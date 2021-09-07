@@ -1,0 +1,13 @@
+plotly
+kaleido
+pillow
+# pint for unit conversion
+pint
+# for easy interface to FFMPEG
+vidgear
+#for vidgear
+opencv-python
+# for drawing little map
+geotiler
+# for loading GPX files
+gpxpy
