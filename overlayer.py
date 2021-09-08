@@ -2,12 +2,12 @@ import dbm
 from datetime import datetime
 from pathlib import Path
 
+from numpy import asarray
+from pint import UnitRegistry
+
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from image import Overlay
-
-from pint import UnitRegistry
-from numpy import asarray
 
 units = UnitRegistry()
 

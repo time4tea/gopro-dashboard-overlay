@@ -1,7 +1,7 @@
 import datetime
 
 import geotiler
-from PIL import Image, ImageDraw, ImageFont, ImageFile, ImageChops
+from PIL import Image, ImageDraw, ImageFont
 
 
 class Text:
@@ -90,7 +90,7 @@ units = UnitRegistry()
 
 class DataSource:
 
-#(-0.1499, +51.4972)
+    # (-0.1499, +51.4972)
 
     def datetime(self):
         return datetime.datetime.now()

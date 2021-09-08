@@ -1,9 +1,5 @@
 import plotly.graph_objects as go
 
-
-
-
-
 fig = go.Figure(go.Indicator(
     mode="gauge+number+delta",
     value=23,

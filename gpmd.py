@@ -2,9 +2,9 @@ import array
 import collections
 import datetime
 import struct
-import time
 import warnings
 from enum import Enum
+
 from ffmpeg import load_gpmd_from
 
 GPMDStruct = struct.Struct('>4sBBH')
@@ -307,7 +307,6 @@ class GPMDScaler:
 
 
 def timeseries_from(filepath, resolution=0.25, unhandled=lambda x: None):
-
     parser = GPMDParser.parser(load_gpmd_from(filepath))
 
     timeseries = Timeseries(resolution)
