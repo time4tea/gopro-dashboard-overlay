@@ -3,6 +3,7 @@ import datetime
 from datetime import timedelta
 
 from timeseries import Timeseries, Entry
+from units import units
 
 TUP = collections.namedtuple("TUP", "time lat lon alt hr cad atemp")
 
@@ -85,6 +86,19 @@ def test_clipping():
     assert clipped.size == 5
 
 
+def test_delta_processing():
+    ts = Timeseries()
+    entry_a = Entry(datetime.datetime.fromtimestamp(1), n=1)
+    entry_b = Entry(datetime.datetime.fromtimestamp(2), n=2)
+    ts.add(entry_a)
+    ts.add(entry_b)
+
+    ts.process_deltas(lambda a, b: {"d": b.n - a.n})
+
+    assert entry_a.d == 1
+    assert entry_b.d is None
+
+
 def test_adding_multiple_items():
     dt1 = datetime.datetime.fromtimestamp(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
@@ -163,3 +177,13 @@ def test_getting_intermediate_point_gets_interpolated():
     assert ts.get(dt1 + timedelta(seconds=1.8)).lat == 2.8
     assert ts.get(dt1 + timedelta(seconds=1.9)).lat == 2.9
     assert ts.get(dt1 + timedelta(seconds=2.0)).lat == 3.0
+
+
+def test_interpolating_quantity():
+    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt2 = dt1 + timedelta(seconds=1)
+    ts = Timeseries()
+    ts.add(Entry(dt1, alt=units.Quantity(10, units.m)))
+    ts.add(Entry(dt2, alt=units.Quantity(20, units.m)))
+
+    assert ts.get(dt1 + timedelta(seconds=0.1)).alt == units.Quantity(11, units.m)

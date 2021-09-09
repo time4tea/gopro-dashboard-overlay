@@ -65,12 +65,12 @@ class Overlay:
             Text((28, 80), date(datasource.datetime), font_metric),
             Text((260, 80), time(datasource.datetime), font_metric),
             Text((1500, 36), lambda: "GPS INFO", font_title),
-            Text((1500, 80), lambda: f"Lat: {datasource.lat()}", font_metric),
-            Text((1500, 120), lambda: f"Lon: {datasource.lon()}", font_metric),
+            Text((1500, 80), lambda: f"Lat: {datasource.lat():0.6f}", font_metric),
+            Text((1500, 120), lambda: f"Lon: {datasource.lon():0.6f}", font_metric),
             Map((1500, 160), lambda: (datasource.lon(), datasource.lat()), map_renderer),
             Text((28, 900), lambda: "SPEED", font_title),
             # icon((100, 875), "speedometer.png"),
-            # Text((28, 940), lambda: f"{datasource.speed().to('MPH'):~.3}", font_metric)
+            Text((28, 940), lambda: f"{datasource.speed().to('MPH'):~.3}" if datasource.speed() else "Unknown", font_metric),
         ]
 
     def draw(self):

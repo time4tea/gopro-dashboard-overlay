@@ -1,6 +1,8 @@
 import bisect
 from datetime import timedelta
 
+import units
+
 
 class Timeseries:
 
@@ -61,9 +63,17 @@ class Timeseries:
 
         return Timeseries(entries=wanted)
 
+    def process_deltas(self, processor):
+
+        diffs = list(zip(self.dates, self.dates[1:]))
+
+        for a, b in diffs:
+            result = processor(self.entries[a], self.entries[b])
+            self.entries[a].update(**result)
+
 
 def entry_wants(v):
-    return isinstance(v, int) or isinstance(v, float)
+    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.units.Quantity)
 
 
 class Entry:
@@ -71,6 +81,9 @@ class Entry:
     def __init__(self, dt, **kwargs):
         self.dt = dt
         self.items = {k: v for k, v in dict(**kwargs).items() if entry_wants(v)}
+
+    def update(self, **kwargs):
+        self.items.update(**kwargs)
 
     def __getattr__(self, item):
         return self.items.get(item, None)
@@ -98,9 +111,12 @@ class Entry:
         items = {}
         for key in self.items.keys():
             start = self.items[key]
-            end = other.items[key]
-            diff = end - start
-            interp = start + (position * diff)
+            try:
+                end = other.items[key]
+                diff = end - start
+                interp = start + (position * diff)
+            except KeyError:
+                interp = None
             items[key] = interp
 
         return Entry(dt, **items)

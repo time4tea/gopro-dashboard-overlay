@@ -2,6 +2,7 @@ import dbm
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from geographiclib.geodesic import Geodesic
 from numpy import asarray
 
 import timeseries
@@ -34,18 +35,26 @@ class TimeSeriesDataSource:
         return self._dt
 
     def lat(self):
-        if self._entry is not None:
-            return self._entry.lat
+        return self._entry.lat
 
     def lon(self):
-        if self._entry is not None:
-            return self._entry.lon
+        return self._entry.lon
 
     def speed(self):
-        if self._entry is not None:
-            return units.Quantity(self._entry.speed, units.mps)
-        else:
-            return units.Quantity(0, units.mps)
+        return self._entry.speed
+
+
+def calculate_speeds(a, b):
+    inverse = Geodesic.WGS84.Inverse(a.lat, a.lon, b.lat, b.lon)
+    dist = units.Quantity(inverse['s12'], units.m)
+    time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
+    azi = units.Quantity(inverse['azi1'], units.degree)
+    return {
+        "speed": dist / time,
+        "dist": dist,
+        "time": time,
+        "azi": azi
+    }
 
 
 if __name__ == "__main__":
@@ -78,6 +87,8 @@ if __name__ == "__main__":
 
     wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
 
+    wanted_timeseries.process_deltas(calculate_speeds)
+
     print(f"GPS Timeseries has {gopro_timeseries.size} data points")
     print(f"GPX Timeseries has {gpx_timeseries.size} data points")
 
@@ -88,6 +99,7 @@ if __name__ == "__main__":
         map_renderer = dbm_caching_renderer(db)
 
         datasource = TimeSeriesDataSource(wanted_timeseries)
+
         overlay = Overlay(datasource, map_renderer)
         output_params = {"-input_framerate": 10, "-r": 30}
         writer = WriteGear(output_filename=f"{filename}-overlay.mp4", logging=True, **output_params)
