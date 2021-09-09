@@ -3,14 +3,13 @@ from datetime import datetime
 from pathlib import Path
 
 from numpy import asarray
-from pint import UnitRegistry
 
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from image import Overlay
+from timeseries import Timeseries
 
-units = UnitRegistry()
-
+from units import units
 
 class TimeSeriesDataSource:
 
@@ -59,9 +58,19 @@ if __name__ == "__main__":
 
     filename = "GH010064"
 
-    timeseries = timeseries_from(f"/data/richja/gopro/{filename}.MP4", resolution=0.10)
+    gps_timeseries = timeseries_from(f"/data/richja/gopro/{filename}.MP4", resolution=0.10)
 
-    print(f"Timeseries has {timeseries.size} data points")
+    from gpx import load
+
+    gpx = load("/home/richja/Downloads/City_Loop.gpx", units)
+
+    gpx_timeseries = Timeseries(resolution=1.0)
+
+    for point in gpx:
+        gpx_timeseries.update(point.time, "gpx", point)
+
+    print(f"GPS Timeseries has {gps_timeseries.size} data points")
+    print(f"GPX Timeseries has {gpx_timeseries.size} data points")
 
     ourdir = Path.home().joinpath(".gopro-graphics")
     ourdir.mkdir(exist_ok=True)
@@ -69,7 +78,7 @@ if __name__ == "__main__":
     with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
         map_renderer = dbm_caching_renderer(db)
 
-        datasource = TimeSeriesDataSource(timeseries)
+        datasource = TimeSeriesDataSource(gps_timeseries)
         overlay = Overlay(datasource, map_renderer)
         output_params = {"-input_framerate": 10, "-r": 30}
         writer = WriteGear(output_filename=f"{filename}-overlay.mp4", logging=True, **output_params)

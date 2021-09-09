@@ -1,12 +1,8 @@
 import collections
 
 import gpxpy
-from pint import UnitRegistry
 
-units = UnitRegistry()
-units.define("bpm = beat / minute")
-units.define("bps = beat / second")
-units.define("rps = revolution / second")
+from units import units
 
 GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp")
 
@@ -43,10 +39,14 @@ def with_unit(gpx, units):
     )
 
 
-if __name__ == "__main__":
-
-    with open('/home/richja/Downloads/City_Loop.gpx', 'r') as gpx_file:
+def load(filepath, units):
+    with open(filepath, 'r') as gpx_file:
         gpx = gpxpy.parse(gpx_file)
 
-    for point in [with_unit(p, units) for p in fudge(gpx)]:
+    return [with_unit(p, units) for p in fudge(gpx)]
+
+
+if __name__ == "__main__":
+
+    for point in load('/home/richja/Downloads/City_Loop.gpx', units):
         print(point)

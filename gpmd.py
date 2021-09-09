@@ -4,6 +4,7 @@ import datetime
 import struct
 import warnings
 from enum import Enum
+from timeseries import Timeseries
 
 from ffmpeg import load_gpmd_from
 
@@ -205,60 +206,6 @@ class GPMDParser:
         return GPMDParser(arr)
 
 
-class TimeSeriesEntry:
-
-    def __init__(self):
-        self._data = {}
-
-    def set(self, key, value):
-        if key not in self._data:
-            self._data[key] = value
-
-    def get(self, key):
-        return self._data.get(key, None)
-
-
-class Timeseries:
-
-    def __init__(self, resolution=1.0):
-        self._resolution = resolution
-        self._data = {}
-        self._min = 1e50
-        self._max = -1e50
-
-    @property
-    def size(self):
-        return len(self._data)
-
-    @property
-    def min(self):
-        return self._min
-
-    @property
-    def max(self):
-        return self._max
-
-    @property
-    def resolution(self):
-        return self._resolution
-
-    def _round(self, ts):
-        return round(ts * (1.0 / self._resolution)) / (1.0 / self._resolution)
-
-    def update(self, ts, key, value):
-        rounded = self._round(ts)
-        entry = self._data.setdefault(rounded, TimeSeriesEntry())
-        self._min = min(self._min, rounded)
-        self._max = max(self._max, rounded)
-        entry.set(key, value)
-
-    def get(self, ts, key):
-        rounded = self._round(ts)
-        if rounded < self.min or rounded > self.max:
-            raise Exception("time out of bounds")
-        return self._data.get(rounded, TimeSeriesEntry()).get(key)
-
-
 class GPMDScaler:
 
     def __init__(self, timeseries):
@@ -303,7 +250,7 @@ class GPMDScaler:
                     scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
                     scaled_point = GPS5._make(scaled)
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
-                    self._timeseries.update(point_datetime.timestamp(), "gps", scaled_point)
+                    self._timeseries.update(point_datetime, "gps", scaled_point)
 
 
 def timeseries_from(filepath, resolution=0.25, unhandled=lambda x: None):
