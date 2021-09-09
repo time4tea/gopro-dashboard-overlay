@@ -4,7 +4,7 @@ import datetime
 import struct
 import warnings
 from enum import Enum
-from timeseries import Timeseries
+from timeseries import Timeseries, Entry
 
 from ffmpeg import load_gpmd_from
 
@@ -250,13 +250,15 @@ class GPMDScaler:
                     scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
                     scaled_point = GPS5._make(scaled)
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
-                    self._timeseries.update(point_datetime, "gps", scaled_point)
+                    self._timeseries.add(
+                        Entry(point_datetime, lat=scaled_point.lat, lon=scaled_point.lon, speed=scaled_point.speed, alt=scaled_point.alt)
+                    )
 
 
-def timeseries_from(filepath, resolution=0.25, unhandled=lambda x: None):
+def timeseries_from(filepath, unhandled=lambda x: None):
     parser = GPMDParser.parser(load_gpmd_from(filepath))
 
-    timeseries = Timeseries(resolution)
+    timeseries = Timeseries()
     scaler = GPMDScaler(timeseries)
 
     for item in parser.items():
@@ -284,8 +286,8 @@ if __name__ == "__main__":
 
     timeseries = timeseries_from(f"/data/richja/gopro/{filename}.MP4", unhandled=unhandled)
 
-    print(f"Min Date: {datetime.datetime.fromtimestamp(timeseries.min)}")
-    print(f"Max Date: {datetime.datetime.fromtimestamp(timeseries.max)}")
+    print(f"Min Date: {timeseries.min}")
+    print(f"Max Date: {timeseries.max}")
 
     from overlayer import TimeSeriesDataSource
 
@@ -302,7 +304,7 @@ if __name__ == "__main__":
     gpx_track.segments.append(gpx_segment)
 
     # Create points:
-    for time in datasource.timerange():
+    for time in datasource.timerange(step=datetime.timedelta(seconds=1)):
         datasource.time_is(time)
         lat = datasource.lat()
         lon = datasource.lon()

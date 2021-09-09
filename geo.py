@@ -1,8 +1,10 @@
 import dbm.ndbm
+import math
 from functools import partial
 from pathlib import Path
 
 import geotiler
+from PIL import ImageDraw
 from geotiler.cache import caching_downloader
 from geotiler.tile.io import fetch_tiles
 
@@ -25,9 +27,29 @@ if __name__ == "__main__":
     with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
         render = dbm_caching_renderer(db)
 
-        map = geotiler.Map(center=(-0.1499, +51.4972), zoom=19, size=(256, 256))
-        image = render(map)
+        desired = 256
+        hyp = int(math.sqrt((desired ** 2) * 2))
 
-        print(map.extent)
+        print(f"desired = {desired}, hyp={hyp}")
 
-        image.show()
+        bounds = (
+            (hyp / 2) - (desired / 2),
+            (hyp / 2) - (desired / 2),
+            (hyp / 2) + (desired / 2),
+            (hyp / 2) + (desired / 2)
+        )
+
+        map = geotiler.Map(center=(-0.1499, +51.4972), zoom=19, size=(hyp, hyp))
+        orig = render(map)
+        draw = ImageDraw.Draw(orig)
+        draw.ellipse((
+            (hyp / 2) - 3,
+            (hyp / 2) - 3,
+            (hyp / 2) + 3,
+            (hyp / 2) + 3
+        ), fill=(255, 0, 0), outline=(0, 0, 0)
+        )
+
+        for rot in range(0, 360, 360):
+            image = orig.rotate(rot).crop(bounds)
+            image.show()

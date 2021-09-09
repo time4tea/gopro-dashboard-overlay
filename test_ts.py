@@ -49,7 +49,40 @@ def test_putting_in_a_point_gets_back_that_point():
 
 
 def test_iterating_empty_timeseries():
-    assert len(Timeseries().items()) == 0
+    ts = Timeseries()
+    assert len(ts.items()) == 0
+    assert ts.size == 0
+
+
+def test_size():
+    ts = Timeseries()
+    ts.add(Entry(datetime.datetime.now(), a=1))
+    ts.add(Entry(datetime.datetime.now(), a=1))
+    assert ts.size == 2
+
+
+def test_clipping():
+    ts1 = Timeseries()
+    ts2 = Timeseries()
+    ts1.add(Entry(datetime.datetime.fromtimestamp(1)))
+    ts1.add(Entry(datetime.datetime.fromtimestamp(2)))
+    ts1.add(Entry(datetime.datetime.fromtimestamp(3)))
+    ts1.add(Entry(datetime.datetime.fromtimestamp(3.5)))
+    ts1.add(Entry(datetime.datetime.fromtimestamp(4)))
+    ts1.add(Entry(datetime.datetime.fromtimestamp(5)))
+    ts1.add(Entry(datetime.datetime.fromtimestamp(6)))
+
+    ts2.add(Entry(datetime.datetime.fromtimestamp(2.5)))
+    ts2.add(Entry(datetime.datetime.fromtimestamp(3)))
+    ts2.add(Entry(datetime.datetime.fromtimestamp(4)))
+    ts2.add(Entry(datetime.datetime.fromtimestamp(4.5)))
+
+    clipped = ts1.clip_to(ts2)
+
+    assert clipped.min == ts2.min
+    assert clipped.max == ts2.max
+
+    assert clipped.size == 5
 
 
 def test_adding_multiple_items():

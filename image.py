@@ -70,7 +70,7 @@ class Overlay:
             Map((1500, 160), lambda: (datasource.lon(), datasource.lat()), map_renderer),
             Text((28, 900), lambda: "SPEED", font_title),
             # icon((100, 875), "speedometer.png"),
-            Text((28, 940), lambda: f"{datasource.speed().to('MPH'):~.3}", font_metric)
+            # Text((28, 940), lambda: f"{datasource.speed().to('MPH'):~.3}", font_metric)
         ]
 
     def draw(self):

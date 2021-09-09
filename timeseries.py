@@ -4,9 +4,23 @@ from datetime import timedelta
 
 class Timeseries:
 
-    def __init__(self):
+    def __init__(self, entries=None):
         self.entries = {}
         self.dates = []
+        if entries is not None:
+            self.add(*entries)
+
+    @property
+    def min(self):
+        return self.dates[0]
+
+    @property
+    def max(self):
+        return self.dates[-1]
+
+    @property
+    def size(self):
+        return len(self.dates)
 
     def _update(self):
         self.dates = sorted(list(self.entries.keys()))
@@ -31,6 +45,21 @@ class Timeseries:
 
     def items(self):
         return [self.entries[k] for k in self.dates]
+
+    def clip_to(self, other):
+
+        wanted = [e for e in self.items() if other.min <= e.dt <= other.max]
+
+        if not wanted:
+            return Timeseries()
+
+        if other.min < wanted[0].dt:
+            wanted.insert(0, self.get(other.min))
+
+        if other.max > wanted[-1].dt:
+            wanted.append(self.get(other.max))
+
+        return Timeseries(entries=wanted)
 
 
 def entry_wants(v):
