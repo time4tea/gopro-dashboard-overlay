@@ -1,4 +1,5 @@
 import datetime
+import math
 
 import geotiler
 from PIL import Image, ImageDraw, ImageFont
@@ -11,7 +12,8 @@ class Text:
         self.font = font
 
     def draw(self, image, draw):
-        draw.text(self.location, self.value(), fill=(255, 255, 255), font=self.font)
+        draw.text(self.location, self.value(), font=self.font, fill=(255, 255, 255), stroke_width=2,
+                  stroke_fill=(0, 0, 0))
 
 
 class Drawable:
@@ -38,19 +40,46 @@ def icon(location, file, transform=lambda x: x):
 
 
 class Map:
-    def __init__(self, location, value, renderer):
+    def __init__(self, location, value, azimuth, renderer):
+        self.azimuth = azimuth
         self.renderer = renderer
         self.value = value
         self.location = location
 
     def draw(self, image, draw):
         centre = self.value()
-        if centre[0] is None or centre[1] is None:
-            pass
-        else:
-            map = geotiler.Map(center=centre, zoom=19, size=(256, 256))
+        if centre[0] is not None and centre[1] is not None:
+            desired = 256
+
+            hypotenuse = int(math.sqrt((desired ** 2) * 2))
+
+            half_width_height = (hypotenuse / 2)
+
+            bounds = (
+                half_width_height - (desired / 2),
+                half_width_height - (desired / 2),
+                half_width_height + (desired / 2),
+                half_width_height + (desired / 2)
+            )
+
+            map = geotiler.Map(center=centre, zoom=17, size=(hypotenuse, hypotenuse))
             map_image = self.renderer(map)
-            image.paste(map_image, self.location)
+
+            draw = ImageDraw.Draw(map_image)
+            draw.ellipse((half_width_height - 3, half_width_height - 3, half_width_height + 3, half_width_height + 3),
+                         fill=(255, 0, 0), outline=(0, 0, 0))
+            azimuth = self.azimuth()
+            if azimuth:
+                azi = azimuth.to("degree").magnitude
+                angle = 0 + azi if azi >= 0 else 360 + azi
+                map_image = map_image.rotate(angle)
+
+            crop = map_image.crop(bounds)
+
+            ImageDraw.Draw(crop).line((0, 0, 0, desired - 1, desired - 1, desired - 1, desired - 1, 0),
+                                      fill=(255, 255, 255))
+
+            image.paste(crop, self.location)
 
 
 class Overlay:
@@ -67,10 +96,11 @@ class Overlay:
             Text((1500, 36), lambda: "GPS INFO", font_title),
             Text((1500, 80), lambda: f"Lat: {datasource.lat():0.6f}", font_metric),
             Text((1500, 120), lambda: f"Lon: {datasource.lon():0.6f}", font_metric),
-            Map((1500, 160), lambda: (datasource.lon(), datasource.lat()), map_renderer),
+            Map((1500, 160), lambda: (datasource.lon(), datasource.lat()), lambda: datasource.azimuth(), map_renderer),
             Text((28, 900), lambda: "SPEED", font_title),
             # icon((100, 875), "speedometer.png"),
-            Text((28, 940), lambda: f"{datasource.speed().to('MPH'):~.3}" if datasource.speed() else "Unknown", font_metric),
+            Text((28, 940), lambda: f"{datasource.speed().to('MPH'):~.3}" if datasource.speed() else "Unknown",
+                 font_metric),
         ]
 
     def draw(self):
@@ -103,6 +133,9 @@ class DataSource:
 
     def speed(self):
         return units.Quantity(23.5, units.mps)
+
+    def azimuth(self):
+        return units.Quantity(90, units.degrees)
 
 
 if __name__ == "__main__":

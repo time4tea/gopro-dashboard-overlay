@@ -5,11 +5,9 @@ from pathlib import Path
 from geographiclib.geodesic import Geodesic
 from numpy import asarray
 
-import timeseries
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from image import Overlay
-from timeseries import Timeseries
 from units import units
 
 
@@ -43,6 +41,9 @@ class TimeSeriesDataSource:
     def speed(self):
         return self._entry.speed
 
+    def azimuth(self):
+        return self._entry.azi
+
 
 def calculate_speeds(a, b):
     inverse = Geodesic.WGS84.Inverse(a.lat, a.lon, b.lat, b.lon)
@@ -61,29 +62,13 @@ if __name__ == "__main__":
 
     from vidgear.gears import WriteGear
 
-    filename = "GH010064"
+    filename = "GH020064"
 
     gopro_timeseries = timeseries_from(f"/data/richja/gopro/{filename}.MP4")
 
-    from gpx import load
+    from gpx import load_timeseries
 
-    gpx = load("/home/richja/Downloads/City_Loop.gpx", units)
-
-    gpx_timeseries = Timeseries()
-
-    points = [
-        timeseries.Entry(
-            point.time,
-            lat=point.lat,
-            lon=point.lon,
-            alt=point.alt,
-            hr=point.hr,
-            cad=point.cad
-        )
-        for point in gpx
-    ]
-
-    gpx_timeseries.add(*points)
+    gpx_timeseries = load_timeseries("/home/richja/Downloads/City_Loop.gpx", units)
 
     wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
 

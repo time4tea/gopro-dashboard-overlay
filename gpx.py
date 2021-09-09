@@ -2,6 +2,8 @@ import collections
 
 import gpxpy
 
+import timeseries
+from timeseries import Timeseries
 from units import units
 
 GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp")
@@ -45,6 +47,28 @@ def load(filepath, units):
 
     return [with_unit(p, units) for p in fudge(gpx)]
 
+
+def load_timeseries(filepath, units):
+
+    gpx = load(filepath, units)
+
+    gpx_timeseries = Timeseries()
+
+    points = [
+        timeseries.Entry(
+            point.time,
+            lat=point.lat,
+            lon=point.lon,
+            alt=point.alt,
+            hr=point.hr,
+            cad=point.cad
+        )
+        for point in gpx
+    ]
+
+    gpx_timeseries.add(*points)
+
+    return gpx_timeseries
 
 if __name__ == "__main__":
 
