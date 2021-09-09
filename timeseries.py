@@ -1,57 +1,77 @@
-import datetime
-from typing import Any
-
-
-class TimeSeriesEntry:
-
-    def __init__(self):
-        self._data = {}
-
-    def set(self, key, value):
-        if key not in self._data:
-            self._data[key] = value
-
-    def get(self, key):
-        return self._data.get(key, None)
+import bisect
+from datetime import timedelta
 
 
 class Timeseries:
 
-    def __init__(self, resolution=1.0):
-        self._resolution = resolution
-        self._data = {}
-        self._min = 1e50
-        self._max = -1e50
+    def __init__(self):
+        self.entries = {}
+        self.dates = []
 
-    @property
-    def size(self):
-        return len(self._data)
+    def _update(self):
+        self.dates = sorted(list(self.entries.keys()))
 
-    @property
-    def min(self):
-        return self._min
+    def add(self, *entries):
+        for e in entries:
+            self.entries[e.dt] = e
+        self._update()
 
-    @property
-    def max(self):
-        return self._max
+    def get(self, dt):
+        if not self.dates or dt < self.dates[0]:
+            raise ValueError("Date is before start")
+        if dt > self.dates[-1]:
+            raise ValueError("Date is after end")
+        if dt in self.entries:
+            return self.entries[dt]
+        else:
+            greater_idx = bisect.bisect_left(self.dates, dt)
+            lesser_idx = greater_idx - 1
 
-    @property
-    def resolution(self):
-        return self._resolution
+            return self.entries[self.dates[lesser_idx]].interpolate(self.entries[self.dates[greater_idx]], dt)
 
-    def _round(self, ts: datetime.datetime) -> float:
-        stamp = ts.timestamp()
-        return round(stamp * (1.0 / self._resolution)) / (1.0 / self._resolution)
+    def items(self):
+        return [self.entries[k] for k in self.dates]
 
-    def update(self, ts: datetime.datetime, key: str, value: Any):
-        rounded = self._round(ts)
-        entry = self._data.setdefault(rounded, TimeSeriesEntry())
-        self._min = min(self._min, rounded)
-        self._max = max(self._max, rounded)
-        entry.set(key, value)
 
-    def get(self, ts, key):
-        rounded = self._round(ts)
-        if rounded < self.min or rounded > self.max:
-            raise Exception("time out of bounds")
-        return self._data.get(rounded, TimeSeriesEntry()).get(key)
+def entry_wants(v):
+    return isinstance(v, int) or isinstance(v, float)
+
+
+class Entry:
+
+    def __init__(self, dt, **kwargs):
+        self.dt = dt
+        self.items = {k: v for k, v in dict(**kwargs).items() if entry_wants(v)}
+
+    def __getattr__(self, item):
+        return self.items.get(item, None)
+
+    def interpolate(self, other, dt):
+        if self.dt == other.dt:
+            raise ValueError("Cannot interpolate between equal points")
+        if self.dt > other.dt:
+            raise ValueError("Lower point must be first")
+        if dt < self.dt:
+            raise ValueError("Wanted point before lower")
+        if dt > other.dt:
+            raise ValueError("Wanted point after other")
+
+        if dt == self.dt:
+            return self
+        elif dt == other.dt:
+            return other
+
+        range = (other.dt - self.dt) / timedelta(milliseconds=1)
+        point = (dt - self.dt) / timedelta(milliseconds=1)
+
+        position = point / range
+
+        items = {}
+        for key in self.items.keys():
+            start = self.items[key]
+            end = other.items[key]
+            diff = end - start
+            interp = start + (position * diff)
+            items[key] = interp
+
+        return Entry(dt, **items)
