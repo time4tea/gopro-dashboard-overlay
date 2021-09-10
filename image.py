@@ -125,7 +125,7 @@ class Overlay:
         ]
 
     def draw(self):
-        image = Image.new("RGBA", (1920, 1080), (0, 255, 0))
+        image = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         for w in self.widgets:

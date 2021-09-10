@@ -208,9 +208,10 @@ class GPMDParser:
 
 class GPMDScaler:
 
-    def __init__(self, timeseries):
+    def __init__(self, timeseries, units):
         self.reset()
         self._timeseries = timeseries
+        self._units = units
 
     def reset(self):
         self._scale = None
@@ -251,15 +252,19 @@ class GPMDScaler:
                     scaled_point = GPS5._make(scaled)
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
                     self._timeseries.add(
-                        Entry(point_datetime, lat=scaled_point.lat, lon=scaled_point.lon, speed=scaled_point.speed, alt=scaled_point.alt)
+                        Entry(point_datetime,
+                              lat=scaled_point.lat,
+                              lon=scaled_point.lon,
+                              speed=self._units.Quantity(scaled_point.speed, self._units.mps),
+                              alt=self._units.Quantity(scaled_point.alt, self._units.m))
                     )
 
 
-def timeseries_from(filepath, unhandled=lambda x: None):
+def timeseries_from(filepath, units, unhandled=lambda x: None):
     parser = GPMDParser.parser(load_gpmd_from(filepath))
 
     timeseries = Timeseries()
-    scaler = GPMDScaler(timeseries)
+    scaler = GPMDScaler(timeseries, units)
 
     for item in parser.items():
         interpreted = GPMDInterpreted.interpret(item)

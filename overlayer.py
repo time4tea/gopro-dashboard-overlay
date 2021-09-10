@@ -70,15 +70,15 @@ def calculate_speeds(a, b):
 
 if __name__ == "__main__":
 
-    from vidgear.gears import WriteGear
+    filename = "GH060068"
+    input_filepath = f"/data/richja/gopro/{filename}.MP4"
 
-    filename = "GH020064"
-
-    gopro_timeseries = timeseries_from(f"/data/richja/gopro/{filename}.MP4")
+    gopro_timeseries = timeseries_from(input_filepath, units)
 
     from gpx import load_timeseries
+    from ffmpeg import FFMPEGOverlay
 
-    gpx_timeseries = load_timeseries("/home/richja/Downloads/City_Loop.gpx", units)
+    gpx_timeseries = load_timeseries("/home/richja/Downloads/LCC_Safer_Streets_Ride.gpx", units)
 
     wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
 
@@ -97,9 +97,10 @@ if __name__ == "__main__":
         datasource = TimeSeriesDataSource(wanted_timeseries)
 
         overlay = Overlay(datasource, map_renderer)
-        output_params = {"-input_framerate": 10, "-r": 30}
-        writer = WriteGear(output_filename=f"{filename}-overlay.mp4", **output_params)
 
-        for time in datasource.timerange(step=timedelta(seconds=0.1)):
-            datasource.time_is(time)
-            writer.write(asarray(overlay.draw()))
+        ffmpeg = FFMPEGOverlay(input=input_filepath, output=f"{filename}-overlay.mp4")
+
+        with ffmpeg.overlay() as writer:
+            for time in datasource.timerange(step=timedelta(seconds=0.1)):
+                datasource.time_is(time)
+                writer.write(asarray(overlay.draw()).tobytes())

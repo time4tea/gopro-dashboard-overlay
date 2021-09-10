@@ -1,3 +1,4 @@
+import contextlib
 import re
 import subprocess
 from array import array
@@ -11,7 +12,7 @@ def invoke(cmd, **kwargs):
     try:
         return run(cmd, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
     except subprocess.CalledProcessError as e:
-        raise IOError(f"Failed: {cmd}\n Stdout: {e.stdout}\n StdErr: {e.stderr}")
+        raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
 
 def find_gpmd_track(filepath):
@@ -33,6 +34,38 @@ def load_gpmd_from(filepath):
         arr = array("b")
         arr.frombytes(result.stdout)
         return arr
+
+
+class FFMPEGOverlay:
+
+    def __init__(self, input, output):
+        self.output = output
+        self.input = input
+
+    @contextlib.contextmanager
+    def overlay(self):
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-loglevel", "info",
+            "-i", self.input,
+            "-f", "rawvideo",
+            "-framerate", "10.0",
+            "-s", "1920x1080",
+            "-pix_fmt", "bgra",
+            "-i", "-",
+            "-r", "30",
+            "-filter_complex", "[0:v][1:v]overlay",
+            "-vcodec", "libx264",
+            "-crf", "18",
+            "-preset", "veryfast",
+            self.output
+        ]
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None)
+        yield process.stdin
+        process.stdin.close()
+        # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
+        process.wait(5 * 60)
 
 
 if __name__ == "__main__":
