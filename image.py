@@ -76,8 +76,10 @@ class Map:
 
             crop = map_image.crop(bounds)
 
-            ImageDraw.Draw(crop).line((0, 0, 0, desired - 1, desired - 1, desired - 1, desired - 1, 0),
-                                      fill=(255, 255, 255))
+            ImageDraw.Draw(crop).line(
+                (0, 0, 1, desired - 1, desired - 1, desired - 1, desired - 1, 0, 0, 0),
+                fill=(0, 0, 0)
+            )
 
             image.paste(crop, self.location)
 
