@@ -5,6 +5,7 @@ from pathlib import Path
 from geographiclib.geodesic import Geodesic
 from numpy import asarray
 
+import timeseries
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from image import Overlay
@@ -82,6 +83,7 @@ if __name__ == "__main__":
     wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
 
     wanted_timeseries.process_deltas(calculate_speeds)
+    wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
     print(f"GPS Timeseries has {gopro_timeseries.size} data points")
     print(f"GPX Timeseries has {gpx_timeseries.size} data points")
@@ -96,7 +98,7 @@ if __name__ == "__main__":
 
         overlay = Overlay(datasource, map_renderer)
         output_params = {"-input_framerate": 10, "-r": 30}
-        writer = WriteGear(output_filename=f"{filename}-overlay.mp4", logging=True, **output_params)
+        writer = WriteGear(output_filename=f"{filename}-overlay.mp4", **output_params)
 
         for time in datasource.timerange(step=timedelta(seconds=0.1)):
             datasource.time_is(time)

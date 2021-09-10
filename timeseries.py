@@ -4,6 +4,26 @@ from datetime import timedelta
 import units
 
 
+def process_ses(new, key, alpha=0.4):
+    forecast = []
+    previous = [None]
+
+    def ses(item):
+        current = key(item)
+        try:
+            if forecast:
+                predicted = alpha * previous[0] + (1 - alpha) * forecast[-1]
+                forecast.append(predicted)
+                return {new: predicted}
+            else:
+                forecast.append(current)
+                return {new: current}
+        finally:
+            previous[0] = current
+
+    return ses
+
+
 class Timeseries:
 
     def __init__(self, entries=None):
@@ -70,6 +90,10 @@ class Timeseries:
         for a, b in diffs:
             result = processor(self.entries[a], self.entries[b])
             self.entries[a].update(**result)
+
+    def process(self, processor):
+        for e in self.dates:
+            self.entries[e].update(**processor(self.entries[e]))
 
 
 def entry_wants(v):

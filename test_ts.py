@@ -2,28 +2,28 @@ import collections
 import datetime
 from datetime import timedelta
 
-from timeseries import Timeseries, Entry
+from timeseries import Timeseries, Entry, process_ses
 from units import units
 
 TUP = collections.namedtuple("TUP", "time lat lon alt hr cad atemp")
 
 
 def test_creating_entry_from_namedtuple():
-    some_tuple = TUP(time=datetime.datetime.fromtimestamp(1631178710), lat=10.0, lon=100.0, alt=-10, hr=100, cad=90,
+    some_tuple = TUP(time=datetime_of(1631178710), lat=10.0, lon=100.0, alt=-10, hr=100, cad=90,
                      atemp=17)
     entry = Entry(some_tuple.time, **some_tuple._asdict())
     assert entry.lat == 10.0
 
 
 def test_creating_entry_from_namedtuple_ignores_non_numeric():
-    some_tuple = TUP(time=datetime.datetime.fromtimestamp(1631178710), lat=10.0, lon=100.0, alt=-10, hr=100, cad=90,
+    some_tuple = TUP(time=datetime_of(1631178710), lat=10.0, lon=100.0, alt=-10, hr=100, cad=90,
                      atemp=17)
     entry = Entry(some_tuple.time, **some_tuple._asdict())
     assert entry.time is None
 
 
 def test_interpolating_entry():
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
 
     point = dt1 + ((dt2 - dt1) / 2)
@@ -40,7 +40,7 @@ def test_interpolating_entry():
 
 
 def test_putting_in_a_point_gets_back_that_point():
-    dt = datetime.datetime.fromtimestamp(1631178710)
+    dt = datetime_of(1631178710)
     dt1 = dt + timedelta(seconds=1)
     ts = Timeseries()
     ts.add(Entry(dt, lat=1.0, lon=1.0, alt=12))
@@ -57,26 +57,26 @@ def test_iterating_empty_timeseries():
 
 def test_size():
     ts = Timeseries()
-    ts.add(Entry(datetime.datetime.now(), a=1))
-    ts.add(Entry(datetime.datetime.now(), a=1))
+    ts.add(Entry(datetime_of(1), a=1))
+    ts.add(Entry(datetime_of(2), a=1))
     assert ts.size == 2
 
 
 def test_clipping():
     ts1 = Timeseries()
     ts2 = Timeseries()
-    ts1.add(Entry(datetime.datetime.fromtimestamp(1)))
-    ts1.add(Entry(datetime.datetime.fromtimestamp(2)))
-    ts1.add(Entry(datetime.datetime.fromtimestamp(3)))
-    ts1.add(Entry(datetime.datetime.fromtimestamp(3.5)))
-    ts1.add(Entry(datetime.datetime.fromtimestamp(4)))
-    ts1.add(Entry(datetime.datetime.fromtimestamp(5)))
-    ts1.add(Entry(datetime.datetime.fromtimestamp(6)))
+    ts1.add(Entry(datetime_of(1)))
+    ts1.add(Entry(datetime_of(2)))
+    ts1.add(Entry(datetime_of(3)))
+    ts1.add(Entry(datetime_of(3.5)))
+    ts1.add(Entry(datetime_of(4)))
+    ts1.add(Entry(datetime_of(5)))
+    ts1.add(Entry(datetime_of(6)))
 
-    ts2.add(Entry(datetime.datetime.fromtimestamp(2.5)))
-    ts2.add(Entry(datetime.datetime.fromtimestamp(3)))
-    ts2.add(Entry(datetime.datetime.fromtimestamp(4)))
-    ts2.add(Entry(datetime.datetime.fromtimestamp(4.5)))
+    ts2.add(Entry(datetime_of(2.5)))
+    ts2.add(Entry(datetime_of(3)))
+    ts2.add(Entry(datetime_of(4)))
+    ts2.add(Entry(datetime_of(4.5)))
 
     clipped = ts1.clip_to(ts2)
 
@@ -88,8 +88,8 @@ def test_clipping():
 
 def test_delta_processing():
     ts = Timeseries()
-    entry_a = Entry(datetime.datetime.fromtimestamp(1), n=1)
-    entry_b = Entry(datetime.datetime.fromtimestamp(2), n=2)
+    entry_a = Entry(datetime_of(1), n=1)
+    entry_b = Entry(datetime_of(2), n=2)
     ts.add(entry_a)
     ts.add(entry_b)
 
@@ -99,8 +99,28 @@ def test_delta_processing():
     assert entry_b.d is None
 
 
+def datetime_of(i):
+    return datetime.datetime.fromtimestamp(i)
+
+
+def test_processing_with_simple_exp_smoothing():
+    ts = Timeseries()
+    ts.add(
+        Entry(datetime_of(1), n=3),
+        Entry(datetime_of(2), n=5),
+        Entry(datetime_of(3), n=9),
+        Entry(datetime_of(4), n=20),
+    )
+    ts.process(process_ses("ns", lambda i: i.n, alpha=0.4))
+
+    assert ts.get(datetime_of(1)).ns == 3.0
+    assert ts.get(datetime_of(2)).ns == 3.0
+    assert ts.get(datetime_of(3)).ns == 3.8
+    assert ts.get(datetime_of(4)).ns == 5.88
+
+
 def test_adding_multiple_items():
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
     ts = Timeseries()
     ts.add(
@@ -112,7 +132,7 @@ def test_adding_multiple_items():
 
 
 def test_iterates_in_datetime_order():
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=2)
     dt3 = dt1 + timedelta(seconds=4)
     ts = Timeseries()
@@ -129,7 +149,7 @@ def test_iterates_in_datetime_order():
 def test_getting_point_before_start_throws():
     import pytest
     ts = Timeseries()
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     ts.add(Entry(dt1, lat=1.0, lon=1.0, alt=12))
     with pytest.raises(ValueError):
         ts.get(dt1 - timedelta(seconds=1))
@@ -138,14 +158,14 @@ def test_getting_point_before_start_throws():
 def test_getting_point_after_end_throws():
     import pytest
     ts = Timeseries()
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     ts.add(Entry(dt1, lat=1.0, lon=1.0, alt=12))
     with pytest.raises(ValueError):
         ts.get(dt1 + timedelta(seconds=1))
 
 
 def test_getting_intermediate_point_gets_interpolated():
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
     dt3 = dt1 + timedelta(seconds=2)
     ts = Timeseries()
@@ -180,7 +200,7 @@ def test_getting_intermediate_point_gets_interpolated():
 
 
 def test_interpolating_quantity():
-    dt1 = datetime.datetime.fromtimestamp(1631178710)
+    dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
     ts = Timeseries()
     ts.add(Entry(dt1, alt=units.Quantity(10, units.m)))
