@@ -44,6 +44,15 @@ class TimeSeriesDataSource:
     def azimuth(self):
         return self._entry.azi
 
+    def cadence(self):
+        return self._entry.cad
+
+    def heart_rate(self):
+        return self._entry.hr
+
+    def altitude(self):
+        return self._entry.alt
+
 
 def calculate_speeds(a, b):
     inverse = Geodesic.WGS84.Inverse(a.lat, a.lon, b.lat, b.lon)
