@@ -1,3 +1,4 @@
+import argparse
 import dbm
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -70,23 +71,33 @@ def calculate_speeds(a, b):
 
 if __name__ == "__main__":
 
-    filename = "GH060068"
-    input_filepath = f"/data/richja/gopro/{filename}.MP4"
+    parser = argparse.ArgumentParser(description="Overlay gadgets on to GoPro MP4")
 
-    gopro_timeseries = timeseries_from(input_filepath, units)
+    parser.add_argument("input", help="Input MP4 file")
+    parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence")
+    parser.add_argument("--no-overlay", action="store_true", help="Only output the gadgets, don't overlay")
+    parser.add_argument("output", help="Output MP4 file")
+
+    args = parser.parse_args()
+
+    gopro_timeseries = timeseries_from(args.input, units)
+    print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
 
     from gpx import load_timeseries
-    from ffmpeg import FFMPEGOverlay
+    from ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 
-    gpx_timeseries = load_timeseries("/home/richja/Downloads/LCC_Safer_Streets_Ride.gpx", units)
-
-    wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
+    if args.gpx:
+        gpx_timeseries = load_timeseries(args.gpx, units)
+        print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
+        wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
+        print(f"GPX Timeseries overlap with GoPro - {len(wanted_timeseries)}")
+        if not len(wanted_timeseries):
+            raise ValueError("No overlap between GoPro and GPX file")
+    else:
+        wanted_timeseries = gopro_timeseries
 
     wanted_timeseries.process_deltas(calculate_speeds)
     wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
-
-    print(f"GPS Timeseries has {gopro_timeseries.size} data points")
-    print(f"GPX Timeseries has {gpx_timeseries.size} data points")
 
     ourdir = Path.home().joinpath(".gopro-graphics")
     ourdir.mkdir(exist_ok=True)
@@ -98,9 +109,12 @@ if __name__ == "__main__":
 
         overlay = Overlay(datasource, map_renderer)
 
-        ffmpeg = FFMPEGOverlay(input=input_filepath, output=f"{filename}-overlay.mp4")
+        if not args.no_overlay:
+            ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
+        else:
+            ffmpeg = FFMPEGGenerate(output=args.output)
 
-        with ffmpeg.overlay() as writer:
+        with ffmpeg.generate() as writer:
             for time in datasource.timerange(step=timedelta(seconds=0.1)):
                 datasource.time_is(time)
                 writer.write(asarray(overlay.draw()).tobytes())

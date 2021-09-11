@@ -4,9 +4,9 @@ import datetime
 import struct
 import warnings
 from enum import Enum
-from timeseries import Timeseries, Entry
 
 from ffmpeg import load_gpmd_from
+from timeseries import Timeseries, Entry
 
 GPMDStruct = struct.Struct('>4sBBH')
 
@@ -66,6 +66,10 @@ def _interpret_gps5(item):
     ]
 
 
+def _interpret_gps_precision(item):
+    return _interpret_atom(item) / 100.0
+
+
 def _interpret_xyz(item):
     return [
         XYZ._make(
@@ -82,25 +86,30 @@ def _interpret_gps_lock(item):
 
 
 def _interpret_stream_marker(item):
-    return "Marker"
+    return "Stream Marker"
+
+
+def _interpret_device_marker(item):
+    return "Device Marker"
 
 
 interpreters = {
     "ACCL": _interpret_xyz,
-    "GYRO": _interpret_xyz,
+    "DEVC": _interpret_device_marker,
     "DVNM": _interpret_string,
-    "TSMP": _interpret_atom,
-    "SIUN": _interpret_string,
-    "SCAL": _interpret_list,
-    "GPSU": _interpret_timestamp,
     "GPS5": _interpret_gps5,
-    "GPSP": _interpret_atom,
     "GPSF": _interpret_gps_lock,
-    "STRM": _interpret_stream_marker,
+    "GPSP": _interpret_gps_precision,
+    "GPSU": _interpret_timestamp,
+    "GYRO": _interpret_xyz,
+    "MWET": _interpret_list,
+    "SCAL": _interpret_list,
+    "SIUN": _interpret_string,
     "STMP": _interpret_atom,
     "STNM": _interpret_string,
+    "STRM": _interpret_stream_marker,
+    "TSMP": _interpret_atom,
     "WNDM": _interpret_list,
-    "MWET": _interpret_list,
 }
 
 
@@ -117,12 +126,15 @@ class GPMDInterpreted:
     def understood(self):
         return self.interpreted is not None
 
-    @staticmethod
-    def interpret(item):
-        return GPMDInterpreted(
-            item,
-            interpreters[item.code](item) if item.code in interpreters else None
-        )
+
+class GPMDInterpreter:
+
+    def interpret(self, items):
+        for item in items:
+            yield GPMDInterpreted(
+                item,
+                interpreters[item.code](item) if item.code in interpreters else None
+            )
 
 
 class GPMDItem:
@@ -206,16 +218,18 @@ class GPMDParser:
         return GPMDParser(arr)
 
 
-class GPMDScaler:
+class GPS5Scaler:
 
-    def __init__(self, timeseries, units):
+    def __init__(self, units, on_item, max_dop=5.0, on_drop=lambda x: None):
         self.reset()
-        self._timeseries = timeseries
         self._units = units
+        self._on_item = on_item
+        self._on_drop = on_drop
+        self._max_dop = max_dop
 
     def reset(self):
         self._scale = None
-        self._accuracy = None
+        self._dop = None
         self._fix = None
         self._basetime = None
 
@@ -230,20 +244,22 @@ class GPMDScaler:
         elif item_type == "GPSF":
             self._fix = interpreted.interpreted
         elif item_type == "GPSP":
-            self._accuracy = interpreted.interpreted
+            self._dop = interpreted.interpreted
         elif item_type == "SCAL":
             self._scale = interpreted.interpreted
         elif item_type == "GPS5":
             if self._basetime is None:
-                warnings.warn("Got a GPS item, but no associated time")
+                self._on_drop("Got a GPS item, but no associated time")
             elif self._fix is None:
-                warnings.warn("Got a GPS item, but no GPS Fix item yet")
+                self._on_drop("Got a GPS item, but no GPS Fix item yet")
             elif self._fix in (GPSFix.NO, GPSFix.UNKNOWN):
-                warnings.warn("Got a GPS Item, but GPS is not locked")
-            elif self._accuracy is None:
-                warnings.warn("Got a GPS item, but no accuracy yet")
+                self._on_drop("Got a GPS Item, but GPS is not locked")
+            elif self._dop is None:
+                self._on_drop("Got a GPS item, but no accuracy yet")
             elif self._scale is None:
-                warnings.warn("Got GPS, but unknown scale")
+                self._on_drop("Got GPS, but unknown scale")
+            elif self._dop > self._max_dop:
+                self._on_drop(f"Got GPS, but DOP > Max DOP {self._max_dop}")
             else:
                 points = interpreted.interpreted
                 hertz = 18
@@ -251,7 +267,7 @@ class GPMDScaler:
                     scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
                     scaled_point = GPS5._make(scaled)
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
-                    self._timeseries.add(
+                    self._on_item(
                         Entry(point_datetime,
                               lat=scaled_point.lat,
                               lon=scaled_point.lon,
@@ -264,62 +280,67 @@ def timeseries_from(filepath, units, unhandled=lambda x: None):
     parser = GPMDParser.parser(load_gpmd_from(filepath))
 
     timeseries = Timeseries()
-    scaler = GPMDScaler(timeseries, units)
+    gps_scaler = GPS5Scaler(units, lambda entry: timeseries.add(entry), max_dop=6.0)
+    interpreter = GPMDInterpreter()
 
-    for item in parser.items():
-        interpreted = GPMDInterpreted.interpret(item)
-
+    for interpreted in interpreter.interpret(parser.items()):
         if interpreted.understood:
-            scaler.accept(interpreted)
+            gps_scaler.accept(interpreted)
         else:
-            unhandled(item)
+            unhandled(interpreted.item)
 
     return timeseries
 
 
 if __name__ == "__main__":
 
-    from collections import Counter
-
-    import gpxpy
+    from units import units
 
     filename = "GH010064"
 
-    counter = Counter()
+    parser = GPMDParser.parser(load_gpmd_from(f"/data/richja/gopro/{filename}.MP4"))
 
-    unhandled = lambda x: counter.update([x.code])
+    scaler = GPS5Scaler(units, lambda entry: print(entry))
 
-    timeseries = timeseries_from(f"/data/richja/gopro/{filename}.MP4", unhandled=unhandled)
+    interpreter = GPMDInterpreter()
 
-    print(f"Min Date: {timeseries.min}")
-    print(f"Max Date: {timeseries.max}")
+    millis = 0
+    last_gps = None
 
-    from overlayer import TimeSeriesDataSource
+    millis_to_diff = {}
 
-    datasource = TimeSeriesDataSource(timeseries)
+    counter = collections.Counter()
 
-    gpx = gpxpy.gpx.GPX()
+    for interpreted in interpreter.interpret(parser.items()):
+        if interpreted.understood:
+            if interpreted.item.code == "DEVC":
+                print("DEVC")
+                millis += 1001
 
-    # Create first track in our GPX:
-    gpx_track = gpxpy.gpx.GPXTrack()
-    gpx.tracks.append(gpx_track)
+            if interpreted.item.code == "GPSF":
+                print(f"GPS Lock {interpreted.interpreted}")
+            if interpreted.item.code == "STMP":
+                print(f"Time: {interpreted.interpreted}")
+            elif interpreted.item.code == "STRM":
+                print("Next data stream")
+            elif interpreted.item.code == "ACCL":
+                print(f"Accelerometer = {interpreted.interpreted}")
+            elif interpreted.item.code == "GPS5":
+                print(f"GPS = {interpreted.interpreted}")
+            elif interpreted.item.code == "GPSU":
+                print(f"GPS Time = {interpreted.interpreted}")
+                this_gps = interpreted.interpreted
+                if last_gps is None:
+                    last_gps = this_gps
 
-    # Create first segment in our GPX track:
-    gpx_segment = gpxpy.gpx.GPXTrackSegment()
-    gpx_track.segments.append(gpx_segment)
+                gps_diff = this_gps - last_gps
+                gps_diff_millis = gps_diff / datetime.timedelta(milliseconds=1)
+                millis_to_diff[millis] = gps_diff_millis
+                counter.update([gps_diff_millis])
 
-    # Create points:
-    for time in datasource.timerange(step=datetime.timedelta(seconds=1)):
-        datasource.time_is(time)
-        lat = datasource.lat()
-        lon = datasource.lon()
-        if lat is not None and lon is not None:
-            gpx_segment.points.append(
-                gpxpy.gpx.GPXTrackPoint(
-                    latitude=lat,
-                    longitude=lon,
-                    elevation=1234)
-            )
+                last_gps = this_gps
 
-    with open(f"{filename}.gpx", "w") as f:
-        f.write(gpx.to_xml())
+
+    print(millis_to_diff)
+
+    print(counter)

@@ -1,15 +1,20 @@
 import datetime
-import subprocess
 
 from PIL import Image, ImageDraw, ImageFont
 from numpy import asarray
-from ffmpeg import  FFMPEGOverlay
+
+from ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 
 if __name__ == "__main__":
 
-    overlay = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4.copy", output="output.mp4")
+    overlay = True
 
-    with overlay.overlay() as writer:
+    if overlay:
+        generator = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4.copy", output="output.mp4")
+    else:
+        generator = FFMPEGGenerate(output="output.mp4")
+
+    with generator.generate() as writer:
 
         for i in range(1, 100):
             image = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
@@ -29,6 +34,3 @@ if __name__ == "__main__":
             writer.write(asarray(image).tobytes())
 
     print("done writing frames")
-
-
-

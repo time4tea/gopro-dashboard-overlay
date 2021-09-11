@@ -40,8 +40,7 @@ class Timeseries:
     def max(self):
         return self.dates[-1]
 
-    @property
-    def size(self):
+    def __len__(self):
         return len(self.dates)
 
     def _update(self):

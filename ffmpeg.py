@@ -36,6 +36,34 @@ def load_gpmd_from(filepath):
         return arr
 
 
+class FFMPEGGenerate:
+
+    def __init__(self, output):
+        self.output = output
+
+    @contextlib.contextmanager
+    def generate(self):
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-loglevel", "info",
+            "-f", "rawvideo",
+            "-framerate", "10.0",
+            "-s", "1920x1080",
+            "-pix_fmt", "bgra",
+            "-i", "-",
+            "-r", "30",
+            "-vcodec", "libx264",
+            "-crf", "18",
+            "-preset", "veryfast",
+            self.output
+        ]
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None)
+        yield process.stdin
+        process.stdin.close()
+        process.wait(10)
+
+
 class FFMPEGOverlay:
 
     def __init__(self, input, output):
@@ -43,7 +71,7 @@ class FFMPEGOverlay:
         self.input = input
 
     @contextlib.contextmanager
-    def overlay(self):
+    def generate(self):
         cmd = [
             "ffmpeg",
             "-y",
