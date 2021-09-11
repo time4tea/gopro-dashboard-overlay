@@ -2,6 +2,7 @@ import collections
 import datetime
 from datetime import timedelta
 
+from gpmd import Point
 from timeseries import Timeseries, Entry, process_ses
 from units import units
 
@@ -43,23 +44,23 @@ def test_putting_in_a_point_gets_back_that_point():
     dt = datetime_of(1631178710)
     dt1 = dt + timedelta(seconds=1)
     ts = Timeseries()
-    ts.add(Entry(dt, lat=1.0, lon=1.0, alt=12))
-    ts.add(Entry(dt1, lat=2.0, lon=1.0, alt=12))
-    assert ts.get(dt).lat == 1.0
-    assert ts.get(dt1).lat == 2.0
+    ts.add(Entry(dt, point=Point(lat=1.0, lon=1.0), alt=12))
+    ts.add(Entry(dt1, point=Point(lat=2.0, lon=1.0), alt=12))
+    assert ts.get(dt).point.lat == 1.0
+    assert ts.get(dt1).point.lat == 2.0
 
 
 def test_iterating_empty_timeseries():
     ts = Timeseries()
     assert len(ts.items()) == 0
-    assert ts.size == 0
+    assert len(ts) == 0
 
 
 def test_size():
     ts = Timeseries()
     ts.add(Entry(datetime_of(1), a=1))
     ts.add(Entry(datetime_of(2), a=1))
-    assert ts.size == 2
+    assert len(ts) == 2
 
 
 def test_clipping():
@@ -83,7 +84,7 @@ def test_clipping():
     assert clipped.min == ts2.min
     assert clipped.max == ts2.max
 
-    assert clipped.size == 5
+    assert len(clipped) == 5
 
 
 def test_delta_processing():
@@ -124,11 +125,11 @@ def test_adding_multiple_items():
     dt2 = dt1 + timedelta(seconds=1)
     ts = Timeseries()
     ts.add(
-        Entry(dt1, lat=3.0, lon=1.0, alt=12),
-        Entry(dt2, lat=2.0, lon=1.0, alt=12)
+        Entry(dt1, point=Point(lat=3.0, lon=1.0), alt=12),
+        Entry(dt2, point=Point(lat=2.0, lon=1.0), alt=12)
     )
-    assert ts.get(dt1).lat == 3.0
-    assert ts.get(dt2).lat == 2.0
+    assert ts.get(dt1).point.lat == 3.0
+    assert ts.get(dt2).point.lat == 2.0
 
 
 def test_iterates_in_datetime_order():
@@ -136,14 +137,14 @@ def test_iterates_in_datetime_order():
     dt2 = dt1 + timedelta(seconds=2)
     dt3 = dt1 + timedelta(seconds=4)
     ts = Timeseries()
-    ts.add(Entry(dt3, lat=3.0, lon=1.0, alt=12))
-    ts.add(Entry(dt2, lat=2.0, lon=1.0, alt=12))
-    ts.add(Entry(dt1, lat=1.0, lon=1.0, alt=12))
+    ts.add(Entry(dt3, point=Point(lat=3.0, lon=1.0), alt=12))
+    ts.add(Entry(dt2, point=Point(lat=2.0, lon=1.0), alt=12))
+    ts.add(Entry(dt1, point=Point(lat=1.0, lon=1.0), alt=12))
 
     iterator = iter(ts.items())
-    assert next(iterator).lat == 1.0
-    assert next(iterator).lat == 2.0
-    assert next(iterator).lat == 3.0
+    assert next(iterator).point.lat == 1.0
+    assert next(iterator).point.lat == 2.0
+    assert next(iterator).point.lat == 3.0
 
 
 def test_getting_point_before_start_throws():
@@ -169,34 +170,34 @@ def test_getting_intermediate_point_gets_interpolated():
     dt2 = dt1 + timedelta(seconds=1)
     dt3 = dt1 + timedelta(seconds=2)
     ts = Timeseries()
-    ts.add(Entry(dt1, lat=1.0, lon=1.0, alt=12))
-    ts.add(Entry(dt2, lat=2.0, lon=1.0, alt=12))
-    ts.add(Entry(dt3, lat=3.0, lon=1.0, alt=12))
+    ts.add(Entry(dt1, point=Point(lat=1.0, lon=1.0), alt=12))
+    ts.add(Entry(dt2, point=Point(lat=2.0, lon=1.0), alt=12))
+    ts.add(Entry(dt3, point=Point(lat=3.0, lon=1.0), alt=12))
 
-    assert ts.get(dt1).lat == 1.0
-    assert ts.get(dt2).lat == 2.0
-    assert ts.get(dt3).lat == 3.0
-    assert ts.get(dt1 + timedelta(seconds=0.0)).lat == 1.0
-    assert ts.get(dt1 + timedelta(seconds=0.1)).lat == 1.1
-    assert ts.get(dt1 + timedelta(seconds=0.2)).lat == 1.2
-    assert ts.get(dt1 + timedelta(seconds=0.3)).lat == 1.3
-    assert ts.get(dt1 + timedelta(seconds=0.4)).lat == 1.4
-    assert ts.get(dt1 + timedelta(seconds=0.5)).lat == 1.5
-    assert ts.get(dt1 + timedelta(seconds=0.6)).lat == 1.6
-    assert ts.get(dt1 + timedelta(seconds=0.7)).lat == 1.7
-    assert ts.get(dt1 + timedelta(seconds=0.8)).lat == 1.8
-    assert ts.get(dt1 + timedelta(seconds=0.9)).lat == 1.9
-    assert ts.get(dt1 + timedelta(seconds=1.0)).lat == 2.0
-    assert ts.get(dt1 + timedelta(seconds=1.1)).lat == 2.1
-    assert ts.get(dt1 + timedelta(seconds=1.2)).lat == 2.2
-    assert ts.get(dt1 + timedelta(seconds=1.3)).lat == 2.3
-    assert ts.get(dt1 + timedelta(seconds=1.4)).lat == 2.4
-    assert ts.get(dt1 + timedelta(seconds=1.5)).lat == 2.5
-    assert ts.get(dt1 + timedelta(seconds=1.6)).lat == 2.6
-    assert ts.get(dt1 + timedelta(seconds=1.7)).lat == 2.7
-    assert ts.get(dt1 + timedelta(seconds=1.8)).lat == 2.8
-    assert ts.get(dt1 + timedelta(seconds=1.9)).lat == 2.9
-    assert ts.get(dt1 + timedelta(seconds=2.0)).lat == 3.0
+    assert ts.get(dt1).point.lat == 1.0
+    assert ts.get(dt2).point.lat == 2.0
+    assert ts.get(dt3).point.lat == 3.0
+    assert ts.get(dt1 + timedelta(seconds=0.0)).point.lat == 1.0
+    assert ts.get(dt1 + timedelta(seconds=0.1)).point.lat == 1.1
+    assert ts.get(dt1 + timedelta(seconds=0.2)).point.lat == 1.2
+    assert ts.get(dt1 + timedelta(seconds=0.3)).point.lat == 1.3
+    assert ts.get(dt1 + timedelta(seconds=0.4)).point.lat == 1.4
+    assert ts.get(dt1 + timedelta(seconds=0.5)).point.lat == 1.5
+    assert ts.get(dt1 + timedelta(seconds=0.6)).point.lat == 1.6
+    assert ts.get(dt1 + timedelta(seconds=0.7)).point.lat == 1.7
+    assert ts.get(dt1 + timedelta(seconds=0.8)).point.lat == 1.8
+    assert ts.get(dt1 + timedelta(seconds=0.9)).point.lat == 1.9
+    assert ts.get(dt1 + timedelta(seconds=1.0)).point.lat == 2.0
+    assert ts.get(dt1 + timedelta(seconds=1.1)).point.lat == 2.1
+    assert ts.get(dt1 + timedelta(seconds=1.2)).point.lat == 2.2
+    assert ts.get(dt1 + timedelta(seconds=1.3)).point.lat == 2.3
+    assert ts.get(dt1 + timedelta(seconds=1.4)).point.lat == 2.4
+    assert ts.get(dt1 + timedelta(seconds=1.5)).point.lat == 2.5
+    assert ts.get(dt1 + timedelta(seconds=1.6)).point.lat == 2.6
+    assert ts.get(dt1 + timedelta(seconds=1.7)).point.lat == 2.7
+    assert ts.get(dt1 + timedelta(seconds=1.8)).point.lat == 2.8
+    assert ts.get(dt1 + timedelta(seconds=1.9)).point.lat == 2.9
+    assert ts.get(dt1 + timedelta(seconds=2.0)).point.lat == 3.0
 
 
 def test_interpolating_quantity():

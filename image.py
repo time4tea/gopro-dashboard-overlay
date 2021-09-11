@@ -1,4 +1,3 @@
-import datetime
 import math
 
 import geotiler
@@ -39,7 +38,49 @@ def icon(location, file, transform=lambda x: x):
     return Drawable(location, image)
 
 
-class Map:
+class JourneyMap:
+    def __init__(self, journey, extents, location, value, renderer, size=256):
+        self.journey = journey
+        self.extents = extents
+        self.location = location
+        self.value = value
+        self.renderer = renderer
+        self.size = size
+        self.map = None
+        self.image = None
+
+    def _init_maybe(self):
+        if self.map is None:
+            bbox = self.extents.bounding_box
+            self.map = geotiler.Map(extent=(bbox[0].lon, bbox[0].lat, bbox[1].lon, bbox[1].lat),
+                                    size=(self.size, self.size))
+            plots = [self.map.rev_geocode((location.lon, location.lat)) for location in self.journey.locations]
+            self.image = self.renderer(self.map)
+            draw = ImageDraw.Draw(self.image)
+            draw.line(plots, fill=(255, 0, 0), width=4)
+            draw.line(
+                (0, 0, 0, self.size - 1, self.size - 1, self.size - 1, self.size - 1, 0, 0, 0),
+                fill=(0, 0, 0)
+            )
+
+    def draw(self, image, draw):
+        self._init_maybe()
+
+        location = self.value()
+
+        frame = self.image.copy()
+        draw = ImageDraw.Draw(frame)
+        current = self.map.rev_geocode((location.lon, location.lat))
+        draw_marker(draw, current, 6)
+        image.paste(frame, self.location)
+
+
+def draw_marker(draw, position, size):
+    draw.ellipse((position[0] - size, position[1] - size, position[0] + size, position[1] + size), fill=(0, 0, 255),
+                 outline=(0, 0, 0))
+
+
+class MovingMap:
     def __init__(self, location, value, azimuth, renderer, rotate=True):
         self.rotate = rotate
         self.azimuth = azimuth
@@ -48,8 +89,8 @@ class Map:
         self.location = location
 
     def draw(self, image, draw):
-        centre = self.value()
-        if centre[0] is not None and centre[1] is not None:
+        location = self.value()
+        if location.lon is not None and location.lat is not None:
             desired = 256
 
             hypotenuse = int(math.sqrt((desired ** 2) * 2))
@@ -63,12 +104,11 @@ class Map:
                 half_width_height + (desired / 2)
             )
 
-            map = geotiler.Map(center=centre, zoom=17, size=(hypotenuse, hypotenuse))
+            map = geotiler.Map(center=(location.lon, location.lat), zoom=17, size=(hypotenuse, hypotenuse))
             map_image = self.renderer(map)
 
             draw = ImageDraw.Draw(map_image)
-            draw.ellipse((half_width_height - 3, half_width_height - 3, half_width_height + 3, half_width_height + 3),
-                         fill=(255, 0, 0), outline=(0, 0, 0))
+            draw_marker(draw, (half_width_height, half_width_height), 6)
             azimuth = self.azimuth()
             if azimuth and self.rotate:
                 azi = azimuth.to("degree").magnitude
@@ -97,12 +137,19 @@ class Overlay:
             Text((28, 80), date(datasource.datetime), font_metric),
             Text((260, 80), time(datasource.datetime), font_metric),
             Text((1500, 36), lambda: "GPS INFO", font_title),
-            Text((1500, 80), lambda: f"Lat: {datasource.lat():0.6f}", font_metric),
-            Text((1500, 120), lambda: f"Lon: {datasource.lon():0.6f}", font_metric),
-            Map((1500, 160),
-                lambda: (datasource.lon(), datasource.lat()),
-                lambda: datasource.azimuth(),
-                map_renderer),
+            Text((1500, 80), lambda: f"Lat: {datasource.point().lat:0.6f}", font_metric),
+            Text((1500, 120), lambda: f"Lon: {datasource.point().lon:0.6f}", font_metric),
+            MovingMap((1500, 160),
+                      lambda: datasource.point(),
+                      lambda: datasource.azimuth(),
+                      map_renderer),
+            JourneyMap(
+                journey=datasource.journey,
+                extents=datasource.extents,
+                location=(1500, 400),
+                value=lambda: datasource.point(),
+                renderer=map_renderer
+            ),
             Text((28, 900), lambda: "Speed (mph)", font_title),
             Text((28, 922),
                  lambda: f"{datasource.speed().to('MPH').magnitude:.0f}" if datasource.speed() else "-",
@@ -134,39 +181,9 @@ class Overlay:
         return image
 
 
-from units import units
-
-
-class DataSource:
-
-    # (-0.1499, +51.4972)
-
-    def datetime(self):
-        return datetime.datetime.now()
-
-    def lat(self):
-        return +51.4972
-
-    def lon(self):
-        return -0.1499
-
-    def speed(self):
-        return units.Quantity(23.5, units.mps)
-
-    def azimuth(self):
-        return units.Quantity(90, units.degrees)
-
-    def cadence(self):
-        return units.Quantity(113.0, units.rpm)
-
-    def heart_rate(self):
-        return units.Quantity(67.0, units.bpm)
-
-    def altitude(self):
-        return units.Quantity(1023.4, units.m)
-
-
 if __name__ == "__main__":
-    overlay = Overlay(DataSource(), geotiler.render_map)
+    import fake
+
+    overlay = Overlay(fake.DataSource(), geotiler.render_map)
 
     overlay.draw().show()

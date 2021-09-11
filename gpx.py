@@ -3,6 +3,7 @@ import collections
 import gpxpy
 
 import timeseries
+from point import Point
 from timeseries import Timeseries
 from units import units
 
@@ -49,7 +50,6 @@ def load(filepath, units):
 
 
 def load_timeseries(filepath, units):
-
     gpx = load(filepath, units)
 
     gpx_timeseries = Timeseries()
@@ -57,8 +57,7 @@ def load_timeseries(filepath, units):
     points = [
         timeseries.Entry(
             point.time,
-            lat=point.lat,
-            lon=point.lon,
+            point=Point(point.lat, point.lon),
             alt=point.alt,
             hr=point.hr,
             cad=point.cad
@@ -69,6 +68,7 @@ def load_timeseries(filepath, units):
     gpx_timeseries.add(*points)
 
     return gpx_timeseries
+
 
 if __name__ == "__main__":
 

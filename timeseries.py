@@ -2,6 +2,7 @@ import bisect
 from datetime import timedelta
 
 import units
+from point import Point
 
 
 def process_ses(new, key, alpha=0.4):
@@ -92,11 +93,13 @@ class Timeseries:
 
     def process(self, processor):
         for e in self.dates:
-            self.entries[e].update(**processor(self.entries[e]))
+            updates = processor(self.entries[e])
+            if updates:
+                self.entries[e].update(**updates)
 
 
 def entry_wants(v):
-    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.units.Quantity)
+    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.units.Quantity) or isinstance(v, Point)
 
 
 class Entry:
@@ -137,7 +140,7 @@ class Entry:
             try:
                 end = other.items[key]
                 diff = end - start
-                interp = start + (position * diff)
+                interp = start + (diff * position)
             except KeyError:
                 interp = None
             items[key] = interp

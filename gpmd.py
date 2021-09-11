@@ -2,10 +2,10 @@ import array
 import collections
 import datetime
 import struct
-import warnings
 from enum import Enum
 
 from ffmpeg import load_gpmd_from
+from point import Point
 from timeseries import Timeseries, Entry
 
 GPMDStruct = struct.Struct('>4sBBH')
@@ -269,8 +269,7 @@ class GPS5Scaler:
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
                     self._on_item(
                         Entry(point_datetime,
-                              lat=scaled_point.lat,
-                              lon=scaled_point.lon,
+                              point=Point(scaled_point.lat, scaled_point.lon),
                               speed=self._units.Quantity(scaled_point.speed, self._units.mps),
                               alt=self._units.Quantity(scaled_point.alt, self._units.m))
                     )
@@ -339,7 +338,6 @@ if __name__ == "__main__":
                 counter.update([gps_diff_millis])
 
                 last_gps = this_gps
-
 
     print(millis_to_diff)
 

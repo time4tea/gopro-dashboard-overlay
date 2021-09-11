@@ -1,6 +1,7 @@
 import argparse
 import dbm
 from datetime import datetime, timedelta
+from functools import cached_property
 from pathlib import Path
 
 from geographiclib.geodesic import Geodesic
@@ -10,15 +11,18 @@ import timeseries
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from image import Overlay
+from point import Point
 from units import units
 
 
 class TimeSeriesDataSource:
 
-    def __init__(self, timeseries):
+    def __init__(self, timeseries, extents, journey):
         self._timeseries = timeseries
         self._dt = timeseries.min
         self._entry = self._timeseries.get(self._dt)
+        self.journey = journey
+        self.extents = extents
 
     def timerange(self, step: timedelta):
         end = self._timeseries.max
@@ -34,11 +38,8 @@ class TimeSeriesDataSource:
     def datetime(self):
         return self._dt
 
-    def lat(self):
-        return self._entry.lat
-
-    def lon(self):
-        return self._entry.lon
+    def point(self):
+        return self._entry.point
 
     def speed(self):
         return self._entry.speed
@@ -56,8 +57,66 @@ class TimeSeriesDataSource:
         return self._entry.alt
 
 
+class MinMax:
+
+    def __init__(self, name):
+        self._items = []
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
+
+    def update(self, new):
+        if new is not None:
+            self._items.append(new)
+
+    @cached_property
+    def min(self):
+        return min(self._items)
+
+    @cached_property
+    def max(self):
+        return max(self._items)
+
+    def __str__(self):
+        return f"{self.name}: min:{self.min} max:{self.max}"
+
+
+class Extents:
+
+    def __init__(self):
+        self.lat = MinMax("lat")
+        self.lon = MinMax("lon")
+        self.velocity = MinMax("velocity")
+        self.altitude = MinMax("altitude")
+        self.cadence = MinMax("cadence")
+        self.hr = MinMax("hr")
+
+    def accept(self, item):
+        self.lat.update(item.point.lat)
+        self.lon.update(item.point.lon)
+        self.velocity.update(item.speed)
+        self.altitude.update(item.alt)
+        self.cadence.update(item.cad)
+        self.hr.update(item.hr)
+
+    @property
+    def bounding_box(self):
+        return Point(self.lat.min, self.lon.min), Point(self.lat.max, self.lon.max)
+
+
+class Journey:
+
+    def __init__(self):
+        self.locations = []
+
+    def accept(self, item):
+        self.locations.append(item.point)
+
+
 def calculate_speeds(a, b):
-    inverse = Geodesic.WGS84.Inverse(a.lat, a.lon, b.lat, b.lon)
+    inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
     dist = units.Quantity(inverse['s12'], units.m)
     time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
     azi = units.Quantity(inverse['azi1'], units.degree)
@@ -99,13 +158,19 @@ if __name__ == "__main__":
     wanted_timeseries.process_deltas(calculate_speeds)
     wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
+    extents = Extents()
+    wanted_timeseries.process(extents.accept)
+
+    journey = Journey()
+    wanted_timeseries.process(journey.accept)
+
     ourdir = Path.home().joinpath(".gopro-graphics")
     ourdir.mkdir(exist_ok=True)
 
     with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
         map_renderer = dbm_caching_renderer(db)
 
-        datasource = TimeSeriesDataSource(wanted_timeseries)
+        datasource = TimeSeriesDataSource(wanted_timeseries, journey=journey, extents=extents)
 
         overlay = Overlay(datasource, map_renderer)
 
