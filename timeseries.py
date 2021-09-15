@@ -114,6 +114,9 @@ class Entry:
     def __getattr__(self, item):
         return self.items.get(item, None)
 
+    def __str__(self):
+        return f"Entry: {self.dt} - {self.items}"
+
     def interpolate(self, other, dt):
         if self.dt == other.dt:
             raise ValueError("Cannot interpolate between equal points")

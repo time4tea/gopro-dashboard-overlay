@@ -1,11 +1,14 @@
 import array
+import bisect
 import collections
 import datetime
+import itertools
 import struct
+import warnings
 from enum import Enum
 
 from ffmpeg import load_gpmd_from
-from point import Point
+from point import Point, Point3
 from timeseries import Timeseries, Entry
 
 GPMDStruct = struct.Struct('>4sBBH')
@@ -218,11 +221,51 @@ class GPMDParser:
         return GPMDParser(arr)
 
 
+class SampleCounter:
+
+    def __init__(self, stream):
+        self.item = None
+        self.stream = stream
+        self._saved = None
+        self._last_sample_count = None
+        self._current_sample_count = 0
+
+    def accept(self, interpreted):
+        if interpreted.item.code == "TSMP":
+            self._saved = interpreted
+        elif interpreted.item.code == self.stream:
+            sample_count = self._saved.interpreted
+            if self._last_sample_count is None:
+                self._current_sample_count = sample_count
+            else:
+                self._current_sample_count = sample_count - self._last_sample_count
+
+            self._last_sample_count = sample_count
+
+    def count(self):
+        return self._current_sample_count
+
+
+class StreamClock:
+    def __init__(self, step=None):
+        self.step = step if step else (1001.0 / 1000.0)
+        self.clock = -self.step
+
+    def accept(self, interpreted):
+        if interpreted.item.code == "DEVC":
+            self.clock += self.step
+
+    def at(self, index, hertz):
+        return self.clock + (self.step * index * (1.0 / hertz))
+
+
 class GPS5Scaler:
 
     def __init__(self, units, on_item, max_dop=5.0, on_drop=lambda x: None):
         self.reset()
         self._units = units
+        self._samples = SampleCounter("GPS5")
+        self._clock = StreamClock()
         self._on_item = on_item
         self._on_drop = on_drop
         self._max_dop = max_dop
@@ -236,6 +279,9 @@ class GPS5Scaler:
     def accept(self, interpreted):
 
         item_type = interpreted.item.code
+
+        self._samples.accept(interpreted)
+        self._clock.accept(interpreted)
 
         if item_type == "STRM":
             self.reset()
@@ -258,28 +304,93 @@ class GPS5Scaler:
                 self._on_drop("Got a GPS item, but no accuracy yet")
             elif self._scale is None:
                 self._on_drop("Got GPS, but unknown scale")
-            elif self._dop > self._max_dop:
-                self._on_drop(f"Got GPS, but DOP > Max DOP {self._max_dop}")
             else:
                 points = interpreted.interpreted
-                hertz = 18
+                hertz = self._samples.count()
+
+                if len(points) != hertz:
+                    warnings.warn("Bug? - Δsamples != samples")
+
                 for index, point in enumerate(points):
                     scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
                     scaled_point = GPS5._make(scaled)
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
-                    self._on_item(
-                        Entry(point_datetime,
-                              point=Point(scaled_point.lat, scaled_point.lon),
-                              speed=self._units.Quantity(scaled_point.speed, self._units.mps),
-                              alt=self._units.Quantity(scaled_point.alt, self._units.m))
-                    )
+                    if self._dop > self._max_dop:
+                        self._on_drop(f"Got GPS, but DOP > Max DOP {self._max_dop}")
+                    else:
+                        self._on_item(
+                            Entry(point_datetime,
+                                  clock=self._clock.at(index, hertz),
+                                  point=Point(scaled_point.lat, scaled_point.lon),
+                                  speed=self._units.Quantity(scaled_point.speed, self._units.mps),
+                                  alt=self._units.Quantity(scaled_point.alt, self._units.m))
+                        )
+
+
+class XYZScaler:
+
+    def __init__(self, units, stream_name, on_item):
+        self._on_item = on_item
+        self._units = units
+        self._clock = StreamClock()
+        self._stream_name = stream_name
+        self._samples = SampleCounter(stream_name)
+        self._reset()
+
+    def _reset(self):
+        self._scale = None
+
+    def accept(self, interpreted):
+
+        item_type = interpreted.item.code
+
+        self._samples.accept(interpreted)
+        self._clock.accept(interpreted)
+
+        if item_type == "STRM":
+            self._reset()
+        elif item_type == "SCAL":
+            self._scale = interpreted.interpreted
+        elif item_type == self._stream_name:
+            points = interpreted.interpreted
+            hertz = self._samples.count()
+
+            if len(points) != hertz:
+                warnings.warn("Bug? - Δsamples != samples")
+
+            for index, point in enumerate(points):
+
+                components = point._asdict().values()
+
+                divisors = self._scale
+                if len(divisors) == 1 and len(components) > 1:
+                    divisors = itertools.repeat(divisors[0], len(components))
+
+                scaled = [float(x) / float(y) for x, y in zip(components, divisors)]
+                scaled_point = XYZ._make(scaled)
+
+                items = {
+                    "clock": self._clock.at(index, hertz),
+                    self._stream_name.lower(): Point3(scaled_point.x, scaled_point.y, scaled_point.z)
+                }
+
+                self._on_item(items)
+
+
+class StreamScalers:
+
+    def __init__(self, *args):
+        self.scalers = args
+
+    def accept(self, interpreted):
+        [s.accept(interpreted) for s in self.scalers]
 
 
 def timeseries_from(filepath, units, unhandled=lambda x: None):
     parser = GPMDParser.parser(load_gpmd_from(filepath))
 
     timeseries = Timeseries()
-    gps_scaler = GPS5Scaler(units, lambda entry: timeseries.add(entry), max_dop=6.0)
+    gps_scaler = GPS5Scaler(units, max_dop=6.0, on_item=lambda entry: timeseries.add(entry))
     interpreter = GPMDInterpreter()
 
     for interpreted in interpreter.interpret(parser.items()):
@@ -291,6 +402,25 @@ def timeseries_from(filepath, units, unhandled=lambda x: None):
     return timeseries
 
 
+class Clocked:
+
+    # Things that don't have a GPS time associated with them, just a stream time.
+    def __init__(self):
+        self.items = {}
+        self.clocks = None
+
+    def add(self, item):
+        self.clocks = None
+        entry = self.items.setdefault(item["clock"], {})
+        entry.update(item)
+
+    def closest(self, clock):
+        if self.clocks is None:
+            self.clocks = sorted(list(self.items.keys()))
+        return self.items[self.clocks[bisect.bisect_right(self.clocks, clock)]]
+
+
+
 if __name__ == "__main__":
 
     from units import units
@@ -299,7 +429,15 @@ if __name__ == "__main__":
 
     parser = GPMDParser.parser(load_gpmd_from(f"/data/richja/gopro/{filename}.MP4"))
 
-    scaler = GPS5Scaler(units, lambda entry: print(entry))
+    clocked = Clocked()
+
+    timeseries = Timeseries()
+
+    scalers = StreamScalers(
+        GPS5Scaler(units, on_item=lambda entry: timeseries.add(entry)),
+        XYZScaler(units, stream_name="ACCL", on_item=lambda item: clocked.add(item)),
+        XYZScaler(units, stream_name="GYRO", on_item=lambda item: clocked.add(item)),
+    )
 
     interpreter = GPMDInterpreter()
 
@@ -311,33 +449,9 @@ if __name__ == "__main__":
     counter = collections.Counter()
 
     for interpreted in interpreter.interpret(parser.items()):
+
         if interpreted.understood:
-            if interpreted.item.code == "DEVC":
-                print("DEVC")
-                millis += 1001
-
-            if interpreted.item.code == "GPSF":
-                print(f"GPS Lock {interpreted.interpreted}")
-            if interpreted.item.code == "STMP":
-                print(f"Time: {interpreted.interpreted}")
-            elif interpreted.item.code == "STRM":
-                print("Next data stream")
-            elif interpreted.item.code == "ACCL":
-                print(f"Accelerometer = {interpreted.interpreted}")
-            elif interpreted.item.code == "GPS5":
-                print(f"GPS = {interpreted.interpreted}")
-            elif interpreted.item.code == "GPSU":
-                print(f"GPS Time = {interpreted.interpreted}")
-                this_gps = interpreted.interpreted
-                if last_gps is None:
-                    last_gps = this_gps
-
-                gps_diff = this_gps - last_gps
-                gps_diff_millis = gps_diff / datetime.timedelta(milliseconds=1)
-                millis_to_diff[millis] = gps_diff_millis
-                counter.update([gps_diff_millis])
-
-                last_gps = this_gps
+            scalers.accept(interpreted)
 
     print(millis_to_diff)
 
