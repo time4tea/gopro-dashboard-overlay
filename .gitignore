@@ -1,2 +1,8 @@
 venv/
 .idea/
+
+
+*.gpx
+*.MP4
+*.mp4
+*.out
