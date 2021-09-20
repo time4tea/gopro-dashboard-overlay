@@ -6,7 +6,7 @@ from collections import Counter
 import gpxpy
 
 from ffmpeg import load_gpmd_from
-from gpmd import GPMDParser, GPS5Scaler, GPMDInterpreted, GPMDInterpreter
+from gpmd import GPMDParser, GPS5Scaler, GPMDInterpreter
 from units import units
 
 

@@ -5,40 +5,7 @@ import geotiler
 from PIL import Image, ImageDraw, ImageFont
 
 from journey import Journey
-
-
-class Text:
-    def __init__(self, at, value, font):
-        self.at = at
-        self.value = value
-        self.font = font
-
-    def draw(self, image, draw):
-        draw.text(self.at, self.value(), font=self.font, fill=(255, 255, 255), stroke_width=2,
-                  stroke_fill=(0, 0, 0))
-
-
-class Drawable:
-    def __init__(self, at, drawable):
-        self.at = at
-        self.drawable = drawable
-
-    def draw(self, image, draw):
-        image.paste(self.drawable, self.at)
-
-
-def time(clock):
-    return lambda: clock().strftime("%H:%M:%S.%f")[:-3]
-
-
-def date(clock):
-    return lambda: clock().strftime("%Y/%m/%d")
-
-
-def icon(location, file, transform=lambda x: x):
-    image = Image.open(file)
-    image = transform(image)
-    return Drawable(location, image)
+from widgets import Text, date, time, Scene
 
 
 class JourneyMap:
@@ -191,10 +158,11 @@ class Overlay:
         self.map_renderer = map_renderer
         self.timeseries = timeseries
         self.current_entry = None
+
         font_title = ImageFont.truetype(font="Roboto-Medium.ttf", size=24)
         font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
 
-        self.widgets = [
+        self.scene = Scene([
             Text((28, 36), lambda: "TIME", font_title),
             Text((28, 80), date(lambda: self.entry.dt), font_metric),
             Text((260, 80), time(lambda: self.entry.dt), font_metric),
@@ -235,22 +203,15 @@ class Overlay:
             Text((1500, 1002),
                  lambda: f"{self.entry.hr.magnitude:.0f}" if self.entry.hr else "-",
                  font_metric),
-        ]
+        ])
 
     @property
     def entry(self):
         return self.current_entry
 
     def draw(self, dt):
-        image = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(image)
-
         self.current_entry = self.timeseries.get(dt)
-
-        for w in self.widgets:
-            w.draw(image, draw)
-
-        return image
+        return self.scene.draw()
 
 
 if __name__ == "__main__":
