@@ -1,54 +1,66 @@
 import datetime
+import random
 
-from overlayer import Extents, Journey
 from point import Point
-from timeseries import Entry
+from timeseries import Entry, Timeseries
 from units import units
 
 
-class DataSource:
+class Random1D:
 
-    def __init__(self):
-        self.entry1 = Entry(
-            datetime.datetime.now(),
-            point=Point(51.4972, -0.1499),
-            speed=units.Quantity(23.5, units.mps),
-            cad=units.Quantity(113.0, units.rpm),
-            hr=units.Quantity(67.0, units.bpm),
-            alt=units.Quantity(1023.4, units.m)
+    def __init__(self, start):
+        self._n = start
+
+    def step(self):
+        n = random.random()
+
+        if n < 0.45:
+            self._n = self._n - 1
+        elif n > 0.55:
+            self._n = self._n + 1
+
+        return self._n
+
+
+class Random2D:
+
+    def __init__(self, start_point, step):
+        self._point = start_point
+        self._steps = [p * step for p in [
+            Point(-1, -1), Point(-1, 0), Point(-1, 1),
+            Point(0, -1), Point(0, 0), Point(0, 1),
+            Point(1, -1), Point(1, 0), Point(1, 1)
+        ]]
+
+    def step(self):
+        n = random.randint(0, 8)
+        self._point = self._point + self._steps[n]
+        return self._point
+
+
+def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
+                    step: datetime.timedelta = datetime.timedelta(seconds=0.1)):
+    points = Random2D(Point(51.4972, -0.1499), 0.001)
+    speed = Random1D(10)
+    cad = Random1D(50)
+    hr = Random1D(100)
+    alt = Random1D(1000)
+
+    ts = Timeseries()
+    current_dt = datetime.datetime.fromtimestamp(0)
+    end_dt = current_dt + length
+
+    while current_dt < end_dt:
+        ts.add(
+            Entry(
+                current_dt,
+                point=points.step(),
+                speed=units.Quantity(speed.step(), units.mps),
+                cad=units.Quantity(cad.step(), units.rpm),
+                hr=units.Quantity(hr.step(), units.bpm),
+                alt=units.Quantity(alt.step(), units.m)
+            )
         )
-        self.entry2 = Entry(
-            datetime.datetime.now(),
-            point=Point(51.4072, -0.1699),
-            speed=units.Quantity(23.5, units.mps),
-            cad=units.Quantity(117.0, units.rpm),
-            hr=units.Quantity(67.0, units.bpm),
-            alt=units.Quantity(1023.4, units.m)
-        )
-        self.extents = Extents()
-        self.extents.accept(self.entry1)
-        self.extents.accept(self.entry2)
-        self.journey = Journey()
-        self.journey.accept(self.entry1)
-        self.journey.accept(self.entry2)
+        current_dt = current_dt + step
 
-    def datetime(self):
-        return datetime.datetime.now()
-
-    def point(self):
-        return self.entry1.point
-
-    def speed(self):
-        return units.Quantity(23.5, units.mps)
-
-    def azimuth(self):
-        return units.Quantity(90, units.degrees)
-
-    def cadence(self):
-        return units.Quantity(113.0, units.rpm)
-
-    def heart_rate(self):
-        return units.Quantity(67.0, units.bpm)
-
-    def altitude(self):
-        return units.Quantity(1023.4, units.m)
+    return ts

@@ -97,6 +97,42 @@ class Timeseries:
             if updates:
                 self.entries[e].update(**updates)
 
+    def window(self, start_dt, length):
+        return TimeseriesWindow(self, start_dt, length)
+
+
+class TimeseriesWindow:
+
+    def __init__(self, timeseries, start_dt, length):
+        self.start_index = bisect.bisect_left(timeseries.dates, start_dt)
+        self.start_dt = timeseries.dates[self.start_index]
+        self.end_index = bisect.bisect_left(timeseries.dates, self.start_dt + length)
+        self.end_dt = timeseries.dates[self.end_index]
+        self.timeseries = timeseries
+        self.size = (self.end_index - self.start_index) + 1
+
+    @property
+    def max(self):
+        return self.end_dt
+
+    @property
+    def min(self):
+        return self.start_dt
+
+    def __len__(self):
+        return self.size
+
+    def items(self):
+        return [self.get(k) for k in self.timeseries.dates[self.start_index:self.end_index]]
+
+    def get(self, dt):
+        if dt < self.start_dt:
+            raise ValueError("Date is before start")
+        if dt > self.end_dt:
+            raise ValueError("Date is after end")
+
+        return self.timeseries.get()
+
 
 def entry_wants(v):
     return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.units.Quantity) or isinstance(v, Point)

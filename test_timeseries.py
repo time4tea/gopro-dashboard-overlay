@@ -208,3 +208,17 @@ def test_interpolating_quantity():
     ts.add(Entry(dt2, alt=units.Quantity(20, units.m)))
 
     assert ts.get(dt1 + timedelta(seconds=0.1)).alt == units.Quantity(11, units.m)
+
+
+def test_window():
+    ts = Timeseries()
+    for i in range(0, 10):
+        ts.add(Entry(datetime_of(i), alt=i))
+
+    assert len(ts) == 10
+
+    window = ts.window(datetime_of(2), timedelta(seconds=3))
+    assert len(window) == 4
+    assert window.min == datetime_of(2)
+    assert window.max == datetime_of(5)
+

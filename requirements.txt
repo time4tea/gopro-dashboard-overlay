@@ -11,3 +11,4 @@ gpxpy
 # for lat/lon/speed calcs
 geographiclib
 
+matplotlib

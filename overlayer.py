@@ -1,7 +1,6 @@
 import argparse
 import dbm
-from datetime import datetime, timedelta
-from functools import cached_property
+from datetime import timedelta
 from pathlib import Path
 
 from geographiclib.geodesic import Geodesic
@@ -11,18 +10,13 @@ import timeseries
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from image import Overlay
-from point import Point
 from units import units
 
 
-class TimeSeriesDataSource:
+class ProductionClock:
 
-    def __init__(self, timeseries, extents, journey):
+    def __init__(self, timeseries):
         self._timeseries = timeseries
-        self._dt = timeseries.min
-        self._entry = self._timeseries.get(self._dt)
-        self.journey = journey
-        self.extents = extents
 
     def timerange(self, step: timedelta):
         end = self._timeseries.max
@@ -30,89 +24,6 @@ class TimeSeriesDataSource:
         while running <= end:
             yield running
             running += step
-
-    def time_is(self, dt: datetime):
-        self._dt = dt
-        self._entry = self._timeseries.get(self._dt)
-
-    def datetime(self):
-        return self._dt
-
-    def point(self):
-        return self._entry.point
-
-    def speed(self):
-        return self._entry.speed
-
-    def azimuth(self):
-        return self._entry.azi
-
-    def cadence(self):
-        return self._entry.cad
-
-    def heart_rate(self):
-        return self._entry.hr
-
-    def altitude(self):
-        return self._entry.alt
-
-
-class MinMax:
-
-    def __init__(self, name):
-        self._items = []
-        self._name = name
-
-    @property
-    def name(self):
-        return self._name
-
-    def update(self, new):
-        if new is not None:
-            self._items.append(new)
-
-    @cached_property
-    def min(self):
-        return min(self._items)
-
-    @cached_property
-    def max(self):
-        return max(self._items)
-
-    def __str__(self):
-        return f"{self.name}: min:{self.min} max:{self.max}"
-
-
-class Extents:
-
-    def __init__(self):
-        self.lat = MinMax("lat")
-        self.lon = MinMax("lon")
-        self.velocity = MinMax("velocity")
-        self.altitude = MinMax("altitude")
-        self.cadence = MinMax("cadence")
-        self.hr = MinMax("hr")
-
-    def accept(self, item):
-        self.lat.update(item.point.lat)
-        self.lon.update(item.point.lon)
-        self.velocity.update(item.speed)
-        self.altitude.update(item.alt)
-        self.cadence.update(item.cad)
-        self.hr.update(item.hr)
-
-    @property
-    def bounding_box(self):
-        return Point(self.lat.min, self.lon.min), Point(self.lat.max, self.lon.max)
-
-
-class Journey:
-
-    def __init__(self):
-        self.locations = []
-
-    def accept(self, item):
-        self.locations.append(item.point)
 
 
 def calculate_speeds(a, b):
@@ -158,21 +69,15 @@ if __name__ == "__main__":
     wanted_timeseries.process_deltas(calculate_speeds)
     wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
-    extents = Extents()
-    wanted_timeseries.process(extents.accept)
-
-    journey = Journey()
-    wanted_timeseries.process(journey.accept)
-
     ourdir = Path.home().joinpath(".gopro-graphics")
     ourdir.mkdir(exist_ok=True)
 
     with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
         map_renderer = dbm_caching_renderer(db)
 
-        datasource = TimeSeriesDataSource(wanted_timeseries, journey=journey, extents=extents)
+        clock = ProductionClock(wanted_timeseries)
 
-        overlay = Overlay(datasource, map_renderer)
+        overlay = Overlay(wanted_timeseries, map_renderer)
 
         if not args.no_overlay:
             ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
@@ -180,6 +85,5 @@ if __name__ == "__main__":
             ffmpeg = FFMPEGGenerate(output=args.output)
 
         with ffmpeg.generate() as writer:
-            for time in datasource.timerange(step=timedelta(seconds=0.1)):
-                datasource.time_is(time)
-                writer.write(asarray(overlay.draw()).tobytes())
+            for dt in clock.timerange(step=timedelta(seconds=0.1)):
+                writer.write(asarray(overlay.draw(dt)).tobytes())

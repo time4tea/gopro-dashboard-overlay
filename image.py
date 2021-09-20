@@ -1,27 +1,30 @@
+import bisect
 import math
 
 import geotiler
 from PIL import Image, ImageDraw, ImageFont
 
+from journey import Journey
+
 
 class Text:
-    def __init__(self, location, value, font):
-        self.location = location
+    def __init__(self, at, value, font):
+        self.at = at
         self.value = value
         self.font = font
 
     def draw(self, image, draw):
-        draw.text(self.location, self.value(), font=self.font, fill=(255, 255, 255), stroke_width=2,
+        draw.text(self.at, self.value(), font=self.font, fill=(255, 255, 255), stroke_width=2,
                   stroke_fill=(0, 0, 0))
 
 
 class Drawable:
-    def __init__(self, location, drawable):
-        self.location = location
+    def __init__(self, at, drawable):
+        self.at = at
         self.drawable = drawable
 
     def draw(self, image, draw):
-        image.paste(self.drawable, self.location)
+        image.paste(self.drawable, self.at)
 
 
 def time(clock):
@@ -39,11 +42,12 @@ def icon(location, file, transform=lambda x: x):
 
 
 class JourneyMap:
-    def __init__(self, journey, extents, location, value, renderer, size=256):
-        self.journey = journey
-        self.extents = extents
+    def __init__(self, timeseries, at, location, renderer, size=256):
+        self.journey = Journey()
+        self.timeseries = timeseries
+
+        self.at = at
         self.location = location
-        self.value = value
         self.renderer = renderer
         self.size = size
         self.map = None
@@ -51,7 +55,9 @@ class JourneyMap:
 
     def _init_maybe(self):
         if self.map is None:
-            bbox = self.extents.bounding_box
+            self.timeseries.process(self.journey.accept)
+
+            bbox = self.journey.bounding_box
             self.map = geotiler.Map(extent=(bbox[0].lon, bbox[0].lat, bbox[1].lon, bbox[1].lat),
                                     size=(self.size, self.size))
             plots = [self.map.rev_geocode((location.lon, location.lat)) for location in self.journey.locations]
@@ -66,13 +72,13 @@ class JourneyMap:
     def draw(self, image, draw):
         self._init_maybe()
 
-        location = self.value()
+        location = self.location()
 
         frame = self.image.copy()
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
         draw_marker(draw, current, 6)
-        image.paste(frame, self.location)
+        image.paste(frame, self.at)
 
 
 def draw_marker(draw, position, size):
@@ -81,15 +87,15 @@ def draw_marker(draw, position, size):
 
 
 class MovingMap:
-    def __init__(self, location, value, azimuth, renderer, rotate=True):
+    def __init__(self, at, location, azimuth, renderer, rotate=True):
+        self.at = at
         self.rotate = rotate
         self.azimuth = azimuth
         self.renderer = renderer
-        self.value = value
         self.location = location
 
     def draw(self, image, draw):
-        location = self.value()
+        location = self.location()
         if location.lon is not None and location.lat is not None:
             desired = 256
 
@@ -122,58 +128,124 @@ class MovingMap:
                 fill=(0, 0, 0)
             )
 
-            image.paste(crop, self.location)
+            image.paste(crop, self.at)
+
+
+class SparkLine:
+    import matplotlib
+    matplotlib.use("Agg")
+
+    def __init__(self, at, timeseries, dt):
+        self.at = at
+        self.timeseries = timeseries
+        self.dt = dt
+        self.cadences = None
+        self.dts = None
+
+    def _maybe_init(self):
+
+        self.cadences = []
+        self.dts = []
+
+        def process(entry):
+            self.cadences.append(entry.cad.magnitude if entry.cad else 0)
+            self.dts.append(entry.dt)
+
+        if not self.cadences:
+            self.timeseries.process(process)
+
+    def draw(self, image, draw):
+        import matplotlib.pyplot as plt
+
+        self._maybe_init()
+
+        data = self.cadences
+
+        fig, ax = plt.subplots(1, 1, figsize=(4, 0.25))
+        ax.plot(data, "r")
+        for k, v in ax.spines.items():
+            v.set_visible(False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        current_dt = self.dt()
+        dt_index = bisect.bisect_right(self.dts, current_dt)
+
+        plt.plot(dt_index, data[dt_index], 'wo')
+
+        fig.patch.set_alpha(0.0)
+        ax.patch.set_alpha(0.0)
+        ax.fill_between(range(len(data)), data, len(data) * [min(data)], color="red", alpha=0.2)
+
+        fig.canvas.draw()
+
+        # PIL Conversion...
+        sparkline = Image.frombytes("RGBA", fig.canvas.get_width_height(), fig.canvas.buffer_rgba().tobytes())
+
+        image.paste(sparkline, self.at)
 
 
 class Overlay:
 
-    def __init__(self, datasource, map_renderer):
+    def __init__(self, timeseries, map_renderer):
         self.map_renderer = map_renderer
-        self.datasource = datasource
+        self.timeseries = timeseries
+        self.current_entry = None
         font_title = ImageFont.truetype(font="Roboto-Medium.ttf", size=24)
         font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
+
         self.widgets = [
             Text((28, 36), lambda: "TIME", font_title),
-            Text((28, 80), date(datasource.datetime), font_metric),
-            Text((260, 80), time(datasource.datetime), font_metric),
+            Text((28, 80), date(lambda: self.entry.dt), font_metric),
+            Text((260, 80), time(lambda: self.entry.dt), font_metric),
             Text((1500, 36), lambda: "GPS INFO", font_title),
-            Text((1500, 80), lambda: f"Lat: {datasource.point().lat:0.6f}", font_metric),
-            Text((1500, 120), lambda: f"Lon: {datasource.point().lon:0.6f}", font_metric),
-            MovingMap((1500, 160),
-                      lambda: datasource.point(),
-                      lambda: datasource.azimuth(),
-                      map_renderer),
+            Text((1500, 80), lambda: f"Lat: {self.entry.point.lat:0.6f}", font_metric),
+            Text((1500, 120), lambda: f"Lon: {self.entry.point.lon:0.6f}", font_metric),
+            MovingMap(
+                at=(1500, 160),
+                location=lambda: self.entry.point,
+                azimuth=lambda: self.entry.azi,
+                renderer=map_renderer
+            ),
             JourneyMap(
-                journey=datasource.journey,
-                extents=datasource.extents,
-                location=(1500, 400),
-                value=lambda: datasource.point(),
+                at=(1500, 400),
+                timeseries=timeseries,
+                location=lambda: self.entry.point,
                 renderer=map_renderer
             ),
             Text((28, 900), lambda: "Speed (mph)", font_title),
             Text((28, 922),
-                 lambda: f"{datasource.speed().to('MPH').magnitude:.0f}" if datasource.speed() else "-",
+                 lambda: f"{self.entry.speed.to('MPH').magnitude:.0f}" if self.entry.speed else "-",
                  font_metric),
 
             Text((28, 980), lambda: "Altitude (m)", font_title),
             Text((28, 1002),
-                 lambda: f"{datasource.altitude().to('m').magnitude:.0f}" if datasource.altitude() else "-",
+                 lambda: f"{self.entry.alt.to('m').magnitude:.0f}" if self.entry.alt else "-",
                  font_metric),
 
             Text((1500, 900), lambda: "Cadence (rpm)", font_title),
             Text((1500, 922),
-                 lambda: f"{datasource.cadence().magnitude:.0f}" if datasource.cadence() else "-",
+                 lambda: f"{self.entry.cad.magnitude:.0f}" if self.entry.cad else "-",
                  font_metric),
-
+            SparkLine((1500, 1000),
+                      timeseries=timeseries,
+                      dt=lambda: self.entry.dt
+                      ),
             Text((1500, 980), lambda: "Heart Rate (bpm)", font_title),
             Text((1500, 1002),
-                 lambda: f"{datasource.heart_rate().magnitude:.0f}" if datasource.heart_rate() else "-",
+                 lambda: f"{self.entry.hr.magnitude:.0f}" if self.entry.hr else "-",
                  font_metric),
         ]
 
-    def draw(self):
+    @property
+    def entry(self):
+        return self.current_entry
+
+    def draw(self, dt):
         image = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
+
+        self.current_entry = self.timeseries.get(dt)
 
         for w in self.widgets:
             w.draw(image, draw)
@@ -184,6 +256,8 @@ class Overlay:
 if __name__ == "__main__":
     import fake
 
-    overlay = Overlay(fake.DataSource(), geotiler.render_map)
+    timeseries = fake.fake_timeseries()
 
-    overlay.draw().show()
+    overlay = Overlay(timeseries, geotiler.render_map)
+
+    overlay.draw(timeseries.min).show()
