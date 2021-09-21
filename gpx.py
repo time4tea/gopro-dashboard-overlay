@@ -60,7 +60,8 @@ def load_timeseries(filepath, units):
             point=Point(point.lat, point.lon),
             alt=point.alt,
             hr=point.hr,
-            cad=point.cad
+            cad=point.cad,
+            atemp=point.atemp,
         )
         for point in gpx
     ]

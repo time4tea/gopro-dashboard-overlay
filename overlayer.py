@@ -1,5 +1,7 @@
 import argparse
+import contextlib
 import dbm
+import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -39,6 +41,37 @@ def calculate_speeds(a, b):
     }
 
 
+class PoorTimer:
+
+    def __init__(self, name):
+        self.name = name
+        self.total = 0
+        self.count = 0
+
+    def time(self, f):
+        t = time.time_ns()
+        r = f()
+        self.total += (time.time_ns() - t)
+        self.count += 1
+        return r
+
+    @contextlib.contextmanager
+    def timing(self):
+        t = time.time_ns()
+        try:
+            yield
+        finally:
+            self.total += (time.time_ns() - t)
+            self.count += 1
+            print(self)
+
+    def seconds(self):
+        return self.total / (10 ** 9)
+
+    def __str__(self):
+        return f"Timer({self.name} - Called: {self.count}, Total: {self.seconds()}, Avg: {self.seconds() / self.count}"
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Overlay gadgets on to GoPro MP4")
@@ -50,40 +83,50 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    gopro_timeseries = timeseries_from(args.input, units)
-    print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
+    with PoorTimer("program").timing():
 
-    from gpx import load_timeseries
-    from ffmpeg import FFMPEGOverlay, FFMPEGGenerate
+        gopro_timeseries = timeseries_from(args.input, units)
+        print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
 
-    if args.gpx:
-        gpx_timeseries = load_timeseries(args.gpx, units)
-        print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
-        wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
-        print(f"GPX Timeseries overlap with GoPro - {len(wanted_timeseries)}")
-        if not len(wanted_timeseries):
-            raise ValueError("No overlap between GoPro and GPX file")
-    else:
-        wanted_timeseries = gopro_timeseries
+        from gpx import load_timeseries
+        from ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 
-    wanted_timeseries.process_deltas(calculate_speeds)
-    wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
-
-    ourdir = Path.home().joinpath(".gopro-graphics")
-    ourdir.mkdir(exist_ok=True)
-
-    with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
-        map_renderer = dbm_caching_renderer(db)
-
-        clock = ProductionClock(wanted_timeseries)
-
-        overlay = Overlay(wanted_timeseries, map_renderer)
-
-        if not args.no_overlay:
-            ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
+        if args.gpx:
+            gpx_timeseries = load_timeseries(args.gpx, units)
+            print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
+            wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
+            print(f"GPX Timeseries overlap with GoPro - {len(wanted_timeseries)}")
+            if not len(wanted_timeseries):
+                raise ValueError("No overlap between GoPro and GPX file")
         else:
-            ffmpeg = FFMPEGGenerate(output=args.output)
+            wanted_timeseries = gopro_timeseries
 
-        with ffmpeg.generate() as writer:
-            for dt in clock.timerange(step=timedelta(seconds=0.1)):
-                writer.write(asarray(overlay.draw(dt)).tobytes())
+        wanted_timeseries.process_deltas(calculate_speeds)
+        wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
+
+        ourdir = Path.home().joinpath(".gopro-graphics")
+        ourdir.mkdir(exist_ok=True)
+
+        with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
+            map_renderer = dbm_caching_renderer(db)
+
+            clock = ProductionClock(wanted_timeseries)
+
+            overlay = Overlay(wanted_timeseries, map_renderer)
+
+            if not args.no_overlay:
+                ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
+            else:
+                ffmpeg = FFMPEGGenerate(output=args.output)
+
+            write_timer = PoorTimer("writing to ffmpeg")
+            draw_timer = PoorTimer("drawing frames")
+
+            with ffmpeg.generate() as writer:
+                for dt in clock.timerange(step=timedelta(seconds=0.1)):
+                    draw = draw_timer.time(lambda: overlay.draw(dt))
+                    tobytes = asarray(draw).tobytes()
+                    write_timer.time(lambda: writer.write(tobytes))
+
+            for t in [write_timer, draw_timer]:
+                print(t)
