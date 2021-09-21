@@ -82,7 +82,7 @@ class PoorTimer:
         return self.total / (10 ** 9)
 
     def __str__(self):
-        return f"Timer({self.name} - Called: {self.count}, Total: {self.seconds()}, Avg: {self.seconds() / self.count}"
+        return f"Timer({self.name} - Called: {self.count}, Total: {self.seconds()}, Avg: {self.seconds() / self.count})"
 
 
 if __name__ == "__main__":
