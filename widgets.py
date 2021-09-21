@@ -1,4 +1,6 @@
-from PIL import Image, ImageDraw
+import functools
+
+from PIL import Image, ImageDraw, ImageFont
 
 
 class Text:
@@ -18,6 +20,7 @@ class Drawable:
         self.drawable = drawable
 
     def draw(self, image, draw):
+        # doesn't do proper alpha composite - draw icons first!
         image.paste(self.drawable, self.at)
 
 
@@ -29,10 +32,26 @@ def date(clock):
     return lambda: clock().strftime("%Y/%m/%d")
 
 
-def icon(location, file, transform=lambda x: x):
-    image = Image.open(file)
-    image = transform(image)
-    return Drawable(location, image)
+def icon(file, at, transform=lambda x: x):
+    return Drawable(at, transform(Image.open(file)))
+
+
+def transform_resize(target, img):
+    return img.resize(target)
+
+
+def transform_rgba(img):
+    return img.convert("RGBA") if img.mode == "P" else img
+
+
+def transform_negative(img):
+    if img.mode != "RGBA":
+        raise ValueError(f"I only work on RGBA, not {img.mode}")
+    for i in range(0, img.size[0] - 1):
+        for j in range(0, img.size[1] - 1):
+            pixel = img.getpixel((i, j))
+            img.putpixel((i, j), (255 - pixel[0], 255 - pixel[1], 255 - pixel[2], pixel[3]))
+    return img
 
 
 class Scene:
@@ -49,3 +68,21 @@ class Scene:
             w.draw(image, draw)
 
         return image
+
+
+def compose(*functions):
+    return functools.reduce(lambda f, g: lambda x: f(g(x)), reversed(functions))
+
+
+if __name__ == "__main__":
+    font = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
+    widgets = [
+        icon("icons/gauge-1.png", (300, 300), transform=compose(
+            functools.partial(transform_resize, (64, 64)),
+            transform_rgba,
+            transform_negative
+        )),
+        Text((300, 300), lambda: "Hello", font),
+    ]
+
+    Scene(widgets).draw().show()
