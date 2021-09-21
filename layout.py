@@ -6,7 +6,7 @@ from widgets import Text, date, time, Scene, LeftInfoPanel, RightInfoPanel
 from widgets_map import MovingMap, JourneyMap
 
 
-class Overlay:
+class Layout:
 
     def __init__(self, timeseries, map_renderer):
         self.map_renderer = map_renderer
@@ -90,6 +90,6 @@ if __name__ == "__main__":
 
     timeseries = fake.fake_timeseries()
 
-    overlay = Overlay(timeseries, geotiler.render_map)
+    overlay = Layout(timeseries, geotiler.render_map)
 
     overlay.draw(timeseries.min).show()

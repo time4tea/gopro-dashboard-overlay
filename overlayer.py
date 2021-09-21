@@ -11,7 +11,7 @@ from numpy import asarray
 import timeseries
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
-from image import Overlay
+from layout import Layout
 from units import units
 
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
             clock = ProductionClock(wanted_timeseries)
 
-            overlay = Overlay(wanted_timeseries, map_renderer)
+            overlay = Layout(wanted_timeseries, map_renderer)
 
             if not args.no_overlay:
                 ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
