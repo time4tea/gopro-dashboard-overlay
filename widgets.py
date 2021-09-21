@@ -2,16 +2,31 @@ import functools
 
 from PIL import Image, ImageDraw, ImageFont
 
+from point import Coordinate
+
+anchors = {
+    "left": "la",
+    "right": "ra"
+}
+
 
 class Text:
-    def __init__(self, at, value, font):
+    def __init__(self, at, value, font, align="left"):
         self.at = at
         self.value = value
         self.font = font
+        self.anchor = anchors[align]
 
     def draw(self, image, draw):
-        draw.text(self.at, self.value(), font=self.font, fill=(255, 255, 255), stroke_width=2,
-                  stroke_fill=(0, 0, 0))
+        draw.text(
+            self.at.tuple(),
+            self.value(),
+            anchor=self.anchor,
+            font=self.font,
+            fill=(255, 255, 255),
+            stroke_width=2,
+            stroke_fill=(0, 0, 0)
+        )
 
 
 class Drawable:
@@ -20,8 +35,37 @@ class Drawable:
         self.drawable = drawable
 
     def draw(self, image, draw):
-        # doesn't do proper alpha composite - draw icons first!
-        image.paste(self.drawable, self.at)
+        image.alpha_composite(self.drawable, self.at.tuple())
+
+
+class RightInfoPanel:
+
+    def __init__(self, at, icon, title, value, title_font, value_font):
+        self.value = value
+        self.widgets = [
+            Text(at + Coordinate(-70, 0), title, title_font, align="right"),
+            simple_icon(at + Coordinate(-64, 0), icon),
+            Text(at + Coordinate(-70, 18), value, value_font, align="right"),
+        ]
+
+    def draw(self, image, draw):
+        for w in self.widgets:
+            w.draw(image, draw)
+
+
+class LeftInfoPanel:
+
+    def __init__(self, at, icon, title, value, title_font, value_font):
+        self.value = value
+        self.widgets = [
+            Text(at + Coordinate(70, 0), title, title_font),
+            simple_icon(at + Coordinate(0, 0), icon),
+            Text(at + Coordinate(70, 18), value, value_font),
+        ]
+
+    def draw(self, image, draw):
+        for w in self.widgets:
+            w.draw(image, draw)
 
 
 def time(clock):
@@ -34,6 +78,14 @@ def date(clock):
 
 def icon(file, at, transform=lambda x: x):
     return Drawable(at, transform(Image.open(file)))
+
+
+def simple_icon(at, file):
+    return icon(file, at, transform=compose(
+        functools.partial(transform_resize, (64, 64)),
+        transform_rgba,
+        transform_negative
+    ))
 
 
 def transform_resize(target, img):
@@ -76,13 +128,12 @@ def compose(*functions):
 
 if __name__ == "__main__":
     font = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
+    title_font = ImageFont.truetype(font="Roboto-Medium.ttf", size=12)
     widgets = [
-        icon("icons/gauge-1.png", (300, 300), transform=compose(
-            functools.partial(transform_resize, (64, 64)),
-            transform_rgba,
-            transform_negative
-        )),
-        Text((300, 300), lambda: "Hello", font),
+        LeftInfoPanel(Coordinate(600, 600), "icons/mountain.png", lambda: "ALT(m)", lambda: "100m", title_font, font),
+        RightInfoPanel(Coordinate(1200, 600), lambda: "ALT(m)", "icons/mountain.png", lambda: "100m", title_font, font),
+        simple_icon(Coordinate(300, 300), "icons/gauge-1.png"),
+        Text(Coordinate(300, 300), lambda: "Hello", font),
     ]
 
     Scene(widgets).draw().show()

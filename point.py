@@ -1,3 +1,26 @@
+class Coordinate:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __sub__(self, other):
+        return Coordinate(self.x - other.x, self.y - other.y)
+
+    def __add__(self, other):
+        return Coordinate(self.x + other.x, self.y + other.y)
+
+    def __mul__(self, other):
+        if isinstance(other, float):
+            return Coordinate(self.x * other, self.y * other)
+        raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
+
+    def __str__(self):
+        return f"Coordinate(x={self.x}, lon={self.y}"
+
+    def tuple(self):
+        return self.x, self.y
+
+
 class Point:
     def __init__(self, lat, lon):
         self.lon = lon

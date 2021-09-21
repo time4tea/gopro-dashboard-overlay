@@ -45,6 +45,7 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
     cad = Random1D(50)
     hr = Random1D(100)
     alt = Random1D(1000)
+    temp = Random1D(27)
 
     ts = Timeseries()
     current_dt = datetime.datetime.fromtimestamp(0)
@@ -58,7 +59,8 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
                 speed=units.Quantity(speed.step(), units.mps),
                 cad=units.Quantity(cad.step(), units.rpm),
                 hr=units.Quantity(hr.step(), units.bpm),
-                alt=units.Quantity(alt.step(), units.m)
+                alt=units.Quantity(alt.step(), units.m),
+                atemp=units.Quantity(temp.step(), units.celsius)
             )
         )
         current_dt = current_dt + step
