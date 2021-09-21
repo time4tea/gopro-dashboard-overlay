@@ -2,13 +2,14 @@ import geotiler
 from PIL import ImageFont
 
 from point import Coordinate
+from privacy import NoPrivacyZone
 from widgets import Text, date, time, Scene, LeftInfoPanel, RightInfoPanel
 from widgets_map import MovingMap, JourneyMap
 
 
 class Layout:
 
-    def __init__(self, timeseries, map_renderer):
+    def __init__(self, timeseries, map_renderer, privacy_zone=NoPrivacyZone()):
         self.map_renderer = map_renderer
         self.timeseries = timeseries
         self.current_entry = None
@@ -32,7 +33,8 @@ class Layout:
                 at=Coordinate(1900 - 256, 160 + 256 + 20),
                 timeseries=timeseries,
                 location=lambda: self.entry.point,
-                renderer=map_renderer
+                renderer=map_renderer,
+                privacy_zone=privacy_zone
             ),
             LeftInfoPanel(
                 Coordinate(16, 900),

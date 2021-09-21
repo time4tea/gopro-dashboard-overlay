@@ -69,7 +69,7 @@ class LeftInfoPanel:
 
 
 def time(clock):
-    return lambda: clock().strftime("%H:%M:%S.%f")[:-3]
+    return lambda: clock().strftime("%H:%M:%S.%f")[:-5]
 
 
 def date(clock):

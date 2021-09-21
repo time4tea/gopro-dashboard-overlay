@@ -4,12 +4,13 @@ import geotiler
 from PIL import ImageDraw
 
 from journey import Journey
+from privacy import NoPrivacyZone
 
 
 class JourneyMap:
-    def __init__(self, timeseries, at, location, renderer, size=256):
-        self.journey = Journey()
+    def __init__(self, timeseries, at, location, renderer, size=256, privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
+        self.privacy_zone = privacy_zone
 
         self.at = at
         self.location = location
@@ -20,12 +21,19 @@ class JourneyMap:
 
     def _init_maybe(self):
         if self.map is None:
-            self.timeseries.process(self.journey.accept)
+            journey = Journey()
 
-            bbox = self.journey.bounding_box
+            self.timeseries.process(journey.accept)
+
+            bbox = journey.bounding_box
             self.map = geotiler.Map(extent=(bbox[0].lon, bbox[0].lat, bbox[1].lon, bbox[1].lat),
                                     size=(self.size, self.size))
-            plots = [self.map.rev_geocode((location.lon, location.lat)) for location in self.journey.locations]
+
+            plots = [
+                self.map.rev_geocode((location.lon, location.lat))
+                for location in journey.locations if not self.privacy_zone.encloses(location)
+            ]
+
             self.image = self.renderer(self.map)
             draw = ImageDraw.Draw(self.image)
             draw.line(plots, fill=(255, 0, 0), width=4)

@@ -17,11 +17,11 @@ class MinMax:
         if new is not None:
             self._items.append(new)
 
-    @cached_property
+    @property
     def min(self):
         return min(self._items)
 
-    @cached_property
+    @property
     def max(self):
         return max(self._items)
 
@@ -61,5 +61,3 @@ class Journey:
     @property
     def bounding_box(self):
         return Point(self.lat.min, self.lon.min), Point(self.lat.max, self.lon.max)
-
-

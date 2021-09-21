@@ -38,7 +38,7 @@ class Point:
         raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
 
     def __str__(self):
-        return f"Point(lat={self.lat}, lon={self.lon}"
+        return f"Point(lat={self.lat}, lon={self.lon})"
 
 
 class Point3:

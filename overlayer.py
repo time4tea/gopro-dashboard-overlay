@@ -12,6 +12,8 @@ import timeseries
 from geo import dbm_caching_renderer
 from gpmd import timeseries_from
 from layout import Layout
+from point import Point
+from privacy import PrivacyZone, NoPrivacyZone
 from units import units
 
 
@@ -39,6 +41,17 @@ def calculate_speeds(a, b):
         "time": time,
         "azi": azi
     }
+
+
+def calculate_odo():
+    total = [units.Quantity(0.0, units.m)]
+
+    def accept(e):
+        if e.dist is not None:
+            total[0] += e.dist
+        return {"odo": total[0]}
+
+    return accept
 
 
 class PoorTimer:
@@ -78,6 +91,7 @@ if __name__ == "__main__":
 
     parser.add_argument("input", help="Input MP4 file")
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence")
+    parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
     parser.add_argument("--no-overlay", action="store_true", help="Only output the gadgets, don't overlay")
     parser.add_argument("output", help="Output MP4 file")
 
@@ -103,16 +117,26 @@ if __name__ == "__main__":
 
         wanted_timeseries.process_deltas(calculate_speeds)
         wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
+        wanted_timeseries.process(calculate_odo())
 
         ourdir = Path.home().joinpath(".gopro-graphics")
         ourdir.mkdir(exist_ok=True)
+
+        if args.privacy:
+            lat, lon, km = args.privacy.split(",")
+            zone = PrivacyZone(
+                Point(float(lat), float(lon)),
+                units.Quantity(float(km), units.km)
+            )
+        else:
+            zone = NoPrivacyZone()
 
         with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
             map_renderer = dbm_caching_renderer(db)
 
             clock = ProductionClock(wanted_timeseries)
 
-            overlay = Layout(wanted_timeseries, map_renderer)
+            overlay = Layout(wanted_timeseries, map_renderer, privacy_zone=zone)
 
             if not args.no_overlay:
                 ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
