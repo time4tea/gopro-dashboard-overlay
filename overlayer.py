@@ -90,7 +90,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Overlay gadgets on to GoPro MP4")
 
     parser.add_argument("input", help="Input MP4 file")
-    parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence")
+    parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
     parser.add_argument("--no-overlay", action="store_true", help="Only output the gadgets, don't overlay")
     parser.add_argument("output", help="Output MP4 file")
