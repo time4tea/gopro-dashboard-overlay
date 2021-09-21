@@ -37,15 +37,14 @@ if __name__ == "__main__":
 
     gpx = gpxpy.gpx.GPX()
 
-    # Create first track in our GPX:
     gpx_track = gpxpy.gpx.GPXTrack()
     gpx.tracks.append(gpx_track)
 
-    # Create first segment in our GPX track:
     gpx_segment = gpxpy.gpx.GPXTrackSegment()
     gpx_track.segments.append(gpx_segment)
 
     counter = Counter()
+
 
     def add_point(entry):
         counter.update(["OK"])
@@ -58,7 +57,12 @@ if __name__ == "__main__":
         )
 
 
-    scaler = GPS5Scaler(units, max_dop=6.0, on_item=lambda entry: add_point(entry), on_drop=lambda x: counter.update([x]))
+    scaler = GPS5Scaler(
+        units,
+        max_dop=6.0,
+        on_item=lambda entry: add_point(entry),
+        on_drop=lambda x: counter.update([x])
+    )
     interpreter = GPMDInterpreter()
 
     for interpreted in interpreter.interpret(parser.items()):
@@ -67,6 +71,5 @@ if __name__ == "__main__":
 
     with smart_open(args.output) as f:
         f.write(gpx.to_xml())
-
 
     print(counter)
