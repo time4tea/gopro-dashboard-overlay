@@ -23,7 +23,7 @@
 
 ```bash
 git clone https://github.com/time4tea/gopro-dashboard-overlay.git
-cd gopro-dashboards
+cd gopro-dashboard-overlay
 make venv req
 venv/bin/python bin/gopro-dashboard.py ...
 ```
