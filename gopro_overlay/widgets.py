@@ -135,14 +135,4 @@ def compose(*functions):
     return functools.reduce(lambda f, g: lambda x: f(g(x)), reversed(functions))
 
 
-if __name__ == "__main__":
-    font = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
-    title_font = ImageFont.truetype(font="Roboto-Medium.ttf", size=12)
-    widgets = [
-        LeftInfoPanel(Coordinate(600, 600), "icons/mountain.png", lambda: "ALT(m)", lambda: "100m", title_font, font),
-        RightInfoPanel(Coordinate(1200, 600), lambda: "ALT(m)", "icons/mountain.png", lambda: "100m", title_font, font),
-        simple_icon(Coordinate(300, 300), "icons/gauge-1.png"),
-        Text(Coordinate(300, 300), lambda: "Hello", font),
-    ]
 
-    Scene(widgets).draw().show()

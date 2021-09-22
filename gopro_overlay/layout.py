@@ -1,4 +1,3 @@
-import geotiler
 from PIL import ImageFont
 
 from .point import Coordinate
@@ -85,13 +84,3 @@ class Layout:
     def draw(self, dt):
         self.current_entry = self.timeseries.get(dt)
         return self.scene.draw()
-
-
-if __name__ == "__main__":
-    import fake
-
-    timeseries = fake.fake_timeseries()
-
-    overlay = Layout(timeseries, geotiler.render_map)
-
-    overlay.draw(timeseries.min).show()

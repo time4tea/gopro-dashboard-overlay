@@ -1,9 +1,9 @@
 import datetime
 import random
 
-from point import Point
-from timeseries import Entry, Timeseries
-from units import units
+from .point import Point
+from .timeseries import Entry, Timeseries
+from .units import units
 
 
 class Random1D:

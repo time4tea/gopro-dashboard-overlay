@@ -1,4 +1,5 @@
 import pathlib
+
 from setuptools import setup
 
 HERE = pathlib.Path(__file__).parent
@@ -21,12 +22,14 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     packages=["gopro_overlay"],
-    include_package_data=True,
     install_requires=[],
     scripts=[
         "bin/gopro-dashboard.py",
         "bin/gopro-to-gpx.py"
     ],
+    package_data={
+
+    },
     entry_points={
         "console_scripts": []
     },
