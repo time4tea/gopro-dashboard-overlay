@@ -16,6 +16,18 @@
 - Unixy machine (probably, untested on Windows)
 
 
+## How to use
+
+- Right now, clone the repo, install the dependencies, and run
+- Fairly manual process right now...
+
+```bash
+git clone https://github.com/time4tea/gopro-dashboard-overlay.git
+cd gopro-dashboards
+make venv req
+venv/bin/python bin/gopro-dashboard.py ...
+```
+
 ## Converting to GPX files
 
 ```bash
