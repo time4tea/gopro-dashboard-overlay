@@ -49,6 +49,11 @@ optional arguments:
 
 No attempt has been made to optimise this program! Right now, on my machine, it renders an 11 minute file in about 7 mins.
 
+## Known Bugs / Issues
+
+- Aligning overlay with video - not exact! - Start garmin first, and wait for GPS lock before recording
+- Multiple GoPro files concatentated and overlayed. Current limit of 10 mins (in 1080p/60) is annoying.
+
 ## Controlling the dashbord layout / controlling widgets
 
 Its all hard coded right now.
