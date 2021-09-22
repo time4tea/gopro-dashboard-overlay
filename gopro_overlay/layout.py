@@ -1,10 +1,10 @@
 import geotiler
 from PIL import ImageFont
 
-from point import Coordinate
-from privacy import NoPrivacyZone
-from widgets import Text, date, time, Scene, LeftInfoPanel, RightInfoPanel
-from widgets_map import MovingMap, JourneyMap
+from .point import Coordinate
+from .privacy import NoPrivacyZone
+from .widgets import Text, date, time, Scene, LeftInfoPanel, RightInfoPanel
+from .widgets_map import MovingMap, JourneyMap
 
 
 class Layout:
@@ -38,7 +38,7 @@ class Layout:
             ),
             LeftInfoPanel(
                 Coordinate(16, 900),
-                "icons/gauge-1.png",
+                "gauge-1.png",
                 lambda: "MPH",
                 lambda: f"{self.entry.speed.to('MPH').magnitude:.2f}" if self.entry.speed else "-",
                 font_title,
@@ -46,7 +46,7 @@ class Layout:
             ),
             LeftInfoPanel(
                 Coordinate(16, 980),
-                "icons/mountain.png",
+                "mountain.png",
                 lambda: "ALT(m)",
                 lambda: f"{self.entry.alt.to('m').magnitude:.2f}" if self.entry.alt else "-",
                 font_title,
@@ -54,7 +54,7 @@ class Layout:
             ),
             RightInfoPanel(
                 Coordinate(1900, 820),
-                "icons/thermometer.png",
+                "thermometer.png",
                 lambda: "TEMP(C)",
                 lambda: f"{self.entry.atemp.magnitude:.0f}" if self.entry.atemp is not None else "-",
                 font_title,
@@ -62,7 +62,7 @@ class Layout:
             ),
             RightInfoPanel(
                 Coordinate(1900, 900),
-                "icons/gauge.png",
+                "gauge.png",
                 lambda: "RPM",
                 lambda: f"{self.entry.cad.magnitude:.0f}" if self.entry.cad else "-",
                 font_title,
@@ -70,7 +70,7 @@ class Layout:
             ),
             RightInfoPanel(
                 Coordinate(1900, 980),
-                "icons/heartbeat.png",
+                "heartbeat.png",
                 lambda: "BPM",
                 lambda: f"{self.entry.hr.magnitude:.0f}" if self.entry.hr else "-",
                 font_title,

@@ -3,7 +3,7 @@ import datetime
 from PIL import Image, ImageDraw, ImageFont
 from numpy import asarray
 
-from ffmpeg import FFMPEGOverlay, FFMPEGGenerate
+from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 
 if __name__ == "__main__":
 

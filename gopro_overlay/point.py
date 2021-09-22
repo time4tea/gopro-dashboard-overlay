@@ -15,7 +15,7 @@ class Coordinate:
         raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
 
     def __str__(self):
-        return f"Coordinate(x={self.x}, lon={self.y}"
+        return f"Coordinate(x={self.x}, y={self.y})"
 
     def tuple(self):
         return self.x, self.y
@@ -65,7 +65,7 @@ class Point3:
         raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
 
     def __str__(self):
-        return f"Point3(x={self.x}, y={self.y}, z={self.z}"
+        return f"Point3(x={self.x}, y={self.y}, z={self.z})"
 
     def __repr__(self):
         return str(self)

@@ -1,6 +1,4 @@
-from functools import cached_property
-
-from point import Point
+from .point import Point
 
 
 class MinMax:

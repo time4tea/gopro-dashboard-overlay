@@ -3,8 +3,8 @@ import math
 import geotiler
 from PIL import ImageDraw
 
-from journey import Journey
-from privacy import NoPrivacyZone
+from .journey import Journey
+from .privacy import NoPrivacyZone
 
 
 class JourneyMap:

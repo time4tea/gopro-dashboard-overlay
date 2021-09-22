@@ -1,8 +1,11 @@
 import functools
+import importlib
+import os
 
 from PIL import Image, ImageDraw, ImageFont
 
-from point import Coordinate
+from . import icons
+from .point import Coordinate
 
 anchors = {
     "left": "la",
@@ -77,7 +80,13 @@ def date(clock):
 
 
 def icon(file, at, transform=lambda x: x):
-    return Drawable(at, transform(Image.open(file)))
+    if os.path.exists(file):
+        image = Image.open(file)
+    else:
+        with importlib.resources.path(icons, file) as f:
+            image = Image.open(f)
+
+    return Drawable(at, transform(image))
 
 
 def simple_icon(at, file):

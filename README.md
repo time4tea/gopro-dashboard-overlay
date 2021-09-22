@@ -1,9 +1,13 @@
 
 
-# Processing GoPro MP4 Files
+# Overlaying Dashboard onto GoPro MP4 Files
 
 - Overlaying exciting graphics
 - Converting to GPX files
+
+## Examples
+
+![Example](examples/2021-09-22-example.png)
 
 ## Requirements
 
@@ -51,7 +55,7 @@ Its all hard coded right now.
 
 ## Icons
 
-Icon files in [icons](icons) are not covered by the MIT licence
+Icon files in [icons](gopro_overlay/icons) are not covered by the MIT licence
 
 
 

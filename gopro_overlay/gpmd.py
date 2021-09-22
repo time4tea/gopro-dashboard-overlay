@@ -7,9 +7,9 @@ import struct
 import warnings
 from enum import Enum
 
-from ffmpeg import load_gpmd_from
-from point import Point, Point3
-from timeseries import Timeseries, Entry
+from .ffmpeg import load_gpmd_from
+from .point import Point, Point3
+from .timeseries import Timeseries, Entry
 
 GPMDStruct = struct.Struct('>4sBBH')
 

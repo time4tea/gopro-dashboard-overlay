@@ -2,9 +2,10 @@ import collections
 import datetime
 from datetime import timedelta
 
-from gpmd import Point
-from timeseries import Timeseries, Entry, process_ses
-from units import units
+from gopro_overlay.gpmd import Point
+from gopro_overlay.timeseries import Timeseries, Entry
+from gopro_overlay.timeseries_process import process_ses
+from gopro_overlay.units import units
 
 TUP = collections.namedtuple("TUP", "time lat lon alt hr cad atemp")
 

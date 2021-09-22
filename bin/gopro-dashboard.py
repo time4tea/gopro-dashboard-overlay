@@ -6,16 +6,17 @@ import time
 from datetime import timedelta
 from pathlib import Path
 
-from geographiclib.geodesic import Geodesic
 from numpy import asarray
 
-import timeseries
-from geo import dbm_caching_renderer
-from gpmd import timeseries_from
-from layout import Layout
-from point import Point
-from privacy import PrivacyZone, NoPrivacyZone
-from units import units
+from gopro_overlay import timeseries_process
+from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
+from gopro_overlay.geo import dbm_caching_renderer
+from gopro_overlay.gpmd import timeseries_from
+from gopro_overlay.gpx import load_timeseries
+from gopro_overlay.layout import Layout
+from gopro_overlay.point import Point
+from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
+from gopro_overlay.units import units
 
 
 class ProductionClock:
@@ -29,35 +30,6 @@ class ProductionClock:
         while running <= end:
             yield running
             running += step
-
-
-def calculate_speeds():
-    def accept(a, b):
-        inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
-        dist = units.Quantity(inverse['s12'], units.m)
-        time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
-        azi = units.Quantity(inverse['azi1'], units.degree)
-        speed = dist / time
-
-        return {
-            "speed": speed,
-            "dist": dist,
-            "time": time,
-            "azi": azi
-        }
-
-    return accept
-
-
-def calculate_odo():
-    total = [units.Quantity(0.0, units.m)]
-
-    def accept(e):
-        if e.dist is not None:
-            total[0] += e.dist
-        return {"odo": total[0]}
-
-    return accept
 
 
 class PoorTimer:
@@ -108,9 +80,6 @@ if __name__ == "__main__":
         gopro_timeseries = timeseries_from(args.input, units)
         print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
 
-        from gpx import load_timeseries
-        from ffmpeg import FFMPEGOverlay, FFMPEGGenerate
-
         if args.gpx:
             gpx_timeseries = load_timeseries(args.gpx, units)
             print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
@@ -127,11 +96,11 @@ if __name__ == "__main__":
             print(f"Created {backfilled} missing points...")
 
         # smooth GPS points
-        wanted_timeseries.process(timeseries.process_ses("point", lambda i: i.point, alpha=0.45))
-        wanted_timeseries.process_deltas(calculate_speeds())
-        wanted_timeseries.process(calculate_odo())
+        wanted_timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
+        wanted_timeseries.process_deltas(timeseries_process.calculate_speeds())
+        wanted_timeseries.process(timeseries_process.calculate_odo())
         # smooth azimuth (heading) points to stop wild swings of compass
-        wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
+        wanted_timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
         ourdir = Path.home().joinpath(".gopro-graphics")
         ourdir.mkdir(exist_ok=True)

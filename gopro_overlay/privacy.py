@@ -1,6 +1,6 @@
 from geographiclib.geodesic import Geodesic
 
-from units import units
+from .units import units
 
 
 class PrivacyZone:

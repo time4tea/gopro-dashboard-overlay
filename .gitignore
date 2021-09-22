@@ -1,6 +1,7 @@
 venv/
 .idea/
 
+render/*
 
 *.gpx
 *.MP4

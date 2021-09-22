@@ -2,10 +2,9 @@ import collections
 
 import gpxpy
 
-import timeseries
-from point import Point
-from timeseries import Timeseries
-from units import units
+from .point import Point
+from .timeseries import Timeseries, Entry
+from .units import units
 
 GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp")
 
@@ -55,7 +54,7 @@ def load_timeseries(filepath, units):
     gpx_timeseries = Timeseries()
 
     points = [
-        timeseries.Entry(
+        Entry(
             point.time,
             point=Point(point.lat, point.lon),
             alt=point.alt,

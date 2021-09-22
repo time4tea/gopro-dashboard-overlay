@@ -1,28 +1,8 @@
 import bisect
 from datetime import timedelta
 
-import units
-from point import Point
-
-
-def process_ses(new, key, alpha=0.4):
-    forecast = []
-    previous = [None]
-
-    def ses(item):
-        current = key(item)
-        try:
-            if forecast:
-                predicted = alpha * previous[0] + (1 - alpha) * forecast[-1]
-                forecast.append(predicted)
-                return {new: predicted}
-            else:
-                forecast.append(current)
-                return {new: current}
-        finally:
-            previous[0] = current
-
-    return ses
+from .units import units
+from .point import Point
 
 
 class Timeseries:
@@ -119,7 +99,7 @@ class Timeseries:
 
 
 def entry_wants(v):
-    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.units.Quantity) or isinstance(v, Point)
+    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.Quantity) or isinstance(v, Point)
 
 
 class Entry:
