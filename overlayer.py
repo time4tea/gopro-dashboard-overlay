@@ -1,5 +1,6 @@
 import argparse
 import contextlib
+import datetime
 import dbm
 import time
 from datetime import timedelta
@@ -30,17 +31,22 @@ class ProductionClock:
             running += step
 
 
-def calculate_speeds(a, b):
-    inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
-    dist = units.Quantity(inverse['s12'], units.m)
-    time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
-    azi = units.Quantity(inverse['azi1'], units.degree)
-    return {
-        "speed": dist / time,
-        "dist": dist,
-        "time": time,
-        "azi": azi
-    }
+def calculate_speeds():
+    def accept(a, b):
+        inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
+        dist = units.Quantity(inverse['s12'], units.m)
+        time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
+        azi = units.Quantity(inverse['azi1'], units.degree)
+        speed = dist / time
+
+        return {
+            "speed": speed,
+            "dist": dist,
+            "time": time,
+            "azi": azi
+        }
+
+    return accept
 
 
 def calculate_odo():
@@ -115,13 +121,22 @@ if __name__ == "__main__":
         else:
             wanted_timeseries = gopro_timeseries
 
-        wanted_timeseries.process_deltas(calculate_speeds)
-        wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
+        # bodge- fill in missing points to make smoothing easier to write.
+        backfilled = wanted_timeseries.backfill(datetime.timedelta(seconds=1))
+        if backfilled:
+            print(f"Created {backfilled} missing points...")
+
+        # smooth GPS points
+        wanted_timeseries.process(timeseries.process_ses("point", lambda i: i.point, alpha=0.45))
+        wanted_timeseries.process_deltas(calculate_speeds())
         wanted_timeseries.process(calculate_odo())
+        # smooth azimuth (heading) points to stop wild swings of compass
+        wanted_timeseries.process(timeseries.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
         ourdir = Path.home().joinpath(".gopro-graphics")
         ourdir.mkdir(exist_ok=True)
 
+        # privacy zone applies everywhere, not just at start, so might not always be suitable...
         if args.privacy:
             lat, lon, km = args.privacy.split(",")
             zone = PrivacyZone(

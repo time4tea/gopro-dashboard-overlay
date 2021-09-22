@@ -81,8 +81,8 @@ def test_clipping():
 
     clipped = ts1.clip_to(ts2)
 
-    assert clipped.min == ts2.min
-    assert clipped.max == ts2.max
+    assert clipped.min == datetime_of(2)
+    assert clipped.max == datetime_of(5)
 
     assert len(clipped) == 5
 
@@ -210,15 +210,19 @@ def test_interpolating_quantity():
     assert ts.get(dt1 + timedelta(seconds=0.1)).alt == units.Quantity(11, units.m)
 
 
-def test_window():
+def test_filling_missing_entries():
+    dt1 = datetime_of(1631178710)
+    dt2 = dt1 + timedelta(seconds=1)
+    dt3 = dt2 + timedelta(seconds=1)
     ts = Timeseries()
-    for i in range(0, 10):
-        ts.add(Entry(datetime_of(i), alt=i))
+    ts.add(Entry(dt1, alt=units.Quantity(10, units.m)))
+    # no entry for dt2
+    ts.add(Entry(dt3, alt=units.Quantity(30, units.m)))
 
-    assert len(ts) == 10
+    assert dt1 in ts.dates
+    assert dt2 not in ts.dates
 
-    window = ts.window(datetime_of(2), timedelta(seconds=3))
-    assert len(window) == 4
-    assert window.min == datetime_of(2)
-    assert window.max == datetime_of(5)
-
+    filled = ts.backfill(timedelta(seconds=1))
+    assert filled == 1
+    assert dt2 in ts.dates
+    assert ts.get(dt2).alt.magnitude == 20

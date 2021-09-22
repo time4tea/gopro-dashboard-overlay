@@ -37,8 +37,14 @@ class Point:
             return Point(self.lat * other, self.lon * other)
         raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
 
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
     def __str__(self):
         return f"Point(lat={self.lat}, lon={self.lon})"
+
+    def __repr__(self):
+        return str(self)
 
 
 class Point3:

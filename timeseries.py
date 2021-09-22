@@ -68,70 +68,54 @@ class Timeseries:
     def items(self):
         return [self.entries[k] for k in self.dates]
 
-    def clip_to(self, other):
+    def clip_to_datetimes(self, dt_min, dt_max):
 
-        wanted = [e for e in self.items() if other.min <= e.dt <= other.max]
+        index_min = bisect.bisect_left(self.dates, dt_min)
+        index_max = bisect.bisect_right(self.dates, dt_max)
+
+        if self.dates[index_min] > dt_min and index_min > 0:
+            index_min = index_min - 1
+
+        if self.dates[index_max] < dt_max and index_max < len(self.dates) - 1:
+            index_max = index_max + 1
+
+        dates = self.dates[index_min:index_max + 1]
+
+        wanted = [self.entries[d] for d in dates]
 
         if not wanted:
             return Timeseries()
 
-        if other.min < wanted[0].dt:
-            wanted.insert(0, self.get(other.min))
-
-        if other.max > wanted[-1].dt:
-            wanted.append(self.get(other.max))
-
         return Timeseries(entries=wanted)
+
+    def clip_to(self, other):
+        return self.clip_to_datetimes(other.min, other.max)
+
+    def backfill(self, delta):
+        to_add = []
+        current = self.min
+        while current <= self.max:
+            if current not in self.entries:
+                to_add.append(self.get(current))
+            current += delta
+        if to_add:
+            self.add(*to_add)
+        return len(to_add)
 
     def process_deltas(self, processor):
 
         diffs = list(zip(self.dates, self.dates[1:]))
 
         for a, b in diffs:
-            result = processor(self.entries[a], self.entries[b])
-            self.entries[a].update(**result)
+            updates = processor(self.entries[a], self.entries[b])
+            if updates:
+                self.entries[a].update(**updates)
 
     def process(self, processor):
         for e in self.dates:
             updates = processor(self.entries[e])
             if updates:
                 self.entries[e].update(**updates)
-
-    def window(self, start_dt, length):
-        return TimeseriesWindow(self, start_dt, length)
-
-
-class TimeseriesWindow:
-
-    def __init__(self, timeseries, start_dt, length):
-        self.start_index = bisect.bisect_left(timeseries.dates, start_dt)
-        self.start_dt = timeseries.dates[self.start_index]
-        self.end_index = bisect.bisect_left(timeseries.dates, self.start_dt + length)
-        self.end_dt = timeseries.dates[self.end_index]
-        self.timeseries = timeseries
-        self.size = (self.end_index - self.start_index) + 1
-
-    @property
-    def max(self):
-        return self.end_dt
-
-    @property
-    def min(self):
-        return self.start_dt
-
-    def __len__(self):
-        return self.size
-
-    def items(self):
-        return [self.get(k) for k in self.timeseries.dates[self.start_index:self.end_index]]
-
-    def get(self, dt):
-        if dt < self.start_dt:
-            raise ValueError("Date is before start")
-        if dt > self.end_dt:
-            raise ValueError("Date is after end")
-
-        return self.timeseries.get()
 
 
 def entry_wants(v):
