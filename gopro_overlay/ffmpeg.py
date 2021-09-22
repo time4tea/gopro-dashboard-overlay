@@ -19,7 +19,7 @@ def find_gpmd_track(filepath):
     ffprobe_output = str(invoke(["ffprobe", filepath]).stderr)  # str here just for PyCharm - its already a string
 
     # look for: Stream #0:3(eng): Data: bin_data (gpmd / 0x646D7067), 61 kb/s (default)
-    match = re.search('Stream #\d:(\d)\(.+\): Data: \w+ \(gpmd', ffprobe_output)
+    match = re.search(r'Stream #\d:(\d)\(.+\): Data: \w+ \(gpmd', ffprobe_output)
     if match:
         return int(match.group(1))
 
