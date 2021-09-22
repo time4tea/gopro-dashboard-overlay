@@ -6,7 +6,7 @@ default: test
 
 .PHONY: test
 test:
-	$(BIN)/pytest
+	PYTHONPATH=. $(BIN)/pytest tests
 
 .PHONY: flake
 flake:
