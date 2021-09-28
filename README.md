@@ -83,6 +83,9 @@ Its all hard coded right now.
 
 Icon files in [icons](gopro_overlay/icons) are not covered by the MIT licence
 
+## Map Data
+
+Data © [OpenStreetMap contributors](http://www.openstreetmap.org/copyright)
 
 ## References
 
