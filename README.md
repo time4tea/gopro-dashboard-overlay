@@ -18,23 +18,25 @@
 
 ## How to use
 
-- Right now, clone the repo, install the dependencies, and run
-- Fairly manual process right now...
+- Install with pip
 
-```bash
-git clone https://github.com/time4tea/gopro-dashboard-overlay.git
-cd gopro-dashboard-overlay
-make venv req
-venv/bin/python bin/gopro-dashboard.py ...
+```shell
+python -m venv venv
+venv/bin/pip install gopro-overlay
 ```
 
 ## Converting to GPX files
 
-```bash
-gopro-to-gpx.py <input-file> [output-file]
+```shell
+venv/bin/gopro-to-gpx.py <input-file> [output-file]
 ```
 
 ## Overlaying a dashboard
+
+```shell
+venv/bin/gopro-dashboard.py
+```
+
 
 The GPS track in Hero 9 (at least) seems to be very poor. If you supply a GPX file from a Garmin or whatever, the 
 program will use this instead for the GPS.
@@ -56,6 +58,13 @@ optional arguments:
   --privacy PRIVACY  Set privacy zone (lat,lon,km)
   --no-overlay       Only output the gadgets, don't overlay
 ```
+
+## Example
+
+```shell
+venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,-0.40000,0.50 ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+```
+
 
 ## Performance
 
