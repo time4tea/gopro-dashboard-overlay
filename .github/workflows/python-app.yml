@@ -25,9 +25,3 @@ jobs:
     - name: Test with pytest
       run: |
         make test
-    - name: Upload to PyPI
-      env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-      run: |
-        make publish
