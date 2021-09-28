@@ -37,3 +37,9 @@ test-publish:
 publish:
 	$(BIN)/pip install twine
 	$(BIN)/twine upload dist/*
+
+
+.PHONY: bump
+bump:
+	$(BIN)/pip install bumpversion
+	$(BIN)/bumpversion minor
