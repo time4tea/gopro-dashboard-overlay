@@ -34,14 +34,14 @@ req:
 test-publish: dist
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
-	$(BIN)/twine upload --repository testpypi dist/*
+	$(BIN)/twine upload --non-interactive --repository testpypi dist/*
 
 
 .PHONY: publish
 publish: dist
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
-	$(BIN)/twine upload --repository pypi dist/*
+	$(BIN)/twine upload --skip-existing --non-interactive --repository pypi dist/*
 
 
 
