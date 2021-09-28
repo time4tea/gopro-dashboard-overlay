@@ -2,6 +2,9 @@ venv/
 .idea/
 
 render/*
+dist/
+*.egg-info/
+
 
 *.gpx
 *.MP4
