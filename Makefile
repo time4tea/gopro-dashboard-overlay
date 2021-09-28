@@ -3,6 +3,9 @@ BIN=venv/bin
 
 default: test
 
+.PHONY: dist
+dist:
+	$(BIN)/python setup.py sdist
 
 .PHONY: test
 test:
@@ -17,10 +20,20 @@ flake:
 venv:
 	python -m venv venv
 
-
 .PHONY: req
 req:
 	$(BIN)/python -m pip install --upgrade pip
 	$(BIN)/pip install -r requirements-dev.txt
 
 
+.PHONY: test-publish
+test-publish:
+	$(BIN)/pip install twine
+	$(BIN)/twine check dist/*
+	$(BIN)/twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+
+.PHONY: publish
+publish:
+	$(BIN)/pip install twine
+	$(BIN)/twine upload dist/*

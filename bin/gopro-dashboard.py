@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import contextlib
 import datetime
@@ -5,8 +7,6 @@ import dbm
 import time
 from datetime import timedelta
 from pathlib import Path
-
-from numpy import asarray
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
@@ -128,13 +128,15 @@ if __name__ == "__main__":
                 ffmpeg = FFMPEGGenerate(output=args.output)
 
             write_timer = PoorTimer("writing to ffmpeg")
+            byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
-            with ffmpeg.generate() as writer:
-                for dt in clock.timerange(step=timedelta(seconds=0.1)):
-                    draw = draw_timer.time(lambda: overlay.draw(dt))
-                    tobytes = asarray(draw).tobytes()
-                    write_timer.time(lambda: writer.write(tobytes))
-
-            for t in [write_timer, draw_timer]:
-                print(t)
+            try:
+                with ffmpeg.generate() as writer:
+                    for dt in clock.timerange(step=timedelta(seconds=0.1)):
+                        frame = draw_timer.time(lambda: overlay.draw(dt))
+                        tobytes = byte_timer.time(lambda: frame.tobytes())
+                        write_timer.time(lambda: writer.write(tobytes))
+            finally:
+                for t in [byte_timer, write_timer, draw_timer]:
+                    print(t)

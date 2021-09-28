@@ -1,7 +1,6 @@
 import datetime
 
 from PIL import Image, ImageDraw, ImageFont
-from numpy import asarray
 
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 
@@ -10,7 +9,7 @@ if __name__ == "__main__":
     overlay = True
 
     if overlay:
-        generator = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4.copy", output="output.mp4")
+        generator = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4", output="output.mp4")
     else:
         generator = FFMPEGGenerate(output="output.mp4")
 
@@ -31,6 +30,6 @@ if __name__ == "__main__":
                 stroke_fill=(0, 0, 0)
             )
 
-            writer.write(asarray(image).tobytes())
+            writer.write(image.tobytes())
 
     print("done writing frames")

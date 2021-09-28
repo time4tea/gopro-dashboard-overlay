@@ -75,7 +75,6 @@ Its all hard coded right now.
 Icon files in [icons](gopro_overlay/icons) are not covered by the MIT licence
 
 
-
 ## References
 
 https://github.com/juanmcasillas/gopro2gpx
