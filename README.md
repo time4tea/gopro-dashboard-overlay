@@ -7,7 +7,7 @@
 
 ## Examples
 
-![Example](examples/2021-09-22-example.png)
+![Example Dashboard Image](examples/2021-09-22-example.png)
 
 ## Requirements
 
@@ -42,7 +42,7 @@ program will use this instead for the GPS.
 Privacy allows you to set a privacy zone. Various widgets will not draw points within that zone.
 
 ```
-usage: overlayer.py [-h] [--gpx GPX] [--privacy PRIVACY] [--no-overlay] input output
+usage: gopro-dashboard.py [-h] [--gpx GPX] [--privacy PRIVACY] [--no-overlay] input output
 
 Overlay gadgets on to GoPro MP4
 
@@ -52,7 +52,7 @@ positional arguments:
 
 optional arguments:
   -h, --help         show this help message and exit
-  --gpx GPX          Use GPX file for location / alt / hr / cadence
+  --gpx GPX          Use GPX file for location / alt / hr / cadence / temp
   --privacy PRIVACY  Set privacy zone (lat,lon,km)
   --no-overlay       Only output the gadgets, don't overlay
 ```

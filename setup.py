@@ -20,7 +20,7 @@ test_requirements = [
 
 setup(
     name="gopro-overlay",
-    version="0.1.0",
+    version="0.2.0",
     description="Overlay graphics dashboards onto GoPro footage",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -29,9 +29,13 @@ setup(
     author_email="james+gopro@time4tea.net",
     license="MIT",
     classifiers=[
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
+        "Environment :: Console",
+        "Topic :: Multimedia :: Graphics",
+        "Topic :: Multimedia :: Video",
     ],
     packages=[
         "gopro_overlay",

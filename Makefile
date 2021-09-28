@@ -3,6 +3,10 @@ BIN=venv/bin
 
 default: test
 
+.PHONY: clean
+clean:
+	rm -rf dist
+
 .PHONY: dist
 dist:
 	$(BIN)/python setup.py sdist
@@ -27,16 +31,18 @@ req:
 
 
 .PHONY: test-publish
-test-publish:
+test-publish: dist
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
-	$(BIN)/twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	$(BIN)/twine upload --repository testpypi dist/*
 
 
 .PHONY: publish
-publish:
+publish: dist
 	$(BIN)/pip install twine
+	$(BIN)/twine check dist/*
 	$(BIN)/twine upload dist/*
+
 
 
 .PHONY: bump
