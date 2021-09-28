@@ -1,5 +1,3 @@
-plotly
-kaleido
 # for drawing text/images
 pillow
 # pint for unit conversion
