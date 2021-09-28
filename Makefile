@@ -41,7 +41,7 @@ test-publish: dist
 publish: dist
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
-	$(BIN)/twine upload dist/*
+	$(BIN)/twine upload --repository pypi dist/*
 
 
 
