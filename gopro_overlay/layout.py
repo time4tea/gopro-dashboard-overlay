@@ -36,10 +36,18 @@ class Layout:
                 privacy_zone=privacy_zone
             ),
             LeftInfoPanel(
+                Coordinate(16, 820),
+                "slope-triangle.png",
+                lambda: "SLOPE(%)",
+                lambda: f"{self.entry.grad.magnitude:.1f}" if self.entry.grad else "-",
+                font_title,
+                font_metric
+            ),
+            LeftInfoPanel(
                 Coordinate(16, 900),
                 "gauge-1.png",
                 lambda: "MPH",
-                lambda: f"{self.entry.speed.to('MPH').magnitude:.2f}" if self.entry.speed else "-",
+                lambda: f"{self.entry.speed.to('MPH').magnitude:.0f}" if self.entry.speed else "-",
                 font_title,
                 font_metric
             ),
@@ -47,7 +55,7 @@ class Layout:
                 Coordinate(16, 980),
                 "mountain.png",
                 lambda: "ALT(m)",
-                lambda: f"{self.entry.alt.to('m').magnitude:.2f}" if self.entry.alt else "-",
+                lambda: f"{self.entry.alt.to('m').magnitude:.1f}" if self.entry.alt else "-",
                 font_title,
                 font_metric
             ),

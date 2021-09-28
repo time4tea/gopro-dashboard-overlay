@@ -95,10 +95,12 @@ def test_delta_processing():
     ts.add(entry_a)
     ts.add(entry_b)
 
-    ts.process_deltas(lambda a, b: {"d": b.n - a.n})
+    ts.process_deltas(lambda a, b, c: {"d": b.n - a.n, "c": c})
 
     assert entry_a.d == 1
     assert entry_b.d is None
+    assert entry_a.c == 1
+    assert entry_b.c is None
 
 
 def datetime_of(i):

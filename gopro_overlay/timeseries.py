@@ -82,12 +82,12 @@ class Timeseries:
             self.add(*to_add)
         return len(to_add)
 
-    def process_deltas(self, processor):
+    def process_deltas(self, processor, skip=1):
 
-        diffs = list(zip(self.dates, self.dates[1:]))
+        diffs = list(zip(self.dates, self.dates[skip:]))
 
         for a, b in diffs:
-            updates = processor(self.entries[a], self.entries[b])
+            updates = processor(self.entries[a], self.entries[b], skip)
             if updates:
                 self.entries[a].update(**updates)
 

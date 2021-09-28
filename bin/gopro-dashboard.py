@@ -99,6 +99,7 @@ if __name__ == "__main__":
         wanted_timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
         wanted_timeseries.process_deltas(timeseries_process.calculate_speeds())
         wanted_timeseries.process(timeseries_process.calculate_odo())
+        wanted_timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=10)
         # smooth azimuth (heading) points to stop wild swings of compass
         wanted_timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
