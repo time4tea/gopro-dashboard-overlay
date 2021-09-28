@@ -62,7 +62,7 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
                 hr=units.Quantity(hr.step(), units.bpm),
                 alt=units.Quantity(alt.step(), units.m),
                 atemp=units.Quantity(temp.step(), units.celsius),
-                grad=units.Quantity(grad.step(), units.celsius)
+                grad=units.Quantity(grad.step())
             )
         )
         current_dt = current_dt + step

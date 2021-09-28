@@ -14,7 +14,8 @@ class Layout:
         self.current_entry = None
 
         font_title = ImageFont.truetype(font="Roboto-Medium.ttf", size=16)
-        font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
+        font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=32)
+        font_speed = ImageFont.truetype(font="Roboto-Medium.ttf", size=48)
 
         self.scene = Scene([
             Text(Coordinate(260, 36), date(lambda: self.entry.dt), font_title, align="right"),
@@ -36,20 +37,12 @@ class Layout:
                 privacy_zone=privacy_zone
             ),
             LeftInfoPanel(
-                Coordinate(16, 820),
-                "slope-triangle.png",
-                lambda: "SLOPE(%)",
-                lambda: f"{self.entry.grad.magnitude:.1f}" if self.entry.grad else "-",
-                font_title,
-                font_metric
-            ),
-            LeftInfoPanel(
                 Coordinate(16, 900),
                 "gauge-1.png",
                 lambda: "MPH",
                 lambda: f"{self.entry.speed.to('MPH').magnitude:.0f}" if self.entry.speed else "-",
                 font_title,
-                font_metric
+                font_speed
             ),
             LeftInfoPanel(
                 Coordinate(16, 980),
@@ -59,6 +52,15 @@ class Layout:
                 font_title,
                 font_metric
             ),
+            LeftInfoPanel(
+                Coordinate(220, 980),
+                "slope-triangle.png",
+                lambda: "SLOPE(%)",
+                lambda: f"{self.entry.grad.magnitude:.1f}" if self.entry.grad else "-",
+                font_title,
+                font_metric
+            ),
+
             RightInfoPanel(
                 Coordinate(1900, 820),
                 "thermometer.png",
