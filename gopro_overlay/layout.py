@@ -13,23 +13,23 @@ class Layout:
         self.timeseries = timeseries
         self.current_entry = None
 
-        font_title = ImageFont.truetype(font="Roboto-Medium.ttf", size=12)
+        font_title = ImageFont.truetype(font="Roboto-Medium.ttf", size=16)
         font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)
 
         self.scene = Scene([
             Text(Coordinate(260, 36), date(lambda: self.entry.dt), font_title, align="right"),
             Text(Coordinate(260, 60), time(lambda: self.entry.dt), font_metric, align="right"),
             Text(Coordinate(1900, 36), lambda: "GPS INFO", font_title, align="right"),
-            Text(Coordinate(1900, 80), lambda: f"Lat: {self.entry.point.lat:0.6f}", font_metric, align="right"),
-            Text(Coordinate(1900, 120), lambda: f"Lon: {self.entry.point.lon:0.6f}", font_metric, align="right"),
+            Text(Coordinate(1780, 60), lambda: f"Lat: {self.entry.point.lat:0.6f}", font_title, align="right"),
+            Text(Coordinate(1900, 60), lambda: f"Lon: {self.entry.point.lon:0.6f}", font_title, align="right"),
             MovingMap(
-                at=Coordinate(1900 - 256, 160),
+                at=Coordinate(1900 - 256, 100),
                 location=lambda: self.entry.point,
                 azimuth=lambda: self.entry.azi,
                 renderer=map_renderer
             ),
             JourneyMap(
-                at=Coordinate(1900 - 256, 160 + 256 + 20),
+                at=Coordinate(1900 - 256, 100 + 256 + 20),
                 timeseries=timeseries,
                 location=lambda: self.entry.point,
                 renderer=map_renderer,
