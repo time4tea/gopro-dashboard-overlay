@@ -48,6 +48,8 @@ class JourneyMap:
         location = self.location()
 
         frame = self.image.copy()
+        frame.putalpha(int(255 * 0.7))
+
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
         draw_marker(draw, current, 6)
@@ -83,7 +85,8 @@ class MovingMap:
         location = self.location()
         if location.lon is not None and location.lat is not None:
 
-            map = geotiler.Map(center=(location.lon, location.lat), zoom=self.zoom, size=(self.hypotenuse, self.hypotenuse))
+            map = geotiler.Map(center=(location.lon, location.lat), zoom=self.zoom,
+                               size=(self.hypotenuse, self.hypotenuse))
             map_image = self.renderer(map)
 
             draw = ImageDraw.Draw(map_image)
@@ -106,5 +109,5 @@ class MovingMap:
                 ),
                 fill=(0, 0, 0)
             )
-
+            crop.putalpha(int(255 * 0.7))
             image.paste(crop, self.at.tuple())
