@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 from PIL import ImageFont
 
 from .point import Coordinate
 from .privacy import NoPrivacyZone
+from .timeseries import Window
 from .widgets import Text, date, time, Scene, LeftInfoPanel, RightInfoPanel
+from .widgets_chart import SimpleChart
 from .widgets_map import MovingMap, JourneyMap
 
 
@@ -16,6 +20,8 @@ class Layout:
         font_title = ImageFont.truetype(font="Roboto-Medium.ttf", size=16)
         font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=32)
         font_speed = ImageFont.truetype(font="Roboto-Medium.ttf", size=48)
+
+        window = Window(timeseries, duration=timedelta(minutes=5), samples=256, key=lambda e: e.alt.to("meter").magnitude)
 
         self.scene = Scene([
             Text(Coordinate(260, 36), date(lambda: self.entry.dt), font_title, align="right"),
@@ -61,7 +67,12 @@ class Layout:
                 font_title,
                 font_metric
             ),
-
+            SimpleChart(
+                at=Coordinate(400, 980),
+                value=lambda: window.view(self.entry.dt),
+                font=font_title,
+                filled=True
+            ),
             RightInfoPanel(
                 Coordinate(1900, 820),
                 "thermometer.png",

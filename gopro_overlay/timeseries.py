@@ -1,8 +1,62 @@
 import bisect
+import datetime
 from datetime import timedelta
 
-from .units import units
 from .point import Point
+from .units import units
+
+
+def entry_wants(v):
+    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.Quantity) or isinstance(v, Point)
+
+
+class Entry:
+
+    def __init__(self, dt, **kwargs):
+        self.dt = dt
+        self.items = {k: v for k, v in dict(**kwargs).items() if entry_wants(v)}
+
+    def update(self, **kwargs):
+        self.items.update(**kwargs)
+
+    def __getattr__(self, item):
+        return self.items.get(item, None)
+
+    def __str__(self):
+        return f"Entry: {self.dt} - {self.items}"
+
+    def interpolate(self, other, dt):
+        if self.dt == other.dt:
+            raise ValueError("Cannot interpolate between equal points")
+        if self.dt > other.dt:
+            raise ValueError("Lower point must be first")
+        if dt < self.dt:
+            raise ValueError("Wanted point before lower")
+        if dt > other.dt:
+            raise ValueError("Wanted point after other")
+
+        if dt == self.dt:
+            return self
+        elif dt == other.dt:
+            return other
+
+        range = (other.dt - self.dt) / timedelta(milliseconds=1)
+        point = (dt - self.dt) / timedelta(milliseconds=1)
+
+        position = point / range
+
+        items = {}
+        for key in self.items.keys():
+            start = self.items[key]
+            try:
+                end = other.items[key]
+                diff = end - start
+                interp = start + (diff * position)
+            except KeyError:
+                interp = None
+            items[key] = interp
+
+        return Entry(dt, **items)
 
 
 class Timeseries:
@@ -14,11 +68,11 @@ class Timeseries:
             self.add(*entries)
 
     @property
-    def min(self):
+    def min(self) -> datetime.datetime:
         return self.dates[0]
 
     @property
-    def max(self):
+    def max(self) -> datetime.datetime:
         return self.dates[-1]
 
     def __len__(self):
@@ -27,7 +81,7 @@ class Timeseries:
     def _update(self):
         self.dates = sorted(list(self.entries.keys()))
 
-    def add(self, *entries):
+    def add(self, *entries: Entry):
         for e in entries:
             self.entries[e.dt] = e
         self._update()
@@ -98,54 +152,40 @@ class Timeseries:
                 self.entries[e].update(**updates)
 
 
-def entry_wants(v):
-    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.Quantity) or isinstance(v, Point)
+class Window:
 
+    def __init__(self, ts, duration, samples, key=lambda e: e.alt, missing=None):
+        self.ts = ts
+        self.duration = duration
+        self.samples = samples
+        self.tick = duration / samples
+        self.key = key
+        self.missing = missing
 
-class Entry:
+        self.last_time = None
+        self.last_view = None
 
-    def __init__(self, dt, **kwargs):
-        self.dt = dt
-        self.items = {k: v for k, v in dict(**kwargs).items() if entry_wants(v)}
+    def view(self, at):
 
-    def update(self, **kwargs):
-        self.items.update(**kwargs)
+        if self.last_time is not None and abs(at - self.last_time) < self.tick:
+            return self.last_view
 
-    def __getattr__(self, item):
-        return self.items.get(item, None)
+        start = at - self.duration / 2
+        end = at + self.duration / 2
 
-    def __str__(self):
-        return f"Entry: {self.dt} - {self.items}"
+        current = start
 
-    def interpolate(self, other, dt):
-        if self.dt == other.dt:
-            raise ValueError("Cannot interpolate between equal points")
-        if self.dt > other.dt:
-            raise ValueError("Lower point must be first")
-        if dt < self.dt:
-            raise ValueError("Wanted point before lower")
-        if dt > other.dt:
-            raise ValueError("Wanted point after other")
+        data = []
 
-        if dt == self.dt:
-            return self
-        elif dt == other.dt:
-            return other
+        while current < end:
+            if current < self.ts.min or current > self.ts.max:
+                data.append(self.missing)
+            else:
+                data.append(self.key(self.ts.get(current)))
+            current += self.tick
 
-        range = (other.dt - self.dt) / timedelta(milliseconds=1)
-        point = (dt - self.dt) / timedelta(milliseconds=1)
+        self.last_time = at
+        self.last_view = data
 
-        position = point / range
+        return data
 
-        items = {}
-        for key in self.items.keys():
-            start = self.items[key]
-            try:
-                end = other.items[key]
-                diff = end - start
-                interp = start + (diff * position)
-            except KeyError:
-                interp = None
-            items[key] = interp
-
-        return Entry(dt, **items)

@@ -56,8 +56,10 @@ class JourneyMap:
         image.paste(frame, self.at.tuple())
 
 
-def draw_marker(draw, position, size):
-    draw.ellipse((position[0] - size, position[1] - size, position[0] + size, position[1] + size), fill=(0, 0, 255),
+def draw_marker(draw, position, size, fill=None):
+    fill = fill if fill is not None else (0, 0, 255)
+    draw.ellipse((position[0] - size, position[1] - size, position[0] + size, position[1] + size),
+                 fill=fill,
                  outline=(0, 0, 0))
 
 

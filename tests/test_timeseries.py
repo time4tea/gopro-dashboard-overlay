@@ -2,8 +2,9 @@ import collections
 import datetime
 from datetime import timedelta
 
+from gopro_overlay import fake
 from gopro_overlay.gpmd import Point
-from gopro_overlay.timeseries import Timeseries, Entry
+from gopro_overlay.timeseries import Timeseries, Entry, Window
 from gopro_overlay.timeseries_process import process_ses
 from gopro_overlay.units import units
 
@@ -229,3 +230,15 @@ def test_filling_missing_entries():
     assert filled == 1
     assert dt2 in ts.dates
     assert ts.get(dt2).alt.magnitude == 20
+
+
+def test_taking_a_view():
+    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
+
+    window = Window(ts, timedelta(minutes=1), samples=100, key=lambda e: e.alt, missing=0)
+
+    view = window.view(ts.min)
+    assert len(view) == 100
+    assert view[0] == 0
+    assert view[50].units == units.meter
+    assert view[99].units == units.meter

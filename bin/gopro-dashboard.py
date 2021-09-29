@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-import contextlib
 import datetime
-import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -15,6 +13,7 @@ from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Layout
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
+from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 
 
@@ -29,37 +28,6 @@ class ProductionClock:
         while running <= end:
             yield running
             running += step
-
-
-class PoorTimer:
-
-    def __init__(self, name):
-        self.name = name
-        self.total = 0
-        self.count = 0
-
-    def time(self, f):
-        t = time.time_ns()
-        r = f()
-        self.total += (time.time_ns() - t)
-        self.count += 1
-        return r
-
-    @contextlib.contextmanager
-    def timing(self):
-        t = time.time_ns()
-        try:
-            yield
-        finally:
-            self.total += (time.time_ns() - t)
-            self.count += 1
-            print(self)
-
-    def seconds(self):
-        return self.total / (10 ** 9)
-
-    def __str__(self):
-        return f"Timer({self.name} - Called: {self.count}, Total: {self.seconds()}, Avg: {self.seconds() / self.count})"
 
 
 if __name__ == "__main__":

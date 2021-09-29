@@ -8,8 +8,9 @@ from .units import units
 
 class Random1D:
 
-    def __init__(self, start):
+    def __init__(self, start, min_value=-2 ^ 31 - 1):
         self._n = start
+        self._min_value = min_value
 
     def step(self):
         n = random.random()
@@ -18,6 +19,9 @@ class Random1D:
             self._n = self._n - 1
         elif n > 0.55:
             self._n = self._n + 1
+
+        if self._n <= self._min_value:
+            self._n = self._min_value
 
         return self._n
 
