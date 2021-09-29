@@ -38,7 +38,7 @@ test-publish: dist
 
 
 .PHONY: publish
-publish: dist
+publish: clean dist
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
 	$(BIN)/twine upload --skip-existing --non-interactive --repository pypi dist/*
