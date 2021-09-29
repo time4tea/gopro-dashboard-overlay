@@ -79,6 +79,7 @@ No attempt has been made to optimise this program! Right now, on my machine, it 
 
 ## Known Bugs / Issues
 
+- Only tested on a GoPro Hero 9, that's all I have. Sample files for other devices are welcomed.
 - Aligning overlay with video - not exact! - Start garmin first, and wait for GPS lock before recording
 - Multiple GoPro files concatentated and overlayed. Current limit of 10 mins (in 1080p/60) is annoying.
 
