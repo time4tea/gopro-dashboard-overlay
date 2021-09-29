@@ -60,13 +60,14 @@ def draw_marker(draw, position, size):
 
 
 class MovingMap:
-    def __init__(self, at, location, azimuth, renderer, rotate=True, size=256):
+    def __init__(self, at, location, azimuth, renderer, rotate=True, size=256, zoom=17):
         self.at = at
         self.rotate = rotate
         self.azimuth = azimuth
         self.renderer = renderer
         self.location = location
         self.size = size
+        self.zoom = zoom
         self.hypotenuse = int(math.sqrt((self.size ** 2) * 2))
 
         self.half_width_height = (self.hypotenuse / 2)
@@ -82,7 +83,7 @@ class MovingMap:
         location = self.location()
         if location.lon is not None and location.lat is not None:
 
-            map = geotiler.Map(center=(location.lon, location.lat), zoom=17, size=(self.hypotenuse, self.hypotenuse))
+            map = geotiler.Map(center=(location.lon, location.lat), zoom=self.zoom, size=(self.hypotenuse, self.hypotenuse))
             map_image = self.renderer(map)
 
             draw = ImageDraw.Draw(map_image)

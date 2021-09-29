@@ -3,14 +3,13 @@
 import argparse
 import contextlib
 import datetime
-import dbm
 import time
 from datetime import timedelta
 from pathlib import Path
 
-from gopro_overlay import timeseries_process
+from gopro_overlay import timeseries_process, geo
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
-from gopro_overlay.geo import dbm_caching_renderer
+from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Layout
@@ -71,6 +70,10 @@ if __name__ == "__main__":
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
     parser.add_argument("--no-overlay", action="store_true", help="Only output the gadgets, don't overlay")
+
+    parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
+    parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
+
     parser.add_argument("output", help="Output MP4 file")
 
     args = parser.parse_args()
@@ -116,8 +119,9 @@ if __name__ == "__main__":
         else:
             zone = NoPrivacyZone()
 
-        with dbm.ndbm.open(str(ourdir.joinpath("tilecache.ndbm")), "c") as db:
-            map_renderer = dbm_caching_renderer(db)
+        renderer = CachingRenderer(style=args.map_style, api_key=args.map_api_key)
+
+        with renderer.open() as map_renderer:
 
             clock = ProductionClock(wanted_timeseries)
 

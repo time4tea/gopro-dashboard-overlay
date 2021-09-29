@@ -27,7 +27,8 @@ class Layout:
                 at=Coordinate(1900 - 256, 100),
                 location=lambda: self.entry.point,
                 azimuth=lambda: self.entry.azi,
-                renderer=map_renderer
+                renderer=map_renderer,
+                zoom=16
             ),
             JourneyMap(
                 at=Coordinate(1900 - 256, 100 + 256 + 20),
