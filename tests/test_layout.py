@@ -18,7 +18,7 @@ def test_render_sample():
 
         timer = PoorTimer("layout")
 
-        for i in range(0, 100):
+        for i in range(0, 20):
             draw = timer.time(lambda: overlay.draw(timeseries.min))
 
     print(timer)

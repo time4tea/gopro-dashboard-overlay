@@ -5,7 +5,8 @@ from PIL import ImageFont
 from .point import Coordinate
 from .privacy import NoPrivacyZone
 from .timeseries import Window
-from .widgets import Text, date, time, Scene, LeftInfoPanel, RightInfoPanel
+from .widgets import Text, date, time, Scene
+from .widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric
 from .widgets_chart import SimpleChart
 from .widgets_map import MovingMap, JourneyMap
 
@@ -43,13 +44,11 @@ class Layout:
                 renderer=map_renderer,
                 privacy_zone=privacy_zone
             ),
-            LeftInfoPanel(
-                Coordinate(16, 900),
-                "gauge-1.png",
+            BigMetric(
+                Coordinate(16, 800),
                 lambda: "MPH",
                 lambda: f"{self.entry.speed.to('MPH').magnitude:.0f}" if self.entry.speed else "-",
-                font_title,
-                font_speed
+                font_title
             ),
             LeftInfoPanel(
                 Coordinate(16, 980),

@@ -2,10 +2,9 @@ import functools
 import importlib
 import os
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 from . import icons
-from .point import Coordinate
 
 anchors = {
     "left": "la",
@@ -32,6 +31,16 @@ class Text:
         )
 
 
+class Composite:
+
+    def __init__(self, *widgets):
+        self.widgets = widgets
+
+    def draw(self, image, draw):
+        for w in self.widgets:
+            w.draw(image, draw)
+
+
 class Drawable:
     def __init__(self, at, drawable):
         self.at = at
@@ -39,36 +48,6 @@ class Drawable:
 
     def draw(self, image, draw):
         image.alpha_composite(self.drawable, self.at.tuple())
-
-
-class RightInfoPanel:
-
-    def __init__(self, at, icon, title, value, title_font, value_font):
-        self.value = value
-        self.widgets = [
-            Text(at + Coordinate(-70, 0), title, title_font, align="right"),
-            simple_icon(at + Coordinate(-64, 0), icon),
-            Text(at + Coordinate(-70, 18), value, value_font, align="right"),
-        ]
-
-    def draw(self, image, draw):
-        for w in self.widgets:
-            w.draw(image, draw)
-
-
-class LeftInfoPanel:
-
-    def __init__(self, at, icon, title, value, title_font, value_font):
-        self.value = value
-        self.widgets = [
-            Text(at + Coordinate(70, 0), title, title_font),
-            simple_icon(at + Coordinate(0, 0), icon),
-            Text(at + Coordinate(70, 18), value, value_font),
-        ]
-
-    def draw(self, image, draw):
-        for w in self.widgets:
-            w.draw(image, draw)
 
 
 def time(clock):
@@ -89,9 +68,9 @@ def icon(file, at, transform=lambda x: x):
     return Drawable(at, transform(image))
 
 
-def simple_icon(at, file):
+def simple_icon(at, file, size=64):
     return icon(file, at, transform=compose(
-        functools.partial(transform_resize, (64, 64)),
+        functools.partial(transform_resize, (size, size)),
         transform_rgba,
         transform_negative
     ))
@@ -133,6 +112,3 @@ class Scene:
 
 def compose(*functions):
     return functools.reduce(lambda f, g: lambda x: f(g(x)), reversed(functions))
-
-
-

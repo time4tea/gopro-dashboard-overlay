@@ -7,12 +7,15 @@ from gopro_overlay import fake
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window
 from gopro_overlay.timing import PoorTimer
-from gopro_overlay.widgets import LeftInfoPanel, RightInfoPanel, simple_icon, Text, Scene
+from gopro_overlay.widgets import simple_icon, Text, Scene
+from gopro_overlay.widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric
 from gopro_overlay.widgets_chart import SimpleChart
 from tests.testenvironment import is_ci
 
 font = ImageFont.truetype(font="Roboto-Medium.ttf", size=18)
 title_font = font.font_variant(size=16)
+
+ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
 
 
 # don't know why this fails only in PyCharm with AttributeError: module 'importlib' has no attribute 'resources'
@@ -55,8 +58,6 @@ def test_render_simple_chart():
 
 
 def test_render_chart():
-    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
-
     window = Window(ts,
                     duration=timedelta(minutes=2),
                     samples=256,
@@ -67,6 +68,12 @@ def test_render_chart():
 
     time_rendering(name="Simple Chart with view", widgets=[
         SimpleChart(Coordinate(600, 600), lambda: view, filled=True, font=font)
+    ])
+
+
+def test_render_big_text():
+    time_rendering(name="big speed", widgets=[
+        BigMetric(Coordinate(600, 600), title=lambda: "MPH", value=lambda: "27", font=font)
     ])
 
 
