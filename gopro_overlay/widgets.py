@@ -8,16 +8,18 @@ from . import icons
 
 anchors = {
     "left": "la",
-    "right": "ra"
+    "right": "ra",
+    "centre": "ma",
 }
 
 
 class Text:
-    def __init__(self, at, value, font, align="left"):
+    def __init__(self, at, value, font, align="left", fill=None):
         self.at = at
         self.value = value
         self.font = font
         self.anchor = anchors[align]
+        self.fill = fill if fill else (255, 255, 255)
 
     def draw(self, image, draw):
         draw.text(
@@ -25,7 +27,7 @@ class Text:
             self.value(),
             anchor=self.anchor,
             font=self.font,
-            fill=(255, 255, 255),
+            fill=self.fill,
             stroke_width=2,
             stroke_fill=(0, 0, 0)
         )
@@ -87,8 +89,8 @@ def transform_rgba(img):
 def transform_negative(img):
     if img.mode != "RGBA":
         raise ValueError(f"I only work on RGBA, not {img.mode}")
-    for i in range(0, img.size[0] - 1):
-        for j in range(0, img.size[1] - 1):
+    for i in range(0, img.size[0]):
+        for j in range(0, img.size[1]):
             pixel = img.getpixel((i, j))
             img.putpixel((i, j), (255 - pixel[0], 255 - pixel[1], 255 - pixel[2], pixel[3]))
     return img

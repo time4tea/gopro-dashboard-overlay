@@ -13,7 +13,7 @@ dist:
 
 .PHONY: test
 test:
-	PYTHONPATH=. $(BIN)/pytest tests
+	DISPLAY= PYTHONPATH=. $(BIN)/pytest tests
 
 .PHONY: flake
 flake:

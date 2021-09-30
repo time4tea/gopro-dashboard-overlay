@@ -7,9 +7,10 @@ from gopro_overlay import fake
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window
 from gopro_overlay.timing import PoorTimer
+from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Text, Scene
-from gopro_overlay.widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric
 from gopro_overlay.widgets_chart import SimpleChart
+from gopro_overlay.widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric, ComparativeEnergy
 from tests.testenvironment import is_ci
 
 font = ImageFont.truetype(font="Roboto-Medium.ttf", size=18)
@@ -74,6 +75,21 @@ def test_render_chart():
 def test_render_big_text():
     time_rendering(name="big speed", widgets=[
         BigMetric(Coordinate(600, 600), title=lambda: "MPH", value=lambda: "27", font=font)
+    ])
+
+
+def test_render_comparative_energy():
+    speed = units.Quantity(25, units.mph)
+
+    time_rendering(name="comparative energy", widgets=[
+        ComparativeEnergy(Coordinate(600, 600),
+                          font=font,
+                          speed=lambda: speed,
+                          person=units.Quantity(60, units.kg),
+                          bike=units.Quantity(12, units.kg),
+                          car=units.Quantity(2678, units.kg),
+                          van=units.Quantity(3500, units.kg)
+                          )
     ])
 
 

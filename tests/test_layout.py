@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from gopro_overlay import fake
 from gopro_overlay.geo import CachingRenderer
-from gopro_overlay.layout import Layout
+from gopro_overlay.layout import Layout, SpeedAwarenessLayout
 from gopro_overlay.timing import PoorTimer
 from tests.testenvironment import is_ci
 
@@ -14,7 +14,7 @@ def test_render_sample():
 
     with renderer.open() as map_renderer:
 
-        overlay = Layout(timeseries, map_renderer)
+        overlay = SpeedAwarenessLayout(timeseries, map_renderer)
 
         timer = PoorTimer("layout")
 

@@ -10,7 +10,7 @@ from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
 from gopro_overlay.gpx import load_timeseries
-from gopro_overlay.layout import Layout
+from gopro_overlay.layout import Layout, SpeedAwarenessLayout
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
@@ -37,10 +37,14 @@ if __name__ == "__main__":
     parser.add_argument("input", help="Input MP4 file")
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
-    parser.add_argument("--no-overlay", action="store_true", help="Only output the gadgets, don't overlay")
+
+    parser.add_argument("--no-overlay", action="store_false", help="Only output the gadgets, don't overlay")
+    parser.set_defaults(overlay=True)
 
     parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
     parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
+
+    parser.add_argument("--layout", choices=["default", "speed-awareness"], default="default", help="Choose graphics layout")
 
     parser.add_argument("output", help="Output MP4 file")
 
@@ -54,25 +58,25 @@ if __name__ == "__main__":
         if args.gpx:
             gpx_timeseries = load_timeseries(args.gpx, units)
             print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
-            wanted_timeseries = gpx_timeseries.clip_to(gopro_timeseries)
-            print(f"GPX Timeseries overlap with GoPro - {len(wanted_timeseries)}")
-            if not len(wanted_timeseries):
+            timeseries = gpx_timeseries.clip_to(gopro_timeseries)
+            print(f"GPX Timeseries overlap with GoPro - {len(timeseries)}")
+            if not len(timeseries):
                 raise ValueError("No overlap between GoPro and GPX file")
         else:
-            wanted_timeseries = gopro_timeseries
+            timeseries = gopro_timeseries
 
         # bodge- fill in missing points to make smoothing easier to write.
-        backfilled = wanted_timeseries.backfill(datetime.timedelta(seconds=1))
+        backfilled = timeseries.backfill(datetime.timedelta(seconds=1))
         if backfilled:
             print(f"Created {backfilled} missing points...")
 
         # smooth GPS points
-        wanted_timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
-        wanted_timeseries.process_deltas(timeseries_process.calculate_speeds())
-        wanted_timeseries.process(timeseries_process.calculate_odo())
-        wanted_timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=10)
+        timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
+        timeseries.process_deltas(timeseries_process.calculate_speeds())
+        timeseries.process(timeseries_process.calculate_odo())
+        timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=10)
         # smooth azimuth (heading) points to stop wild swings of compass
-        wanted_timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
+        timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
         ourdir = Path.home().joinpath(".gopro-graphics")
         ourdir.mkdir(exist_ok=True)
@@ -91,11 +95,16 @@ if __name__ == "__main__":
 
         with renderer.open() as map_renderer:
 
-            clock = ProductionClock(wanted_timeseries)
+            clock = ProductionClock(timeseries)
 
-            overlay = Layout(wanted_timeseries, map_renderer, privacy_zone=zone)
+            if args.layout == "default":
+                overlay = Layout(timeseries, map_renderer, privacy_zone=zone)
+            elif args.layout == "speed-awareness":
+                overlay = SpeedAwarenessLayout(timeseries, map_renderer)
+            else:
+                raise ValueError(f"Unsupported layout {args.layout}")
 
-            if not args.no_overlay:
+            if args.overlay:
                 ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
             else:
                 ffmpeg = FFMPEGGenerate(output=args.output)
