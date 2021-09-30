@@ -63,7 +63,10 @@ class ComparativeEnergy:
             v = speed()
             if v:
                 kJ = model.evaluate(v).magnitude / 1000.0
-                return f"{kJ :,.1f} kJ"
+                if kJ > 10:
+                    return f"{kJ :,.0f} kJ"
+                else:
+                    return f"{kJ :,.1f} kJ"
             else:
                 return "-"
 
