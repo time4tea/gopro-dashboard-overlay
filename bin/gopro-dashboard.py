@@ -111,16 +111,14 @@ if __name__ == "__main__":
         else:
             zone = NoPrivacyZone()
 
-        renderer = CachingRenderer(style=args.map_style, api_key=args.map_api_key)
-
-        with renderer.open() as map_renderer:
+        with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
             clock = ProductionClock(timeseries)
 
             if args.layout == "default":
-                overlay = Layout(timeseries, map_renderer, privacy_zone=zone)
+                overlay = Layout(timeseries, renderer, privacy_zone=zone)
             elif args.layout == "speed-awareness":
-                overlay = SpeedAwarenessLayout(timeseries, map_renderer)
+                overlay = SpeedAwarenessLayout(timeseries, renderer)
             else:
                 raise ValueError(f"Unsupported layout {args.layout}")
 
@@ -142,8 +140,13 @@ if __name__ == "__main__":
 
             frames_to_render = clock.steps(frame_time)
             progress = progressbar.ProgressBar(
-                widgets=['Render: ', progressbar.Counter(), ' [', progressbar.Percentage(), '] ', progressbar.Bar(), ' ', progressbar.ETA()],
-                max_value =frames_to_render
+                widgets=[
+                    'Render: ',
+                    progressbar.Counter(),
+                    ' [', progressbar.Percentage(), '] ',
+                    progressbar.Bar(), ' ', progressbar.ETA()
+                ],
+                max_value=frames_to_render
             )
 
             try:
