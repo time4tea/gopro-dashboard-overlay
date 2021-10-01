@@ -18,6 +18,7 @@ title_font = font.font_variant(size=16)
 
 ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
 
+# These don't test the actual rendering output (approval test), only that rendering doesn't blow up.
 
 # don't know why this fails only in PyCharm with AttributeError: module 'importlib' has no attribute 'resources'
 
