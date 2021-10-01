@@ -66,12 +66,17 @@ class FFMPEGGenerate:
 
 class FFMPEGOverlay:
 
-    def __init__(self, input, output):
+    def __init__(self, input, output, vsize=1080):
         self.output = output
         self.input = input
+        self.vsize = vsize
 
     @contextlib.contextmanager
     def generate(self):
+        if self.vsize == 1080:
+            filter_extra = ""
+        else:
+            filter_extra = f",scale=-1:{self.vsize}"
         cmd = [
             "ffmpeg",
             "-y",
@@ -83,7 +88,7 @@ class FFMPEGOverlay:
             "-pix_fmt", "rgba",
             "-i", "-",
             "-r", "30",
-            "-filter_complex", "[0:v][1:v]overlay",
+            f"-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
             "-vcodec", "libx264",
             "-crf", "18",
             "-preset", "veryfast",

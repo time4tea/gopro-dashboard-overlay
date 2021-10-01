@@ -46,6 +46,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--layout", choices=["default", "speed-awareness"], default="default", help="Choose graphics layout")
 
+    parser.add_argument("--output-size", default="1080", type=int, help="Vertical size of output movie - default is 1080")
+
     parser.add_argument("output", help="Output MP4 file")
 
     args = parser.parse_args()
@@ -105,7 +107,7 @@ if __name__ == "__main__":
                 raise ValueError(f"Unsupported layout {args.layout}")
 
             if args.overlay:
-                ffmpeg = FFMPEGOverlay(input=args.input, output=args.output)
+                ffmpeg = FFMPEGOverlay(input=args.input, output=args.output, vsize=args.output_size)
             else:
                 ffmpeg = FFMPEGGenerate(output=args.output)
 
