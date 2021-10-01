@@ -8,3 +8,4 @@ geotiler
 gpxpy
 # for lat/lon/speed calcs
 geographiclib
+progressbar2

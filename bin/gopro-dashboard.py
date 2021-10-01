@@ -2,8 +2,12 @@
 
 import argparse
 import datetime
+import os
+import tempfile
 from datetime import timedelta
 from pathlib import Path
+
+import progressbar
 
 from gopro_overlay import timeseries_process, geo
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
@@ -22,12 +26,21 @@ class ProductionClock:
     def __init__(self, timeseries):
         self._timeseries = timeseries
 
+    def steps(self, step: timedelta):
+        return (self._timeseries.max - self._timeseries.min) / step
+
     def timerange(self, step: timedelta):
         end = self._timeseries.max
         running = self._timeseries.min
         while running <= end:
             yield running
             running += step
+
+
+def temp_file_name():
+    handle, path = tempfile.mkstemp()
+    os.close(handle)
+    return path
 
 
 if __name__ == "__main__":
@@ -44,9 +57,14 @@ if __name__ == "__main__":
     parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
     parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
 
-    parser.add_argument("--layout", choices=["default", "speed-awareness"], default="default", help="Choose graphics layout")
+    parser.add_argument("--layout", choices=["default", "speed-awareness"], default="default",
+                        help="Choose graphics layout")
 
-    parser.add_argument("--output-size", default="1080", type=int, help="Vertical size of output movie - default is 1080")
+    parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
+    parser.set_defaults(show_ffmpeg=False)
+
+    parser.add_argument("--output-size", default="1080", type=int,
+                        help="Vertical size of output movie - default is 1080")
 
     parser.add_argument("output", help="Output MP4 file")
 
@@ -107,7 +125,12 @@ if __name__ == "__main__":
                 raise ValueError(f"Unsupported layout {args.layout}")
 
             if args.overlay:
-                ffmpeg = FFMPEGOverlay(input=args.input, output=args.output, vsize=args.output_size)
+                redirect = None
+                if not args.show_ffmpeg:
+                    redirect = temp_file_name()
+                    print(f"FFMPEG Output is in {redirect}")
+
+                ffmpeg = FFMPEGOverlay(input=args.input, output=args.output, vsize=args.output_size, redirect=redirect)
             else:
                 ffmpeg = FFMPEGGenerate(output=args.output)
 
@@ -115,12 +138,22 @@ if __name__ == "__main__":
             byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
+            frame_time = timedelta(seconds=0.1)
+
+            frames_to_render = clock.steps(frame_time)
+            progress = progressbar.ProgressBar(
+                widgets=['Render: ', progressbar.Counter(), ' [', progressbar.Percentage(), '] ', progressbar.Bar(), ' ', progressbar.ETA()],
+                max_value =frames_to_render
+            )
+
             try:
                 with ffmpeg.generate() as writer:
-                    for dt in clock.timerange(step=timedelta(seconds=0.1)):
+                    for index, dt in enumerate(clock.timerange(step=frame_time)):
+                        progress.update(index)
                         frame = draw_timer.time(lambda: overlay.draw(dt))
                         tobytes = byte_timer.time(lambda: frame.tobytes())
                         write_timer.time(lambda: writer.write(tobytes))
+                    progress.finish()
             finally:
                 for t in [byte_timer, write_timer, draw_timer]:
                     print(t)

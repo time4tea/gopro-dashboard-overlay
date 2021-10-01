@@ -12,6 +12,7 @@ requires = [
     "geographiclib",
     "pillow",
     "pint",
+    "progressbar2",
 ]
 
 test_requirements = [

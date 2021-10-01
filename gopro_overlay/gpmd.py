@@ -309,12 +309,13 @@ class GPS5Scaler:
                 hertz = self._samples.count()
 
                 if len(points) != hertz:
-                    warnings.warn("Bug? - Δsamples != samples")
+                    # this will happen for first sample in when recording spans multiple files (for second file onwards)
+                    pass
 
                 for index, point in enumerate(points):
                     scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
                     scaled_point = GPS5._make(scaled)
-                    point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / hertz)))
+                    point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / len(points))))
                     if self._dop > self._max_dop:
                         self._on_drop(f"Got GPS, but DOP > Max DOP {self._max_dop}")
                     else:

@@ -58,7 +58,7 @@ class FFMPEGGenerate:
             "-preset", "veryfast",
             self.output
         ]
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None)
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
         yield process.stdin
         process.stdin.close()
         process.wait(10)
@@ -66,10 +66,11 @@ class FFMPEGGenerate:
 
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, vsize=1080):
+    def __init__(self, input, output, vsize=1080, redirect=None):
         self.output = output
         self.input = input
         self.vsize = vsize
+        self.redirect = redirect
 
     @contextlib.contextmanager
     def generate(self):
@@ -94,7 +95,13 @@ class FFMPEGOverlay:
             "-preset", "veryfast",
             self.output
         ]
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=None)
+
+        if self.redirect:
+            with open(self.redirect, "w") as std:
+                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
+        else:
+            process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
+
         yield process.stdin
         process.stdin.close()
         # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
