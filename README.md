@@ -46,7 +46,7 @@ Privacy allows you to set a privacy zone. Various widgets will not draw points w
 ```
 usage: gopro-dashboard.py [-h] [--gpx GPX] [--privacy PRIVACY] [--no-overlay]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas}]
-                          [--map-api-key MAP_API_KEY]
+                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness}] [--show-ffmpeg] [--output-size OUTPUT_SIZE]
                           input output
 
 Overlay gadgets on to GoPro MP4
@@ -64,6 +64,11 @@ optional arguments:
                         Style of map to render
   --map-api-key MAP_API_KEY
                         API Key for map provider, if required (default OSM doesn't need one)
+  --layout {default,speed-awareness}
+                        Choose graphics layout
+  --show-ffmpeg         Show FFMPEG output (not usually useful)
+  --output-size OUTPUT_SIZE
+                        Vertical size of output movie - default is 1080
 ```
 
 ## Example

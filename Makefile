@@ -49,3 +49,8 @@ publish: clean dist
 bump:
 	$(BIN)/pip install bumpversion
 	$(BIN)/bumpversion minor
+
+
+.PHONY: help
+help:
+	PYTHONPATH=. $(BIN)/python bin/gopro-dashboard.py --help
