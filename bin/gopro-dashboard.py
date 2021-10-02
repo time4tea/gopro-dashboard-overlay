@@ -146,6 +146,7 @@ if __name__ == "__main__":
                     ' [', progressbar.Percentage(), '] ',
                     progressbar.Bar(), ' ', progressbar.ETA()
                 ],
+                poll_interval=2.0,
                 max_value=frames_to_render
             )
 
