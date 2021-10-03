@@ -13,7 +13,7 @@ dist:
 
 .PHONY: test
 test:
-	DISPLAY= PYTHONPATH=. $(BIN)/pytest tests
+	CI=true PYTHONPATH=. $(BIN)/pytest tests
 
 .PHONY: flake
 flake:

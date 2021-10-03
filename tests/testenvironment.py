@@ -2,4 +2,4 @@ import os
 
 
 def is_ci():
-    return os.environ.get("DISPLAY") is None
+    return os.environ.get("CI") is not None
