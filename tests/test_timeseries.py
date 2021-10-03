@@ -238,7 +238,14 @@ def test_taking_a_view():
     window = Window(ts, timedelta(minutes=1), samples=100, key=lambda e: e.alt, missing=0)
 
     view = window.view(ts.min)
-    assert len(view) == 100
-    assert view[0] == 0
-    assert view[50].units == units.meter
-    assert view[99].units == units.meter
+
+    assert view.version == 1
+    data = view.data
+    assert len(data) == 100
+    assert data[0] == 0
+    assert data[50].units == units.meter
+    assert data[99].units == units.meter
+
+    view = window.view(ts.max)
+    assert view.version == 2
+

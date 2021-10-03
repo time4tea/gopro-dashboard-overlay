@@ -152,6 +152,12 @@ class Timeseries:
                 self.entries[e].update(**updates)
 
 
+class View:
+    def __init__(self, data, version):
+        self.data = data
+        self.version = version
+
+
 class Window:
 
     def __init__(self, ts, duration, samples, key=lambda e: e.alt, missing=None):
@@ -164,6 +170,8 @@ class Window:
 
         self.last_time = None
         self.last_view = None
+
+        self.version = 0
 
     def view(self, at):
 
@@ -184,8 +192,9 @@ class Window:
                 data.append(self.key(self.ts.get(current)))
             current += self.tick
 
+        self.version += 1
         self.last_time = at
-        self.last_view = data
+        self.last_view = View(data, self.version)
 
-        return data
+        return self.last_view
 

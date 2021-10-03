@@ -7,7 +7,7 @@ from .point import Coordinate
 from .privacy import NoPrivacyZone
 from .timeseries import Window
 from .units import units
-from .widgets import Text, date, time, Scene
+from .widgets import Text, date, time, Scene, CachingText
 from .widgets_chart import SimpleChart
 from .widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric, ComparativeEnergy
 from .widgets_map import MovingMap, JourneyMap
@@ -15,14 +15,14 @@ from .widgets_map import MovingMap, JourneyMap
 
 def date_and_time(at, entry, font_title, font_metric):
     return [
-        Text(at + Coordinate(0, 0), date(lambda: entry().dt), font_title, align="right"),
+        CachingText(at + Coordinate(0, 0), date(lambda: entry().dt), font_title, align="right"),
         Text(at + Coordinate(0, 24), time(lambda: entry().dt), font_metric, align="right"),
     ]
 
 
 def gps_info(at, entry, font_title):
     return [
-        Text(at + Coordinate(0, 0), lambda: "GPS INFO", font_title, align="right"),
+        CachingText(at + Coordinate(0, 0), lambda: "GPS INFO", font_title, align="right"),
         Text(at + Coordinate(-130, 24), lambda: f"Lat: {entry().point.lat:0.6f}", font_title, align="right"),
         Text(at + Coordinate(0, 24), lambda: f"Lon: {entry().point.lon:0.6f}", font_title, align="right"),
     ]

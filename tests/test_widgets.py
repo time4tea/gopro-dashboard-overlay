@@ -6,7 +6,7 @@ from PIL import ImageFont
 
 from gopro_overlay import fake, layout
 from gopro_overlay.point import Coordinate
-from gopro_overlay.timeseries import Window
+from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText
@@ -39,21 +39,21 @@ def test_render_text():
 
 @approve_image
 def test_render_caching_text_small():
-    return time_rendering("simple text", [CachingText(Coordinate(50, 50), lambda: "Hello", font)])
+    return time_rendering("simple text (cached)", [CachingText(Coordinate(50, 50), lambda: "Hello", font)])
 
 
 @approve_image
 def test_render_text_big():
     # 15ms target to beat
-    return time_rendering("simple text",
+    return time_rendering("big text",
                           [Text(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
 
 @approve_image
 def test_render_caching_text_big():
-    #     15ms target to beat
-    return time_rendering("simple text",
-                      [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
+    # runs in 0.3 ms
+    return time_rendering("big text (cached)",
+                          [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
 
 @approve_image
@@ -67,16 +67,17 @@ def test_render_panel():
 
 @approve_image
 def test_render_gps_info():
+    # was 9ms -> 6ms
     entry = ts.get(ts.min)
     return time_rendering(name="gps info", widgets=layout.gps_info(Coordinate(400, 10), lambda: entry, font))
 
 
 @approve_image
 def test_render_simple_chart():
-    view = list(itertools.chain(
+    view = View(data=list(itertools.chain(
         itertools.repeat(0, 128),
         itertools.repeat(1, 128)
-    ))
+    )), version=1)
     return time_rendering("Simple Chart", [
         SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
     ])
@@ -99,7 +100,7 @@ def test_render_chart():
 
 @approve_image
 def test_render_big_metric():
-    # 9 ms to beat
+    # 9 ms to beat -> 0.3ms
     return time_rendering(name="big speed", widgets=[
         BigMetric(Coordinate(10, 10), title=lambda: "MPH", value=lambda: "27", font=font)
     ])
@@ -107,7 +108,7 @@ def test_render_big_metric():
 
 @approve_image
 def test_render_comparative_energy():
-    # 32ms to beat
+    # 32ms to beat -> 1.4ms
     speed = units.Quantity(25, units.mph)
 
     return time_rendering(name="comparative energy",

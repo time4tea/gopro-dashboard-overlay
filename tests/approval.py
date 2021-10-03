@@ -38,6 +38,7 @@ def approve_image(f):
             stat = ImageStat.Stat(difference)
             total_difference = sum(stat.sum)
             diff_location.unlink(missing_ok=True)
+            approved_diff_location.unlink(missing_ok=True)
             if total_difference > 0.0:
 
                 for x in range(0, approved_image.width):

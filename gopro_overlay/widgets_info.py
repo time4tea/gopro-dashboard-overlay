@@ -2,15 +2,15 @@ import itertools
 
 from gopro_overlay.models import KineticEnergyModel
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets import Composite, Text, simple_icon
+from gopro_overlay.widgets import Composite, Text, simple_icon, CachingText
 
 
 class BigMetric:
 
     def __init__(self, at, title, value, font):
         self.widget = Composite(
-            Text(at + Coordinate(0, 0), title, font),
-            Text(at + Coordinate(0, 0), value, font.font_variant(size=160)),
+            CachingText(at + Coordinate(0, 0), title, font),
+            CachingText(at + Coordinate(0, 0), value, font.font_variant(size=160)),
         )
 
     def draw(self, image, draw):
@@ -22,9 +22,9 @@ class RightInfoPanel:
     def __init__(self, at, icon, title, value, title_font, value_font):
         self.value = value
         self.widget = Composite(
-            Text(at + Coordinate(-70, 0), title, title_font, align="right"),
+            CachingText(at + Coordinate(-70, 0), title, title_font, align="right"),
             simple_icon(at + Coordinate(-64, 0), icon),
-            Text(at + Coordinate(-70, 18), value, value_font, align="right"),
+            CachingText(at + Coordinate(-70, 18), value, value_font, align="right"),
         )
 
     def draw(self, image, draw):
@@ -36,9 +36,9 @@ class LeftInfoPanel:
     def __init__(self, at, icon, title, value, title_font, value_font):
         self.value = value
         self.widget = Composite(
-            Text(at + Coordinate(70, 0), title, title_font),
+            CachingText(at + Coordinate(70, 0), title, title_font),
             simple_icon(at + Coordinate(0, 0), icon),
-            Text(at + Coordinate(70, 18), value, value_font),
+            CachingText(at + Coordinate(70, 18), value, value_font),
         )
 
     def draw(self, image, draw):
@@ -77,10 +77,10 @@ class ComparativeEnergy:
             multiplier = f"{ (thing / person).m:,.1f}x"
             return [
                 simple_icon(at + Coordinate(230, 0), icon),
-                Text(at + Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour, align="centre"),
-                Text(at + Coordinate(200, 55), lambda: multiplier, small_font, align="right",
+                CachingText(at + Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour, align="centre"),
+                CachingText(at + Coordinate(200, 55), lambda: multiplier, small_font, align="right",
                      fill=multiplier_colour),
-                Text(at + Coordinate(200, 5), lambda: model_output(thing_model), font, align="right"),
+                CachingText(at + Coordinate(200, 5), lambda: model_output(thing_model), font, align="right"),
             ]
 
         self.widget = Composite(
