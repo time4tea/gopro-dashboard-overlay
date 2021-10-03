@@ -9,7 +9,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, Text, Scene
+from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText
 from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_info import LeftInfoPanel, BigMetric, ComparativeEnergy
 from tests.approval import approve_image
@@ -37,8 +37,9 @@ def test_render_text():
     return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font)])
 
 
-# def test_render_caching_text_small():
-#     time_rendering("simple text", [CachingText(Coordinate(300, 300), lambda: "Hello", font)])
+@approve_image
+def test_render_caching_text_small():
+    return time_rendering("simple text", [CachingText(Coordinate(50, 50), lambda: "Hello", font)])
 
 
 @approve_image
@@ -48,11 +49,11 @@ def test_render_text_big():
                           [Text(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
 
-# @approve_image
-# def test_render_caching_text_big():
-#     15ms target to beat
-# return time_rendering("simple text",
-#                       [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
+@approve_image
+def test_render_caching_text_big():
+    #     15ms target to beat
+    return time_rendering("simple text",
+                      [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
 
 @approve_image
