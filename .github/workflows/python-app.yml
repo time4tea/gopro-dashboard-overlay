@@ -25,3 +25,10 @@ jobs:
     - name: Test with pytest
       run: |
         make test
+    - name: Upload build artefacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: approval-artifacts
+        path: ${{ github.workspace }}/tests/approvals/*.png
+        retention-days: 2
+
