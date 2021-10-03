@@ -12,3 +12,9 @@ dist/
 *.out
 
 .~*#
+
+# Ignore actuals / diffs from approvals
+tests/approvals/*.actual.png
+tests/approvals/*.diff.png
+
+

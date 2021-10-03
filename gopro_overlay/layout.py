@@ -13,18 +13,18 @@ from .widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric, ComparativeE
 from .widgets_map import MovingMap, JourneyMap
 
 
-def date_and_time(entry, font_title, font_metric):
+def date_and_time(at, entry, font_title, font_metric):
     return [
-        Text(Coordinate(260, 36), date(lambda: entry().dt), font_title, align="right"),
-        Text(Coordinate(260, 60), time(lambda: entry().dt), font_metric, align="right"),
+        Text(at + Coordinate(0, 0), date(lambda: entry().dt), font_title, align="right"),
+        Text(at + Coordinate(0, 24), time(lambda: entry().dt), font_metric, align="right"),
     ]
 
 
-def gps_info(entry, font_title):
+def gps_info(at, entry, font_title):
     return [
-        Text(Coordinate(1900, 36), lambda: "GPS INFO", font_title, align="right"),
-        Text(Coordinate(1780, 60), lambda: f"Lat: {entry().point.lat:0.6f}", font_title, align="right"),
-        Text(Coordinate(1900, 60), lambda: f"Lon: {entry().point.lon:0.6f}", font_title, align="right"),
+        Text(at + Coordinate(0, 0), lambda: "GPS INFO", font_title, align="right"),
+        Text(at + Coordinate(-130, 24), lambda: f"Lat: {entry().point.lat:0.6f}", font_title, align="right"),
+        Text(at + Coordinate(0, 24), lambda: f"Lon: {entry().point.lon:0.6f}", font_title, align="right"),
     ]
 
 
@@ -69,8 +69,8 @@ class SpeedAwarenessLayout:
 
         self.scene = Scene(
             list(itertools.chain(
-                date_and_time(self.entry, font_title, font_metric),
-                gps_info(self.entry, font_title),
+                date_and_time(Coordinate(260, 30), self.entry, font_title, font_metric),
+                gps_info(Coordinate(1900, 36), self.entry, font_title),
                 big_mph(self.entry, font_title),
                 [
                     MovingMap(
@@ -117,8 +117,8 @@ class Layout:
 
         self.scene = Scene(
             list(itertools.chain(
-                date_and_time(self.entry, font_title, font_metric),
-                gps_info(self.entry, font_title),
+                date_and_time(Coordinate(260, 30), self.entry, font_title, font_metric),
+                gps_info(Coordinate(1900, 36), self.entry, font_title),
                 maps(self.entry, map_renderer, timeseries, privacy_zone),
                 big_mph(self.entry, font_title),
                 [
