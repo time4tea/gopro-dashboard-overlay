@@ -30,6 +30,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: approval-artifacts
-        path: ${{ github.workspace }}
+        path: ${{ github.workspace }}/tests/approvals/*.png
         retention-days: 2
 
