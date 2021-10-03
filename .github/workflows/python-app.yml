@@ -26,7 +26,7 @@ jobs:
       run: |
         make test
     - name: Upload build artefacts
-      if: always()
+      if: failure()
       uses: actions/upload-artifact@v2
       with:
         name: approval-artifacts
