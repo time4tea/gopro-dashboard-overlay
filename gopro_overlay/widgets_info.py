@@ -2,7 +2,7 @@ import itertools
 
 from gopro_overlay.models import KineticEnergyModel
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets import Composite, Text, simple_icon, CachingText
+from gopro_overlay.widgets import Composite, simple_icon, CachingText
 
 
 class BigMetric:

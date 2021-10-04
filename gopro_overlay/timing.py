@@ -37,5 +37,12 @@ class PoorTimer:
         else:
             return 0
 
+    @property
+    def rate(self):
+        a = self.avg
+        if a == 0:
+            return 0
+        return 1 / a
+
     def __str__(self):
-        return f"Timer({self.name} - Called: {self.count}, Total: {self.seconds}, Avg: {self.avg})"
+        return f"Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, Avg: {self.avg:.5f}, Rate: {self.rate:,.2f})"

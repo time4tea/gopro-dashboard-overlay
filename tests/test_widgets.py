@@ -51,7 +51,7 @@ def test_render_text_big():
 
 @approve_image
 def test_render_caching_text_big():
-    # runs in 0.3 ms
+    # Avg: 0.00014, Rate: 6,966.58
     return time_rendering("big text (cached)",
                           [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
@@ -67,13 +67,14 @@ def test_render_panel():
 
 @approve_image
 def test_render_gps_info():
-    # was 9ms -> 6ms
+    # Avg: 0.00645, Rate: 155.05
     entry = ts.get(ts.min)
     return time_rendering(name="gps info", widgets=layout.gps_info(Coordinate(400, 10), lambda: entry, font))
 
 
 @approve_image
 def test_render_simple_chart():
+    # Avg: 0.00018, Rate: 5,491.91
     view = View(data=list(itertools.chain(
         itertools.repeat(0, 128),
         itertools.repeat(1, 128)
@@ -85,6 +86,7 @@ def test_render_simple_chart():
 
 @approve_image
 def test_render_chart():
+    # Avg: 0.00019, Rate: 5,325.79
     window = Window(ts,
                     duration=timedelta(minutes=2),
                     samples=256,
@@ -98,9 +100,27 @@ def test_render_chart():
     ])
 
 
+# start = 0.04 / 24.52
+def test_render_moving_chart():
+    window = Window(ts,
+                    duration=timedelta(minutes=2),
+                    samples=256,
+                    key=lambda e: e.alt.magnitude if e.alt else 0,
+                    missing=None)
+
+    stepper = iter(ts.stepper(timedelta(seconds=1)).steps())
+
+    def get_view():
+        return window.view(next(stepper))
+
+    return time_rendering(name="Moving Chart", repeat=50, widgets=[
+        SimpleChart(Coordinate(50, 50), get_view, filled=True, font=font)
+    ])
+
+
 @approve_image
 def test_render_big_metric():
-    # 9 ms to beat -> 0.3ms
+    # Avg: 0.00026, Rate: 3,871.63
     return time_rendering(name="big speed", widgets=[
         BigMetric(Coordinate(10, 10), title=lambda: "MPH", value=lambda: "27", font=font)
     ])
@@ -108,7 +128,7 @@ def test_render_big_metric():
 
 @approve_image
 def test_render_comparative_energy():
-    # 32ms to beat -> 1.4ms
+    # Avg: 0.00148, Rate: 676.70
     speed = units.Quantity(25, units.mph)
 
     return time_rendering(name="comparative energy",
