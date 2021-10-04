@@ -249,3 +249,21 @@ def test_taking_a_view():
     view = window.view(ts.max)
     assert view.version == 2
 
+
+def test_stepping_through_time():
+    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
+    stepper = ts.stepper(timedelta(minutes=1))
+
+    steps = []
+
+    # its exactly 10 mins long, so we have 0,1,2,3,4,5,6,7,8,9,10 mins.
+    assert len(stepper) == 11
+
+    for step in stepper.steps():
+        steps.append(step)
+
+    assert len(steps) == 11
+    assert steps[0] == datetime_of(0)
+    assert steps[1] == datetime_of(60)
+    assert steps[10] == datetime_of(60 * 10)
+

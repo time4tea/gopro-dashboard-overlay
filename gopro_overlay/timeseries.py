@@ -59,6 +59,23 @@ class Entry:
         return Entry(dt, **items)
 
 
+class Stepper:
+
+    def __init__(self, timeseries, step: timedelta):
+        self._timeseries = timeseries
+        self._step = step
+
+    def __len__(self):
+        return int((self._timeseries.max - self._timeseries.min) / self._step) + 1
+
+    def steps(self):
+        end = self._timeseries.max
+        running = self._timeseries.min
+        while running <= end:
+            yield running
+            running += self._step
+
+
 class Timeseries:
 
     def __init__(self, entries=None):
@@ -74,6 +91,9 @@ class Timeseries:
     @property
     def max(self) -> datetime.datetime:
         return self.dates[-1]
+
+    def stepper(self, step: timedelta):
+        return Stepper(self, step)
 
     def __len__(self):
         return len(self.dates)
@@ -197,4 +217,3 @@ class Window:
         self.last_view = View(data, self.version)
 
         return self.last_view
-

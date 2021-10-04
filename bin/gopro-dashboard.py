@@ -21,22 +21,6 @@ from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 
 
-class ProductionClock:
-
-    def __init__(self, timeseries):
-        self._timeseries = timeseries
-
-    def steps(self, step: timedelta):
-        return (self._timeseries.max - self._timeseries.min) / step
-
-    def timerange(self, step: timedelta):
-        end = self._timeseries.max
-        running = self._timeseries.min
-        while running <= end:
-            yield running
-            running += step
-
-
 def temp_file_name():
     handle, path = tempfile.mkstemp()
     os.close(handle)
@@ -113,8 +97,6 @@ if __name__ == "__main__":
 
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
-            clock = ProductionClock(timeseries)
-
             if args.layout == "default":
                 overlay = Layout(timeseries, renderer, privacy_zone=zone)
             elif args.layout == "speed-awareness":
@@ -136,9 +118,8 @@ if __name__ == "__main__":
             byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
-            frame_time = timedelta(seconds=0.1)
-
-            frames_to_render = clock.steps(frame_time)
+            # Draw an overlay frame every 0.1 seconds
+            stepper = timeseries.stepper(timedelta(seconds=0.1))
             progress = progressbar.ProgressBar(
                 widgets=[
                     'Render: ',
@@ -147,12 +128,12 @@ if __name__ == "__main__":
                     progressbar.Bar(), ' ', progressbar.ETA()
                 ],
                 poll_interval=2.0,
-                max_value=frames_to_render
+                max_value=len(stepper)
             )
 
             try:
                 with ffmpeg.generate() as writer:
-                    for index, dt in enumerate(clock.timerange(step=frame_time)):
+                    for index, dt in enumerate(stepper.steps()):
                         progress.update(index)
                         frame = draw_timer.time(lambda: overlay.draw(dt))
                         tobytes = byte_timer.time(lambda: frame.tobytes())

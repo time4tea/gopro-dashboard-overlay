@@ -61,7 +61,7 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
     current_dt = datetime.datetime.fromtimestamp(0)
     end_dt = current_dt + length
 
-    while current_dt < end_dt:
+    while current_dt <= end_dt:
         ts.add(
             Entry(
                 current_dt,
