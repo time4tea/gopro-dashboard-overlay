@@ -32,7 +32,10 @@ class PoorTimer:
 
     @property
     def avg(self):
-        return self.seconds / self.count
+        if self.count > 0:
+            return self.seconds / self.count
+        else:
+            return 0
 
     def __str__(self):
         return f"Timer({self.name} - Called: {self.count}, Total: {self.seconds}, Avg: {self.avg})"
