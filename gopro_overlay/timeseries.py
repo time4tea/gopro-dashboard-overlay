@@ -180,12 +180,13 @@ class View:
 
 class Window:
 
-    def __init__(self, ts, duration, samples, key=lambda e: e.alt, missing=None):
+    def __init__(self, ts, duration, samples, key=lambda e: 1, fmt=lambda v: v, missing=None):
         self.ts = ts
         self.duration = duration
         self.samples = samples
         self.tick = duration / samples
         self.key = key
+        self.fmt = fmt
         self.missing = missing
 
         self.last_time = None
@@ -209,7 +210,11 @@ class Window:
             if current < self.ts.min or current > self.ts.max:
                 data.append(self.missing)
             else:
-                data.append(self.key(self.ts.get(current)))
+                value = self.key(self.ts.get(current))
+                if value is not None:
+                    data.append(self.fmt(value))
+                else:
+                    data.append(self.missing)
             current += self.tick
 
         self.version += 1

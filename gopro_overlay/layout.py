@@ -113,7 +113,7 @@ class Layout:
         font_metric = ImageFont.truetype(font="Roboto-Medium.ttf", size=32)
 
         window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
-                        key=lambda e: e.alt.to("meter").magnitude)
+                        key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
 
         self.scene = Scene(
             list(itertools.chain(

@@ -19,6 +19,7 @@ renderer = CachingRenderer()
 
 @approve_image
 def test_render_default_layout():
+    # Avg: 0.02276, Rate: 43.93
     with renderer.open() as map_renderer:
         return time_layout("default", Layout(timeseries, map_renderer))
 

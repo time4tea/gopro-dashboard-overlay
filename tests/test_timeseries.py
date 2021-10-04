@@ -250,6 +250,14 @@ def test_taking_a_view():
     assert view.version == 2
 
 
+def test_missing_window_entries():
+    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
+
+    window = Window(ts, timedelta(minutes=1), samples=100, key=lambda e: e.bob, fmt=lambda v: v.magnitude, missing=0)
+
+    window.view(ts.min)
+
+
 def test_stepping_through_time():
     ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
     stepper = ts.stepper(timedelta(minutes=1))
@@ -266,4 +274,3 @@ def test_stepping_through_time():
     assert steps[0] == datetime_of(0)
     assert steps[1] == datetime_of(60)
     assert steps[10] == datetime_of(60 * 10)
-

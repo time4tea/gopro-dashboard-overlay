@@ -90,12 +90,24 @@ def test_render_chart():
     window = Window(ts,
                     duration=timedelta(minutes=2),
                     samples=256,
-                    key=lambda e: e.alt.magnitude if e.alt else 0,
-                    missing=None)
+                    key=lambda e: e.alt, fmt=lambda v: v.magnitude)
 
     view = window.view(ts.min)
 
     return time_rendering(name="Simple Chart with view", widgets=[
+        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
+    ])
+
+
+def test_render_chart_with_no_data():
+    window = Window(ts,
+                    duration=timedelta(minutes=2),
+                    samples=256,
+                    key=lambda e: e.bob, fmt=lambda v: v.magnitude)
+
+    view = window.view(ts.min)
+
+    return time_rendering(name="Simple Chart with no valid data", widgets=[
         SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
     ])
 

@@ -29,10 +29,13 @@ class SimpleChart:
             self.image = Image.new("RGBA", size, (0, 0, 0, 0))
             draw = ImageDraw.Draw(self.image)
 
-            max_val = max(filter(None.__ne__, data))
-            min_val = min(filter(None.__ne__, data))
+            max_val = max(filter(None.__ne__, data), default=0)
+            min_val = min(filter(None.__ne__, data), default=0)
 
             range_val = max_val - min_val
+
+            if range_val == 0:
+                range_val = 1
 
             scale_y = size[1] / (range_val * 1.1)
 
@@ -56,7 +59,9 @@ class SimpleChart:
                 draw.text((10, 40), f"{min_val:.0f}", font=self.font, fill=(255, 255, 255), stroke_width=2,
                           stroke_fill=(0, 0, 0))
 
-            draw_marker(draw, (size[0] / 2, y_pos(data[int(size[0] / 2)])), 4, fill=(255, 0, 0))
+            marker_val = data[int(size[0] / 2)]
+            if marker_val:
+                draw_marker(draw, (size[0] / 2, y_pos(marker_val)), 4, fill=(255, 0, 0))
 
             self.image.putalpha(int(255 * 0.7))
 
