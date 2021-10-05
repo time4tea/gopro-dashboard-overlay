@@ -6,7 +6,7 @@ from gopro_overlay import fake
 from gopro_overlay.gpmd import Point
 from gopro_overlay.timeseries import Timeseries, Entry, Window
 from gopro_overlay.timeseries_process import process_ses
-from gopro_overlay.units import units
+from gopro_overlay.units import units, metres
 
 TUP = collections.namedtuple("TUP", "time lat lon alt hr cad atemp")
 
@@ -208,10 +208,10 @@ def test_interpolating_quantity():
     dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
     ts = Timeseries()
-    ts.add(Entry(dt1, alt=units.Quantity(10, units.m)))
-    ts.add(Entry(dt2, alt=units.Quantity(20, units.m)))
+    ts.add(Entry(dt1, alt=metres(10)))
+    ts.add(Entry(dt2, alt=metres(20)))
 
-    assert ts.get(dt1 + timedelta(seconds=0.1)).alt == units.Quantity(11, units.m)
+    assert ts.get(dt1 + timedelta(seconds=0.1)).alt == metres(11)
 
 
 def test_filling_missing_entries():
@@ -219,9 +219,9 @@ def test_filling_missing_entries():
     dt2 = dt1 + timedelta(seconds=1)
     dt3 = dt2 + timedelta(seconds=1)
     ts = Timeseries()
-    ts.add(Entry(dt1, alt=units.Quantity(10, units.m)))
+    ts.add(Entry(dt1, alt=metres(10)))
     # no entry for dt2
-    ts.add(Entry(dt3, alt=units.Quantity(30, units.m)))
+    ts.add(Entry(dt3, alt=metres(30)))
 
     assert dt1 in ts.dates
     assert dt2 not in ts.dates

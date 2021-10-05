@@ -69,8 +69,3 @@ def load_timeseries(filepath, units):
 
     return gpx_timeseries
 
-
-if __name__ == "__main__":
-
-    for point in load('/home/richja/Downloads/City_Loop.gpx', units):
-        print(point)

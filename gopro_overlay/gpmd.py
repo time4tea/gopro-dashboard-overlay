@@ -118,7 +118,8 @@ interpreters = {
 
 class GPMDInterpreted:
 
-    def __init__(self, item, interpreted):
+    def __init__(self, fourcc, item, interpreted):
+        self.fourcc = fourcc
         self.item = item
         self.interpreted = interpreted
 
@@ -132,22 +133,26 @@ class GPMDInterpreted:
 
 class GPMDInterpreter:
 
-    def interpret(self, items):
-        for item in items:
+    def __init__(self, items):
+        self.items = items
+
+    def interpret(self):
+        for item in self.items():
             yield GPMDInterpreted(
+                item.fourcc,
                 item,
-                interpreters[item.code](item) if item.code in interpreters else None
+                interpreters[item.fourcc](item) if item.fourcc in interpreters else None
             )
 
 
 class GPMDItem:
 
-    def __init__(self, code, type, repeat, padded_length, rawdata):
+    def __init__(self, fourcc, type, repeat, padded_length, rawdata):
         self._rawdata = rawdata
         self._padded_length = padded_length
         self._type = type
         self._repeat = repeat
-        self._code = code
+        self._fourcc = fourcc
 
     @property
     def repeat(self):
@@ -162,8 +167,8 @@ class GPMDItem:
         return self._rawdata
 
     @property
-    def code(self):
-        return self._code
+    def fourcc(self):
+        return self._fourcc
 
     @property
     def size(self):
@@ -194,7 +199,7 @@ class GPMDItem:
             rawdata = ' '.join(format(x, '02x') for x in self.rawdata)
             rawdatas = self.rawdata[0:50]
 
-        return f"GPMDItem: Code={self.code} Type={self.type_char} Len={self.size} [{rawdata}] [{rawdatas}]"
+        return f"GPMDItem: FourCC={self.fourcc} Type={self.type_char} Len={self.size} [{rawdata}] [{rawdatas}]"
 
     @staticmethod
     def extend(n, base=4):
@@ -216,10 +221,6 @@ class GPMDParser:
             yield item
             offset += item.size
 
-    @staticmethod
-    def parser(arr):
-        return GPMDParser(arr)
-
 
 class SampleCounter:
 
@@ -231,9 +232,9 @@ class SampleCounter:
         self._current_sample_count = 0
 
     def accept(self, interpreted):
-        if interpreted.item.code == "TSMP":
+        if interpreted.fourcc == "TSMP":
             self._saved = interpreted
-        elif interpreted.item.code == self.stream:
+        elif interpreted.fourcc == self.stream:
             sample_count = self._saved.interpreted
             if self._last_sample_count is None:
                 self._current_sample_count = sample_count
@@ -248,11 +249,11 @@ class SampleCounter:
 
 class StreamClock:
     def __init__(self, step=None):
-        self.step = step if step else (1001.0 / 1000.0)
+        self.step = step if step else 1001
         self.clock = -self.step
 
     def accept(self, interpreted):
-        if interpreted.item.code == "DEVC":
+        if interpreted.fourcc == "DEVC":
             self.clock += self.step
 
     def at(self, index, hertz):
@@ -278,7 +279,7 @@ class GPS5Scaler:
 
     def accept(self, interpreted):
 
-        item_type = interpreted.item.code
+        item_type = interpreted.fourcc
 
         self._samples.accept(interpreted)
         self._clock.accept(interpreted)
@@ -343,7 +344,7 @@ class XYZScaler:
 
     def accept(self, interpreted):
 
-        item_type = interpreted.item.code
+        item_type = interpreted.fourcc
 
         self._samples.accept(interpreted)
         self._clock.accept(interpreted)
@@ -387,18 +388,21 @@ class StreamScalers:
         [s.accept(interpreted) for s in self.scalers]
 
 
-def timeseries_from(filepath, units, unhandled=lambda x: None):
-    parser = GPMDParser.parser(load_gpmd_from(filepath))
+def timeseries_from(filepath, units, unhandled=lambda x: None, on_drop=lambda reason: None):
+    meta = GPMDInterpreter(GPMDParser(load_gpmd_from(filepath)).items).interpret()
 
     timeseries = Timeseries()
-    gps_scaler = GPS5Scaler(units, max_dop=6.0, on_item=lambda entry: timeseries.add(entry))
-    interpreter = GPMDInterpreter()
+    gps_scaler = GPS5Scaler(units=units,
+                            max_dop=6.0,
+                            on_item=lambda entry: timeseries.add(entry),
+                            on_drop=on_drop
+                            )
 
-    for interpreted in interpreter.interpret(parser.items()):
-        if interpreted.understood:
-            gps_scaler.accept(interpreted)
+    for item in meta:
+        if item.understood:
+            gps_scaler.accept(item)
         else:
-            unhandled(interpreted.item)
+            unhandled(item.item)
 
     return timeseries
 
@@ -419,41 +423,3 @@ class Clocked:
         if self.clocks is None:
             self.clocks = sorted(list(self.items.keys()))
         return self.items[self.clocks[bisect.bisect_right(self.clocks, clock)]]
-
-
-
-if __name__ == "__main__":
-
-    from units import units
-
-    filename = "GH010064"
-
-    parser = GPMDParser.parser(load_gpmd_from(f"/data/richja/gopro/{filename}.MP4"))
-
-    clocked = Clocked()
-
-    timeseries = Timeseries()
-
-    scalers = StreamScalers(
-        GPS5Scaler(units, on_item=lambda entry: timeseries.add(entry)),
-        XYZScaler(units, stream_name="ACCL", on_item=lambda item: clocked.add(item)),
-        XYZScaler(units, stream_name="GYRO", on_item=lambda item: clocked.add(item)),
-    )
-
-    interpreter = GPMDInterpreter()
-
-    millis = 0
-    last_gps = None
-
-    millis_to_diff = {}
-
-    counter = collections.Counter()
-
-    for interpreted in interpreter.interpret(parser.items()):
-
-        if interpreted.understood:
-            scalers.accept(interpreted)
-
-    print(millis_to_diff)
-
-    print(counter)
