@@ -54,7 +54,6 @@ class FFMPEGGenerate:
             "-i", "-",
             "-r", "30",
             "-vcodec", "libx264",
-            "-crf", "18",
             "-preset", "veryfast",
             self.output
         ]
@@ -91,7 +90,6 @@ class FFMPEGOverlay:
             "-r", "30",
             f"-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
             "-vcodec", "libx264",
-            "-crf", "18",
             "-preset", "veryfast",
             self.output
         ]
