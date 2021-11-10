@@ -14,5 +14,3 @@ def smart_open(filename=None):
     finally:
         if fh is not sys.stdout:
             fh.close()
-
-
