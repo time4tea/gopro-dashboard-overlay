@@ -32,6 +32,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Overlay gadgets on to GoPro MP4")
 
     parser.add_argument("input", help="Input MP4 file")
+
+    parser.add_argument("--font", help="Selects a font")
+    parser.set_defaults(font="Roboto-Medium.ttf")
+
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
@@ -98,7 +102,7 @@ if __name__ == "__main__":
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
             if args.layout == "default":
-                overlay = Layout(timeseries, renderer, privacy_zone=zone)
+                overlay = Layout(timeseries, renderer, privacy_zone=zone, font_name=args.font)
             elif args.layout == "speed-awareness":
                 overlay = SpeedAwarenessLayout(timeseries, renderer)
             else:
