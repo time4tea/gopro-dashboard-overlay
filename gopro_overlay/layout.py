@@ -118,12 +118,8 @@ class Layout:
         self.timeseries = timeseries
         self._entry = None
 
-        try:
-            font_title = load_font(font=font_name, size=16)
-            font_metric = load_font(font=font_name, size=32)
-        except OSError as e:
-            print(f"Can't find {font_name}", file=stderr)
-            raise e
+        font_title = load_font(font=font_name, size=16)
+        font_metric = load_font(font=font_name, size=32)
 
         window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
                         key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
