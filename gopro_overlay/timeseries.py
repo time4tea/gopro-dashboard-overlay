@@ -1,5 +1,6 @@
 import bisect
 import datetime
+import itertools
 from datetime import timedelta
 
 from .point import Point
@@ -9,6 +10,11 @@ from .units import units
 def entry_wants(v):
     return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.Quantity) or isinstance(v, Point)
 
+def pairwise(iterable): # Added in itertools v3.10
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 class Entry:
 
@@ -147,11 +153,14 @@ class Timeseries:
 
     def backfill(self, delta):
         to_add = []
-        current = self.min
-        while current <= self.max:
-            if current not in self.entries:
-                to_add.append(self.get(current))
-            current += delta
+        for a, b in pairwise(self.dates):
+            if b - a > delta:
+                num_of_points = int((b - a) / delta)
+                seg_len = (b - a) / (num_of_points + 1)
+                nxt = a + seg_len
+                for _ in range(num_of_points):
+                    to_add.append(self.get(nxt))
+                    nxt += seg_len
         if to_add:
             self.add(*to_add)
         return len(to_add)
