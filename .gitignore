@@ -18,4 +18,5 @@ tests/approvals/*.actual.png
 tests/approvals/*.diff.png
 tests/approvals/*.diff_over_approved.png
 
+**/__pycache__/
 

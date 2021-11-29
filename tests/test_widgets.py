@@ -15,7 +15,8 @@ from gopro_overlay.widgets_info import LeftInfoPanel, BigMetric, ComparativeEner
 from tests.approval import approve_image
 from tests.testenvironment import is_ci
 
-font = ImageFont.truetype(font="Roboto-Medium.ttf", size=18)
+# font = ImageFont.load_default()
+font = ImageFont.truetype(font='tests/Roboto-Medium.ttf', size=18)
 title_font = font.font_variant(size=16)
 
 # Need reproducible results for approval tests
