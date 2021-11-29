@@ -1,6 +1,7 @@
 import bisect
 import datetime
 import itertools
+import math
 from datetime import timedelta
 
 from .point import Point
@@ -155,10 +156,10 @@ class Timeseries:
         to_add = []
         for a, b in pairwise(self.dates):
             if b - a > delta:
-                num_of_points = int((b - a) / delta)
-                seg_len = (b - a) / (num_of_points + 1)
+                num_of_segments = int(math.ceil((b - a) / delta))
+                seg_len = (b - a) / num_of_segments
                 nxt = a + seg_len
-                for _ in range(num_of_points):
+                for _ in range(num_of_segments - 1):
                     to_add.append(self.get(nxt))
                     nxt += seg_len
         if to_add:
