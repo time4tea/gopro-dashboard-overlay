@@ -11,6 +11,7 @@ import progressbar
 
 from gopro_overlay import timeseries_process, geo
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
+from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
 from gopro_overlay.gpx import load_timeseries
@@ -33,8 +34,7 @@ if __name__ == "__main__":
 
     parser.add_argument("input", help="Input MP4 file")
 
-    parser.add_argument("--font", help="Selects a font")
-    parser.set_defaults(font="Roboto-Medium.ttf")
+    parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
 
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
@@ -57,6 +57,8 @@ if __name__ == "__main__":
     parser.add_argument("output", help="Output MP4 file")
 
     args = parser.parse_args()
+
+    font = load_font(args.font)
 
     with PoorTimer("program").timing():
 
@@ -102,9 +104,9 @@ if __name__ == "__main__":
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
             if args.layout == "default":
-                overlay = Layout(timeseries, renderer, privacy_zone=zone, font_name=args.font)
+                overlay = Layout(timeseries, renderer, privacy_zone=zone, font=font)
             elif args.layout == "speed-awareness":
-                overlay = SpeedAwarenessLayout(timeseries, renderer)
+                overlay = SpeedAwarenessLayout(timeseries, renderer, font=font)
             else:
                 raise ValueError(f"Unsupported layout {args.layout}")
 

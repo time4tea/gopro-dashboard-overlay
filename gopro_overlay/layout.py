@@ -1,6 +1,5 @@
 import itertools
 from datetime import timedelta
-from sys import stderr
 
 from PIL import ImageFont
 
@@ -59,22 +58,14 @@ def big_mph(entry, font_title):
     ]
 
 
-def load_font(font: str, size: int):
-    try:
-        return ImageFont.truetype(font=font, size=size)
-    except OSError as e:
-        print(f"Can't find the font {font}", file=stderr)
-        raise e
-
-
 class SpeedAwarenessLayout:
-    def __init__(self, timeseries, map_renderer, font_name: str):
+    def __init__(self, timeseries, map_renderer, font: ImageFont):
         self.map_renderer = map_renderer
         self.timeseries = timeseries
         self._entry = None
 
-        font_title = load_font(font=font_name, size=16)
-        font_metric = load_font(font=font_name, size=32)
+        font_title = font.font_variant(size=16)
+        font_metric = font.font_variant(size=32)
 
         self.scene = Scene(
             list(itertools.chain(
@@ -113,13 +104,13 @@ class SpeedAwarenessLayout:
 
 class Layout:
 
-    def __init__(self, timeseries, map_renderer, privacy_zone=NoPrivacyZone(), font_name: str = None):
+    def __init__(self, timeseries, map_renderer, font: ImageFont, privacy_zone=NoPrivacyZone()):
         self.map_renderer = map_renderer
         self.timeseries = timeseries
         self._entry = None
 
-        font_title = load_font(font=font_name, size=16)
-        font_metric = load_font(font=font_name, size=32)
+        font_title = font.font_variant(size=16)
+        font_metric = font.font_variant(size=32)
 
         window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
                         key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)

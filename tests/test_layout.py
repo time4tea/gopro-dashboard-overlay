@@ -2,6 +2,7 @@ import random
 from datetime import timedelta
 
 from gopro_overlay import fake
+from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Layout, SpeedAwarenessLayout
 from gopro_overlay.timing import PoorTimer
@@ -16,20 +17,20 @@ timeseries = fake.fake_timeseries(length=timedelta(minutes=10), step=timedelta(s
 
 renderer = CachingRenderer()
 
-default_test_font = 'tests/Roboto-Medium.ttf'
+font = load_font("Roboto-Medium.ttf")
 
 
 @approve_image
 def test_render_default_layout():
     # Avg: 0.02276, Rate: 43.93
     with renderer.open() as map_renderer:
-        return time_layout("default", Layout(timeseries, map_renderer, font_name=default_test_font))
+        return time_layout("default", Layout(timeseries, map_renderer, font=font))
 
 
 @approve_image
 def test_render_speed_layout():
     with renderer.open() as map_renderer:
-        return time_layout("speed", SpeedAwarenessLayout(timeseries, map_renderer, font_name=default_test_font))
+        return time_layout("speed", SpeedAwarenessLayout(timeseries, map_renderer, font=font))
 
 
 def time_layout(name, layout, repeat=20):

@@ -24,7 +24,8 @@ def find_gpmd_track(filepath):
     if match:
         return int(match.group(1))
     else:
-        print("Error: the data stream doesn't contain the GoPro metadata. No 'GoPro MET' binary stream found.")
+        raise IOError("Invalid Stream? The data stream doesn't contain the GoPro metadata. "
+                      "No 'GoPro MET' binary stream found.")
 
 
 def load_gpmd_from(filepath):
