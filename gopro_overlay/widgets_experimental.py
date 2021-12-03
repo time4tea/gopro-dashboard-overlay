@@ -1,10 +1,10 @@
 import bisect
 
 import matplotlib
+import matplotlib.pyplot as plt
+from PIL import Image
 
 matplotlib.use("Agg")
-
-from PIL import Image
 
 
 class SparkLine:
@@ -29,8 +29,6 @@ class SparkLine:
             self.timeseries.process(process)
 
     def draw(self, image, draw):
-        import matplotlib.pyplot as plt
-
         self._maybe_init()
 
         data = self.cadences

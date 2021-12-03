@@ -24,7 +24,8 @@ map_styles = list(itertools.chain(
 def thunderforest_attrs(style):
     return {
         "name": "ThunderForest Map",
-        "attribution": "Maps © Thunderforest\nhttp://www.thunderforest.com/\nData © OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
+        "attribution": "Maps © Thunderforest\nhttp://www.thunderforest.com/\nData © OpenStreetMap "
+                       "contributors\nhttp://www.openstreetmap.org/copyright",
         "url": "https://{subdomain}.tile.thunderforest.com/$MAPSTYLE$/{z}/{x}/{y}.{ext}?apikey={api_key}".replace(
             "$MAPSTYLE$", style),
         "subdomains": ["a", "b", "c"],
@@ -44,13 +45,14 @@ def provider_for_style(name, api_key):
 
 
 def dbm_downloader(dbm_file):
-    get = lambda key: dbm_file.get(key, None)
+    def get_key(key):
+        return dbm_file.get(key, None)
 
-    def set(key, value):
+    def set_key(key, value):
         if value:
             dbm_file.setdefault(key, value)
 
-    return partial(caching_downloader, get, set, fetch_tiles)
+    return partial(caching_downloader, get_key, set_key, fetch_tiles)
 
 
 def dbm_caching_renderer(provider, dbm_file):

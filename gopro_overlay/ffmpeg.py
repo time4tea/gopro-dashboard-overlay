@@ -18,7 +18,8 @@ def invoke(cmd, **kwargs):
 def find_gpmd_track(filepath):
     ffprobe_output = str(invoke(["ffprobe", filepath]).stderr)  # str here just for PyCharm - its already a string
 
-    #           Stream #0:0(eng): Video: hevc (Main) (hvc1 / 0x31637668), yuvj420p(pc, bt709), 3840x2160 [SAR 1:1 DAR 16:9], 99919 kb/s, 59.95 fps, 59.94 tbr, 60k tbn, 59.94 tbc (default)
+    #           Stream #0:0(eng): Video: hevc (Main) (hvc1 / 0x31637668), yuvj420p(pc, bt709),
+    #           3840x2160 [SAR 1:1 DAR 16:9], 99919 kb/s, 59.95 fps, 59.94 tbr, 60k tbn, 59.94 tbc (default)
     # look for: Stream #0:3(eng): Data: bin_data (gpmd / 0x646D7067), 61 kb/s (default)
     match = re.search(r'Stream #\d:(\d)\(.+\): Data: \w+ \(gpmd', ffprobe_output)
     if match:
@@ -92,7 +93,7 @@ class FFMPEGOverlay:
             "-pix_fmt", "rgba",
             "-i", "-",
             "-r", "30",
-            f"-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
+            "-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
             "-vcodec", "libx264",
             "-preset", "veryfast",
             self.output

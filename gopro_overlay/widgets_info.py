@@ -74,12 +74,13 @@ class ComparativeEnergy:
             return f"{thing.to('kg').m:,} kg"
 
         def thing(at, icon, thing, thing_model):
-            multiplier = f"{ (thing / person).m:,.1f}x"
+            multiplier = f"{(thing / person).m:,.1f}x"
             return [
                 simple_icon(at + Coordinate(230, 0), icon),
-                CachingText(at + Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour, align="centre"),
+                CachingText(at + Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour,
+                            align="centre"),
                 CachingText(at + Coordinate(200, 55), lambda: multiplier, small_font, align="right",
-                     fill=multiplier_colour),
+                            fill=multiplier_colour),
                 CachingText(at + Coordinate(200, 5), lambda: model_output(thing_model), font, align="right"),
             ]
 

@@ -11,11 +11,13 @@ from .units import units
 def entry_wants(v):
     return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.Quantity) or isinstance(v, Point)
 
-def pairwise(iterable): # Added in itertools v3.10
+
+def pairwise(iterable):  # Added in itertools v3.10
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = itertools.tee(iterable)
     next(b, None)
     return zip(a, b)
+
 
 class Entry:
 

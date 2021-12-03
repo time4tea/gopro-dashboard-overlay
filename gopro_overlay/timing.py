@@ -45,4 +45,5 @@ class PoorTimer:
         return 1 / a
 
     def __str__(self):
-        return f"Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, Avg: {self.avg:.5f}, Rate: {self.rate:,.2f})"
+        return f"Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, " \
+               f"Avg: {self.avg:.5f}, Rate: {self.rate:,.2f})"

@@ -4,7 +4,6 @@ import gpxpy
 
 from .point import Point
 from .timeseries import Timeseries, Entry
-from .units import units
 
 GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp")
 
@@ -68,4 +67,3 @@ def load_timeseries(filepath, units):
     gpx_timeseries.add(*points)
 
     return gpx_timeseries
-
