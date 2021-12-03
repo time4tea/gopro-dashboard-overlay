@@ -13,6 +13,10 @@ dist:
 
 .PHONY: test
 test:
+	TEST=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all tests
+
+.PHONY: ci
+ci:
 	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all tests
 
 .PHONY: flake

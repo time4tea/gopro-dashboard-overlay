@@ -24,7 +24,7 @@ jobs:
         make venv req
     - name: Test with pytest
       run: |
-        make test
+        make ci
     - name: Upload build artefacts
       if: failure()
       uses: actions/upload-artifact@v2

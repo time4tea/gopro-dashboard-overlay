@@ -13,7 +13,7 @@ from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText
 from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_info import LeftInfoPanel, BigMetric, ComparativeEnergy
 from tests.approval import approve_image
-from tests.testenvironment import is_ci
+from tests.testenvironment import is_ci, is_make
 
 font = ImageFont.truetype(font='Roboto-Medium.ttf', size=18)
 title_font = font.font_variant(size=16)
@@ -165,7 +165,7 @@ def time_rendering(name, widgets, dimensions=None, repeat=100):
     for i in range(0, repeat):
         draw = timer.time(lambda: scene.draw())
 
-    if not is_ci():
+    if not is_make():
         draw.show()
 
     print(timer)

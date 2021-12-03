@@ -7,7 +7,7 @@ from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Layout, SpeedAwarenessLayout
 from gopro_overlay.timing import PoorTimer
 from tests.approval import approve_image
-from tests.testenvironment import is_ci
+from tests.testenvironment import is_ci, is_make
 
 # Need reproducible results for approval tests
 rng = random.Random()
@@ -41,7 +41,7 @@ def time_layout(name, layout, repeat=20):
 
     print(timer)
 
-    if not is_ci():
+    if not is_make():
         draw.show()
 
     return draw
