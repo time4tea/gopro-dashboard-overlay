@@ -6,6 +6,4 @@ def is_ci():
 
 
 def is_make():
-    get = os.environ.get("TEST")
-    print(f"Test is {get}")
-    return get is not None
+    return is_ci() or os.environ.get("TEST") is not None
