@@ -30,7 +30,10 @@ def temp_file_name():
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Overlay gadgets on to GoPro MP4")
+    parser = argparse.ArgumentParser(
+        description="Overlay gadgets on to GoPro MP4",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument("input", help="Input MP4 file")
 
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     parser.set_defaults(show_ffmpeg=False)
 
     parser.add_argument("--output-size", default="1080", type=int,
-                        help="Vertical size of output movie - default is 1080")
+                        help="Vertical size of output movie")
 
     parser.add_argument("output", help="Output MP4 file")
 

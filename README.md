@@ -44,9 +44,10 @@ program will use this instead for the GPS.
 Privacy allows you to set a privacy zone. Various widgets will not draw points within that zone.
 
 ```
-usage: gopro-dashboard.py [-h] [--gpx GPX] [--privacy PRIVACY] [--no-overlay]
+usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--privacy PRIVACY] [--no-overlay]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas}]
-                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness}] [--show-ffmpeg] [--output-size OUTPUT_SIZE]
+                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness}] [--show-ffmpeg]
+                          [--output-size OUTPUT_SIZE]
                           input output
 
 Overlay gadgets on to GoPro MP4
@@ -57,18 +58,19 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --gpx GPX             Use GPX file for location / alt / hr / cadence / temp
-  --privacy PRIVACY     Set privacy zone (lat,lon,km)
-  --no-overlay          Only output the gadgets, don't overlay
+  --font FONT           Selects a font (default: Roboto-Medium.ttf)
+  --gpx GPX             Use GPX file for location / alt / hr / cadence / temp (default: None)
+  --privacy PRIVACY     Set privacy zone (lat,lon,km) (default: None)
+  --no-overlay          Only output the gadgets, don't overlay (default: True)
   --map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas}
-                        Style of map to render
+                        Style of map to render (default: osm)
   --map-api-key MAP_API_KEY
-                        API Key for map provider, if required (default OSM doesn't need one)
+                        API Key for map provider, if required (default OSM doesn't need one) (default: None)
   --layout {default,speed-awareness}
-                        Choose graphics layout
-  --show-ffmpeg         Show FFMPEG output (not usually useful)
+                        Choose graphics layout (default: default)
+  --show-ffmpeg         Show FFMPEG output (not usually useful) (default: False)
   --output-size OUTPUT_SIZE
-                        Vertical size of output movie - default is 1080
+                        Vertical size of output movie (default: 1080)
 ```
 
 ## Example
