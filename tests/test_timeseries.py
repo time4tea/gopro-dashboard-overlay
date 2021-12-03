@@ -232,6 +232,52 @@ def test_filling_missing_entries():
     assert ts.get(dt2).alt.magnitude == 20
 
 
+def test_filling_missing_entries_2():
+    dt1 = datetime_of(1631178710)
+    dt2 = dt1 + timedelta(seconds=0.9)
+    dt3 = dt2 + timedelta(seconds=0.9)
+    ts = Timeseries()
+    ts.add(Entry(dt1, alt=metres(10)))
+    # no entry for dt2
+    ts.add(Entry(dt3, alt=metres(30)))
+
+    assert dt1 in ts.dates
+    assert dt2 not in ts.dates
+
+    filled = ts.backfill(timedelta(seconds=1))
+    assert filled == 1
+    assert dt2 in ts.dates
+    assert ts.get(dt2).alt.magnitude == 20
+
+
+def test_no_filling_missing_entries():
+    dt1 = datetime_of(1631178710)
+    dt2 = dt1 + timedelta(seconds=1)
+    ts = Timeseries()
+    ts.add(Entry(dt1, alt=metres(10)))
+    ts.add(Entry(dt2, alt=metres(20)))
+
+    assert dt1 in ts.dates
+    assert dt2 in ts.dates
+
+    filled = ts.backfill(timedelta(seconds=1))
+    assert filled == 0
+
+
+def test_no_filling_missing_entries_2():
+    dt1 = datetime_of(1631178710)
+    dt2 = dt1 + timedelta(seconds=0.9)
+    ts = Timeseries()
+    ts.add(Entry(dt1, alt=metres(10)))
+    ts.add(Entry(dt2, alt=metres(19)))
+
+    assert dt1 in ts.dates
+    assert dt2 in ts.dates
+
+    filled = ts.backfill(timedelta(seconds=1))
+    assert filled == 0
+
+
 def test_taking_a_view():
     ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
 
