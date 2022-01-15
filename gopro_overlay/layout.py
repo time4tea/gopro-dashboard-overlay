@@ -84,9 +84,9 @@ class SpeedAwarenessLayout:
                     ComparativeEnergy(Coordinate(450, 850),
                                       font=font_title,
                                       speed=lambda: self._entry.speed,
-                                      person=units.Quantity(60, units.kg),
+                                      person=units.Quantity(84, units.kg),
                                       bike=units.Quantity(12, units.kg),
-                                      car=units.Quantity(2678, units.kg),
+                                      car=units.Quantity(2000, units.kg),
                                       van=units.Quantity(3500, units.kg)
                                       )
 
