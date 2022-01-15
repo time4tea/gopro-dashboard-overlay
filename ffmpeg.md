@@ -12,3 +12,7 @@ ffmpeg -i <input> -vf scale=-1:720  -max_muxing_queue_size 9999 <output>
 ## Extract single frame
 
 ffmpeg -ss <hh:mm:ss.zzzz> -i inputfile.mp4 -vframes 1 -f image2 imagefile.jpg
+
+# Extract section
+
+ffmpeg -ss <hh:mm:ss.zzzz> -to <hh:mm...> -i inputfile.mp4 imagefile-clipped.mp4
