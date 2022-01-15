@@ -1,6 +1,7 @@
 import contextlib
 import re
 import subprocess
+import sys
 from array import array
 
 
@@ -39,6 +40,20 @@ def load_gpmd_from(filepath):
         arr = array("b")
         arr.frombytes(result.stdout)
         return arr
+
+
+def ffmpeg_is_installed():
+    try:
+        invoke(["ffmpeg", "-version"])
+        return True
+    except FileNotFoundError:
+        return False
+
+
+def ffmpeg_libx264_is_installed():
+    output = invoke(["ffmpeg", "-v", "quiet", "-codecs"]).stdout
+    libx264s = [x for x in output.split('\n') if "libx264" in x]
+    return len(libx264s) > 0
 
 
 class FFMPEGGenerate:
@@ -99,18 +114,26 @@ class FFMPEGOverlay:
             self.output
         ]
 
-        if self.redirect:
-            with open(self.redirect, "w") as std:
-                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
-        else:
-            process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
+        try:
+            if self.redirect:
+                with open(self.redirect, "w") as std:
+                    process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
+            else:
+                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
 
-        yield process.stdin
-        process.stdin.close()
-        # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
-        process.wait(5 * 60)
+            yield process.stdin
+            process.stdin.close()
+            # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
+            process.wait(5 * 60)
+        except FileNotFoundError:
+            raise IOError("Unable to start the 'ffmpeg' process - is FFMPEG installed?") from None
+        except BrokenPipeError:
+            if self.redirect:
+                print("FFMPEG Output:")
+                with open(self.redirect) as f:
+                    print("".join(f.readlines()), file=sys.stderr)
+            raise IOError("FFMPEG reported an error - can't continue") from None
 
 
 if __name__ == "__main__":
-    loaded = load_gpmd_from("/data/richja/gopro/GH010064.MP4")
-    print(len(loaded))
+    print(ffmpeg_libx264_is_installed())

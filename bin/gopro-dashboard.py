@@ -10,7 +10,7 @@ from pathlib import Path
 import progressbar
 
 from gopro_overlay import timeseries_process, geo
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
+from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
@@ -60,6 +60,14 @@ if __name__ == "__main__":
     parser.add_argument("output", help="Output MP4 file")
 
     args = parser.parse_args()
+
+    if not ffmpeg_is_installed():
+        print("Can't start ffmpeg - is it installed?")
+        exit(1)
+    if not ffmpeg_libx264_is_installed():
+        print("ffmpeg doesn't seem to handle libx264 files - it needs to be compiled with support for this, "
+              "check your installation")
+        exit(1)
 
     font = load_font(args.font)
 

@@ -12,7 +12,7 @@
 ## Requirements
 
 - Python3.8
-- ffmpeg
+- ffmpeg (you'll need the ffmpeg program installed)
 - Unixy machine (probably, untested on Windows)
 
 
