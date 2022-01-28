@@ -58,6 +58,66 @@ def big_mph(entry, font_title):
     ]
 
 
+def heartbeat(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="heartbeat.png",
+        title=lambda: "BPM",
+        value=lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
+        align="right",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def cadence(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="gauge.png",
+        title=lambda: "RPM",
+        value=lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
+        align="right",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def temperature(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="thermometer.png",
+        title=lambda: "TEMP(C)",
+        value=lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
+        align="right",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def gradient(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="slope-triangle.png",
+        title=lambda: "SLOPE(%)",
+        value=lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
+        align="left",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def altitude(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="mountain.png",
+        title=lambda: "ALT(m)",
+        value=lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
+        align="left",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
 def speed_awareness_layout(renderer, font: ImageFont):
     def create(entry):
         font_title = font.font_variant(size=16)
@@ -121,57 +181,17 @@ def standard_layout(renderer, timeseries, font, privacy=NoPrivacyZone()):
             maps(entry, renderer, timeseries, privacy),
             big_mph(entry, font_title),
             [
-                IconPanel(
-                    at=Coordinate(16, 980),
-                    icon="mountain.png",
-                    title=lambda: "ALT(m)",
-                    value=lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
-                    align="left",
-                    title_font=font_title,
-                    value_font=font_metric
-                ),
-                IconPanel(
-                    at=Coordinate(220, 980),
-                    icon="slope-triangle.png",
-                    title=lambda: "SLOPE(%)",
-                    value=lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
-                    align="left",
-                    title_font=font_title,
-                    value_font=font_metric
-                ),
+                altitude(Coordinate(16, 980), entry, font_metric, font_title),
+                gradient(Coordinate(220, 980), entry, font_metric, font_title),
                 SimpleChart(
                     at=Coordinate(400, 980),
                     value=lambda: window.view(entry().dt),
                     font=font_title,
                     filled=True
                 ),
-                IconPanel(
-                    at=Coordinate(1900, 820),
-                    icon="thermometer.png",
-                    title=lambda: "TEMP(C)",
-                    value=lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
-                    align="right",
-                    title_font=font_title,
-                    value_font=font_metric
-                ),
-                IconPanel(
-                    at=Coordinate(1900, 900),
-                    icon="gauge.png",
-                    title=lambda: "RPM",
-                    value=lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
-                    align="right",
-                    title_font=font_title,
-                    value_font=font_metric
-                ),
-                IconPanel(
-                    at=Coordinate(1900, 980),
-                    icon="heartbeat.png",
-                    title=lambda: "BPM",
-                    value=lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
-                    align="right",
-                    title_font=font_title,
-                    value_font=font_metric
-                ),
+                temperature(Coordinate(1900, 820), entry, font_metric, font_title),
+                cadence(Coordinate(1900, 900), entry, font_metric, font_title),
+                heartbeat(Coordinate(1900, 980), entry, font_metric, font_title),
             ])
         )
 
