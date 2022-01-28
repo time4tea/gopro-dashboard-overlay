@@ -17,6 +17,19 @@ class BigMetric:
         self.widget.draw(image, draw)
 
 
+class IconPanel:
+    def __init__(self, at, icon, title, value, align, title_font, value_font):
+        if align == "left":
+            self.widget = LeftInfoPanel(at, icon, title, value, title_font, value_font)
+        elif align == "right":
+            self.widget = RightInfoPanel(at, icon, title, value, title_font, value_font)
+        else:
+            raise ValueError("unhandled align - only 'left' or 'right")
+
+    def draw(self, image, draw):
+        self.widget.draw(image, draw)
+
+
 class RightInfoPanel:
 
     def __init__(self, at, icon, title, value, title_font, value_font):

@@ -9,7 +9,7 @@ from .timeseries import Window
 from .units import units
 from .widgets import Text, date, time, Scene, CachingText
 from .widgets_chart import SimpleChart
-from .widgets_info import LeftInfoPanel, RightInfoPanel, BigMetric, ComparativeEnergy
+from .widgets_info import BigMetric, ComparativeEnergy, IconPanel
 from .widgets_map import MovingMap, JourneyMap
 
 
@@ -121,21 +121,23 @@ def standard_layout(renderer, timeseries, font, privacy=NoPrivacyZone()):
             maps(entry, renderer, timeseries, privacy),
             big_mph(entry, font_title),
             [
-                LeftInfoPanel(
-                    Coordinate(16, 980),
-                    "mountain.png",
-                    lambda: "ALT(m)",
-                    lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
-                    font_title,
-                    font_metric
+                IconPanel(
+                    at=Coordinate(16, 980),
+                    icon="mountain.png",
+                    title=lambda: "ALT(m)",
+                    value=lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
+                    align="left",
+                    title_font=font_title,
+                    value_font=font_metric
                 ),
-                LeftInfoPanel(
-                    Coordinate(220, 980),
-                    "slope-triangle.png",
-                    lambda: "SLOPE(%)",
-                    lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
-                    font_title,
-                    font_metric
+                IconPanel(
+                    at=Coordinate(220, 980),
+                    icon="slope-triangle.png",
+                    title=lambda: "SLOPE(%)",
+                    value=lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
+                    align="left",
+                    title_font=font_title,
+                    value_font=font_metric
                 ),
                 SimpleChart(
                     at=Coordinate(400, 980),
@@ -143,29 +145,32 @@ def standard_layout(renderer, timeseries, font, privacy=NoPrivacyZone()):
                     font=font_title,
                     filled=True
                 ),
-                RightInfoPanel(
-                    Coordinate(1900, 820),
-                    "thermometer.png",
-                    lambda: "TEMP(C)",
-                    lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
-                    font_title,
-                    font_metric
+                IconPanel(
+                    at=Coordinate(1900, 820),
+                    icon="thermometer.png",
+                    title=lambda: "TEMP(C)",
+                    value=lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
+                    align="right",
+                    title_font=font_title,
+                    value_font=font_metric
                 ),
-                RightInfoPanel(
-                    Coordinate(1900, 900),
-                    "gauge.png",
-                    lambda: "RPM",
-                    lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
-                    font_title,
-                    font_metric
+                IconPanel(
+                    at=Coordinate(1900, 900),
+                    icon="gauge.png",
+                    title=lambda: "RPM",
+                    value=lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
+                    align="right",
+                    title_font=font_title,
+                    value_font=font_metric
                 ),
-                RightInfoPanel(
-                    Coordinate(1900, 980),
-                    "heartbeat.png",
-                    lambda: "BPM",
-                    lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
-                    font_title,
-                    font_metric
+                IconPanel(
+                    at=Coordinate(1900, 980),
+                    icon="heartbeat.png",
+                    title=lambda: "BPM",
+                    value=lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
+                    align="right",
+                    title_font=font_title,
+                    value_font=font_metric
                 ),
             ])
         )
