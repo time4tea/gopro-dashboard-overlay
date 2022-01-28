@@ -47,10 +47,10 @@ def maps(entry, renderer, timeseries, privacy_zone):
     ]
 
 
-def big_mph(entry, font_title):
+def big_mph(at, entry, font_title, ):
     return [
         BigMetric(
-            Coordinate(16, 800),
+            at,
             lambda: "MPH",
             lambda: f"{entry().speed.to('MPH').magnitude:.0f}" if entry().speed else "-",
             font_title
@@ -126,7 +126,7 @@ def speed_awareness_layout(renderer, font: ImageFont):
         return list(itertools.chain(
             date_and_time(Coordinate(260, 30), entry, font_title, font_metric),
             gps_info(Coordinate(1900, 36), entry, font_title),
-            big_mph(entry, font_title),
+            big_mph(Coordinate(16, 800), entry, font_title),
             [
                 MovingMap(
                     size=384,
@@ -179,7 +179,7 @@ def standard_layout(renderer, timeseries, font, privacy=NoPrivacyZone()):
             date_and_time(Coordinate(260, 30), entry, font_title, font_metric),
             gps_info(Coordinate(1900, 36), entry, font_title),
             maps(entry, renderer, timeseries, privacy),
-            big_mph(entry, font_title),
+            big_mph(Coordinate(16, 800), entry, font_title),
             [
                 altitude(Coordinate(16, 980), entry, font_metric, font_title),
                 gradient(Coordinate(220, 980), entry, font_metric, font_title),
