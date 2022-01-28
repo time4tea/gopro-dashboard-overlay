@@ -74,7 +74,8 @@ def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
         entry,
         privacy,
         renderer,
-        timeseries
+        timeseries,
+        size=iattrib(element, "size", d=256)
     )
 
 
@@ -130,14 +131,3 @@ def create_gradient_chart(element, entry, timeseries, font, **kwargs):
         entry,
         font_title=font(iattrib(element, "size_title", d=16))
     )
-
-# gps_info(Coordinate(1900, 36), entry, font_title),
-#             moving_map(Coordinate(1900 - 256, 100), entry, size=256, zoom=16, renderer=renderer),
-#             journey_map(Coordinate(1900 - 256, 100 + 256 + 20), entry, privacy, renderer, timeseries),
-#             big_mph(Coordinate(16, 800), entry, font_title),
-#             altitude(Coordinate(16, 980), entry, font_metric, font_title),
-#             gradient(Coordinate(220, 980), entry, font_metric, font_title),
-#             gradient_chart(Coordinate(400, 980), timeseries, entry, font_title),
-#             temperature(Coordinate(1900, 820), entry, font_metric, font_title),
-#             cadence(Coordinate(1900, 900), entry, font_metric, font_title),
-#             heartbeat(Coordinate(1900, 980), entry, font_metric, font_title),

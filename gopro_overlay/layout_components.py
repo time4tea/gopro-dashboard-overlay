@@ -23,11 +23,12 @@ def gps_info(at, entry, font):
     )
 
 
-def journey_map(at, entry, privacy_zone, renderer, timeseries):
+def journey_map(at, entry, privacy_zone, renderer, timeseries, size=256):
     return JourneyMap(
         at=at,
         timeseries=timeseries,
         location=lambda: entry().point,
+        size=size,
         renderer=renderer,
         privacy_zone=privacy_zone
     )

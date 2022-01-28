@@ -16,6 +16,7 @@ from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Overlay, standard_layout, speed_awareness_layout
+from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
@@ -48,14 +49,16 @@ if __name__ == "__main__":
     parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
     parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
 
-    parser.add_argument("--layout", choices=["default", "speed-awareness"], default="default",
+    parser.add_argument("--layout", choices=["default", "speed-awareness", "xml"], default="default",
                         help="Choose graphics layout")
+
+    parser.add_argument("--layout-xml", type=argparse.FileType(mode='r', encoding='utf-8'),
+                        help="Use XML File for layout [experimental! - file format likely to change!]")
 
     parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
     parser.set_defaults(show_ffmpeg=False)
 
-    parser.add_argument("--output-size", default="1080", type=int,
-                        help="Vertical size of output movie")
+    parser.add_argument("--output-size", default="1080", type=int, help="Vertical size of output movie")
 
     parser.add_argument("output", help="Output MP4 file")
 
@@ -118,6 +121,8 @@ if __name__ == "__main__":
                 layout = standard_layout(renderer, timeseries, font, zone)
             elif args.layout == "speed-awareness":
                 layout = speed_awareness_layout(renderer, font=font)
+            elif args.layout == "xml":
+                layout = layout_from_xml(args.layout_xml.read(), renderer, timeseries, font, zone)
             else:
                 raise ValueError(f"Unsupported layout {args.layout}")
 
