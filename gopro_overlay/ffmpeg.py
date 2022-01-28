@@ -3,6 +3,7 @@ import re
 import subprocess
 import sys
 from array import array
+from collections import namedtuple
 
 
 def run(cmd, **kwargs):
@@ -16,22 +17,39 @@ def invoke(cmd, **kwargs):
         raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
 
-def find_gpmd_track(filepath):
-    ffprobe_output = str(invoke(["ffprobe", filepath]).stderr)  # str here just for PyCharm - its already a string
+StreamInfo = namedtuple("StreamInfo", ["audio", "video", "meta"])
 
-    #           Stream #0:0(eng): Video: hevc (Main) (hvc1 / 0x31637668), yuvj420p(pc, bt709),
-    #           3840x2160 [SAR 1:1 DAR 16:9], 99919 kb/s, 59.95 fps, 59.94 tbr, 60k tbn, 59.94 tbc (default)
-    # look for: Stream #0:3(eng): Data: bin_data (gpmd / 0x646D7067), 61 kb/s (default)
-    match = re.search(r'Stream #\d:(\d)\(.+\): Data: \w+ \(gpmd', ffprobe_output)
-    if match:
-        return int(match.group(1))
-    else:
-        raise IOError("Invalid Stream? The data stream doesn't contain the GoPro metadata. "
-                      "No 'GoPro MET' binary stream found.")
+
+def find_streams(filepath, invoke=invoke):
+    ffprobe_output = str(invoke(["ffprobe", "-hide_banner", filepath]).stderr)
+
+    video_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Video")
+    audio_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Audio")
+    meta_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Data: bin_data \(gpmd")
+
+    video_stream = None
+    audio_stream = None
+    meta_stream = None
+
+    for line in ffprobe_output.split("\n"):
+        video_match = video_re.search(line)
+        if video_match:
+            video_stream = int(video_match.group(1))
+        audio_match = audio_re.search(line)
+        if audio_match:
+            audio_stream = int(audio_match.group(1))
+        meta_match = meta_re.search(line)
+        if meta_match:
+            meta_stream = int(meta_match.group(1))
+
+    if video_stream is None or audio_stream is None or meta_stream is None:
+        raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
+
+    return StreamInfo(audio_stream, video_stream,  meta_stream)
 
 
 def load_gpmd_from(filepath):
-    track = find_gpmd_track(filepath)
+    track = find_streams(filepath).meta
     if track:
         cmd = ["ffmpeg", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
         result = run(cmd, capture_output=True, timeout=10)
