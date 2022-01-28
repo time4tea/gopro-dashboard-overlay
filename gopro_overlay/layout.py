@@ -27,22 +27,24 @@ def gps_info(at, entry, font_title):
     )
 
 
-def maps(entry, renderer, timeseries, privacy_zone):
-    return Composite(
-        MovingMap(
-            at=Coordinate(1900 - 256, 100),
-            location=lambda: entry().point,
-            azimuth=lambda: entry().azi,
-            renderer=renderer,
-            zoom=16
-        ),
-        JourneyMap(
-            at=Coordinate(1900 - 256, 100 + 256 + 20),
-            timeseries=timeseries,
-            location=lambda: entry().point,
-            renderer=renderer,
-            privacy_zone=privacy_zone
-        ),
+def journey_map(at, entry, privacy_zone, renderer, timeseries):
+    return JourneyMap(
+        at=at,
+        timeseries=timeseries,
+        location=lambda: entry().point,
+        renderer=renderer,
+        privacy_zone=privacy_zone
+    )
+
+
+def moving_map(at, entry, size, zoom, renderer):
+    return MovingMap(
+        at=at,
+        location=lambda: entry().point,
+        azimuth=lambda: entry().azi,
+        renderer=renderer,
+        size=size,
+        zoom=zoom
     )
 
 
@@ -117,6 +119,17 @@ def altitude(at, entry, font_metric, font_title):
     )
 
 
+def gradient_chart(at, timeseries, entry, font_title):
+    window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
+                    key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
+    return SimpleChart(
+        at=at,
+        value=lambda: window.view(entry().dt),
+        font=font_title,
+        filled=True
+    )
+
+
 def speed_awareness_layout(renderer, font: ImageFont):
     def create(entry):
         font_title = font.font_variant(size=16)
@@ -126,14 +139,7 @@ def speed_awareness_layout(renderer, font: ImageFont):
             date_and_time(Coordinate(260, 30), entry, font_title, font_metric),
             gps_info(Coordinate(1900, 36), entry, font_title),
             big_mph(Coordinate(16, 800), entry, font_title),
-            MovingMap(
-                size=384,
-                at=Coordinate(1900 - 384, 100),
-                location=lambda: entry().point,
-                azimuth=lambda: entry().azi,
-                renderer=renderer,
-                zoom=16
-            ),
+            moving_map(Coordinate(1900 - 384, 100), entry, size=384, zoom=16, renderer=renderer),
             ComparativeEnergy(Coordinate(450, 850),
                               font=font_title,
                               speed=lambda: entry().speed,
@@ -152,22 +158,15 @@ def standard_layout(renderer, timeseries, font, privacy=NoPrivacyZone()):
         font_title = font.font_variant(size=16)
         font_metric = font.font_variant(size=32)
 
-        window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
-                        key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
-
         return [
             date_and_time(Coordinate(260, 30), entry, font_title, font_metric),
             gps_info(Coordinate(1900, 36), entry, font_title),
-            maps(entry, renderer, timeseries, privacy),
+            moving_map(Coordinate(1900 - 256, 100), entry, size=256, zoom=16, renderer=renderer),
+            journey_map(Coordinate(1900 - 256, 100 + 256 + 20), entry, privacy, renderer, timeseries),
             big_mph(Coordinate(16, 800), entry, font_title),
             altitude(Coordinate(16, 980), entry, font_metric, font_title),
             gradient(Coordinate(220, 980), entry, font_metric, font_title),
-            SimpleChart(
-                at=Coordinate(400, 980),
-                value=lambda: window.view(entry().dt),
-                font=font_title,
-                filled=True
-            ),
+            gradient_chart(Coordinate(400, 980), timeseries, entry, font_title),
             temperature(Coordinate(1900, 820), entry, font_metric, font_title),
             cadence(Coordinate(1900, 900), entry, font_metric, font_title),
             heartbeat(Coordinate(1900, 980), entry, font_metric, font_title),
