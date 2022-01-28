@@ -1,0 +1,126 @@
+from datetime import timedelta
+
+from .point import Coordinate
+from .timeseries import Window
+from .widgets import Text, date, time, CachingText, Composite
+from .widgets_chart import SimpleChart
+from .widgets_info import BigMetric, IconPanel
+from .widgets_map import MovingMap, JourneyMap
+
+
+def date_and_time(at, entry, font_title, font_metric):
+    return Composite(
+        CachingText(at + Coordinate(0, 0), date(lambda: entry().dt), font_title, align="right"),
+        Text(at + Coordinate(0, 24), time(lambda: entry().dt), font_metric, align="right"),
+    )
+
+
+def gps_info(at, entry, font_title):
+    return Composite(
+        CachingText(at + Coordinate(0, 0), lambda: "GPS INFO", font_title, align="right"),
+        Text(at + Coordinate(-130, 24), lambda: f"Lat: {entry().point.lat:0.6f}", font_title, align="right"),
+        Text(at + Coordinate(0, 24), lambda: f"Lon: {entry().point.lon:0.6f}", font_title, align="right"),
+    )
+
+
+def journey_map(at, entry, privacy_zone, renderer, timeseries):
+    return JourneyMap(
+        at=at,
+        timeseries=timeseries,
+        location=lambda: entry().point,
+        renderer=renderer,
+        privacy_zone=privacy_zone
+    )
+
+
+def moving_map(at, entry, size, zoom, renderer):
+    return MovingMap(
+        at=at,
+        location=lambda: entry().point,
+        azimuth=lambda: entry().azi,
+        renderer=renderer,
+        size=size,
+        zoom=zoom
+    )
+
+
+def big_mph(at, entry, font_title, ):
+    return Composite(
+        BigMetric(
+            at,
+            lambda: "MPH",
+            lambda: f"{entry().speed.to('MPH').magnitude:.0f}" if entry().speed else "-",
+            font_title
+        )
+    )
+
+
+def heartbeat(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="heartbeat.png",
+        title=lambda: "BPM",
+        value=lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
+        align="right",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def cadence(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="gauge.png",
+        title=lambda: "RPM",
+        value=lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
+        align="right",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def temperature(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="thermometer.png",
+        title=lambda: "TEMP(C)",
+        value=lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
+        align="right",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def gradient(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="slope-triangle.png",
+        title=lambda: "SLOPE(%)",
+        value=lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
+        align="left",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def altitude(at, entry, font_metric, font_title):
+    return IconPanel(
+        at=at,
+        icon="mountain.png",
+        title=lambda: "ALT(m)",
+        value=lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
+        align="left",
+        title_font=font_title,
+        value_font=font_metric
+    )
+
+
+def gradient_chart(at, timeseries, entry, font_title):
+    window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
+                    key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
+    return SimpleChart(
+        at=at,
+        value=lambda: window.view(entry().dt),
+        font=font_title,
+        filled=True
+    )
