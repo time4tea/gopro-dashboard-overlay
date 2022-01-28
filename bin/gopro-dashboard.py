@@ -15,7 +15,7 @@ from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
 from gopro_overlay.gpx import load_timeseries
-from gopro_overlay.layout import Layout, SpeedAwarenessLayout
+from gopro_overlay.layout import Overlay, standard_layout, speed_awareness_layout
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
@@ -115,11 +115,13 @@ if __name__ == "__main__":
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
             if args.layout == "default":
-                overlay = Layout(timeseries, renderer, privacy_zone=zone, font=font)
+                layout = standard_layout(renderer, timeseries, font, zone)
             elif args.layout == "speed-awareness":
-                overlay = SpeedAwarenessLayout(timeseries, renderer, font=font)
+                layout = speed_awareness_layout(renderer, font=font)
             else:
                 raise ValueError(f"Unsupported layout {args.layout}")
+
+            overlay = Overlay(timeseries, layout)
 
             if args.overlay:
                 redirect = None

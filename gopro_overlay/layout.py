@@ -58,41 +58,46 @@ def big_mph(entry, font_title):
     ]
 
 
-class SpeedAwarenessLayout:
-    def __init__(self, timeseries, map_renderer, font: ImageFont):
-        self.map_renderer = map_renderer
-        self.timeseries = timeseries
-        self._entry = None
-
+def speed_awareness_layout(renderer, font: ImageFont):
+    def create(entry):
         font_title = font.font_variant(size=16)
         font_metric = font.font_variant(size=32)
 
-        self.scene = Scene(
-            list(itertools.chain(
-                date_and_time(Coordinate(260, 30), self.entry, font_title, font_metric),
-                gps_info(Coordinate(1900, 36), self.entry, font_title),
-                big_mph(self.entry, font_title),
-                [
-                    MovingMap(
-                        size=384,
-                        at=Coordinate(1900 - 384, 100),
-                        location=lambda: self._entry.point,
-                        azimuth=lambda: self._entry.azi,
-                        renderer=map_renderer,
-                        zoom=16
-                    ),
-                    ComparativeEnergy(Coordinate(450, 850),
-                                      font=font_title,
-                                      speed=lambda: self._entry.speed,
-                                      person=units.Quantity(84, units.kg),
-                                      bike=units.Quantity(12, units.kg),
-                                      car=units.Quantity(2000, units.kg),
-                                      van=units.Quantity(3500, units.kg)
-                                      )
+        return list(itertools.chain(
+            date_and_time(Coordinate(260, 30), entry, font_title, font_metric),
+            gps_info(Coordinate(1900, 36), entry, font_title),
+            big_mph(entry, font_title),
+            [
+                MovingMap(
+                    size=384,
+                    at=Coordinate(1900 - 384, 100),
+                    location=lambda: entry().point,
+                    azimuth=lambda: entry().azi,
+                    renderer=renderer,
+                    zoom=16
+                ),
+                ComparativeEnergy(Coordinate(450, 850),
+                                  font=font_title,
+                                  speed=lambda: entry().speed,
+                                  person=units.Quantity(84, units.kg),
+                                  bike=units.Quantity(12, units.kg),
+                                  car=units.Quantity(2000, units.kg),
+                                  van=units.Quantity(3500, units.kg)
+                                  )
 
-                ]
-            ))
+            ]
         )
+        )
+
+    return create
+
+
+class Overlay:
+
+    def __init__(self, timeseries, create_widgets):
+        self.scene = Scene(create_widgets(self.entry))
+        self.timeseries = timeseries
+        self._entry = None
 
     def entry(self):
         return self._entry
@@ -102,79 +107,67 @@ class SpeedAwarenessLayout:
         return self.scene.draw()
 
 
-class Layout:
-
-    def __init__(self, timeseries, map_renderer, font: ImageFont, privacy_zone=NoPrivacyZone()):
-        self.map_renderer = map_renderer
-        self.timeseries = timeseries
-        self._entry = None
-
+def standard_layout(renderer, timeseries, font, privacy=NoPrivacyZone()):
+    def create(entry):
         font_title = font.font_variant(size=16)
         font_metric = font.font_variant(size=32)
 
         window = Window(timeseries, duration=timedelta(minutes=5), samples=256,
                         key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
 
-        self.scene = Scene(
-            list(itertools.chain(
-                date_and_time(Coordinate(260, 30), self.entry, font_title, font_metric),
-                gps_info(Coordinate(1900, 36), self.entry, font_title),
-                maps(self.entry, map_renderer, timeseries, privacy_zone),
-                big_mph(self.entry, font_title),
-                [
-                    LeftInfoPanel(
-                        Coordinate(16, 980),
-                        "mountain.png",
-                        lambda: "ALT(m)",
-                        lambda: f"{self._entry.alt.to('m').magnitude:.1f}" if self._entry.alt else "-",
-                        font_title,
-                        font_metric
-                    ),
-                    LeftInfoPanel(
-                        Coordinate(220, 980),
-                        "slope-triangle.png",
-                        lambda: "SLOPE(%)",
-                        lambda: f"{self._entry.grad.magnitude:.1f}" if self._entry.grad else "-",
-                        font_title,
-                        font_metric
-                    ),
-                    SimpleChart(
-                        at=Coordinate(400, 980),
-                        value=lambda: window.view(self._entry.dt),
-                        font=font_title,
-                        filled=True
-                    ),
-                    RightInfoPanel(
-                        Coordinate(1900, 820),
-                        "thermometer.png",
-                        lambda: "TEMP(C)",
-                        lambda: f"{self._entry.atemp.magnitude:.0f}" if self._entry.atemp is not None else "-",
-                        font_title,
-                        font_metric
-                    ),
-                    RightInfoPanel(
-                        Coordinate(1900, 900),
-                        "gauge.png",
-                        lambda: "RPM",
-                        lambda: f"{self._entry.cad.magnitude:.0f}" if self._entry.cad else "-",
-                        font_title,
-                        font_metric
-                    ),
-                    RightInfoPanel(
-                        Coordinate(1900, 980),
-                        "heartbeat.png",
-                        lambda: "BPM",
-                        lambda: f"{self._entry.hr.magnitude:.0f}" if self._entry.hr else "-",
-                        font_title,
-                        font_metric
-                    ),
-                ])
-            )
+        return list(itertools.chain(
+            date_and_time(Coordinate(260, 30), entry, font_title, font_metric),
+            gps_info(Coordinate(1900, 36), entry, font_title),
+            maps(entry, renderer, timeseries, privacy),
+            big_mph(entry, font_title),
+            [
+                LeftInfoPanel(
+                    Coordinate(16, 980),
+                    "mountain.png",
+                    lambda: "ALT(m)",
+                    lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
+                    font_title,
+                    font_metric
+                ),
+                LeftInfoPanel(
+                    Coordinate(220, 980),
+                    "slope-triangle.png",
+                    lambda: "SLOPE(%)",
+                    lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
+                    font_title,
+                    font_metric
+                ),
+                SimpleChart(
+                    at=Coordinate(400, 980),
+                    value=lambda: window.view(entry().dt),
+                    font=font_title,
+                    filled=True
+                ),
+                RightInfoPanel(
+                    Coordinate(1900, 820),
+                    "thermometer.png",
+                    lambda: "TEMP(C)",
+                    lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
+                    font_title,
+                    font_metric
+                ),
+                RightInfoPanel(
+                    Coordinate(1900, 900),
+                    "gauge.png",
+                    lambda: "RPM",
+                    lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
+                    font_title,
+                    font_metric
+                ),
+                RightInfoPanel(
+                    Coordinate(1900, 980),
+                    "heartbeat.png",
+                    lambda: "BPM",
+                    lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
+                    font_title,
+                    font_metric
+                ),
+            ])
         )
 
-    def entry(self):
-        return self._entry
-
-    def draw(self, dt):
-        self._entry = self.timeseries.get(dt)
-        return self.scene.draw()
+    return create
