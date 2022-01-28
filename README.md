@@ -112,3 +112,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 https://github.com/gopro/gpmf-parser
 
+## Other Related Software
+
+https://github.com/progweb/gpx2video
+
+https://github.com/JuanIrache/gopro-telemetry
+
