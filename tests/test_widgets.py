@@ -5,6 +5,7 @@ from datetime import timedelta
 from PIL import ImageFont
 
 from gopro_overlay import fake, layout
+from gopro_overlay.layout_components import gps_info
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
@@ -69,7 +70,10 @@ def test_render_panel():
 def test_render_gps_info():
     # Avg: 0.00645, Rate: 155.05
     entry = ts.get(ts.min)
-    return time_rendering(name="gps info", widgets=layout.gps_info(Coordinate(400, 10), lambda: entry, font))
+    return time_rendering(
+        name="gps info",
+        widgets=[gps_info(Coordinate(400, 10), lambda: entry, font)]
+    )
 
 
 @approve_image
@@ -134,7 +138,7 @@ def test_render_moving_chart():
 def test_render_big_metric():
     # Avg: 0.00026, Rate: 3,871.63
     return time_rendering(name="big speed", widgets=[
-        BigMetric(Coordinate(10, 10), title=lambda: "MPH", value=lambda: "27", font=font)
+        BigMetric(Coordinate(10, 10), title=lambda: "MPH", value=lambda: "27", font_title=font, font_metric=font.font_variant(size=160))
     ])
 
 

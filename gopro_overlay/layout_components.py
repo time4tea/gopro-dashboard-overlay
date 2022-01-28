@@ -15,11 +15,11 @@ def date_and_time(at, entry, font_title, font_metric):
     )
 
 
-def gps_info(at, entry, font_title):
+def gps_info(at, entry, font):
     return Composite(
-        CachingText(at + Coordinate(0, 0), lambda: "GPS INFO", font_title, align="right"),
-        Text(at + Coordinate(-130, 24), lambda: f"Lat: {entry().point.lat:0.6f}", font_title, align="right"),
-        Text(at + Coordinate(0, 24), lambda: f"Lon: {entry().point.lon:0.6f}", font_title, align="right"),
+        CachingText(at + Coordinate(0, 0), lambda: "GPS INFO", font, align="right"),
+        Text(at + Coordinate(-130, 24), lambda: f"Lat: {entry().point.lat:0.6f}", font, align="right"),
+        Text(at + Coordinate(0, 24), lambda: f"Lon: {entry().point.lon:0.6f}", font, align="right"),
     )
 
 
@@ -44,13 +44,17 @@ def moving_map(at, entry, size, zoom, renderer):
     )
 
 
-def big_mph(at, entry, font_title, ):
+def big_mph(at, entry, font_title, font_metric=None):
+    if font_metric is None:
+        font_metric = font_title.font_variant(size=160)
+
     return Composite(
         BigMetric(
             at,
             lambda: "MPH",
             lambda: f"{entry().speed.to('MPH').magnitude:.0f}" if entry().speed else "-",
-            font_title
+            font_title=font_title,
+            font_metric=font_metric
         )
     )
 

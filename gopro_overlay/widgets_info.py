@@ -7,10 +7,10 @@ from gopro_overlay.widgets import Composite, simple_icon, CachingText
 
 class BigMetric:
 
-    def __init__(self, at, title, value, font):
+    def __init__(self, at, title, value, font_title, font_metric=None):
         self.widget = Composite(
-            CachingText(at + Coordinate(0, 0), title, font),
-            CachingText(at + Coordinate(0, 0), value, font.font_variant(size=160)),
+            CachingText(at + Coordinate(0, 0), title, font_title),
+            CachingText(at + Coordinate(0, 0), value, font_metric),
         )
 
     def draw(self, image, draw):
