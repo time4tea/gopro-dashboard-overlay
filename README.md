@@ -124,3 +124,11 @@ https://github.com/progweb/gpx2video
 
 https://github.com/JuanIrache/gopro-telemetry
 
+
+## Latest Changes
+
+- Unreleased
+  - Improve Parsing Speed for GoPro
+- 0.11.0 
+  - Allow XML layout definitions 
+  
