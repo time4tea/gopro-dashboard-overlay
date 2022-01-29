@@ -152,8 +152,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
 
-- Unreleased
-  - Improve Parsing Speed for GoPro
+- 0.12.0
+  - Join GoPro files together 
+  - Improve Parsing Speed for GoPro Metadata
 - 0.11.0 
   - Allow XML layout definitions 
   
