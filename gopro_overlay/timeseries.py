@@ -4,13 +4,6 @@ import itertools
 import math
 from datetime import timedelta
 
-from .point import Point
-from .units import units
-
-
-def entry_wants(v):
-    return isinstance(v, int) or isinstance(v, float) or isinstance(v, units.Quantity) or isinstance(v, Point)
-
 
 def pairwise(iterable):  # Added in itertools v3.10
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -23,7 +16,7 @@ class Entry:
 
     def __init__(self, dt, **kwargs):
         self.dt = dt
-        self.items = {k: v for k, v in dict(**kwargs).items() if entry_wants(v)}
+        self.items = {k: v for k, v in dict(**kwargs).items() if v is not None}
 
     def update(self, **kwargs):
         self.items.update(**kwargs)
@@ -90,32 +83,43 @@ class Timeseries:
     def __init__(self, entries=None):
         self.entries = {}
         self.dates = []
+        self.modified = False
         if entries is not None:
             self.add(*entries)
 
     @property
     def min(self) -> datetime.datetime:
+        self.check_modified()
         return self.dates[0]
 
     @property
     def max(self) -> datetime.datetime:
+        self.check_modified()
         return self.dates[-1]
 
     def stepper(self, step: timedelta):
+        self.check_modified()
         return Stepper(self, step)
 
     def __len__(self):
+        self.check_modified()
         return len(self.dates)
+
+    def check_modified(self):
+        if self.modified:
+            self._update()
 
     def _update(self):
         self.dates = sorted(list(self.entries.keys()))
+        self.modified = False
 
     def add(self, *entries: Entry):
         for e in entries:
             self.entries[e.dt] = e
-        self._update()
+        self.modified = True
 
-    def get(self, dt):
+    def get(self, dt, interpolate=True):
+        self.check_modified()
         if not self.dates or dt < self.dates[0]:
             raise ValueError("Date is before start")
         if dt > self.dates[-1]:
@@ -123,16 +127,20 @@ class Timeseries:
         if dt in self.entries:
             return self.entries[dt]
         else:
+            if not interpolate:
+                raise KeyError(f"Date {dt} not found")
+
             greater_idx = bisect.bisect_left(self.dates, dt)
             lesser_idx = greater_idx - 1
 
             return self.entries[self.dates[lesser_idx]].interpolate(self.entries[self.dates[greater_idx]], dt)
 
     def items(self):
+        self.check_modified()
         return [self.entries[k] for k in self.dates]
 
     def clip_to_datetimes(self, dt_min, dt_max):
-
+        self.check_modified()
         index_min = bisect.bisect_left(self.dates, dt_min)
         index_max = bisect.bisect_right(self.dates, dt_max)
 
@@ -152,9 +160,11 @@ class Timeseries:
         return Timeseries(entries=wanted)
 
     def clip_to(self, other):
+        self.check_modified()
         return self.clip_to_datetimes(other.min, other.max)
 
     def backfill(self, delta):
+        self.check_modified()
         to_add = []
         for a, b in pairwise(self.dates):
             if b - a > delta:
@@ -169,7 +179,7 @@ class Timeseries:
         return len(to_add)
 
     def process_deltas(self, processor, skip=1):
-
+        self.check_modified()
         diffs = list(zip(self.dates, self.dates[skip:]))
 
         for a, b in diffs:
@@ -178,6 +188,7 @@ class Timeseries:
                 self.entries[a].update(**updates)
 
     def process(self, processor):
+        self.check_modified()
         for e in self.dates:
             updates = processor(self.entries[e])
             if updates:

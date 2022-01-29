@@ -1,5 +1,6 @@
 import collections
 import datetime
+import pytest
 from datetime import timedelta
 
 from gopro_overlay import fake
@@ -223,13 +224,13 @@ def test_filling_missing_entries():
     # no entry for dt2
     ts.add(Entry(dt3, alt=metres(30)))
 
-    assert dt1 in ts.dates
-    assert dt2 not in ts.dates
+    ts.get(dt1, interpolate=False)
+    with pytest.raises(KeyError):
+        ts.get(dt2, interpolate=False)
 
     filled = ts.backfill(timedelta(seconds=1))
     assert filled == 1
-    assert dt2 in ts.dates
-    assert ts.get(dt2).alt.magnitude == 20
+    assert ts.get(dt2, interpolate=False).alt.magnitude == 20
 
 
 def test_filling_missing_entries_2():
@@ -241,13 +242,14 @@ def test_filling_missing_entries_2():
     # no entry for dt2
     ts.add(Entry(dt3, alt=metres(30)))
 
-    assert dt1 in ts.dates
-    assert dt2 not in ts.dates
+    ts.get(dt1, interpolate=False)
+
+    with pytest.raises(KeyError):
+        ts.get(dt2, interpolate=False)
 
     filled = ts.backfill(timedelta(seconds=1))
     assert filled == 1
-    assert dt2 in ts.dates
-    assert ts.get(dt2).alt.magnitude == 20
+    assert ts.get(dt2, interpolate=False).alt.magnitude == 20
 
 
 def test_no_filling_missing_entries():
@@ -257,8 +259,8 @@ def test_no_filling_missing_entries():
     ts.add(Entry(dt1, alt=metres(10)))
     ts.add(Entry(dt2, alt=metres(20)))
 
-    assert dt1 in ts.dates
-    assert dt2 in ts.dates
+    ts.get(dt1, interpolate=False)
+    ts.get(dt2, interpolate=False)
 
     filled = ts.backfill(timedelta(seconds=1))
     assert filled == 0
@@ -271,8 +273,8 @@ def test_no_filling_missing_entries_2():
     ts.add(Entry(dt1, alt=metres(10)))
     ts.add(Entry(dt2, alt=metres(19)))
 
-    assert dt1 in ts.dates
-    assert dt2 in ts.dates
+    ts.get(dt1, interpolate=False)
+    ts.get(dt2, interpolate=False)
 
     filled = ts.backfill(timedelta(seconds=1))
     assert filled == 0

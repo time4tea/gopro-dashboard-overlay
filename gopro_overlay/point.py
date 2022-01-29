@@ -10,9 +10,7 @@ class Coordinate:
         return Coordinate(self.x + other.x, self.y + other.y)
 
     def __mul__(self, other):
-        if isinstance(other, float):
-            return Coordinate(self.x * other, self.y * other)
-        raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
+        return Coordinate(self.x * other, self.y * other)
 
     def __str__(self):
         return f"Coordinate(x={self.x}, y={self.y})"
@@ -33,9 +31,7 @@ class Point:
         return Point(self.lat + other.lat, self.lon + other.lon)
 
     def __mul__(self, other):
-        if isinstance(other, float):
-            return Point(self.lat * other, self.lon * other)
-        raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
+        return Point(self.lat * other, self.lon * other)
 
     def __rmul__(self, other):
         return self.__mul__(other)
@@ -60,9 +56,7 @@ class Point3:
         return Point3(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __mul__(self, other):
-        if isinstance(other, float):
-            return Point3(self.x * other, self.y * other, self.z * other)
-        raise ValueError(f"Can't multiply a {type(self)} with a {type(other)}")
+        return Point3(self.x * other, self.y * other, self.z * other)
 
     def __str__(self):
         return f"Point3(x={self.x}, y={self.y}, z={self.z})"
