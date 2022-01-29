@@ -1,9 +1,22 @@
 import contextlib
+import itertools
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from array import array
 from collections import namedtuple
+
+
+@contextlib.contextmanager
+def temporary_file(dir=None, suffix=""):
+    (fd, name) = tempfile.mkstemp(dir=dir, suffix=suffix)
+    os.close(fd)
+    try:
+        yield name
+    finally:
+        os.remove(name)
 
 
 def run(cmd, **kwargs):
@@ -18,6 +31,33 @@ def invoke(cmd, **kwargs):
 
 
 StreamInfo = namedtuple("StreamInfo", ["audio", "video", "meta"])
+
+
+def join_files(filepaths, output):
+    """only for joining parts of same trip"""
+
+    streams = find_streams(filepaths[0])
+
+    maps = list(itertools.chain.from_iterable(
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta]]))
+
+    with temporary_file() as commandfile:
+        with open(commandfile, "w") as f:
+            for path in filepaths:
+                f.write(f"file '{path}\n")
+
+        args = ["ffmpeg",
+                "-y",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", commandfile,
+                "-map_metadata", "0",
+                *maps,
+                "-copy_unknown",
+                "-c", "copy",
+                output]
+        print(f"Running {args}")
+        process = run(args)
 
 
 def find_streams(filepath, invoke=invoke):
@@ -45,7 +85,7 @@ def find_streams(filepath, invoke=invoke):
     if video_stream is None or audio_stream is None or meta_stream is None:
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
 
-    return StreamInfo(audio_stream, video_stream,  meta_stream)
+    return StreamInfo(audio_stream, video_stream, meta_stream)
 
 
 def load_gpmd_from(filepath):

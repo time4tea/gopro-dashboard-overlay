@@ -95,6 +95,7 @@ if __name__ == "__main__":
             print(f"Created {backfilled} missing points...")
 
         # smooth GPS points
+        print("Processing....")
         timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
         timeseries.process_deltas(timeseries_process.calculate_speeds())
         timeseries.process(timeseries_process.calculate_odo())

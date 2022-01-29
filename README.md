@@ -76,11 +76,36 @@ optional arguments:
 
 ```
 
-## Example
+### Example
 
 ```shell
 venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,-0.40000,0.50 ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
+
+## Joining a sequence of MP4 files together
+
+Use the gopro-join.py command. Given a single file from the sequence, it will find and join together all the files.
+If you have any problems with this, please do raise an issue - I don't have that much test data.
+
+The joined file almost certainly won't work in the GoPro tools! - But it should work with `gopro-dashboard.py` - I will look into
+the additional technical stuff required to make it work in the GoPro tools.
+
+*This will require a lot of disk space!*
+
+```shell
+usage: gopro-join.py [-h] input output
+
+Concatenate sequence of GoPro Files
+
+positional arguments:
+  input       A single MP4 file from the sequence
+  output      Output MP4 file
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+```
+
 
 
 ## Performance
