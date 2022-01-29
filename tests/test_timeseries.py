@@ -19,13 +19,6 @@ def test_creating_entry_from_namedtuple():
     assert entry.lat == 10.0
 
 
-def test_creating_entry_from_namedtuple_ignores_non_numeric():
-    some_tuple = TUP(time=datetime_of(1631178710), lat=10.0, lon=100.0, alt=-10, hr=100, cad=90,
-                     atemp=17)
-    entry = Entry(some_tuple.time, **some_tuple._asdict())
-    assert entry.time is None
-
-
 def test_interpolating_entry():
     dt1 = datetime_of(1631178710)
     dt2 = dt1 + timedelta(seconds=1)
