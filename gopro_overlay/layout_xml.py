@@ -74,7 +74,7 @@ def metric_accessor_from(name):
     }
     if name in accessors:
         return accessors[name]
-    raise IOError(f"The metric '{name}' is not supported. Use one of: {accessors.keys()}")
+    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
 
 
 def metric_converter_from(name):
