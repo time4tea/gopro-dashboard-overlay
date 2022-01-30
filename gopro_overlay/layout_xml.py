@@ -56,7 +56,7 @@ def battrib(el, a, d):
 
 
 def at(el):
-    return Coordinate(int(attrib(el, "x")), int(attrib(el, "y")))
+    return Coordinate(iattrib(el, "x"), iattrib(el, "y"))
 
 
 def metric_accessor_from(name):
