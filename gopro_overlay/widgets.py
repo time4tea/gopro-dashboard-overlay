@@ -27,6 +27,9 @@ class CachingText:
 
         text = self.value()
 
+        if text is None:
+            raise ValueError("Refusing to draw text with value of 'None'")
+
         cached = self.cache.get(text, None)
 
         if cached is None:

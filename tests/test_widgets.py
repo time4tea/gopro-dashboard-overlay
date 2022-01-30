@@ -4,8 +4,8 @@ from datetime import timedelta
 
 from PIL import ImageFont
 
-from gopro_overlay import fake, layout
-from gopro_overlay.layout_components import gps_info
+from gopro_overlay import fake
+from gopro_overlay.layout_components import gps_info, text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
@@ -14,7 +14,7 @@ from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText
 from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_info import LeftInfoPanel, BigMetric, ComparativeEnergy
 from tests.approval import approve_image
-from tests.testenvironment import is_ci, is_make
+from tests.testenvironment import is_make
 
 font = ImageFont.truetype(font='Roboto-Medium.ttf', size=18)
 title_font = font.font_variant(size=16)
@@ -138,7 +138,8 @@ def test_render_moving_chart():
 def test_render_big_metric():
     # Avg: 0.00026, Rate: 3,871.63
     return time_rendering(name="big speed", widgets=[
-        BigMetric(Coordinate(10, 10), title=lambda: "MPH", value=lambda: "27", font_title=font, font_metric=font.font_variant(size=160))
+        BigMetric(Coordinate(10, 10), title=lambda: "MPH", value=lambda: "27", font_title=font,
+                  font_metric=font.font_variant(size=160))
     ])
 
 
@@ -159,6 +160,26 @@ def test_render_comparative_energy():
                                                 van=units.Quantity(3500, units.kg)
                                                 )
                           ])
+
+
+@approve_image
+def test_text_component():
+    return time_rendering(name="text", widgets=[
+        text(Coordinate(100, 100), "String", font.font_variant(size=50))
+    ])
+
+
+@approve_image
+def test_metric_component():
+    return time_rendering(name="text", widgets=[
+        metric(
+            at=Coordinate(100, 100),
+            entry=lambda: ts.get(ts.min),
+            accessor=lambda e: e.speed,
+            formatter=lambda v: format(v, ".1f"),
+            font=font.font_variant(size=160),
+        )
+    ])
 
 
 def time_rendering(name, widgets, dimensions=None, repeat=100):

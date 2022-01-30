@@ -45,6 +45,48 @@ def moving_map(at, entry, size, zoom, renderer):
     )
 
 
+def metric_value(entry, accessor, converter, formatter):
+    def value():
+        v = accessor(entry())
+        if v is not None:
+            v = converter(v)
+            return formatter(v.magnitude)
+        return "-"
+
+    return value
+
+
+def metric(at, entry, accessor, formatter, font, converter=lambda x: x, align="left", cache=True):
+    if cache:
+        return CachingText(
+            at,
+            metric_value(entry, accessor, converter, formatter),
+            font,
+            align
+        )
+    else:
+        return Text(
+            at,
+            metric_value(entry, accessor, converter, formatter),
+            font,
+            align
+        )
+
+
+def text_dynamic(at, string, font, align="left", cache=True):
+    if cache:
+        return CachingText(at, string, font, align)
+    else:
+        return Text(at, string, font, align)
+
+
+def text(at, string, font, align="left", cache=True):
+    if cache:
+        return CachingText(at, lambda: string, font, align)
+    else:
+        return Text(at, lambda: string, font, align)
+
+
 def big_mph(at, entry, font_title, font_metric=None):
     if font_metric is None:
         font_metric = font_title.font_variant(size=160)
