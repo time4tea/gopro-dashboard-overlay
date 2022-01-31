@@ -110,13 +110,27 @@ optional arguments:
 
 ## Performance
 
-No attempt has been made to optimise this program! Right now, on my machine, it renders an 11 minute file in about 7 mins.
+Performance isn't really a major goal... Right now it processes video just a bit faster than realtime, so your 10 minute video 
+will probably take about 10 minutes to render. This is highly dependent on your CPU though. 
+
+
+### Pillow-SIMD
+
+You might be able to get some more performance out of the program by using pillow-simd. Installing it is a bit more complicated.
+You'll need a compiler etc. Follow the installation instructions at https://github.com/uploadcare/pillow-simd#pillow-simd
+
+On my computer, although for sure the frame-drawing is a bit faster ( 36fps v 25fps ), ffmpeg itself is the limiting factor, so 
+overall it doesn't make much difference, it's 5 seconds faster for an 8-minute render. This is on an 4/8HT core Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz (2015-Skylake),
+if you have a lot more CPU cores it might make a bigger difference.
+
+### FFMPEG GPU
+
+My GPU isn't really new enough to use the GPU-enabled FFMPEG, so I can't test it out. If you have information to share about this, please do! 
 
 ## Known Bugs / Issues
 
 - Only tested on a GoPro Hero 9, that's all I have. Sample files for other devices are welcomed.
 - Aligning overlay with video - not exact! - Start garmin first, and wait for GPS lock before recording
-- Multiple GoPro files concatentated and overlayed. Current limit of 10 mins (in 1080p/60) is annoying.
 
 ## Controlling the dashboard layout / controlling widgets
 
