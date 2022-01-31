@@ -1,11 +1,11 @@
 # for drawing text/images
-pillow
+pillow==8.3.2
 # pint for unit conversion
-pint
+pint==0.17
 # for drawing little map
-geotiler
+geotiler==0.14.5
 # for loading GPX files
-gpxpy
+gpxpy==1.4.2
 # for lat/lon/speed calcs
-geographiclib
-progressbar2
+geographiclib==1.52
+progressbar2==3.53.3
