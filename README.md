@@ -173,7 +173,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
-
+- 0.16.0
+  - Add support for degrees F for temp. 
 - 0.15.0
   - XML Layouts improved. Probably good/stable enough to make custom layouts
   - Include/Exclude named components using command line
