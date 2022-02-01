@@ -168,6 +168,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
 
+- 0.14.0
+  - Fix for some thunderforest themes (H/T @KyleGW)
+  - XML layout support for vertical and colour text
 - 0.13.0
   - Improved XML layout - text/metrics/unit conversions
 - 0.12.0
