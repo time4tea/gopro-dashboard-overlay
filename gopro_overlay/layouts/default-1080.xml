@@ -1,0 +1,15 @@
+<layout>
+    <component type="date_and_time" x="260" y="30" size_time="32" size_date="16"/>
+    <component type="gps_info" x="1900" y="36" size="16"/>
+    <component type="big_mph" x="16" y="800" size_title="16" size_metric="160"/>
+    <component type="gradient_chart" x="400" y="980"/>
+
+    <component type="gradient" x="220" y="980" size_title="16" size_metric="32"/>
+    <component type="altitude" x="16" y="980" size_title="16" size_metric="32"/>
+    <component type="temperature" x="1900" y="820" size_title="16" size_metric="32"/>
+    <component type="cadence" x="1900" y="900" size_title="16" size_metric="32"/>
+    <component type="heartbeat" x="1900" y="980" size_title="16" size_metric="32"/>
+
+    <component type="moving_map" x="1644" y="100" size="256" zoom="16"/>
+    <component type="journey_map" x="1644" y="376" size="256"/>
+</layout>
