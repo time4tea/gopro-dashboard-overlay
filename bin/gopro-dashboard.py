@@ -29,22 +29,27 @@ def temp_file_name():
     return path
 
 
+def accepter_from_args(include, exclude):
+    if include and exclude:
+        raise ValueError("Can't use both include and exclude at the same time")
+
+    if include:
+        return lambda n: n in include
+    if exclude:
+        return lambda n: n not in exclude
+
+    return lambda n: True
+
+
 def create_desired_layout(layout_name, include, exclude, renderer, timeseries, font, privacy_zone):
+
+    accepter = accepter_from_args(include, exclude)
+
     if layout_name == "default":
-        return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone)
+        return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone, include=accepter)
     elif layout_name == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
     elif args.layout == "xml":
-
-        accepter = lambda n: True
-
-        if include and exclude:
-            raise ValueError("Can't use both include and exclude at the same time")
-
-        if include:
-            accepter = lambda n: n in args.xml_include
-        if exclude:
-            accepter = lambda n: n not in args.exclude
 
         return layout_from_xml(load_xml_layout(layout_name), renderer, timeseries, font, privacy_zone, include=accepter)
     else:
@@ -77,10 +82,10 @@ if __name__ == "__main__":
     parser.add_argument("--layout-xml",
                         help="Use XML File for layout [experimental! - file format likely to change!]")
 
-    parser.add_argument("--xml-exclude", action="append", nargs="+",
-                        help="exclude named component when using xml layout (will include all others")
-    parser.add_argument("--xml-include", action="append", nargs="+",
-                        help="include named component when using xml layout (will exclude all others)")
+    parser.add_argument("--exclude", nargs="+",
+                        help="exclude named component (will include all others")
+    parser.add_argument("--include", nargs="+",
+                        help="include named component (will exclude all others)")
 
     parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
     parser.set_defaults(show_ffmpeg=False)
@@ -148,7 +153,7 @@ if __name__ == "__main__":
             overlay = Overlay(timeseries,
                               create_desired_layout(
                                   args.layout,
-                                  args.xml_include, args.xml_exclude,
+                                  args.include, args.exclude,
                                   renderer, timeseries, font, privacy_zone)
                               )
 
