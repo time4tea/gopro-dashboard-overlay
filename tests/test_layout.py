@@ -90,7 +90,7 @@ def test_render_xml_component_with_exclusions():
                                    timeseries,
                                    font,
                                    privacy=NoPrivacyZone(),
-                                   exclusions=["bob"]
+                                   include=lambda name: name == "alice"
                                )
                            ))
 

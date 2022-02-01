@@ -8,14 +8,19 @@ from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite
 
 
-def layout_from_xml(xml, renderer, timeseries, font, privacy, exclusions=None):
+def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda name: True):
     root = ET.fromstring(xml)
 
     fonts = {}
-    exclusions = exclusions if exclusions is not None else []
 
     def font_at(size):
         return fonts.setdefault(size, font.font_variant(size=size))
+
+    def want_element(element):
+        name = attrib(element, "name", d=None)
+        if name is not None:
+            return include(name)
+        return True
 
     def create(entry):
         def create_component(child):
@@ -48,12 +53,6 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy, exclusions=None):
                 raise IOError(f"Tag {element.tag} is not recognised. Should be one of '{list(elements.keys())}'")
 
             return elements[element.tag](element)
-
-        def want_element(element):
-            name = attrib(element, "name", d=None)
-            if name is not None and name in exclusions:
-                return False
-            return True
 
         return [do_element(child) for child in root if want_element(child)]
 
