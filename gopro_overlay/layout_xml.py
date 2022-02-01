@@ -4,8 +4,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 from gopro_overlay import layouts
-from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient, \
-    temperature, cadence, heartbeat, gradient_chart, text, metric, altitude
+from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient_chart, \
+    text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite
@@ -250,51 +250,6 @@ def create_big_mph(element, entry, font, **kwargs):
         entry,
         font_title=font(iattrib(element, "size_title", d=16)),
         font_metric=font(iattrib(element, "size_metric", d=160))
-    )
-
-
-def create_gradient(element, entry, font, **kwargs):
-    return gradient(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_altitude(element, entry, font, **kwargs):
-    return altitude(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_temperature(element, entry, font, **kwargs):
-    return temperature(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_cadence(element, entry, font, **kwargs):
-    return cadence(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_heartbeat(element, entry, font, **kwargs):
-    return heartbeat(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
     )
 
 

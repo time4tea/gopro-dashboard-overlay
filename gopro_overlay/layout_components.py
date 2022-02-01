@@ -4,7 +4,7 @@ from .point import Coordinate
 from .timeseries import Window
 from .widgets import Text, date, time, CachingText, Composite
 from .widgets_chart import SimpleChart
-from .widgets_info import BigMetric, IconPanel
+from .widgets_info import BigMetric
 from .widgets_map import MovingMap, JourneyMap
 
 
@@ -79,66 +79,6 @@ def big_mph(at, entry, font_title, font_metric=None):
             font_title=font_title,
             font_metric=font_metric
         )
-    )
-
-
-def heartbeat(at, entry, font_metric, font_title):
-    return IconPanel(
-        at=at,
-        icon="heartbeat.png",
-        title=lambda: "BPM",
-        value=lambda: f"{entry().hr.magnitude:.0f}" if entry().hr else "-",
-        align="right",
-        title_font=font_title,
-        value_font=font_metric
-    )
-
-
-def cadence(at, entry, font_metric, font_title):
-    return IconPanel(
-        at=at,
-        icon="gauge.png",
-        title=lambda: "RPM",
-        value=lambda: f"{entry().cad.magnitude:.0f}" if entry().cad else "-",
-        align="right",
-        title_font=font_title,
-        value_font=font_metric
-    )
-
-
-def temperature(at, entry, font_metric, font_title):
-    return IconPanel(
-        at=at,
-        icon="thermometer.png",
-        title=lambda: "TEMP(C)",
-        value=lambda: f"{entry().atemp.magnitude:.0f}" if entry().atemp is not None else "-",
-        align="right",
-        title_font=font_title,
-        value_font=font_metric
-    )
-
-
-def gradient(at, entry, font_metric, font_title):
-    return IconPanel(
-        at=at,
-        icon="slope-triangle.png",
-        title=lambda: "SLOPE(%)",
-        value=lambda: f"{entry().grad.magnitude:.1f}" if entry().grad else "-",
-        align="left",
-        title_font=font_title,
-        value_font=font_metric
-    )
-
-
-def altitude(at, entry, font_metric, font_title):
-    return IconPanel(
-        at=at,
-        icon="mountain.png",
-        title=lambda: "ALT(m)",
-        value=lambda: f"{entry().alt.to('m').magnitude:.1f}" if entry().alt else "-",
-        align="left",
-        title_font=font_title,
-        value_font=font_metric
     )
 
 

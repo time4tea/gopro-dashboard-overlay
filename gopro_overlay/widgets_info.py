@@ -18,53 +18,6 @@ class BigMetric:
         self.widget.draw(image, draw)
 
 
-class IconPanel:
-    def __init__(self, at, icon, title, value, align, title_font, value_font):
-        if align == "left":
-            self.widget = LeftInfoPanel(at, icon, title, value, title_font, value_font)
-        elif align == "right":
-            self.widget = RightInfoPanel(at, icon, title, value, title_font, value_font)
-        else:
-            raise ValueError("unhandled align - only 'left' or 'right")
-
-    def draw(self, image, draw):
-        self.widget.draw(image, draw)
-
-
-class RightInfoPanel:
-
-    def __init__(self, at, icon, title, value, title_font, value_font):
-        self.value = value
-        self.widget = Translate(
-            at,
-            Composite(
-                CachingText(Coordinate(-70, 0), title, title_font, align="right"),
-                simple_icon(Coordinate(-64, 0), icon, invert=True),
-                CachingText(Coordinate(-70, 18), value, value_font, align="right"),
-            )
-        )
-
-    def draw(self, image, draw):
-        self.widget.draw(image, draw)
-
-
-class LeftInfoPanel:
-
-    def __init__(self, at, icon, title, value, title_font, value_font):
-        self.value = value
-        self.widget = Translate(
-            at,
-            Composite(
-                CachingText(Coordinate(70, 0), title, title_font),
-                simple_icon(Coordinate(0, 0), icon, invert=True),
-                CachingText(Coordinate(70, 18), value, value_font),
-            )
-        )
-
-    def draw(self, image, draw):
-        self.widget.draw(image, draw)
-
-
 class ComparativeEnergy:
 
     def __init__(self, at, font, speed, person, bike, car, van):
