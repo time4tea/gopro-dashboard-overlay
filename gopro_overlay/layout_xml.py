@@ -5,13 +5,14 @@ from gopro_overlay.layout_components import date_and_time, gps_info, moving_map,
     temperature, cadence, heartbeat, gradient_chart, text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon
+from gopro_overlay.widgets import simple_icon, ViewportWidget, Composite
 
 
-def layout_from_xml(xml, renderer, timeseries, font, privacy):
+def layout_from_xml(xml, renderer, timeseries, font, privacy, exclusions=None):
     root = ET.fromstring(xml)
 
     fonts = {}
+    exclusions = exclusions if exclusions is not None else []
 
     def font_at(size):
         return fonts.setdefault(size, font.font_variant(size=size))
@@ -30,7 +31,29 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy):
             method = getattr(sys.modules[__name__], attr)
             return method(child, entry=entry, renderer=renderer, timeseries=timeseries, font=font_at, privacy=privacy)
 
-        return [create_component(child) for child in root]
+        def create_composite(element):
+            name = attrib(element, "name", d=None)
+            if name is not None and name in exclusions:
+                return None
+
+            return ViewportWidget(
+                at(element),
+                Composite(
+                    *[do_element(child) for child in element]
+                )
+            )
+
+        def do_element(element):
+            elements = {
+                "composite": create_composite,
+                "component": create_component
+            }
+            if element.tag not in elements:
+                raise IOError(f"Tag {element.tag} is not recognised. Should be one of '{list(elements.keys())}'")
+
+            return elements[element.tag](element)
+
+        return list(filter(lambda w: w is not None, [do_element(child) for child in root]))
 
     return create
 
@@ -100,7 +123,7 @@ def metric_converter_from(name):
     }
     if name in converters:
         return converters[name]
-    raise IOError(f"The conversion '{name}' is not supported. Use one of: {converters.keys()}")
+    raise IOError(f"The conversion '{name}' is not supported. Use one of: {list(converters.keys())}")
 
 
 def formatter_from(element):

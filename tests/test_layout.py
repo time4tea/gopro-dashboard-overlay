@@ -2,8 +2,8 @@ import importlib
 import random
 from datetime import timedelta
 
-from gopro_overlay import layouts
 from gopro_overlay import fake
+from gopro_overlay import layouts
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Overlay, standard_layout, speed_awareness_layout
@@ -46,6 +46,53 @@ def test_render_xml_layout():
     with renderer.open() as map_renderer:
         return time_layout("xml", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,
                                                                       privacy=NoPrivacyZone())))
+
+
+@approve_image
+def test_render_xml_component():
+    xmldoc = """<layout>
+        <composite name="bob" x="200" y="200">
+            <component type="text" x="0" y="0" size="32" cache="False">Text</component> 
+            <component type="text" x="50" y="50" size="64">Text</component> 
+            <component type="text" x="150" y="150" size="128" >Text</component> 
+        </composite>
+    </layout>
+    """
+
+    with renderer.open() as map_renderer:
+        return time_layout("xml", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,
+                                                                      privacy=NoPrivacyZone())))
+
+
+@approve_image
+def test_render_xml_component_with_exclusions():
+    xmldoc = """<layout>
+        <composite name="bob" x="200" y="200">
+            <component type="text" x="0" y="0" size="32" cache="False">Bob</component> 
+            <component type="text" x="50" y="50" size="64">Bob</component> 
+            <component type="text" x="150" y="150" size="128" >Bob</component> 
+        </composite>
+        <composite name="alice" x="400" y="200">
+            <component type="text" x="0" y="0" size="32" cache="False">Alice</component> 
+            <component type="text" x="50" y="50" size="64">Alice</component> 
+            <component type="text" x="150" y="150" size="128" >Alice</component> 
+        </composite>
+    </layout>
+    """
+
+    with renderer.open() as map_renderer:
+        return time_layout("xml",
+                           Overlay(
+                               timeseries,
+                               layout_from_xml(
+                                   xmldoc,
+                                   map_renderer,
+                                   timeseries,
+                                   font,
+                                   privacy=NoPrivacyZone(),
+                                   exclusions=["bob"]
+                               )
+                           ))
 
 
 def time_layout(name, layout, repeat=20):

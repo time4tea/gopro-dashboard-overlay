@@ -154,6 +154,42 @@ def transform_negative(img):
     return img
 
 
+class ImageViewport:
+    def __init__(self, at, image):
+        self.at = at
+        self.image = image
+
+    def alpha_composite(self, im, dest=(0, 0)):
+        self.image.alpha_composite(im, dest=(dest[0] + self.at.x, dest[1] + self.at.y))
+
+
+class DrawViewport:
+    def __init__(self, at, draw):
+        self.at = at
+        self.draw = draw
+
+    def text(self, xy, text, **kwargs):
+        self.draw.text(xy=(xy[0] + self.at.x, xy[1] + self.at.y), text=text, **kwargs)
+
+
+class ViewportWidget:
+    """Extremely rudimentary viewport support!
+
+    Translate the 'at' of child widget by this widget's location. Use in combination with a Composite
+    Need to test each child type that intend to put in here, as certainly won't work for many use cases.
+    """
+
+    def __init__(self, at: Coordinate, widget):
+        self.at = at
+        self.widget = widget
+
+    def draw(self, image, draw):
+        ivp = ImageViewport(self.at, image)
+        dvp = DrawViewport(self.at, draw)
+
+        self.widget.draw(ivp, dvp)
+
+
 class Scene:
 
     def __init__(self, widgets, dimensions=None):
