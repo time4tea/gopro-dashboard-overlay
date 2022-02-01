@@ -157,6 +157,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 https://github.com/gopro/gpmf-parser
 
+https://coderunner.io/how-to-compress-gopro-movies-and-keep-metadata/
+
 ## Other Related Software
 
 https://github.com/progweb/gpx2video

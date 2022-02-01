@@ -56,35 +56,15 @@ def metric_value(entry, accessor, converter, formatter):
     return value
 
 
-def metric(at, entry, accessor, formatter, font, converter=lambda x: x, align="left", cache=True):
+def text(cache=True, **kwargs):
     if cache:
-        return CachingText(
-            at,
-            metric_value(entry, accessor, converter, formatter),
-            font,
-            align
-        )
+        return CachingText(**kwargs)
     else:
-        return Text(
-            at,
-            metric_value(entry, accessor, converter, formatter),
-            font,
-            align
-        )
+        return Text(**kwargs)
 
 
-def text_dynamic(at, string, font, align="left", cache=True):
-    if cache:
-        return CachingText(at, string, font, align)
-    else:
-        return Text(at, string, font, align)
-
-
-def text(at, string, font, align="left", cache=True):
-    if cache:
-        return CachingText(at, lambda: string, font, align)
-    else:
-        return Text(at, lambda: string, font, align)
+def metric(entry, accessor, formatter, converter=lambda x: x, cache=True, **kwargs):
+    return text(cache, value=metric_value(entry, accessor, converter, formatter), **kwargs)
 
 
 def big_mph(at, entry, font_title, font_metric=None):

@@ -18,8 +18,10 @@
     <component type="journey_map" x="1644" y="376" size="256"/>
 
     <!--    Static Text-->
-    <component type="text" x="800" y="480" size="32">(C) Some Copyright Message</component>
+    <component type="text" x="800" y="480" size="32" rgb="255,255,0">(C) Some Copyright Message</component>
     <component type="text" x="800" y="480" size="48" align="right">(C) Some Copyright Message</component>
+
+    <component type="text" x="1400" y="150" size="32" align="lt" direction="ttb" rgb="0,255,255">Vertical Message</component>
 
     <!--  Some metric from the gopro data or calculated from it -->
     <!-- supported metrics: 'hr', 'speed', 'temp', 'gradient', 'alt', 'lat', 'lon', 'odo', "dist", "azi" -->
@@ -36,7 +38,7 @@
     <component type="metric" x="800" y="650" metric="hr" format=".4f" size="32" align="right"/>
     <component type="metric" x="850" y="700" metric="hr" dp="5" size="32"/>
 
-    <component type="metric" x="850" y="750" metric="odo" units="miles" dp="2" size="32"/>
+    <component type="metric" x="850" y="750" metric="odo" units="miles" dp="2" size="32" rgb="255,255,0"/>
 
     <component type="metric" x="250" y="300" metric="alt" dp="1" size="32"/>
     <component type="metric" x="250" y="350" metric="alt" units="feet" dp="1" size="32"/>

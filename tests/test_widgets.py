@@ -39,6 +39,21 @@ def test_render_text():
 
 
 @approve_image
+def test_render_text_colour():
+    return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font, fill=(255, 255, 0))])
+
+
+@approve_image
+def test_render_text_vertical():
+    return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font, direction="ttb", align="lt")])
+
+
+@approve_image
+def test_render_caching_text_vertical():
+    return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font, direction="ttb", align="lt")])
+
+
+@approve_image
 def test_render_caching_text_small():
     return time_rendering("simple text (cached)", [CachingText(Coordinate(50, 50), lambda: "Hello", font)])
 
@@ -165,7 +180,7 @@ def test_render_comparative_energy():
 @approve_image
 def test_text_component():
     return time_rendering(name="text", widgets=[
-        text(Coordinate(100, 100), "String", font.font_variant(size=50))
+        text(at=Coordinate(100, 100), value=lambda: "String", font=font.font_variant(size=50))
     ])
 
 

@@ -15,11 +15,12 @@ anchors = {
 
 
 class CachingText:
-    def __init__(self, at, value, font, align="left", fill=None):
+    def __init__(self, at, value, font, align="left", direction="ltr", fill=None):
         self.at = at
         self.value = value
         self.font = font
-        self.anchor = anchors[align]
+        self.anchor = anchors.get(align, align)
+        self.direction = direction
         self.fill = fill if fill else (255, 255, 255)
         self.cache = {}
 
@@ -37,7 +38,8 @@ class CachingText:
             x0, y0, x1, y1 = self.font.getbbox(
                 text=self.value(),
                 stroke_width=2,
-                anchor=self.anchor
+                anchor=self.anchor,
+                direction=self.direction
             )
 
             if x0 < 0:
@@ -52,6 +54,7 @@ class CachingText:
                 (abs(x0), 0),
                 self.value(),
                 anchor=self.anchor,
+                direction=self.direction,
                 font=self.font,
                 fill=self.fill,
                 stroke_width=2,
@@ -67,11 +70,12 @@ class CachingText:
 
 
 class Text:
-    def __init__(self, at, value, font, align="left", fill=None):
+    def __init__(self, at, value, font, align="left", direction="ltr", fill=None):
         self.at = at
         self.value = value
         self.font = font
-        self.anchor = anchors[align]
+        self.anchor = anchors.get(align, align)
+        self.direction = direction
         self.fill = fill if fill else (255, 255, 255)
 
     def draw(self, image, draw):
@@ -79,6 +83,7 @@ class Text:
             self.at.tuple(),
             self.value(),
             anchor=self.anchor,
+            direction=self.direction,
             font=self.font,
             fill=self.fill,
             stroke_width=2,

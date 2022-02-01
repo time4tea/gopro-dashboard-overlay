@@ -2,7 +2,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient, \
-    temperature, cadence, heartbeat, gradient_chart, text, metric, text_dynamic
+    temperature, cadence, heartbeat, gradient_chart, text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon
@@ -36,6 +36,7 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy):
 
 
 def attrib(el, a, f=lambda v: v, **kwargs):
+    """Use kwargs so can return a default value of None"""
     if a not in el.attrib:
         if "d" in kwargs:
             return kwargs["d"]
@@ -53,6 +54,13 @@ def iattrib(el, a, d=None, r=None):
 
 def battrib(el, a, d):
     return attrib(el, a, f=bool, d=d)
+
+
+def rgbattr(el, a, d):
+    v = attrib(el, a, f=lambda s: tuple(map(int, s.split(","))), d=d)
+    if len(v) != 3:
+        raise ValueError(f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), not {len(v)}")
+    return v
 
 
 def at(el):
@@ -118,6 +126,7 @@ def create_metric(element, entry, font, **kwargs):
         converter=metric_converter_from(attrib(element, "units", d=None)),
         align=attrib(element, "align", d="left"),
         cache=battrib(element, "cache", d=True),
+        fill=rgbattr(element, "rgb", d=(255, 255, 255))
     )
 
 
@@ -140,12 +149,13 @@ def date_formatter_from(element, entry):
 
 
 def create_datetime(element, entry, font, **kwargs):
-    return text_dynamic(
-        at(element),
-        date_formatter_from(element, entry),
+    return text(
+        at=at(element),
+        value=date_formatter_from(element, entry),
         font=font(iattrib(element, "size", d=16)),
         align=attrib(element, "align", d="left"),
-        cache=battrib(element, "cache", d=True)
+        cache=battrib(element, "cache", d=True),
+        fill=rgbattr(element, "rgb", d=(255, 255, 255))
     )
 
 
@@ -154,10 +164,12 @@ def create_text(element, font, **kwargs):
         raise IOError("Text components should have the text in the element like <component...>Text</component>")
 
     return text(
-        at(element),
-        element.text,
+        at=at(element),
+        value=lambda: element.text,
         font=font(iattrib(element, "size", d=16)),
-        align=attrib(element, "align", d="left")
+        align=attrib(element, "align", d="left"),
+        direction=attrib(element, "direction", d="ltr"),
+        fill=rgbattr(element, "rgb", d=(255, 255, 255))
     )
 
 
