@@ -40,10 +40,12 @@
 
     <component type="metric" x="850" y="750" metric="odo" units="miles" dp="2" size="32" rgb="255,255,0"/>
 
-    <component type="metric" x="250" y="300" metric="alt" dp="1" size="32"/>
-    <component type="metric" x="250" y="350" metric="alt" units="feet" dp="1" size="32"/>
-    <component type="metric" x="250" y="400" metric="alt" units="miles" dp="1" size="32"/>
-    <component type="metric" x="250" y="400" metric="alt" units="nautical_miles" dp="1" size="32"/>
+    <composite name="metrics" x="250" y="300">
+        <component type="metric" x="0" y="0" metric="alt" dp="1" size="32"/>
+        <component type="metric" x="0" y="50" metric="alt" units="feet" dp="1" size="32"/>
+        <component type="metric" x="0" y="100" metric="alt" units="miles" dp="1" size="32"/>
+        <component type="metric" x="0" y="100" metric="alt" units="nautical_miles" dp="1" size="32"/>
+    </composite>
 
     <component type="metric" x="250" y="700" metric="lat" dp="5" size="32" cache="False"/>
     <component type="metric" x="250" y="750" metric="lon" dp="5" size="32" cache="False"/>
@@ -54,8 +56,10 @@
     <component type="datetime" x="1000" y="350" format="%H:%M:%S.%f" size="32" truncate="4"/>
 
     <!--  icon  (bundled icons are actually black, so need invert to be white )-->
-    <component type="icon" x="64" y="100" file="mountain.png" size="128"/>
-    <component type="icon" x="256" y="100" file="mountain.png" size="128" invert="False"/>
+    <composite name="icons" x="64" y="100">
+        <component type="icon" x="0" y="0" file="mountain.png" size="128"/>
+        <component type="icon" x="192" y="0" file="mountain.png" size="128" invert="False"/>
+    </composite>
     <!-- icon somewhere on filesystem -->
     <!--    <component type="icon" x="64" y="100" file="/home/bob/blah.png" size="128"/>-->
 
