@@ -25,10 +25,29 @@
         <component type="metric" x="70" y="18" metric="gradient" dp="1" size="32" />
     </composite>
 
-    <component type="altitude" x="16" y="980" size_title="16" size_metric="32"/>
-    <component type="temperature" x="1900" y="820" size_title="16" size_metric="32"/>
-    <component type="cadence" x="1900" y="900" size_title="16" size_metric="32"/>
-    <component type="heartbeat" x="1900" y="980" size_title="16" size_metric="32"/>
+    <composite x="16" y="980" name="altitude">
+        <component type="text" x="70" y="0" size="16">ALT(m)</component>
+        <component type="icon" x="0" y="0" file="mountain.png" size="64"/>
+        <component type="metric" x="70" y="18" metric="alt" dp="1" size="32" />
+    </composite>
+
+    <composite x="1900" y="820" name="temperature">
+        <component type="text" x="-70" y="0" size="16" align="right">TEMP(C)</component>
+        <component type="icon" x="-64" y="0" file="thermometer.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="temp" dp="0" size="32" align="right"/>
+    </composite>
+
+    <composite x="1900" y="900" name="cadence">
+        <component type="text" x="-70" y="0" size="16" align="right">RPM</component>
+        <component type="icon" x="-64" y="0" file="gauge.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="cadence" dp="0" size="32" align="right"/>
+    </composite>
+
+    <composite x="1900" y="980" name="heartbeat">
+        <component type="text" x="-70" y="0" size="16" align="right">BPM</component>
+        <component type="icon" x="-64" y="0" file="heartbeat.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
+    </composite>
 
     <component type="moving_map" x="1644" y="100" size="256" zoom="16"/>
     <component type="journey_map" x="1644" y="376" size="256"/>

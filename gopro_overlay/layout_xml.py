@@ -107,6 +107,7 @@ def at(el):
 def metric_accessor_from(name):
     accessors = {
         "hr": lambda e: e.hr,
+        "cadence": lambda e: e.cad,
         "speed": lambda e: e.speed,
         "temp": lambda e: e.atemp,
         "gradient": lambda e: e.grad,
