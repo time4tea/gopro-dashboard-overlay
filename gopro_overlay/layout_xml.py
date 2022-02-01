@@ -132,6 +132,9 @@ def metric_converter_from(name):
         "mps": lambda u: u.to("mps"),
         "knots": lambda u: u.to("knot"),
 
+        "degreeF": lambda u: u.to('degreeF'),
+        "degreeC": lambda u: u.to('degreeC'),
+
         "feet": lambda u: u.to("international_feet"),
         "miles": lambda u: u.to("mile"),
         "nautical_miles": lambda u: u.to("nautical_mile"),

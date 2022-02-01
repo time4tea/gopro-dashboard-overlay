@@ -46,7 +46,7 @@
     <!--  Some metric from the gopro data or calculated from it -->
     <!-- supported metrics: 'hr', 'speed', 'temp', 'gradient', 'alt', 'lat', 'lon', 'odo', "dist", "azi" -->
     <!-- odo = odometer - total distance travelled, dist = dist from last point, azi = azimuth/heading -->
-    <!-- supported units: mph, kph, mps, knots, miles, nautical_miles -->
+    <!-- supported units: mph, kph, mps, knots, miles, nautical_miles, degreeF, degreeC -->
     <!-- use 'format' for python format string, or 'dp' to give # of decimal places -->
     <!-- consider use 'cache' False for values that change a lot, and don't have a fixed set of values, e.g. lat/lon -->
     <component type="metric" x="800" y="600" metric="speed" format=".1f" size="32"/>
