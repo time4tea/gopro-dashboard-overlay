@@ -12,7 +12,11 @@
         <component type="metric" x="256"    y="24" metric="lon" dp="6" size="16" align="right" cache="False"/>
     </composite>
 
-    <component type="big_mph" x="16" y="800" size_title="16" size_metric="160"/>
+    <composite x="16" y="800" name="big_mph">
+        <component type="text" x="0" y="0" size="16">MPH</component>
+        <component type="metric" x="0" y="0" metric="speed" units="mph" dp="0" size="160" />
+    </composite>
+
     <component type="gradient_chart" x="400" y="980"/>
 
     <component type="gradient" x="220" y="980" size_title="16" size_metric="32"/>
