@@ -39,7 +39,7 @@ class RightInfoPanel:
             at,
             Composite(
                 CachingText(Coordinate(-70, 0), title, title_font, align="right"),
-                simple_icon(Coordinate(-64, 0), icon),
+                simple_icon(Coordinate(-64, 0), icon, invert=True),
                 CachingText(Coordinate(-70, 18), value, value_font, align="right"),
             )
         )
@@ -56,7 +56,7 @@ class LeftInfoPanel:
             at,
             Composite(
                 CachingText(Coordinate(70, 0), title, title_font),
-                simple_icon(Coordinate(0, 0), icon),
+                simple_icon(Coordinate(0, 0), icon, invert=True),
                 CachingText(Coordinate(70, 18), value, value_font),
             )
         )
@@ -96,7 +96,7 @@ class ComparativeEnergy:
         def thing(icon, thing, thing_model):
             multiplier = f"{(thing / person).m:,.1f}x"
             return Composite(
-                simple_icon(Coordinate(230, 0), icon),
+                simple_icon(Coordinate(230, 0), icon, invert=True),
                 CachingText(Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour,
                             align="centre"),
                 CachingText(Coordinate(200, 55), lambda: multiplier, small_font, align="right",

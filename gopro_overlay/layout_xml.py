@@ -77,7 +77,7 @@ def iattrib(el, a, d=None, r=None):
 
 
 def battrib(el, a, d):
-    return attrib(el, a, f=bool, d=d)
+    return attrib(el, a, f=lambda s: s.lower() in ["true", "yes", "1"], d=d)
 
 
 def rgbattr(el, a, d):
@@ -158,7 +158,8 @@ def create_icon(element, **kwargs):
     return simple_icon(
         at=at(element),
         file=attrib(element, "file"),
-        size=iattrib(element, "size", d=64)
+        size=iattrib(element, "size", d=64),
+        invert=battrib(element, "invert", d=True)
     )
 
 

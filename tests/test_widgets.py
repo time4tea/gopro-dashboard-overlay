@@ -29,7 +29,7 @@ ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=
 @approve_image
 def test_render_icon():
     return time_rendering("icon", widgets=[
-        simple_icon(Coordinate(50, 50), "gauge-1.png"),
+        simple_icon(Coordinate(50, 50), "gauge-1.png", invert=True),
     ])
 
 
@@ -204,7 +204,7 @@ def test_composite_viewport():
             Coordinate(330, 130),
             Composite(
                 text(at=Coordinate(0, 0), cache=True, value=lambda: "String", font=font.font_variant(size=50)),
-                simple_icon(Coordinate(0, 50), "gauge-1.png"),
+                simple_icon(Coordinate(0, 50), "gauge-1.png", invert=True),
             )
         )
     })

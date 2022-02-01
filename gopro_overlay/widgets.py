@@ -128,12 +128,16 @@ def icon(file, at, transform=lambda x: x):
     return Drawable(at, transform(image))
 
 
-def simple_icon(at, file, size=64):
+def simple_icon(at, file, size=64, invert=False):
     return icon(file, at, transform=compose(
         functools.partial(transform_resize, (size, size)),
         transform_rgba,
-        transform_negative
+        transform_negative if invert else transform_identity
     ))
+
+
+def transform_identity(img):
+    return img
 
 
 def transform_resize(target, img):

@@ -53,8 +53,9 @@
     <component type="datetime" x="1000" y="300" format="%H:%M:%S.%f" size="32" cache="False"/>
     <component type="datetime" x="1000" y="350" format="%H:%M:%S.%f" size="32" truncate="4"/>
 
-    <!--  icon-->
+    <!--  icon  (bundled icons are actually black, so need invert to be white )-->
     <component type="icon" x="64" y="100" file="mountain.png" size="128"/>
+    <component type="icon" x="256" y="100" file="mountain.png" size="128" invert="False"/>
     <!-- icon somewhere on filesystem -->
     <!--    <component type="icon" x="64" y="100" file="/home/bob/blah.png" size="128"/>-->
 
