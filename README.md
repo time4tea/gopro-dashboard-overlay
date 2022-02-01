@@ -174,6 +174,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
 
+- 0.15.0
+  - XML Layouts improved. Probably good/stable enough to make custom layouts
+  - Include/Exclude named components using command line
 - 0.14.0
   - Fix for some thunderforest themes (H/T [@KyleGW](https://github.com/KyleGW))
   - XML layout support for vertical and colour text
