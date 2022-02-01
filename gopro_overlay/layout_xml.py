@@ -5,7 +5,7 @@ from gopro_overlay.layout_components import date_and_time, gps_info, moving_map,
     temperature, cadence, heartbeat, gradient_chart, text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, ViewportWidget, Composite
+from gopro_overlay.widgets import simple_icon, Translate, Composite
 
 
 def layout_from_xml(xml, renderer, timeseries, font, privacy, exclusions=None):
@@ -32,14 +32,10 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy, exclusions=None):
             return method(child, entry=entry, renderer=renderer, timeseries=timeseries, font=font_at, privacy=privacy)
 
         def create_composite(element):
-            name = attrib(element, "name", d=None)
-            if name is not None and name in exclusions:
-                return None
-
-            return ViewportWidget(
+            return Translate(
                 at(element),
                 Composite(
-                    *[do_element(child) for child in element]
+                    *[do_element(child) for child in element if want_element(child)]
                 )
             )
 
@@ -53,7 +49,13 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy, exclusions=None):
 
             return elements[element.tag](element)
 
-        return list(filter(lambda w: w is not None, [do_element(child) for child in root]))
+        def want_element(element):
+            name = attrib(element, "name", d=None)
+            if name is not None and name in exclusions:
+                return False
+            return True
+
+        return [do_element(child) for child in root if want_element(child)]
 
     return create
 

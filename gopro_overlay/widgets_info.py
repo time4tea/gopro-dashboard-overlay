@@ -1,16 +1,17 @@
-import itertools
-
 from gopro_overlay.models import KineticEnergyModel
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets import Composite, simple_icon, CachingText
+from gopro_overlay.widgets import Composite, simple_icon, CachingText, Translate
 
 
 class BigMetric:
 
     def __init__(self, at, title, value, font_title, font_metric=None):
-        self.widget = Composite(
-            CachingText(at + Coordinate(0, 0), title, font_title),
-            CachingText(at + Coordinate(0, 0), value, font_metric),
+        self.widget = Translate(
+            at,
+            Composite(
+                CachingText(Coordinate(0, 0), title, font_title),
+                CachingText(Coordinate(0, 0), value, font_metric),
+            )
         )
 
     def draw(self, image, draw):
@@ -34,10 +35,13 @@ class RightInfoPanel:
 
     def __init__(self, at, icon, title, value, title_font, value_font):
         self.value = value
-        self.widget = Composite(
-            CachingText(at + Coordinate(-70, 0), title, title_font, align="right"),
-            simple_icon(at + Coordinate(-64, 0), icon),
-            CachingText(at + Coordinate(-70, 18), value, value_font, align="right"),
+        self.widget = Translate(
+            at,
+            Composite(
+                CachingText(Coordinate(-70, 0), title, title_font, align="right"),
+                simple_icon(Coordinate(-64, 0), icon),
+                CachingText(Coordinate(-70, 18), value, value_font, align="right"),
+            )
         )
 
     def draw(self, image, draw):
@@ -48,10 +52,13 @@ class LeftInfoPanel:
 
     def __init__(self, at, icon, title, value, title_font, value_font):
         self.value = value
-        self.widget = Composite(
-            CachingText(at + Coordinate(70, 0), title, title_font),
-            simple_icon(at + Coordinate(0, 0), icon),
-            CachingText(at + Coordinate(70, 18), value, value_font),
+        self.widget = Translate(
+            at,
+            Composite(
+                CachingText(Coordinate(70, 0), title, title_font),
+                simple_icon(Coordinate(0, 0), icon),
+                CachingText(Coordinate(70, 18), value, value_font),
+            )
         )
 
     def draw(self, image, draw):
@@ -86,24 +93,22 @@ class ComparativeEnergy:
         def mass(thing):
             return f"{thing.to('kg').m:,} kg"
 
-        def thing(at, icon, thing, thing_model):
+        def thing(icon, thing, thing_model):
             multiplier = f"{(thing / person).m:,.1f}x"
-            return [
-                simple_icon(at + Coordinate(230, 0), icon),
-                CachingText(at + Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour,
+            return Composite(
+                simple_icon(Coordinate(230, 0), icon),
+                CachingText(Coordinate(230 + 32, 70), lambda: mass(thing), small_font, fill=mass_colour,
                             align="centre"),
-                CachingText(at + Coordinate(200, 55), lambda: multiplier, small_font, align="right",
+                CachingText(Coordinate(200, 55), lambda: multiplier, small_font, align="right",
                             fill=multiplier_colour),
-                CachingText(at + Coordinate(200, 5), lambda: model_output(thing_model), font, align="right"),
-            ]
+                CachingText(Coordinate(200, 5), lambda: model_output(thing_model), font, align="right"),
+            )
 
         self.widget = Composite(
-            *itertools.chain(
-                thing(at, "user.png", person, person_model),
-                thing(at + Coordinate(300, 0), "bicycle.png", bike + person, bike_model),
-                thing(at + Coordinate(600, 0), "car.png", car + person, car_model),
-                thing(at + Coordinate(900, 0), "van-black-side-view.png", van + person, van_model),
-            )
+            Translate(at + Coordinate(0, 0), thing("user.png", person, person_model)),
+            Translate(at + Coordinate(300, 0), thing("bicycle.png", bike + person, bike_model)),
+            Translate(at + Coordinate(600, 0), thing("car.png", car + person, car_model)),
+            Translate(at + Coordinate(900, 0), thing("van-black-side-view.png", van + person, van_model)),
         )
 
     def draw(self, image, draw):

@@ -10,7 +10,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, ViewportWidget
+from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate
 from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_info import LeftInfoPanel, BigMetric, ComparativeEnergy
 from tests.approval import approve_image
@@ -200,7 +200,7 @@ def test_metric_component():
 @approve_image
 def test_composite_viewport():
     return time_rendering(name="viewport", widgets={
-        ViewportWidget(
+        Translate(
             Coordinate(330, 130),
             Composite(
                 text(at=Coordinate(0, 0), cache=True, value=lambda: "String", font=font.font_variant(size=50)),
