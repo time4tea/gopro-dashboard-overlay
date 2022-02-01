@@ -13,9 +13,9 @@
     </composite>
 
     <composite x="1900" y="820" name="temperature">
-        <component type="text" x="-70" y="0" size="16" align="right">TEMP(C)</component>
+        <component type="text" x="-70" y="0" size="16" align="right">TEMP(F)</component>
         <component type="icon" x="-64" y="0" file="thermometer.png" size="64"/>
-        <component type="metric" x="-70" y="18" metric="temp" dp="0" size="32" align="right"/>
+        <component type="metric" x="-70" y="18" metric="temp" units="degreeF" dp="0" size="32" align="right"/>
     </composite>
 
     <composite x="1900" y="900" name="cadence">
