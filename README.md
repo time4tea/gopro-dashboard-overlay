@@ -173,6 +173,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.17.0
+  - BUGFIX: pypi distribution was broken. :-(
 - 0.16.0
   - Add support for degrees F for temp. 
 - 0.15.0
