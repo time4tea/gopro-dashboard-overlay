@@ -192,6 +192,9 @@ if __name__ == "__main__":
                         tobytes = byte_timer.time(lambda: frame.tobytes())
                         write_timer.time(lambda: writer.write(tobytes))
                     progress.finish()
+            except KeyboardInterrupt:
+                print("...Stopping...")
+                pass
             finally:
                 for t in [byte_timer, write_timer, draw_timer]:
                     print(t)
