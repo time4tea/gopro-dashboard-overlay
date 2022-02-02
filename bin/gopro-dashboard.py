@@ -41,17 +41,16 @@ def accepter_from_args(include, exclude):
     return lambda n: True
 
 
-def create_desired_layout(layout_name, include, exclude, renderer, timeseries, font, privacy_zone):
+def create_desired_layout(layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone):
 
     accepter = accepter_from_args(include, exclude)
 
-    if layout_name == "default":
+    if layout == "default":
         return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone, include=accepter)
-    elif layout_name == "speed-awareness":
+    elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
-    elif args.layout == "xml":
-
-        return layout_from_xml(load_xml_layout(layout_name), renderer, timeseries, font, privacy_zone, include=accepter)
+    elif layout == "xml":
+        return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter)
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
 
@@ -152,7 +151,7 @@ if __name__ == "__main__":
 
             overlay = Overlay(timeseries,
                               create_desired_layout(
-                                  args.layout,
+                                  args.layout, args.layout_xml,
                                   args.include, args.exclude,
                                   renderer, timeseries, font, privacy_zone)
                               )
