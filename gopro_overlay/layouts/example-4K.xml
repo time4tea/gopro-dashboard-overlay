@@ -1,0 +1,46 @@
+<layout>
+    <!--    Some bundled components-->
+    <component type="date_and_time" x="120" y="15" size_time="20" size_date="20"/>
+    <component type="gps_info" x="1870" y="1" size="17"/>
+    <component type="big_mph" x="200" y="800" size_title="10" size_metric="50"/>
+    <component type="gradient_chart" x="0" y="1010"/>
+
+    <!-- components with metric and icon -->
+    <component type="metric" x="270" y="1005" metric="alt" units="feet" dp="1" size="64"/>
+    <!--    Basic Components-->
+
+    <!-- Maps size=square size of map, zoom=open street map zoom level-->
+    <component type="moving_map" x="1600" y="75" size="320" zoom="10"/>
+    <component type="journey_map" x="1600" y="430" size="320"/>
+
+    <!--    Static Text-->
+    <component type="text" x="800" y="0" size="40" rgb="255,255,0">(C) Some Copyright Message</component>
+    <component type="text" x="1100" y="1040" size="32" align="right">(C) Another Copyright Message</component>
+
+    <!-- component type="text" x="1000" y="25" size="32" align="lt" direction="ttb" rgb="0,255,255">Vertical Message</component -->
+
+    <!--  Some metric from the gopro data or calculated from it -->
+    <!-- supported metrics: 'hr', 'speed', 'temp', 'gradient', 'alt', 'lat', 'lon', 'odo', "dist", "azi" -->
+    <!-- odo = odometer - total distance travelled, dist = dist from last point, azi = azimuth/heading -->
+    <!-- supported units: mph, kph, mps, knots, miles, nautical_miles -->
+    <!-- use 'format' for python format string, or 'dp' to give # of decimal places -->
+    <!-- consider use 'cache' False for values that change a lot, and don't have a fixed set of values, e.g. lat/lon -->
+    <component type="metric" x="25" y="350" metric="speed" format=".1f" size="32"/>
+    <component type="metric" x="25" y="400" metric="speed" units="mph" format=".1f" size="32"/>
+    <component type="metric" x="25" y="450" metric="speed" units="kph" format=".1f" size="32"/>
+    <component type="metric" x="25" y="500" metric="speed" units="mps" format=".1f" size="32"/>
+    <component type="metric" x="25" y="550" metric="speed" units="knots" format=".1f" size="32"/>
+
+    <!--    Date and time-->
+    <component type="datetime" x="25" y="150" format="%Y/%m/%d" size="32" />
+    <component type="datetime" x="25" y="200" format="%H:%M:%S.%f" size="32" truncate="4" cache="False"/>
+    <component type="datetime" x="25" y="250" format="%H:%M:%S" size="32"/>
+
+    <!--  icon-->
+    <component type="icon" x="1600" y="825" file="mountain.png" size="64"/>
+    <component type="icon" x="1600" y="900" file="mountain.png" size="64" invert="False"/>
+    
+    <!-- icon somewhere on filesystem -->
+    <!--    <component type="icon" x="64" y="100" file="/home/bob/blah.png" size="128"/>-->
+
+</layout>
