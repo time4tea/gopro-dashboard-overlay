@@ -134,10 +134,16 @@ My GPU isn't really new enough to use the GPU-enabled FFMPEG, so I can't test it
 
 ## Controlling the dashboard layout / controlling widgets
 
-Primitive XML Configuration file support - By using the parameters `--layout xml --layout-xml <filename>` you can get
-configure the layout yourself. Its very basic right now, but allows you to choose which elements you want.
+XML Configuration file support - By using the parameters `--layout xml --layout-xml <filename>` you can get
+configure the layout yourself.
 
-Have a look at the [example file](gopro_overlay/layouts/example.xml) to see an example. 
+Have a look at the [example file](gopro_overlay/layouts/example.xml) to see an example, or see the 
+[default layout](gopro_overlay/layouts/default-1080.xml) which now uses XML layout.
+
+## Omitting Widgets
+
+If the layout you are using has a widget you don't want, you can use `--include <name> <name>.. ` or `--exclude <name> <name>...`
+on the command line to include or exclude that widget.  To get the name of the widget, currently you need to look at the xml file. (linked above)
 
 ## Icons
 
@@ -167,7 +173,11 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
-
+- 0.16.0
+  - Add support for degrees F for temp. 
+- 0.15.0
+  - XML Layouts improved. Probably good/stable enough to make custom layouts
+  - Include/Exclude named components using command line
 - 0.14.0
   - Fix for some thunderforest themes (H/T [@KyleGW](https://github.com/KyleGW))
   - XML layout support for vertical and colour text

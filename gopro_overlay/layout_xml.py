@@ -1,11 +1,24 @@
+import importlib
+import os.path
 import sys
 import xml.etree.ElementTree as ET
 
-from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient, \
-    temperature, cadence, heartbeat, gradient_chart, text, metric
+from gopro_overlay import layouts
+from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient_chart, \
+    text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite
+
+
+def load_xml_layout(filename):
+    if os.path.exists(filename):
+        with open(filename) as f:
+            return f.read()
+
+    with importlib.resources.path(layouts, f"{filename}.xml") as fn:
+        with open(fn) as f:
+            return f.read()
 
 
 def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda name: True):
@@ -94,6 +107,7 @@ def at(el):
 def metric_accessor_from(name):
     accessors = {
         "hr": lambda e: e.hr,
+        "cadence": lambda e: e.cad,
         "speed": lambda e: e.speed,
         "temp": lambda e: e.atemp,
         "gradient": lambda e: e.grad,
@@ -117,6 +131,9 @@ def metric_converter_from(name):
         "kph": lambda u: u.to("KPH"),
         "mps": lambda u: u.to("mps"),
         "knots": lambda u: u.to("knot"),
+
+        "degreeF": lambda u: u.to('degreeF'),
+        "degreeC": lambda u: u.to('degreeC'),
 
         "feet": lambda u: u.to("international_feet"),
         "miles": lambda u: u.to("mile"),
@@ -236,42 +253,6 @@ def create_big_mph(element, entry, font, **kwargs):
         entry,
         font_title=font(iattrib(element, "size_title", d=16)),
         font_metric=font(iattrib(element, "size_metric", d=160))
-    )
-
-
-def create_gradient(element, entry, font, **kwargs):
-    return gradient(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_temperature(element, entry, font, **kwargs):
-    return temperature(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_cadence(element, entry, font, **kwargs):
-    return cadence(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
-    )
-
-
-def create_heartbeat(element, entry, font, **kwargs):
-    return heartbeat(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=32))
     )
 
 

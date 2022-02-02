@@ -1,13 +1,11 @@
-import importlib
 import random
 from datetime import timedelta
 
 from gopro_overlay import fake
-from gopro_overlay import layouts
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
-from gopro_overlay.layout import Overlay, standard_layout, speed_awareness_layout
-from gopro_overlay.layout_xml import layout_from_xml
+from gopro_overlay.layout import Overlay, speed_awareness_layout
+from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from tests.approval import approve_image
@@ -27,8 +25,12 @@ font = load_font("Roboto-Medium.ttf")
 @approve_image
 def test_render_default_layout():
     # Avg: 0.02276, Rate: 43.93
+
+    xmldoc = load_xml_layout("default-1080")
+
     with renderer.open() as map_renderer:
-        return time_layout("default", Overlay(timeseries, standard_layout(map_renderer, timeseries, font)))
+        return time_layout("default", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,
+                                                                          privacy=NoPrivacyZone())))
 
 
 @approve_image
@@ -39,9 +41,7 @@ def test_render_speed_layout():
 
 @approve_image
 def test_render_xml_layout():
-    with importlib.resources.path(layouts, "example.xml") as fn:
-        with open(fn) as f:
-            xmldoc = f.read()
+    xmldoc = load_xml_layout("example")
 
     with renderer.open() as map_renderer:
         return time_layout("xml", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,

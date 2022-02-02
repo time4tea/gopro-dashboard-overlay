@@ -12,7 +12,7 @@ from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate
 from gopro_overlay.widgets_chart import SimpleChart
-from gopro_overlay.widgets_info import LeftInfoPanel, BigMetric, ComparativeEnergy
+from gopro_overlay.widgets_info import BigMetric, ComparativeEnergy
 from tests.approval import approve_image
 from tests.testenvironment import is_make
 
@@ -70,15 +70,6 @@ def test_render_caching_text_big():
     # Avg: 0.00014, Rate: 6,966.58
     return time_rendering("big text (cached)",
                           [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
-
-
-@approve_image
-def test_render_panel():
-    return time_rendering("info panel",
-                          widgets=[
-                              LeftInfoPanel(Coordinate(10, 10), "mountain.png", lambda: "ALT(m)", lambda: "100m",
-                                            title_font, font)
-                          ])
 
 
 @approve_image

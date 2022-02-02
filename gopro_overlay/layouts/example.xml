@@ -6,10 +6,30 @@
     <component type="gradient_chart" x="400" y="980"/>
 
     <!-- components with metric and icon -->
-    <component type="gradient" x="220" y="980" size_title="16" size_metric="32"/>
-    <component type="temperature" x="1900" y="820" size_title="16" size_metric="32"/>
-    <component type="cadence" x="1900" y="900" size_title="16" size_metric="32"/>
-    <component type="heartbeat" x="1900" y="980" size_title="16" size_metric="32"/>
+    <composite x="220" y="980" name="gradient">
+        <component type="text" x="70" y="0" size="16">SLOPE(%)</component>
+        <component type="icon" x="0" y="0" file="slope-triangle.png" size="64"/>
+        <component type="metric" x="70" y="18" metric="gradient" dp="1" size="32" />
+    </composite>
+
+    <composite x="1900" y="820" name="temperature">
+        <component type="text" x="-70" y="0" size="16" align="right">TEMP(F)</component>
+        <component type="icon" x="-64" y="0" file="thermometer.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="temp" units="degreeF" dp="0" size="32" align="right"/>
+    </composite>
+
+    <composite x="1900" y="900" name="cadence">
+        <component type="text" x="-70" y="0" size="16" align="right">RPM</component>
+        <component type="icon" x="-64" y="0" file="gauge.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="cadence" dp="0" size="32" align="right"/>
+    </composite>
+
+    <composite x="1900" y="980" name="heartbeat">
+        <component type="text" x="-70" y="0" size="16" align="right">BPM</component>
+        <component type="icon" x="-64" y="0" file="heartbeat.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
+    </composite>
+    <!-- see default-1080.xml for these -->
 
     <!--    Basic Components-->
 
@@ -26,7 +46,7 @@
     <!--  Some metric from the gopro data or calculated from it -->
     <!-- supported metrics: 'hr', 'speed', 'temp', 'gradient', 'alt', 'lat', 'lon', 'odo', "dist", "azi" -->
     <!-- odo = odometer - total distance travelled, dist = dist from last point, azi = azimuth/heading -->
-    <!-- supported units: mph, kph, mps, knots, miles, nautical_miles -->
+    <!-- supported units: mph, kph, mps, knots, miles, nautical_miles, degreeF, degreeC -->
     <!-- use 'format' for python format string, or 'dp' to give # of decimal places -->
     <!-- consider use 'cache' False for values that change a lot, and don't have a fixed set of values, e.g. lat/lon -->
     <component type="metric" x="800" y="600" metric="speed" format=".1f" size="32"/>

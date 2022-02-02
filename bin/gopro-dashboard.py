@@ -15,8 +15,8 @@ from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
 from gopro_overlay.gpx import load_timeseries
-from gopro_overlay.layout import Overlay, standard_layout, speed_awareness_layout
-from gopro_overlay.layout_xml import layout_from_xml
+from gopro_overlay.layout import Overlay, speed_awareness_layout
+from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
@@ -27,6 +27,33 @@ def temp_file_name():
     handle, path = tempfile.mkstemp()
     os.close(handle)
     return path
+
+
+def accepter_from_args(include, exclude):
+    if include and exclude:
+        raise ValueError("Can't use both include and exclude at the same time")
+
+    if include:
+        return lambda n: n in include
+    if exclude:
+        return lambda n: n not in exclude
+
+    return lambda n: True
+
+
+def create_desired_layout(layout_name, include, exclude, renderer, timeseries, font, privacy_zone):
+
+    accepter = accepter_from_args(include, exclude)
+
+    if layout_name == "default":
+        return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone, include=accepter)
+    elif layout_name == "speed-awareness":
+        return speed_awareness_layout(renderer, font=font)
+    elif args.layout == "xml":
+
+        return layout_from_xml(load_xml_layout(layout_name), renderer, timeseries, font, privacy_zone, include=accepter)
+    else:
+        raise ValueError(f"Unsupported layout {args.layout}")
 
 
 if __name__ == "__main__":
@@ -52,8 +79,13 @@ if __name__ == "__main__":
     parser.add_argument("--layout", choices=["default", "speed-awareness", "xml"], default="default",
                         help="Choose graphics layout")
 
-    parser.add_argument("--layout-xml", type=argparse.FileType(mode='r', encoding='utf-8'),
+    parser.add_argument("--layout-xml",
                         help="Use XML File for layout [experimental! - file format likely to change!]")
+
+    parser.add_argument("--exclude", nargs="+",
+                        help="exclude named component (will include all others")
+    parser.add_argument("--include", nargs="+",
+                        help="include named component (will exclude all others)")
 
     parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
     parser.set_defaults(show_ffmpeg=False)
@@ -109,25 +141,21 @@ if __name__ == "__main__":
         # privacy zone applies everywhere, not just at start, so might not always be suitable...
         if args.privacy:
             lat, lon, km = args.privacy.split(",")
-            zone = PrivacyZone(
+            privacy_zone = PrivacyZone(
                 Point(float(lat), float(lon)),
                 units.Quantity(float(km), units.km)
             )
         else:
-            zone = NoPrivacyZone()
+            privacy_zone = NoPrivacyZone()
 
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
-            if args.layout == "default":
-                layout = standard_layout(renderer, timeseries, font, zone)
-            elif args.layout == "speed-awareness":
-                layout = speed_awareness_layout(renderer, font=font)
-            elif args.layout == "xml":
-                layout = layout_from_xml(args.layout_xml.read(), renderer, timeseries, font, zone)
-            else:
-                raise ValueError(f"Unsupported layout {args.layout}")
-
-            overlay = Overlay(timeseries, layout)
+            overlay = Overlay(timeseries,
+                              create_desired_layout(
+                                  args.layout,
+                                  args.include, args.exclude,
+                                  renderer, timeseries, font, privacy_zone)
+                              )
 
             if args.overlay:
                 redirect = None
