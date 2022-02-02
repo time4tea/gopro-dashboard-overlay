@@ -173,6 +173,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.19.0
+  - Load custom XML layouts correctly on command line. 
 - 0.18.0
   - BUGFIX: pypi distribution was still broken. :-(
 - 0.17.0
