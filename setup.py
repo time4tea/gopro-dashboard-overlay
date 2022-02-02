@@ -46,7 +46,7 @@ setup(
     tests_require=test_requirements,
     scripts=[
         "bin/gopro-dashboard.py",
-        "bin/gopro-to-gpx.py"
+        "bin/gopro-to-gpx.py",
     ],
     python_requires=">=3.8",
     include_package_data=True,

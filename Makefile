@@ -41,12 +41,23 @@ test-publish: dist
 	$(BIN)/twine upload --non-interactive --repository testpypi dist/*
 
 
+DIST_TEST=$(realpath tmp/dist-test)
+CURRENT_VERSION=$(shell PYTHONPATH=. python3 -c 'import gopro_overlay.__version__;print(gopro_overlay.__version__.__version__)')
+
+.PHONY:
+test-distribution: dist
+	@echo "Current Version is $(CURRENT_VERSION)"
+	rm -rf $(DIST_TEST)
+	python3 -m venv $(DIST_TEST)/venv
+	$(DIST_TEST)/venv/bin/pip install wheel dist/gopro-overlay-$(CURRENT_VERSION).tar.gz
+	DISTRIBUTION=$(DIST_TEST)/venv $(BIN)/pytest --capture sys --show-capture all tests-dist
+
+
 .PHONY: publish
-publish: clean dist
+publish: clean test-distribution
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
 	$(BIN)/twine upload --skip-existing --non-interactive --repository pypi dist/*
-
 
 
 .PHONY: bump
