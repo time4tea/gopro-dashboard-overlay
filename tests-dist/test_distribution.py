@@ -35,3 +35,17 @@ def test_can_at_least_show_help_for_all_binaries():
             cmd = [thing, "--help"]
             process = subprocess.run(cmd, check=True, env={})
             assert process.returncode == 0
+
+
+# this is kind of a hack. works on my machine
+def test_init_pys_are_in_right_subfolders():
+    path = os.path.join(top, "gopro_overlay")
+    expected_subpackages = list(
+        map(os.path.basename, filter(
+            os.path.isdir,
+            map(lambda f: os.path.join(path, f), filter(lambda f: not f.startswith("__"), os.listdir(path)))
+        ))
+    )
+    assert len(expected_subpackages) > 0
+    for p in expected_subpackages:
+        assert os.path.exists(os.path.join(distribution, "lib", "python3.8", "site-packages", "gopro_overlay", p, "__init__.py"))
