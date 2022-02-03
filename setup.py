@@ -7,12 +7,12 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 requires = [
-    "geotiler",
-    "gpxpy",
+    "geotiler==0.14.5",
+    "gpxpy==1.4.2",
     "geographiclib",
-    "pillow",
-    "pint",
-    "progressbar2",
+    "pillow==8.3.2",
+    "pint==0.17",
+    "progressbar2==3.53.3",
 ]
 
 test_requirements = [
