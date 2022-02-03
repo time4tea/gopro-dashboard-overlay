@@ -21,7 +21,7 @@ test_requirements = [
 
 setup(
     name="gopro-overlay",
-    version="0.18.0",
+    version="0.19.0",
     description="Overlay graphics dashboards onto GoPro footage",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -49,6 +49,7 @@ setup(
         "bin/gopro-dashboard.py",
         "bin/gopro-to-gpx.py",
         "bin/gopro-join.py",
+        "bin/gopro-cut.py",
     ],
     python_requires=">=3.8",
     include_package_data=True,

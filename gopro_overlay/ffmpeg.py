@@ -33,6 +33,28 @@ def invoke(cmd, **kwargs):
 StreamInfo = namedtuple("StreamInfo", ["audio", "video", "meta"])
 
 
+def cut_file(input, output, start, duration):
+    streams = find_streams(input)
+
+    maps = list(itertools.chain.from_iterable(
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta]]))
+
+    args = ["ffmpeg",
+            "-y",
+            "-i", input,
+            "-map_metadata", "0",
+            *maps,
+            "-copy_unknown",
+            "-ss", str(start),
+            "-t", str(duration),
+            "-c", "copy",
+            output]
+
+    print(args)
+
+    run(args)
+
+
 def join_files(filepaths, output):
     """only for joining parts of same trip"""
 
