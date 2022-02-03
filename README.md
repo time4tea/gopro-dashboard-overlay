@@ -173,6 +173,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.20.0
+  - Add opacity control and corner_radius to maps (H/T [@KyleGW](https://github.com/KyleGW))
+  - New Utility: gopro-cut.py - Extract a section of a GoPro recording, with metadata
 - 0.19.0
   - Load custom XML layouts correctly on command line. 
 - 0.18.0
@@ -190,7 +193,7 @@ https://github.com/JuanIrache/gopro-telemetry
 - 0.13.0
   - Improved XML layout - text/metrics/unit conversions
 - 0.12.0
-  - Join GoPro files together 
+  - New Utility: gopro-join.py - Join multiple GoPro files from a single session together 
   - Improve Parsing Speed for GoPro Metadata
 - 0.11.0 
   - Allow XML layout definitions 

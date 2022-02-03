@@ -48,4 +48,26 @@ def test_init_pys_are_in_right_subfolders():
     )
     assert len(expected_subpackages) > 0
     for p in expected_subpackages:
-        assert os.path.exists(os.path.join(distribution, "lib", "python3.8", "site-packages", "gopro_overlay", p, "__init__.py"))
+        assert os.path.exists(
+            os.path.join(distribution, "lib", "python3.8", "site-packages", "gopro_overlay", p, "__init__.py"))
+
+
+def test_maybe_renders_something():
+    clip = os.path.join(top, "render", "clip.MP4")
+    if os.path.exists(clip):
+        prog = os.path.join(distribution, "bin", "gopro-dashboard.py")
+        subprocess.run([prog, clip, "/tmp/render-clip.MP4"], check=True)
+
+
+def test_maybe_clips_something():
+    clip = os.path.join(top, "render", "clip.MP4")
+    if os.path.exists(clip):
+        prog = os.path.join(distribution, "bin", "gopro-cut.py")
+        subprocess.run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"], check=True)
+
+
+def test_maybe_clips_something_with_duration():
+    clip = os.path.join(top, "render", "clip.MP4")
+    if os.path.exists(clip):
+        prog = os.path.join(distribution, "bin", "gopro-cut.py")
+        subprocess.run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"], check=True)

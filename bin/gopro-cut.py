@@ -32,8 +32,8 @@ if __name__ == "__main__":
     from_seconds = as_seconds(args.start)
     duration = None
 
-    if args.to:
-        to_seconds = as_seconds(as_seconds(args.end))
+    if args.end:
+        to_seconds = as_seconds(args.end)
         duration = to_seconds - from_seconds
 
         if duration < 0:
