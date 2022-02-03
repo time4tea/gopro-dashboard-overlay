@@ -232,6 +232,8 @@ def create_moving_map(element, entry, renderer, **kwargs):
         entry,
         size=iattrib(element, "size", d=256),
         zoom=iattrib(element, "zoom", d=16, r=range(1, 18)),
+        roundedcorners=battrib(element, "roundedcorners", d=False),
+        transparencylevel=attrib(element, "transparencylevel", d=0.7,r=range(0, 1)),
         renderer=renderer
     )
 
@@ -243,7 +245,9 @@ def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
         privacy,
         renderer,
         timeseries,
-        size=iattrib(element, "size", d=256)
+        size=iattrib(element, "size", d=256),
+        roundedcorners=battrib(element, "roundedcorners", d=False),
+        transparencylevel=attrib(element, "transparencylevel", d=0.7,r=range(0, 1))
     )
 
 

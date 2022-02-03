@@ -1,14 +1,14 @@
 import math
-
+import logging.config
 import geotiler
-from PIL import ImageDraw
+from PIL import ImageDraw,Image,ImageOps
 
 from .journey import Journey
 from .privacy import NoPrivacyZone
 
 
 class JourneyMap:
-    def __init__(self, timeseries, at, location, renderer, size=256, privacy_zone=NoPrivacyZone()):
+    def __init__(self, timeseries, at, location, renderer, roundedcorners, size=256, privacy_zone=NoPrivacyZone(), transparencylevel=0.7):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
 
@@ -18,6 +18,8 @@ class JourneyMap:
         self.size = size
         self.map = None
         self.image = None
+        self.roundedcorners = roundedcorners
+        self.transparencylevel = transparencylevel
 
     def _init_maybe(self):
         if self.map is None:
@@ -48,13 +50,31 @@ class JourneyMap:
         location = self.location()
 
         frame = self.image.copy()
-        frame.putalpha(int(255 * 0.7))
+        logging.debug("JourneyMap Transparencylevel=%s",self.transparencylevel)
+        frame.putalpha(int(255 * float(self.transparencylevel)))
 
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
         draw_marker(draw, current, 6)
-        image.paste(frame, self.at.tuple())
 
+        # This code draws the JourneyMap with rounded corners to give it a little nicer look
+        # The creation of the larger draw canvas and then re-sizing it with the antialias option gives a smoother rounded corner result
+        if self.roundedcorners:
+            logging.debug("Rounding the corners of the JourneyMap")
+            image.paste(round_framecorners(frame,self.transparencylevel), self.at.tuple())
+        else:
+            logging.debug("Keeping JourneyMap corners square")
+            image.paste(frame, self.at.tuple())
+
+def round_framecorners(frame, transparencylevel):
+            bigsize = (frame.size[0] * 2, frame.size[1] * 2)
+            mask = Image.new('L', bigsize, 0)
+            draw_rounded_map = ImageDraw.Draw(mask) 
+            draw_rounded_map.rounded_rectangle((0, 0) + bigsize, radius=70, fill=int(float(transparencylevel)*255))
+            mask = mask.resize(frame.size, Image.ANTIALIAS)
+            frame = ImageOps.fit(frame, mask.size, centering=(0.5, 0.5))
+            frame.putalpha(mask)
+            return frame
 
 def draw_marker(draw, position, size, fill=None):
     fill = fill if fill is not None else (0, 0, 255)
@@ -64,7 +84,7 @@ def draw_marker(draw, position, size, fill=None):
 
 
 class MovingMap:
-    def __init__(self, at, location, azimuth, renderer, rotate=True, size=256, zoom=17):
+    def __init__(self, at, location, azimuth, renderer, roundedcorners, transparencylevel=0.7, rotate=True, size=256, zoom=17):
         self.at = at
         self.rotate = rotate
         self.azimuth = azimuth
@@ -72,6 +92,8 @@ class MovingMap:
         self.location = location
         self.size = size
         self.zoom = zoom
+        self.roundedcorners = roundedcorners
+        self.transparencylevel = transparencylevel
         self.hypotenuse = int(math.sqrt((self.size ** 2) * 2))
 
         self.half_width_height = (self.hypotenuse / 2)
@@ -111,5 +133,13 @@ class MovingMap:
                 ),
                 fill=(0, 0, 0)
             )
-            crop.putalpha(int(255 * 0.7))
-            image.paste(crop, self.at.tuple())
+            
+            # This code draws the JourneyMap with rounded corners to give it a little nicer look
+            # The creation of the larger draw canvas and then re-sizing it with the antialias option gives a smoother rounded corner result
+            if self.roundedcorners:
+                logging.debug("Rounding the corners of the MovingMap with transparency level %s",self.transparencylevel)
+                image.paste(round_framecorners(crop,self.transparencylevel), self.at.tuple())
+            else:
+                logging.debug("Keeping MovingMap corners square with transparency level %s", self.transparencylevel)
+                crop.putalpha(int(255 * float(self.transparencylevel)))
+                image.paste(crop, self.at.tuple())

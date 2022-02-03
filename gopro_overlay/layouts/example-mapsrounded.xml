@@ -1,0 +1,86 @@
+<layout>
+    <!--    Some bundled components-->
+    <component type="date_and_time" x="260" y="30" size_time="48" size_date="16"/>
+    <component type="gps_info" x="1900" y="36" size="16"/>
+    <component type="big_mph" x="16" y="800" size_title="16" size_metric="160"/>
+    <component type="gradient_chart" x="400" y="980"/>
+
+    <!-- components with metric and icon -->
+    <composite x="220" y="980" name="gradient">
+        <component type="text" x="70" y="0" size="16">SLOPE(%)</component>
+        <component type="icon" x="0" y="0" file="slope-triangle.png" size="64"/>
+        <component type="metric" x="70" y="18" metric="gradient" dp="1" size="32" />
+    </composite>
+
+    <composite x="1900" y="820" name="temperature">
+        <component type="text" x="-70" y="0" size="16" align="right">TEMP(F)</component>
+        <component type="icon" x="-64" y="0" file="thermometer.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="temp" units="degreeF" dp="0" size="32" align="right"/>
+    </composite>
+
+    <composite x="1900" y="900" name="cadence">
+        <component type="text" x="-70" y="0" size="16" align="right">RPM</component>
+        <component type="icon" x="-64" y="0" file="gauge.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="cadence" dp="0" size="32" align="right"/>
+    </composite>
+
+    <composite x="1900" y="980" name="heartbeat">
+        <component type="text" x="-70" y="0" size="16" align="right">BPM</component>
+        <component type="icon" x="-64" y="0" file="heartbeat.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
+    </composite>
+    <!-- see default-1080.xml for these -->
+
+    <!--    Basic Components-->
+
+    <!-- Maps size=square size of map, zoom=open street map zoom level, transparencylevel=how transparent the overlay map is on the image-->
+    <component type="moving_map" x="1644" y="100" size="256" zoom="16" roundedcorners="True" transparencylevel="0.9"/>
+    <component type="journey_map" x="1644" y="376" size="256" roundedcorners="True" transparencylevel="0.3"/>
+
+    <!--    Static Text-->
+    <component type="text" x="800" y="480" size="32" rgb="255,255,0">(C) Some Copyright Message</component>
+    <component type="text" x="800" y="480" size="48" align="right">(C) Some Copyright Message</component>
+
+    <component type="text" x="1400" y="150" size="32" align="lt" direction="ttb" rgb="0,255,255">Vertical Message</component>
+
+    <!--  Some metric from the gopro data or calculated from it -->
+    <!-- supported metrics: 'hr', 'speed', 'temp', 'gradient', 'alt', 'lat', 'lon', 'odo', "dist", "azi" -->
+    <!-- odo = odometer - total distance travelled, dist = dist from last point, azi = azimuth/heading -->
+    <!-- supported units: mph, kph, mps, knots, miles, nautical_miles, degreeF, degreeC -->
+    <!-- use 'format' for python format string, or 'dp' to give # of decimal places -->
+    <!-- consider use 'cache' False for values that change a lot, and don't have a fixed set of values, e.g. lat/lon -->
+    <component type="metric" x="800" y="600" metric="speed" format=".1f" size="32"/>
+    <component type="metric" x="900" y="600" metric="speed" units="mph" format=".1f" size="32"/>
+    <component type="metric" x="1000" y="600" metric="speed" units="kph" format=".1f" size="32"/>
+    <component type="metric" x="1100" y="600" metric="speed" units="mps" format=".1f" size="32"/>
+    <component type="metric" x="1200" y="600" metric="speed" units="knots" format=".1f" size="32"/>
+
+    <component type="metric" x="800" y="650" metric="hr" format=".4f" size="32" align="right"/>
+    <component type="metric" x="850" y="700" metric="hr" dp="5" size="32"/>
+
+    <component type="metric" x="850" y="750" metric="odo" units="miles" dp="2" size="32" rgb="255,255,0"/>
+
+    <composite name="metrics" x="250" y="300">
+        <component type="metric" x="0" y="0" metric="alt" dp="1" size="32"/>
+        <component type="metric" x="0" y="50" metric="alt" units="feet" dp="1" size="32"/>
+        <component type="metric" x="0" y="100" metric="alt" units="miles" dp="1" size="32"/>
+        <component type="metric" x="0" y="150" metric="alt" units="nautical_miles" dp="1" size="32"/>
+    </composite>
+
+    <component type="metric" x="250" y="700" metric="lat" dp="5" size="32" cache="False"/>
+    <component type="metric" x="250" y="750" metric="lon" dp="5" size="32" cache="False"/>
+
+    <!--    Date and time-->
+    <component type="datetime" x="1000" y="250" format="%Y/%m/%d" size="32" />
+    <component type="datetime" x="1000" y="300" format="%H:%M:%S.%f" size="32" cache="False"/>
+    <component type="datetime" x="1000" y="350" format="%H:%M:%S.%f" size="32" truncate="4"/>
+
+    <!--  icon  (bundled icons are actually black, so need invert to be white )-->
+    <composite name="icons" x="64" y="100">
+        <component type="icon" x="0" y="0" file="mountain.png" size="128"/>
+        <component type="icon" x="192" y="0" file="mountain.png" size="128" invert="False"/>
+    </composite>
+    <!-- icon somewhere on filesystem -->
+    <!--    <component type="icon" x="64" y="100" file="/home/bob/blah.png" size="128"/>-->
+
+</layout>

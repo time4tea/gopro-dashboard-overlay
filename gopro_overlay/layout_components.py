@@ -23,25 +23,29 @@ def gps_info(at, entry, font):
     )
 
 
-def journey_map(at, entry, privacy_zone, renderer, timeseries, size=256):
+def journey_map(at, entry, privacy_zone, renderer, timeseries, roundedcorners, transparencylevel, size=256):
     return JourneyMap(
         at=at,
         timeseries=timeseries,
         location=lambda: entry().point,
         size=size,
         renderer=renderer,
-        privacy_zone=privacy_zone
+        privacy_zone=privacy_zone,
+        roundedcorners=roundedcorners,
+        transparencylevel=transparencylevel
     )
 
 
-def moving_map(at, entry, size, zoom, renderer):
+def moving_map(at, entry, size, zoom, renderer, roundedcorners, transparencylevel):
     return MovingMap(
         at=at,
         location=lambda: entry().point,
         azimuth=lambda: entry().azi,
         renderer=renderer,
         size=size,
-        zoom=zoom
+        zoom=zoom,
+        roundedcorners=roundedcorners,
+        transparencylevel=transparencylevel
     )
 
 
