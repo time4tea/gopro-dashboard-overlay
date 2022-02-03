@@ -49,6 +49,7 @@ setup(
         "bin/gopro-dashboard.py",
         "bin/gopro-to-gpx.py",
         "bin/gopro-join.py",
+        "bin/gopro-cut.py",
     ],
     python_requires=">=3.8",
     include_package_data=True,
