@@ -49,6 +49,6 @@
         <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
     </composite>
 
-    <component type="moving_map" x="1644" y="100" size="256" zoom="16"/>
-    <component type="journey_map" x="1644" y="376" size="256"/>
+    <component type="moving_map" x="1644" y="100" size="256" zoom="16" corner_radius="35"/>
+    <component type="journey_map" x="1644" y="376" size="256" corner_radius="35"/>
 </layout>

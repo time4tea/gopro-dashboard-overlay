@@ -35,7 +35,9 @@
 
     <!-- Maps size=square size of map, zoom=open street map zoom level-->
     <component type="moving_map" x="1644" y="100" size="256" zoom="16"/>
+    <component type="moving_map" x="1644" y="700" size="256" zoom="16" corner_radius="35" opacity="0.5"/>
     <component type="journey_map" x="1644" y="376" size="256"/>
+    <component type="journey_map" x="1344" y="700" size="256" corner_radius="128" opacity="0.5"/>
 
     <!--    Static Text-->
     <component type="text" x="800" y="480" size="32" rgb="255,255,0">(C) Some Copyright Message</component>

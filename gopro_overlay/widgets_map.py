@@ -1,20 +1,22 @@
 import math
 
 import geotiler
-from PIL import ImageDraw
+from PIL import ImageDraw, Image, ImageOps
 
 from .journey import Journey
 from .privacy import NoPrivacyZone
 
 
 class JourneyMap:
-    def __init__(self, timeseries, at, location, renderer, size=256, privacy_zone=NoPrivacyZone()):
+    def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7, privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
 
         self.at = at
         self.location = location
         self.renderer = renderer
+        self.corner_radius = corner_radius
+        self.opacity = opacity
         self.size = size
         self.map = None
         self.image = None
@@ -34,13 +36,29 @@ class JourneyMap:
                 for location in journey.locations if not self.privacy_zone.encloses(location)
             ]
 
-            self.image = self.renderer(self.map)
-            draw = ImageDraw.Draw(self.image)
+            image = self.renderer(self.map)
+
+            draw = ImageDraw.Draw(image)
             draw.line(plots, fill=(255, 0, 0), width=4)
-            draw.line(
-                (0, 0, 0, self.size - 1, self.size - 1, self.size - 1, self.size - 1, 0, 0, 0),
-                fill=(0, 0, 0)
-            )
+
+            if self.corner_radius:
+                image = rounded_corners(image, self.corner_radius, self.opacity)
+
+                draw.rounded_rectangle(
+                    (0, 0) + (self.size - 1, self.size - 1),
+                    radius=self.corner_radius,
+                    outline=(0, 0, 0)
+                )
+            else:
+                draw.line(
+                    (0, 0, 0, self.size - 1, self.size - 1, self.size - 1, self.size - 1, 0, 0, 0),
+                    fill=(0, 0, 0)
+                )
+
+                image.putalpha(int(255 * self.opacity))
+
+            self.image = image
+
 
     def draw(self, image, draw):
         self._init_maybe()
@@ -48,11 +66,11 @@ class JourneyMap:
         location = self.location()
 
         frame = self.image.copy()
-        frame.putalpha(int(255 * 0.7))
 
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
         draw_marker(draw, current, 6)
+
         image.paste(frame, self.at.tuple())
 
 
@@ -64,7 +82,8 @@ def draw_marker(draw, position, size, fill=None):
 
 
 class MovingMap:
-    def __init__(self, at, location, azimuth, renderer, rotate=True, size=256, zoom=17):
+    def __init__(self, at, location, azimuth, renderer,
+                 rotate=True, size=256, zoom=17, corner_radius=None, opacity=0.7):
         self.at = at
         self.rotate = rotate
         self.azimuth = azimuth
@@ -72,6 +91,8 @@ class MovingMap:
         self.location = location
         self.size = size
         self.zoom = zoom
+        self.corner_radius = corner_radius
+        self.opacity=opacity
         self.hypotenuse = int(math.sqrt((self.size ** 2) * 2))
 
         self.half_width_height = (self.hypotenuse / 2)
@@ -101,15 +122,33 @@ class MovingMap:
 
             crop = map_image.crop(self.bounds)
 
-            ImageDraw.Draw(crop).line(
-                (
-                    0, 0,
-                    0, self.size - 1,
-                    self.size - 1, self.size - 1,
-                    self.size - 1, 0,
-                    0, 0
-                ),
-                fill=(0, 0, 0)
-            )
-            crop.putalpha(int(255 * 0.7))
+            if self.corner_radius:
+                crop = rounded_corners(crop, self.corner_radius, self.opacity)
+
+                ImageDraw.Draw(crop).rounded_rectangle(
+                    (0, 0) + (self.size - 1, self.size - 1),
+                    radius=self.corner_radius,
+                    outline=(0, 0, 0)
+                )
+            else:
+                ImageDraw.Draw(crop).line(
+                    (
+                        0, 0,
+                        0, self.size - 1,
+                        self.size - 1, self.size - 1,
+                        self.size - 1, 0,
+                        0, 0
+                    ),
+                    fill=(0, 0, 0)
+                )
+
+                crop.putalpha(int(255 * self.opacity))
+
             image.paste(crop, self.at.tuple())
+
+
+def rounded_corners(frame, radius, opacity):
+    mask = Image.new('L', frame.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (frame.size[0] - 1, frame.size[1] - 1), radius=radius, fill=int(opacity * 255))
+    frame.putalpha(mask)
+    return frame

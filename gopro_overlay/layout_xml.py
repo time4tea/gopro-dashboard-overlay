@@ -89,6 +89,14 @@ def iattrib(el, a, d=None, r=None):
     return v
 
 
+def fattrib(el, a, d=None, r=None):
+    v = attrib(el, a, f=float, d=d)
+    if r:
+        if v not in r:
+            raise ValueError(f"Value for '{a}' in '{el.tag}' needs to lie in range {r.start} to {r.stop}, not '{v}'")
+    return v
+
+
 def battrib(el, a, d):
     return attrib(el, a, f=lambda s: s.lower() in ["true", "yes", "1"], d=d)
 
@@ -228,11 +236,13 @@ def create_gps_info(element, entry, font, **kwargs):
 
 def create_moving_map(element, entry, renderer, **kwargs):
     return moving_map(
-        at(element),
-        entry,
+        at=at(element),
+        entry=entry,
         size=iattrib(element, "size", d=256),
         zoom=iattrib(element, "zoom", d=16, r=range(1, 18)),
-        renderer=renderer
+        renderer=renderer,
+        corner_radius=iattrib(element, "corner_radius", 0),
+        opacity=fattrib(element, "opacity", 0.7)
     )
 
 
@@ -240,10 +250,12 @@ def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
     return journey_map(
         at(element),
         entry,
-        privacy,
-        renderer,
-        timeseries,
-        size=iattrib(element, "size", d=256)
+        privacy_zone=privacy,
+        renderer=renderer,
+        timeseries=timeseries,
+        size=iattrib(element, "size", d=256),
+        corner_radius=iattrib(element, "corner_radius", 0),
+        opacity=fattrib(element, "opacity", 0.7)
     )
 
 
