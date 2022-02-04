@@ -175,6 +175,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 - 0.21.0
   - Built-in support for 4k videos, with a supporting overlay. Feedback welcomed.
+  - Use --overlay-size with --layout xml to use custom overlay sizes and layouts
   - Minor Bugfixes
 - 0.20.0
   - Add "opacity"  and "corner_radius" to maps xml components (H/T [@KyleGW](https://github.com/KyleGW))
