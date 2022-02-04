@@ -162,7 +162,7 @@ if __name__ == "__main__":
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
             overlay = Overlay(
-                dimensions=Dimension(x=1920, y=1080),
+                dimensions=stream_info.video_dimension,
                 timeseries=timeseries,
                 create_widgets=create_desired_layout(
                     args.layout, args.layout_xml,
