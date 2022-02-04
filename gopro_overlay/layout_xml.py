@@ -16,9 +16,12 @@ def load_xml_layout(filename):
         with open(filename) as f:
             return f.read()
 
-    with importlib.resources.path(layouts, f"{filename}.xml") as fn:
-        with open(fn) as f:
-            return f.read()
+    try:
+        with importlib.resources.path(layouts, f"{filename}.xml") as fn:
+            with open(fn) as f:
+                return f.read()
+    except FileNotFoundError:
+        raise IOError(f"Unable to locate bundled layout resource: {filename}. You may need to create a custom layout.") from None
 
 
 def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda name: True):

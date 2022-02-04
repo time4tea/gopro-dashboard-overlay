@@ -29,7 +29,7 @@
         <component type="icon" x="-64" y="0" file="heartbeat.png" size="64"/>
         <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
     </composite>
-    <!-- see default-1080.xml for these -->
+    <!-- see default-1920x1080.xml for these -->
 
     <!--    Basic Components-->
 

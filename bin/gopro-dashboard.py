@@ -10,7 +10,6 @@ from pathlib import Path
 import progressbar
 
 from gopro_overlay import timeseries_process, geo
-from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams
 from gopro_overlay.font import load_font
@@ -43,11 +42,12 @@ def accepter_from_args(include, exclude):
     return lambda n: True
 
 
-def create_desired_layout(layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone):
+def create_desired_layout(dimensions, layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone):
     accepter = accepter_from_args(include, exclude)
 
     if layout == "default":
-        return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone,
+        resource_name = f"default-{dimensions.x}x{dimensions.y}"
+        return layout_from_xml(load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone,
                                include=accepter)
     elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
@@ -114,8 +114,8 @@ if __name__ == "__main__":
         exit(1)
 
     stream_info = find_streams(input_file)
-
-    print(f"Input file has size {stream_info.video_dimension}")
+    dimensions = stream_info.video_dimension
+    print(f"Input file has size {dimensions}")
 
     with PoorTimer("program").timing():
 
@@ -162,12 +162,13 @@ if __name__ == "__main__":
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
             overlay = Overlay(
-                dimensions=stream_info.video_dimension,
+                dimensions=dimensions,
                 timeseries=timeseries,
                 create_widgets=create_desired_layout(
-                    args.layout, args.layout_xml,
-                    args.include, args.exclude,
-                    renderer, timeseries, font, privacy_zone)
+                    layout=args.layout, layout_xml=args.layout_xml,
+                    dimensions=dimensions,
+                    include=args.include, exclude=args.exclude,
+                    renderer=renderer, timeseries=timeseries, font=font, privacy_zone=privacy_zone)
             )
 
             if args.overlay:

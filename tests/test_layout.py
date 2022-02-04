@@ -27,7 +27,7 @@ font = load_font("Roboto-Medium.ttf")
 def test_render_default_layout():
     # Avg: 0.01550, Rate: 64.53
 
-    xmldoc = load_xml_layout("default-1080")
+    xmldoc = load_xml_layout("default-1920x1080")
 
     with renderer.open() as map_renderer:
         return time_layout("default", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))

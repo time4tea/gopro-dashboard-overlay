@@ -138,7 +138,7 @@ XML Configuration file support - By using the parameters `--layout xml --layout-
 configure the layout yourself.
 
 Have a look at the [example file](gopro_overlay/layouts/example.xml) to see an example, or see the 
-[default layout](gopro_overlay/layouts/default-1080.xml) which now uses XML layout.
+[default layout](gopro_overlay/layouts/default-1920x1080.xml) which now uses XML layout.
 
 ## Omitting Widgets
 
