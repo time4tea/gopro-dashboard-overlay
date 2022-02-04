@@ -10,7 +10,8 @@ from pathlib import Path
 import progressbar
 
 from gopro_overlay import timeseries_process, geo
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed
+from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
+    find_streams
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
@@ -42,11 +43,11 @@ def accepter_from_args(include, exclude):
 
 
 def create_desired_layout(layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone):
-
     accepter = accepter_from_args(include, exclude)
 
     if layout == "default":
-        return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone, include=accepter)
+        return layout_from_xml(load_xml_layout("default-1080"), renderer, timeseries, font, privacy_zone,
+                               include=accepter)
     elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
     elif layout == "xml":
@@ -105,9 +106,19 @@ if __name__ == "__main__":
 
     font = load_font(args.font)
 
+    input_file = args.input
+
+    if not os.path.exists(input_file):
+        print(f"{input_file}: not found")
+        exit(1)
+
+    stream_info = find_streams(input_file)
+
+    print(f"Input file has size {stream_info.video_dimension}")
+
     with PoorTimer("program").timing():
 
-        gopro_timeseries = timeseries_from(args.input, units)
+        gopro_timeseries = timeseries_from(input_file, units)
         print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
 
         if args.gpx:
@@ -162,7 +173,7 @@ if __name__ == "__main__":
                     redirect = temp_file_name()
                     print(f"FFMPEG Output is in {redirect}")
 
-                ffmpeg = FFMPEGOverlay(input=args.input, output=args.output, vsize=args.output_size, redirect=redirect)
+                ffmpeg = FFMPEGOverlay(input=input_file, output=args.output, vsize=args.output_size, redirect=redirect)
             else:
                 ffmpeg = FFMPEGGenerate(output=args.output)
 

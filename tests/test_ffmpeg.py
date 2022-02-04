@@ -1,4 +1,5 @@
 from gopro_overlay import ffmpeg
+from gopro_overlay.dimensions import Dimension
 
 ffprobe_output = """[mov,mp4,m4a,3gp,3g2,mj2 @ 0x559b7fad8f00] Using non-standard frame rate 59/1
 Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH010091.MP4':
@@ -60,6 +61,7 @@ def test_parsing_stream_information():
     streams = ffmpeg.find_streams("whatever", fake_invoke(stderr=ffprobe_output))
 
     assert streams.video == 0
+    assert streams.video_dimension == Dimension(1920, 1080)
     assert streams.audio == 1
     assert streams.meta == 3
 

@@ -8,6 +8,8 @@ import tempfile
 from array import array
 from collections import namedtuple
 
+from gopro_overlay.dimensions import dimension_from, Dimension
+
 
 @contextlib.contextmanager
 def temporary_file(dir=None, suffix=""):
@@ -30,7 +32,7 @@ def invoke(cmd, **kwargs):
         raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
 
-StreamInfo = namedtuple("StreamInfo", ["audio", "video", "meta"])
+StreamInfo = namedtuple("StreamInfo", ["audio", "video", "meta", "video_dimension"])
 
 
 def cut_file(input, output, start, duration):
@@ -79,17 +81,18 @@ def join_files(filepaths, output):
                 "-c", "copy",
                 output]
         print(f"Running {args}")
-        process = run(args)
+        run(args)
 
 
 def find_streams(filepath, invoke=invoke):
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", filepath]).stderr)
 
-    video_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Video")
+    video_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Video.*, (\d+x\d+)")
     audio_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Audio")
     meta_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Data: bin_data \(gpmd")
 
     video_stream = None
+    video_dimension = None
     audio_stream = None
     meta_stream = None
 
@@ -97,6 +100,7 @@ def find_streams(filepath, invoke=invoke):
         video_match = video_re.search(line)
         if video_match:
             video_stream = int(video_match.group(1))
+            video_dimension = dimension_from(video_match.group(2))
         audio_match = audio_re.search(line)
         if audio_match:
             audio_stream = int(audio_match.group(1))
@@ -104,10 +108,10 @@ def find_streams(filepath, invoke=invoke):
         if meta_match:
             meta_stream = int(meta_match.group(1))
 
-    if video_stream is None or audio_stream is None or meta_stream is None:
+    if video_stream is None or audio_stream is None or meta_stream is None or video_dimension is None :
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
 
-    return StreamInfo(audio_stream, video_stream, meta_stream)
+    return StreamInfo(audio_stream, video_stream, meta_stream, video_dimension)
 
 
 def load_gpmd_from(filepath):
@@ -138,8 +142,9 @@ def ffmpeg_libx264_is_installed():
 
 class FFMPEGGenerate:
 
-    def __init__(self, output):
+    def __init__(self, output, overlay_size=Dimension(x=1920, y=1080)):
         self.output = output
+        self.overlay_size = overlay_size
 
     @contextlib.contextmanager
     def generate(self):
@@ -149,7 +154,7 @@ class FFMPEGGenerate:
             "-loglevel", "info",
             "-f", "rawvideo",
             "-framerate", "10.0",
-            "-s", "1920x1080",
+            "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
             "-pix_fmt", "rgba",
             "-i", "-",
             "-r", "30",
@@ -165,9 +170,10 @@ class FFMPEGGenerate:
 
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, vsize=1080, redirect=None):
+    def __init__(self, input, output, vsize=1080, overlay_size=Dimension(x=1920, y=1080), redirect=None):
         self.output = output
         self.input = input
+        self.overlay_size = overlay_size
         self.vsize = vsize
         self.redirect = redirect
 
@@ -184,7 +190,7 @@ class FFMPEGOverlay:
             "-i", self.input,
             "-f", "rawvideo",
             "-framerate", "10.0",
-            "-s", "1920x1080",
+            "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
             "-pix_fmt", "rgba",
             "-i", "-",
             "-r", "30",
