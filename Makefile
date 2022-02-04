@@ -57,8 +57,17 @@ test-distribution: dist
 	DISTRIBUTION=$(DIST_TEST)/venv $(BIN)/pytest --capture sys --show-capture all tests-dist
 
 
+.PHONY: ensure-not-released
+ensure-not-released:
+	build-scripts/ensure-version-not-released.sh $(CURRENT_VERSION)
+
+
+.PHONY: ensure-pristine
+ensure-pristine:
+	build-scripts/ensure-working-directory-clean.sh
+
 .PHONY: publish
-publish: clean test-distribution
+publish: ensure-not-released ensure-pristine clean test-distribution
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
 	$(BIN)/twine upload --skip-existing --non-interactive --repository pypi dist/*
