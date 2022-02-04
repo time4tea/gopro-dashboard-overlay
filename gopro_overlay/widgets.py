@@ -5,6 +5,7 @@ import os
 from PIL import Image, ImageDraw
 
 from . import icons
+from .dimensions import Dimension
 from .point import Coordinate
 
 anchors = {
@@ -196,12 +197,12 @@ class Translate:
 
 class Scene:
 
-    def __init__(self, widgets, dimensions=None):
+    def __init__(self, widgets, dimensions: Dimension):
         self._widgets = widgets
-        self._dimensions = dimensions if dimensions else (1920, 1080)
+        self._dimensions = dimensions
 
     def draw(self):
-        image = Image.new("RGBA", self._dimensions, (0, 0, 0, 0))
+        image = Image.new("RGBA", (self._dimensions.x, self._dimensions.y), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         for w in self._widgets:

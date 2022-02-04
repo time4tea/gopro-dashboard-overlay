@@ -5,6 +5,7 @@ from datetime import timedelta
 from PIL import ImageFont
 
 from gopro_overlay import fake
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.layout_components import gps_info, text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
@@ -155,7 +156,7 @@ def test_render_comparative_energy():
     speed = units.Quantity(25, units.mph)
 
     return time_rendering(name="comparative energy",
-                          dimensions=(1300, 200),
+                          dimensions=Dimension(x=1300, y=200),
                           widgets=[
                               ComparativeEnergy(Coordinate(10, 50),
                                                 font=font,
@@ -201,8 +202,7 @@ def test_composite_viewport():
     })
 
 
-def time_rendering(name, widgets, dimensions=None, repeat=100):
-    dimensions = dimensions or (600, 300)
+def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=100):
     timer = PoorTimer(name)
 
     scene = Scene(widgets, dimensions=dimensions)

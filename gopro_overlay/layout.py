@@ -1,5 +1,6 @@
 from PIL import ImageFont
 
+from .dimensions import Dimension
 from .layout_components import date_and_time, gps_info, big_mph, moving_map
 from .point import Coordinate
 from .units import units
@@ -33,7 +34,7 @@ def speed_awareness_layout(renderer, font: ImageFont):
 class Overlay:
 
     def __init__(self, timeseries, create_widgets):
-        self.scene = Scene(create_widgets(self.entry))
+        self.scene = Scene(create_widgets(self.entry), dimensions=Dimension(x=1920, y=1080))
         self.timeseries = timeseries
         self._entry = None
 
