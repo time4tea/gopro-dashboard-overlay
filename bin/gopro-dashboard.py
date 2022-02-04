@@ -10,6 +10,7 @@ from pathlib import Path
 import progressbar
 
 from gopro_overlay import timeseries_process, geo
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams
 from gopro_overlay.font import load_font
@@ -160,12 +161,14 @@ if __name__ == "__main__":
 
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
-            overlay = Overlay(timeseries,
-                              create_desired_layout(
-                                  args.layout, args.layout_xml,
-                                  args.include, args.exclude,
-                                  renderer, timeseries, font, privacy_zone)
-                              )
+            overlay = Overlay(
+                dimensions=Dimension(x=1920, y=1080),
+                timeseries=timeseries,
+                create_widgets=create_desired_layout(
+                    args.layout, args.layout_xml,
+                    args.include, args.exclude,
+                    renderer, timeseries, font, privacy_zone)
+            )
 
             if args.overlay:
                 redirect = None

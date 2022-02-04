@@ -1,8 +1,11 @@
+from typing import Callable
+
 from PIL import ImageFont
 
 from .dimensions import Dimension
 from .layout_components import date_and_time, gps_info, big_mph, moving_map
 from .point import Coordinate
+from .timeseries import Timeseries
 from .units import units
 from .widgets import Scene
 from .widgets_info import ComparativeEnergy
@@ -33,8 +36,8 @@ def speed_awareness_layout(renderer, font: ImageFont):
 
 class Overlay:
 
-    def __init__(self, timeseries, create_widgets):
-        self.scene = Scene(create_widgets(self.entry), dimensions=Dimension(x=1920, y=1080))
+    def __init__(self, dimensions: Dimension, timeseries: Timeseries, create_widgets: Callable):
+        self.scene = Scene(create_widgets(self.entry), dimensions)
         self.timeseries = timeseries
         self._entry = None
 

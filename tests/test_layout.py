@@ -2,6 +2,7 @@ import random
 from datetime import timedelta
 
 from gopro_overlay import fake
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Overlay, speed_awareness_layout
@@ -24,32 +25,32 @@ font = load_font("Roboto-Medium.ttf")
 
 @approve_image
 def test_render_default_layout():
-    # Avg: 0.02276, Rate: 43.93
+    # Avg: 0.01550, Rate: 64.53
 
     xmldoc = load_xml_layout("default-1080")
 
     with renderer.open() as map_renderer:
-        return time_layout("default", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,
-                                                                          privacy=NoPrivacyZone())))
+        return time_layout("default", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))
 
 
 @approve_image
 def test_render_speed_layout():
     with renderer.open() as map_renderer:
-        return time_layout("speed", Overlay(timeseries, speed_awareness_layout(map_renderer, font=font)))
+        return time_layout("speed", speed_awareness_layout(map_renderer, font=font))
 
 
 @approve_image
 def test_render_xml_layout():
+    # Avg: 0.04147, Rate: 24.12
     xmldoc = load_xml_layout("example")
 
     with renderer.open() as map_renderer:
-        return time_layout("xml", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,
-                                                                      privacy=NoPrivacyZone())))
+        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))
 
 
 @approve_image
 def test_render_xml_component():
+    # Avg: 0.00169, Rate: 590.66
     xmldoc = """<layout>
         <composite name="bob" x="200" y="200">
             <component type="text" x="0" y="0" size="32" cache="False">Text</component> 
@@ -60,12 +61,12 @@ def test_render_xml_component():
     """
 
     with renderer.open() as map_renderer:
-        return time_layout("xml", Overlay(timeseries, layout_from_xml(xmldoc, map_renderer, timeseries, font,
-                                                                      privacy=NoPrivacyZone())))
+        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))
 
 
 @approve_image
 def test_render_xml_component_with_exclusions():
+    # Avg: 0.00180, Rate: 556.84
     xmldoc = """<layout>
         <composite name="bob" x="200" y="200">
             <component type="text" x="0" y="0" size="32" cache="False">Bob</component> 
@@ -82,24 +83,23 @@ def test_render_xml_component_with_exclusions():
 
     with renderer.open() as map_renderer:
         return time_layout("xml",
-                           Overlay(
+                           layout_from_xml(
+                               xmldoc,
+                               map_renderer,
                                timeseries,
-                               layout_from_xml(
-                                   xmldoc,
-                                   map_renderer,
-                                   timeseries,
-                                   font,
-                                   privacy=NoPrivacyZone(),
-                                   include=lambda name: name == "alice"
-                               )
+                               font,
+                               privacy=NoPrivacyZone(),
+                               include=lambda name: name == "alice"
                            ))
 
 
 def time_layout(name, layout, repeat=20):
+    overlay = Overlay(dimensions=Dimension(1920, 1080), timeseries=timeseries, create_widgets=layout)
+
     timer = PoorTimer(name)
 
     for i in range(0, repeat):
-        draw = timer.time(lambda: layout.draw(timeseries.min))
+        draw = timer.time(lambda: overlay.draw(timeseries.min))
 
     print(timer)
 
