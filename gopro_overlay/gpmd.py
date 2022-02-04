@@ -323,6 +323,7 @@ class GPS5Scaler:
             else:
                 if self._dop > self._max_dop:
                     self.report_drop(f"DOP Out of Range. DOP {self._dop} > Max DOP {self._max_dop}")
+                    return
 
                 points = interpreted.interpreted
                 hertz = self._samples.count()
