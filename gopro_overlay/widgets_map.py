@@ -8,7 +8,8 @@ from .privacy import NoPrivacyZone
 
 
 class JourneyMap:
-    def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7, privacy_zone=NoPrivacyZone()):
+    def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
+                 privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
 
@@ -30,6 +31,9 @@ class JourneyMap:
             bbox = journey.bounding_box
             self.map = geotiler.Map(extent=(bbox[0].lon, bbox[0].lat, bbox[1].lon, bbox[1].lat),
                                     size=(self.size, self.size))
+
+            if self.map.zoom > 18:
+                self.map.zoom = 18
 
             plots = [
                 self.map.rev_geocode((location.lon, location.lat))
@@ -58,7 +62,6 @@ class JourneyMap:
                 image.putalpha(int(255 * self.opacity))
 
             self.image = image
-
 
     def draw(self, image, draw):
         self._init_maybe()
@@ -92,7 +95,7 @@ class MovingMap:
         self.size = size
         self.zoom = zoom
         self.corner_radius = corner_radius
-        self.opacity=opacity
+        self.opacity = opacity
         self.hypotenuse = int(math.sqrt((self.size ** 2) * 2))
 
         self.half_width_height = (self.hypotenuse / 2)
@@ -149,6 +152,7 @@ class MovingMap:
 
 def rounded_corners(frame, radius, opacity):
     mask = Image.new('L', frame.size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (frame.size[0] - 1, frame.size[1] - 1), radius=radius, fill=int(opacity * 255))
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (frame.size[0] - 1, frame.size[1] - 1), radius=radius,
+                                           fill=int(opacity * 255))
     frame.putalpha(mask)
     return frame

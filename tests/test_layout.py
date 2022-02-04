@@ -34,6 +34,19 @@ def test_render_default_layout():
 
 
 @approve_image
+def test_render_default_layout_4k():
+    xmldoc = load_xml_layout("default-3840x2160")
+
+    with renderer.open() as map_renderer:
+        return time_layout(
+            "default-4k",
+            layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()),
+            dimensions=Dimension(3840, 2160)
+        )
+
+
+
+@approve_image
 def test_render_speed_layout():
     with renderer.open() as map_renderer:
         return time_layout("speed", speed_awareness_layout(map_renderer, font=font))
@@ -93,8 +106,8 @@ def test_render_xml_component_with_exclusions():
                            ))
 
 
-def time_layout(name, layout, repeat=20):
-    overlay = Overlay(dimensions=Dimension(1920, 1080), timeseries=timeseries, create_widgets=layout)
+def time_layout(name, layout, repeat=20, dimensions=Dimension(1920, 1080)):
+    overlay = Overlay(dimensions, timeseries=timeseries, create_widgets=layout)
 
     timer = PoorTimer(name)
 

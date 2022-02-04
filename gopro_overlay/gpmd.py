@@ -222,6 +222,16 @@ class GPMDParser:
             offset += item.size
 
 
+class PacketCounter:
+
+    def __init__(self):
+        self.packet = 0
+
+    def accept(self, interpreted):
+        if interpreted.fourcc == "DEVC":
+            self.packet += 1
+
+
 class SampleCounter:
 
     def __init__(self, stream):
@@ -266,6 +276,7 @@ class GPS5Scaler:
         self.reset()
         self._units = units
         self._samples = SampleCounter("GPS5")
+        self._packet_counter = PacketCounter()
         self._clock = StreamClock()
         self._on_item = on_item
         self._on_drop = on_drop
@@ -277,12 +288,16 @@ class GPS5Scaler:
         self._fix = None
         self._basetime = None
 
+    def report_drop(self, message):
+        self._on_drop(f"Packet: {self._packet_counter.packet} GPS Time: {self._basetime} Discarding GPS Location, {message}")
+
     def accept(self, interpreted):
 
         item_type = interpreted.fourcc
 
         self._samples.accept(interpreted)
         self._clock.accept(interpreted)
+        self._packet_counter.accept(interpreted)
 
         if item_type == "STRM":
             self.reset()
@@ -296,16 +311,19 @@ class GPS5Scaler:
             self._scale = interpreted.interpreted
         elif item_type == "GPS5":
             if self._basetime is None:
-                self._on_drop("Got a GPS item, but no associated time")
+                self.report_drop(f"Unknown GPS time")
             elif self._fix is None:
-                self._on_drop("Got a GPS item, but no GPS Fix item yet")
+                self.report_drop("Unknown GPS Fix status")
             elif self._fix in (GPSFix.NO, GPSFix.UNKNOWN):
-                self._on_drop("Got a GPS Item, but GPS is not locked")
+                self.report_drop(f"GPS is not locked (Status = {self._fix})")
             elif self._dop is None:
-                self._on_drop("Got a GPS item, but no accuracy yet")
+                self.report_drop("Unknown GPS DOP/Accuracy")
             elif self._scale is None:
-                self._on_drop("Got GPS, but unknown scale")
+                self.report_drop("Unknown scale (metadata stream error?)")
             else:
+                if self._dop > self._max_dop:
+                    self.report_drop(f"DOP Out of Range. DOP {self._dop} > Max DOP {self._max_dop}")
+
                 points = interpreted.interpreted
                 hertz = self._samples.count()
 
@@ -317,16 +335,13 @@ class GPS5Scaler:
                     scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
                     scaled_point = GPS5._make(scaled)
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / len(points))))
-                    if self._dop > self._max_dop:
-                        self._on_drop(f"Got GPS, but DOP > Max DOP {self._max_dop}")
-                    else:
-                        self._on_item(
-                            Entry(point_datetime,
-                                  clock=self._clock.at(index, hertz),
-                                  point=Point(scaled_point.lat, scaled_point.lon),
-                                  speed=self._units.Quantity(scaled_point.speed, self._units.mps),
-                                  alt=self._units.Quantity(scaled_point.alt, self._units.m))
-                        )
+                    self._on_item(
+                        Entry(point_datetime,
+                              clock=self._clock.at(index, hertz),
+                              point=Point(scaled_point.lat, scaled_point.lon),
+                              speed=self._units.Quantity(scaled_point.speed, self._units.mps),
+                              alt=self._units.Quantity(scaled_point.alt, self._units.m))
+                    )
 
 
 class XYZScaler:

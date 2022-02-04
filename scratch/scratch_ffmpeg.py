@@ -2,21 +2,23 @@ import datetime
 
 from PIL import Image, ImageDraw, ImageFont
 
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
 
 if __name__ == "__main__":
 
     overlay = True
 
+    dimension = Dimension(1920, 1080)
     if overlay:
-        generator = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4", output="output.mp4")
+        generator = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4", output="output.mp4", overlay_size=dimension)
     else:
-        generator = FFMPEGGenerate(output="output.mp4")
+        generator = FFMPEGGenerate(output="output.mp4", overlay_size=dimension)
 
     with generator.generate() as writer:
 
         for i in range(1, 100):
-            image = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
+            image = Image.new("RGBA", (dimension.x, dimension.y), (0, 0, 0, 0))
             draw = ImageDraw.Draw(image)
 
             font = ImageFont.truetype(font="Roboto-Medium.ttf", size=36)

@@ -10,6 +10,7 @@ from pathlib import Path
 import progressbar
 
 from gopro_overlay import timeseries_process, geo
+from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams
 from gopro_overlay.font import load_font
@@ -47,8 +48,13 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
 
     if layout == "default":
         resource_name = f"default-{dimensions.x}x{dimensions.y}"
-        return layout_from_xml(load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone,
-                               include=accepter)
+        try:
+            return layout_from_xml(load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone,
+                                   include=accepter)
+        except FileNotFoundError:
+            raise IOError(f"Unable to locate bundled layout resource: {resource_name}. "
+                          f"You may need to create a custom layout for this frame size") from None
+
     elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
     elif layout == "xml":
@@ -91,6 +97,10 @@ if __name__ == "__main__":
     parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
     parser.set_defaults(show_ffmpeg=False)
 
+    parser.add_argument("--debug-metadata", action="store_true", default=False, help="Show detailed information when parsing GoPro Metadata")
+
+    parser.add_argument("--overlay-size", help="<XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160)")
+
     parser.add_argument("--output-size", default="1080", type=int, help="Vertical size of output movie")
 
     parser.add_argument("output", help="Output MP4 file")
@@ -119,7 +129,11 @@ if __name__ == "__main__":
 
     with PoorTimer("program").timing():
 
-        gopro_timeseries = timeseries_from(input_file, units)
+        gopro_timeseries = timeseries_from(input_file, units, on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
+
+        if len(gopro_timeseries) < 1:
+            raise IOError(f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
+
         print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
 
         if args.gpx:
@@ -127,8 +141,8 @@ if __name__ == "__main__":
             print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
             timeseries = gpx_timeseries.clip_to(gopro_timeseries)
             print(f"GPX Timeseries overlap with GoPro - {len(timeseries)}")
-            if not len(timeseries):
-                raise ValueError("No overlap between GoPro and GPX file")
+            if len(timeseries) < 1:
+                raise ValueError("No overlap between GoPro and GPX file - Is this the correct GPX file?")
         else:
             timeseries = gopro_timeseries
 
@@ -161,6 +175,9 @@ if __name__ == "__main__":
 
         with CachingRenderer(style=args.map_style, api_key=args.map_api_key).open() as renderer:
 
+            if args.overlay_size:
+                dimensions = dimension_from(args.overlay_size)
+
             overlay = Overlay(
                 dimensions=dimensions,
                 timeseries=timeseries,
@@ -177,9 +194,18 @@ if __name__ == "__main__":
                     redirect = temp_file_name()
                     print(f"FFMPEG Output is in {redirect}")
 
-                ffmpeg = FFMPEGOverlay(input=input_file, output=args.output, vsize=args.output_size, redirect=redirect)
+                ffmpeg = FFMPEGOverlay(
+                    input=input_file,
+                    output=args.output,
+                    vsize=args.output_size,
+                    overlay_size=dimensions,
+                    redirect=redirect
+                )
             else:
-                ffmpeg = FFMPEGGenerate(output=args.output)
+                ffmpeg = FFMPEGGenerate(
+                    output=args.output,
+                    overlay_size=dimensions
+                )
 
             write_timer = PoorTimer("writing to ffmpeg")
             byte_timer = PoorTimer("image to bytes")
