@@ -44,6 +44,10 @@ test-publish: dist
 DIST_TEST=$(realpath tmp/dist-test)
 CURRENT_VERSION=$(shell PYTHONPATH=. python3 -c 'import gopro_overlay.__version__;print(gopro_overlay.__version__.__version__)')
 
+.PHONY: version
+version:
+	@echo $(CURRENT_VERSION)
+
 .PHONY:
 test-distribution: dist
 	@echo "Current Version is $(CURRENT_VERSION)"
@@ -58,6 +62,7 @@ publish: clean test-distribution
 	$(BIN)/pip install twine
 	$(BIN)/twine check dist/*
 	$(BIN)/twine upload --skip-existing --non-interactive --repository pypi dist/*
+	git tag v$(CURRENT_VERSION)
 
 
 .PHONY: bump
