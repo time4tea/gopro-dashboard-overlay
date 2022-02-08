@@ -289,7 +289,8 @@ class GPS5Scaler:
         self._basetime = None
 
     def report_drop(self, message):
-        self._on_drop(f"Packet: {self._packet_counter.packet} GPS Time: {self._basetime} Discarding GPS Location, {message}")
+        self._on_drop(
+            f"Packet: {self._packet_counter.packet} GPS Time: {self._basetime} Discarding GPS Location, {message}")
 
     def accept(self, interpreted):
 
@@ -338,6 +339,9 @@ class GPS5Scaler:
                     point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / len(points))))
                     self._on_item(
                         Entry(point_datetime,
+                              dop=self._units.Quantity(self._dop, self._units.location),
+                              packet=self._units.Quantity(self._packet_counter.packet, self._units.location),
+                              packet_index=self._units.Quantity(index, self._units.location),
                               clock=self._clock.at(index, hertz),
                               point=Point(scaled_point.lat, scaled_point.lon),
                               speed=self._units.Quantity(scaled_point.speed, self._units.mps),
@@ -406,7 +410,6 @@ class StreamScalers:
 
 def timeseries_from(filepath, units, unhandled=lambda x: None, on_drop=lambda reason: None):
     meta = GPMDInterpreter(GPMDParser(load_gpmd_from(filepath)).items).interpret()
-
     timeseries = Timeseries()
     gps_scaler = GPS5Scaler(units=units,
                             max_dop=6.0,

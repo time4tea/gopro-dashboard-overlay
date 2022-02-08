@@ -50,6 +50,7 @@ setup(
         "bin/gopro-to-gpx.py",
         "bin/gopro-join.py",
         "bin/gopro-cut.py",
+        "bin/gopro-to-csv.py",
     ],
     python_requires=">=3.8",
     include_package_data=True,
