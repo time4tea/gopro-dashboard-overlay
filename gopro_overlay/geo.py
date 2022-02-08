@@ -38,7 +38,7 @@ def provider_for_style(name, api_key):
     if name == "osm":
         return geotiler.find_provider("osm")
     elif name.startswith("tf"):
-        style = name.split("-",1)[1]
+        style = name.split("-", 1)[1]
         return MapProvider(thunderforest_attrs(style), api_key)
     else:
         raise KeyError(f"Unknown map provider: {name}")

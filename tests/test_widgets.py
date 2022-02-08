@@ -205,7 +205,7 @@ def test_composite_viewport():
 def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=100):
     timer = PoorTimer(name)
 
-    scene = Scene(widgets, dimensions=dimensions)
+    scene = Scene(dimensions, widgets)
     for i in range(0, repeat):
         draw = timer.time(lambda: scene.draw())
 

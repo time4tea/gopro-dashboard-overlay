@@ -1,6 +1,7 @@
 import functools
 import importlib
 import os
+from typing import Callable
 
 from PIL import Image, ImageDraw
 
@@ -16,7 +17,7 @@ anchors = {
 
 
 class CachingText:
-    def __init__(self, at, value, font, align="left", direction="ltr", fill=None):
+    def __init__(self, at: Coordinate, value: Callable, font, align="left", direction="ltr", fill=None):
         self.at = at
         self.value = value
         self.font = font
@@ -37,7 +38,7 @@ class CachingText:
         if cached is None:
 
             x0, y0, x1, y1 = self.font.getbbox(
-                text=self.value(),
+                text=text,
                 stroke_width=2,
                 anchor=self.anchor,
                 direction=self.direction
@@ -53,7 +54,7 @@ class CachingText:
 
             backing_draw.text(
                 (abs(x0), 0),
-                self.value(),
+                text,
                 anchor=self.anchor,
                 direction=self.direction,
                 font=self.font,
@@ -197,7 +198,7 @@ class Translate:
 
 class Scene:
 
-    def __init__(self, widgets, dimensions: Dimension):
+    def __init__(self, dimensions: Dimension, widgets, ):
         self._widgets = widgets
         self._dimensions = dimensions
 

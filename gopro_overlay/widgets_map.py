@@ -1,7 +1,7 @@
 import math
 
 import geotiler
-from PIL import ImageDraw, Image, ImageOps
+from PIL import ImageDraw, Image
 
 from .journey import Journey
 from .privacy import NoPrivacyZone

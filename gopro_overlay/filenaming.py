@@ -39,4 +39,3 @@ class GoProFile:
         found = [GoProFile(name) for name in listdir(directory) if find.match(name)]
         found.sort(key=lambda f: f.sequence)
         return found
-

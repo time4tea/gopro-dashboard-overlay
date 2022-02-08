@@ -37,7 +37,7 @@ def speed_awareness_layout(renderer, font: ImageFont):
 class Overlay:
 
     def __init__(self, dimensions: Dimension, timeseries: Timeseries, create_widgets: Callable):
-        self.scene = Scene(create_widgets(self.entry), dimensions)
+        self.scene = Scene(dimensions, create_widgets(self.entry))
         self.timeseries = timeseries
         self._entry = None
 

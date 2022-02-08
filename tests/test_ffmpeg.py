@@ -1,5 +1,8 @@
+from io import BytesIO
+
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.ffmpeg import FFMPEGGenerate
 
 ffprobe_output = """[mov,mp4,m4a,3gp,3g2,mj2 @ 0x559b7fad8f00] Using non-standard frame rate 59/1
 Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH010091.MP4':
@@ -65,3 +68,45 @@ def test_parsing_stream_information():
     assert streams.audio == 1
     assert streams.meta == 3
 
+
+class FakePopen:
+    def __init__(self):
+        self.stdin = BytesIO()
+        self.stdout = BytesIO()
+        self.args = None
+
+    def popen(self, cmd, **kwargs):
+        self.args = cmd
+        return objectview({
+            "stdin": self.stdin,
+            "stdout": self.stdout,
+            "wait": lambda x: None
+        })
+
+
+def test_ffmpeg_generate_execute():
+    fake = FakePopen()
+
+    ffmpeg = FFMPEGGenerate(
+        output="output",
+        overlay_size=Dimension(100, 200),
+        popen=fake.popen
+    )
+
+    with ffmpeg.generate():
+        pass
+
+    assert fake.args == [
+        "ffmpeg",                                                    #
+        "-y",                                                        # overwrite targets
+        "-loglevel", "info",
+        "-f", "rawvideo",                                            # input format 'raw'
+        "-framerate", "10.0",                                        # input framerate
+        "-s", "100x200",                                             # input dimension
+        "-pix_fmt", "rgba",                                          # input pixel format
+        "-i", "-",                                                   # input file stdin
+        "-r", "30",                                                  # output framerate
+        "-vcodec", "libx264",                                        # output format
+        "-preset", "veryfast",                                       # output quality/encoding preset
+        "output"                                                     # output file
+    ]

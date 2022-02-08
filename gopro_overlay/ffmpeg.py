@@ -1,24 +1,13 @@
 import contextlib
 import itertools
-import os
 import re
 import subprocess
 import sys
-import tempfile
 from array import array
 from collections import namedtuple
 
+from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import dimension_from, Dimension
-
-
-@contextlib.contextmanager
-def temporary_file(dir=None, suffix=""):
-    (fd, name) = tempfile.mkstemp(dir=dir, suffix=suffix)
-    os.close(fd)
-    try:
-        yield name
-    finally:
-        os.remove(name)
 
 
 def run(cmd, **kwargs):
@@ -108,7 +97,7 @@ def find_streams(filepath, invoke=invoke):
         if meta_match:
             meta_stream = int(meta_match.group(1))
 
-    if video_stream is None or audio_stream is None or meta_stream is None or video_dimension is None :
+    if video_stream is None or audio_stream is None or meta_stream is None or video_dimension is None:
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
 
     return StreamInfo(audio_stream, video_stream, meta_stream, video_dimension)
@@ -142,9 +131,10 @@ def ffmpeg_libx264_is_installed():
 
 class FFMPEGGenerate:
 
-    def __init__(self, output, overlay_size=Dimension(x=1920, y=1080)):
+    def __init__(self, output, overlay_size: Dimension, popen=subprocess.Popen):
         self.output = output
         self.overlay_size = overlay_size
+        self.popen = popen
 
     @contextlib.contextmanager
     def generate(self):
@@ -162,15 +152,18 @@ class FFMPEGGenerate:
             "-preset", "veryfast",
             self.output
         ]
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
-        yield process.stdin
+        process = self.popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
+        try:
+            yield process.stdin
+        finally:
+            process.stdin.flush()
         process.stdin.close()
         process.wait(10)
 
 
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, vsize=1080, overlay_size=Dimension(x=1920, y=1080), redirect=None):
+    def __init__(self, input, output, overlay_size: Dimension, vsize=1080, redirect=None):
         self.output = output
         self.input = input
         self.overlay_size = overlay_size
@@ -207,7 +200,10 @@ class FFMPEGOverlay:
             else:
                 process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
 
-            yield process.stdin
+            try:
+                yield process.stdin
+            finally:
+                process.stdin.flush()
             process.stdin.close()
             # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
             process.wait(5 * 60)

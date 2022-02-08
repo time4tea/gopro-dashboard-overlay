@@ -311,7 +311,7 @@ class GPS5Scaler:
             self._scale = interpreted.interpreted
         elif item_type == "GPS5":
             if self._basetime is None:
-                self.report_drop(f"Unknown GPS time")
+                self.report_drop("Unknown GPS time")
             elif self._fix is None:
                 self.report_drop("Unknown GPS Fix status")
             elif self._fix in (GPSFix.NO, GPSFix.UNKNOWN):

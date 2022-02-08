@@ -9,4 +9,3 @@ def parse_time(s):
         except ValueError:
             pass
     raise ValueError(f"Unable to parse '{s}' as a timey thing")
-

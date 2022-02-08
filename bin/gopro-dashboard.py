@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-import argparse
 import datetime
 import os
-import tempfile
 from datetime import timedelta
 from pathlib import Path
 
 import progressbar
 
-from gopro_overlay import timeseries_process, geo
+from gopro_overlay import timeseries_process
+from gopro_overlay.arguments import gopro_dashboard_arguments
+from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams
@@ -23,12 +23,6 @@ from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-
-
-def temp_file_name():
-    handle, path = tempfile.mkstemp()
-    os.close(handle)
-    return path
 
 
 def accepter_from_args(include, exclude):
@@ -65,47 +59,7 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(
-        description="Overlay gadgets on to GoPro MP4",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-
-    parser.add_argument("input", help="Input MP4 file")
-
-    parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
-
-    parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
-    parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
-
-    parser.add_argument("--no-overlay", action="store_false", help="Only output the gadgets, don't overlay")
-    parser.set_defaults(overlay=True)
-
-    parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
-    parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
-
-    parser.add_argument("--layout", choices=["default", "speed-awareness", "xml"], default="default",
-                        help="Choose graphics layout")
-
-    parser.add_argument("--layout-xml",
-                        help="Use XML File for layout [experimental! - file format likely to change!]")
-
-    parser.add_argument("--exclude", nargs="+",
-                        help="exclude named component (will include all others")
-    parser.add_argument("--include", nargs="+",
-                        help="include named component (will exclude all others)")
-
-    parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
-    parser.set_defaults(show_ffmpeg=False)
-
-    parser.add_argument("--debug-metadata", action="store_true", default=False, help="Show detailed information when parsing GoPro Metadata")
-
-    parser.add_argument("--overlay-size", help="<XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160)")
-
-    parser.add_argument("--output-size", default="1080", type=int, help="Vertical size of output movie")
-
-    parser.add_argument("output", help="Output MP4 file")
-
-    args = parser.parse_args()
+    args = gopro_dashboard_arguments()
 
     if not ffmpeg_is_installed():
         print("Can't start ffmpeg - is it installed?")
@@ -129,10 +83,12 @@ if __name__ == "__main__":
 
     with PoorTimer("program").timing():
 
-        gopro_timeseries = timeseries_from(input_file, units, on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
+        gopro_timeseries = timeseries_from(input_file, units,
+                                           on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
 
         if len(gopro_timeseries) < 1:
-            raise IOError(f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
+            raise IOError(
+                f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
 
         print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
 
@@ -188,7 +144,12 @@ if __name__ == "__main__":
                     renderer=renderer, timeseries=timeseries, font=font, privacy_zone=privacy_zone)
             )
 
-            if args.overlay:
+            if args.overlay_only:
+                ffmpeg = FFMPEGGenerate(
+                    output=args.output,
+                    overlay_size=dimensions
+                )
+            else:
                 redirect = None
                 if not args.show_ffmpeg:
                     redirect = temp_file_name()
@@ -200,11 +161,6 @@ if __name__ == "__main__":
                     vsize=args.output_size,
                     overlay_size=dimensions,
                     redirect=redirect
-                )
-            else:
-                ffmpeg = FFMPEGGenerate(
-                    output=args.output,
-                    overlay_size=dimensions
                 )
 
             write_timer = PoorTimer("writing to ffmpeg")
