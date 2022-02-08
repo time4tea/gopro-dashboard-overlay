@@ -20,7 +20,7 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        sudo apt install fonts-roboto
+        sudo apt install fonts-roboto ffmpeg
         make venv req
     - name: Test with pytest
       run: |
