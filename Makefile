@@ -82,5 +82,7 @@ bump:
 
 .PHONY: help
 help:
+	PYTHONPATH=. $(BIN)/python bin/gopro-to-gpx.py --help
 	PYTHONPATH=. $(BIN)/python bin/gopro-dashboard.py --help
 	PYTHONPATH=. $(BIN)/python bin/gopro-join.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-cut.py --help
