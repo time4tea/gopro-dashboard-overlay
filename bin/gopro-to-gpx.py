@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     counter = Counter()
 
-    ts = timeseries_from(args.input, units, on_drop=lambda reason: counter.update([reason]))
+    ts = timeseries_from(args.input, units=units, on_drop=lambda reason: counter.update([reason]))
 
     gpx = timeseries_to_gpx(ts)
 

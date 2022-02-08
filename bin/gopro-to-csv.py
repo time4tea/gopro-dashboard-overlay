@@ -32,7 +32,7 @@ if __name__ == "__main__":
         ts = load_timeseries(args.input, units)
     else:
         ts = timeseries_from(args.input,
-                             units,
+                             units=units,
                              on_drop=lambda reason: print(reason),
                              )
 

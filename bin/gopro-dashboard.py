@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     with PoorTimer("program").timing():
 
-        gopro_timeseries = timeseries_from(input_file, units,
+        gopro_timeseries = timeseries_from(input_file, units=units,
                                            on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
 
         if len(gopro_timeseries) < 1:

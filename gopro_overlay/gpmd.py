@@ -408,8 +408,8 @@ class StreamScalers:
         [s.accept(interpreted) for s in self.scalers]
 
 
-def timeseries_from(filepath, units, unhandled=lambda x: None, on_drop=lambda reason: None):
-    meta = GPMDInterpreter(GPMDParser(load_gpmd_from(filepath)).items).interpret()
+def timeseries_from_data(data, units, unhandled=lambda x: None, on_drop=lambda reason: None):
+    meta = GPMDInterpreter(GPMDParser(data).items).interpret()
     timeseries = Timeseries()
     gps_scaler = GPS5Scaler(units=units,
                             max_dop=6.0,
@@ -424,6 +424,10 @@ def timeseries_from(filepath, units, unhandled=lambda x: None, on_drop=lambda re
             unhandled(item.item)
 
     return timeseries
+
+
+def timeseries_from(filepath, **kwargs):
+    return timeseries_from_data(load_gpmd_from(filepath), **kwargs)
 
 
 class Clocked:
