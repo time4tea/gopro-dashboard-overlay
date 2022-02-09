@@ -1,10 +1,8 @@
 import array
-import bisect
 import collections
 import datetime
 import itertools
 import struct
-import warnings
 from enum import Enum
 
 from .ffmpeg import load_gpmd_from
@@ -109,6 +107,7 @@ interpreters = {
     "SCAL": _interpret_list,
     "SIUN": _interpret_string,
     "STMP": _interpret_atom,
+    "TMPC": _interpret_atom,
     "STNM": _interpret_string,
     "STRM": _interpret_stream_marker,
     "TSMP": _interpret_atom,
@@ -116,41 +115,50 @@ interpreters = {
 }
 
 
-class GPMDInterpreted:
+class GPMDContainer:
 
-    def __init__(self, fourcc, item, interpreted):
+    def __init__(self, fourcc, size, repeat, padded_length, items):
         self.fourcc = fourcc
-        self.item = item
-        self.interpreted = interpreted
+        self.items = items
+        self._size = size
+        self._repeat = repeat
+        self._padded_length = padded_length
 
-    def __str__(self):
-        return f"GPMDInterpreted: Understood={self.understood} Interpreted={self.interpreted} Item={self.item}"
+    def __str__(self) -> str:
+        return f"GPMDContainer: {self.fourcc} " \
+               f"Items: {len(self.items)} " \
+               f"Size: {self._size} " \
+               f"Repeat: {self._repeat} " \
+               f"Length: {self._padded_length} " \
+               f"Item Types {[i.fourcc for i in self.items]}"
 
     @property
-    def understood(self):
-        return self.interpreted is not None
+    def size(self):
+        return GPMDStruct.size + self._padded_length
 
+    @property
+    def is_container(self):
+        return True
 
-class GPMDInterpreter:
+    def accept(self, visitor):
 
-    def __init__(self, items):
-        self.items = items
+        method = f"vic_{self.fourcc}"
+        if hasattr(visitor, method):
+            container_visitor = getattr(visitor, method)(self, set([i.fourcc for i in self.items]))
 
-    def interpret(self):
-        for item in self.items():
-            yield GPMDInterpreted(
-                item.fourcc,
-                item,
-                interpreters[item.fourcc](item) if item.fourcc in interpreters else None
-            )
+            if container_visitor is not None:
+                for i in self.items:
+                    i.accept(container_visitor)
+
+                container_visitor.v_end()
 
 
 class GPMDItem:
 
-    def __init__(self, fourcc, type, repeat, padded_length, rawdata):
+    def __init__(self, fourcc, type_char_code, repeat, padded_length, rawdata):
         self._rawdata = rawdata
         self._padded_length = padded_length
-        self._type = type
+        self._type = chr(type_char_code)
         self._repeat = repeat
         self._fourcc = fourcc
 
@@ -160,7 +168,7 @@ class GPMDItem:
 
     @property
     def type_char(self):
-        return chr(self._type) if self._type != 0 else None
+        return self._type
 
     @property
     def rawdata(self):
@@ -174,22 +182,10 @@ class GPMDItem:
     def size(self):
         return GPMDStruct.size + self._padded_length if self._type != 0 else GPMDStruct.size
 
-    @staticmethod
-    def from_array(data, offset):
-        code, type, size, repeat = GPMDStruct.unpack_from(data, offset=offset)
-        code = code.decode()
-        type = int(type)
-        length = size * repeat
-        padded_length = GPMDItem.extend(length)
-
-        if type != 0 and padded_length >= 0:
-            fmt = '>' + str(padded_length) + 's'
-            s = struct.Struct(fmt)
-            rawdata, = s.unpack_from(data, offset=offset + 8)
-        else:
-            rawdata = None
-
-        return GPMDItem(code, type, repeat, padded_length, rawdata)
+    def accept(self, visitor):
+        method = f"vi_{self.fourcc}"
+        if hasattr(visitor, method):
+            getattr(visitor, method)(self)
 
     def __str__(self):
         if self.rawdata is None:
@@ -199,14 +195,11 @@ class GPMDItem:
             rawdata = ' '.join(format(x, '02x') for x in self.rawdata)
             rawdatas = self.rawdata[0:50]
 
-        return f"GPMDItem: FourCC={self.fourcc} Type={self.type_char} Len={self.size} [{rawdata}] [{rawdatas}]"
-
-    @staticmethod
-    def extend(n, base=4):
-        i = n
-        while i % base != 0:
-            i += 1
-        return i
+        return f"GPMDItem: {self.fourcc} " \
+               f"Type={self.type_char} " \
+               f"Repeat: {self._repeat} " \
+               f"Len={self.size}/{self._padded_length}" \
+               f" [{rawdata}] [{rawdatas}]"
 
 
 class GPMDParser:
@@ -217,232 +210,190 @@ class GPMDParser:
     def items(self):
         offset = 0
         while offset < len(self.data):
-            item = GPMDItem.from_array(self.data, offset)
+            item = self.from_array(self.data, offset)
             yield item
             offset += item.size
 
+    def from_array(self, data, offset):
+        fourcc, type_char_code, size, repeat = GPMDStruct.unpack_from(data, offset=offset)
+        fourcc = fourcc.decode()
+        length = size * repeat
+        padded_length = GPMDParser.extend(length)
 
-class PacketCounter:
+        if type_char_code != 0 and padded_length >= 0:
+            fmt = '>' + str(padded_length) + 's'
+            s = struct.Struct(fmt)
+            rawdata, = s.unpack_from(data, offset=offset + 8)
 
-    def __init__(self):
-        self.packet = 0
+            return GPMDItem(fourcc, type_char_code, repeat, padded_length, rawdata)
+        else:
+            offset += GPMDStruct.size
+            child_data = data[offset:padded_length + offset]
 
-    def accept(self, interpreted):
-        if interpreted.fourcc == "DEVC":
-            self.packet += 1
+            children = []
 
+            bob_offset = 0
 
-class SampleCounter:
+            while bob_offset < len(child_data):
+                child = self.from_array(child_data, bob_offset)
+                children.append(child)
+                bob_offset += child.size
 
-    def __init__(self, stream):
-        self.item = None
-        self.stream = stream
-        self._saved = None
-        self._last_sample_count = None
-        self._current_sample_count = 0
+            return GPMDContainer(fourcc, size, repeat, padded_length, children)
 
-    def accept(self, interpreted):
-        if interpreted.fourcc == "TSMP":
-            self._saved = interpreted
-        elif interpreted.fourcc == self.stream:
-            sample_count = self._saved.interpreted
-            if self._last_sample_count is None:
-                self._current_sample_count = sample_count
-            else:
-                self._current_sample_count = sample_count - self._last_sample_count
-
-            self._last_sample_count = sample_count
-
-    def count(self):
-        return self._current_sample_count
-
-
-class StreamClock:
-    def __init__(self, step=None):
-        self.step = step if step else 1001
-        self.clock = -self.step
-
-    def accept(self, interpreted):
-        if interpreted.fourcc == "DEVC":
-            self.clock += self.step
-
-    def at(self, index, hertz):
-        return self.clock + (self.step * index * (1.0 / hertz))
+    @staticmethod
+    def extend(n, base=4):
+        i = n
+        while i % base != 0:
+            i += 1
+        return i
 
 
-class GPS5Scaler:
+def interpret_item(item):
+    return interpreters[item.fourcc](item)
 
-    def __init__(self, units, on_item, max_dop=5.0, on_drop=lambda x: None):
-        self.reset()
+
+class XYZStreamVisitor:
+
+    def __init__(self, on_item):
+        self._on_item = on_item
+
+    def vi_STMP(self, item):
+        self._timestamp = interpret_item(item)
+
+    def vi_TSMP(self, item):
+        self._total_samples = interpret_item(item)
+
+    def vi_ORIN(self, item):
+        pass
+
+    def vi_SCAL(self, item):
+        self._scale = interpret_item(item)
+
+    def vi_TMPC(self, item):
+        self._temperature = interpret_item(item)
+
+    def vi_ACCL(self, item):
+        self._type = item.fourcc
+        self._points = interpret_item(item)
+
+    def vi_GYRO(self, item):
+        self._type = item.fourcc
+        self._points = interpret_item(item)
+
+    def v_end(self):
+        for index, point in enumerate(self._points):
+
+            components = point._asdict().values()
+
+            divisors = self._scale
+            if len(divisors) == 1 and len(components) > 1:
+                divisors = itertools.repeat(divisors[0], len(components))
+
+            scaled = [float(x) / float(y) for x, y in zip(components, divisors)]
+            scaled_point = XYZ._make(scaled)
+
+            items = {
+                self._type.lower(): Point3(scaled_point.x, scaled_point.y, scaled_point.z)
+            }
+
+            self._on_item(items)
+
+
+class GPS5StreamVisitor:
+
+    def __init__(self, counter, units, max_dop, on_item, on_drop):
+        self._max_dop = max_dop
+        self._counter = counter
         self._units = units
-        self._samples = SampleCounter("GPS5")
-        self._packet_counter = PacketCounter()
-        self._clock = StreamClock()
         self._on_item = on_item
         self._on_drop = on_drop
-        self._max_dop = max_dop
 
-    def reset(self):
-        self._scale = None
-        self._dop = None
-        self._fix = None
+        self._samples = None
         self._basetime = None
+        self._fix = None
+        self._scale = None
+        self._drop = None
+        self._points = None
+
+    def vi_TSMP(self, item):
+        self._samples = interpret_item(item)
+
+    def vi_GPSU(self, item):
+        self._basetime = interpret_item(item)
+
+    def vi_GPSF(self, item):
+        self._fix = interpret_item(item)
+
+    def vi_GPSP(self, item):
+        self._dop = interpret_item(item)
+
+    def vi_SCAL(self, item):
+        self._scale = interpret_item(item)
+
+    def vi_GPS5(self, item):
+        self._points = interpret_item(item)
 
     def report_drop(self, message):
-        self._on_drop(
-            f"Packet: {self._packet_counter.packet} GPS Time: {self._basetime} Discarding GPS Location, {message}")
+        self._on_drop(f"Packet: {self._counter} GPS Time: {self._basetime} Discarding GPS Location, {message}")
 
-    def accept(self, interpreted):
-
-        item_type = interpreted.fourcc
-
-        self._samples.accept(interpreted)
-        self._clock.accept(interpreted)
-        self._packet_counter.accept(interpreted)
-
-        if item_type == "STRM":
-            self.reset()
-        elif item_type == "GPSU":
-            self._basetime = interpreted.interpreted
-        elif item_type == "GPSF":
-            self._fix = interpreted.interpreted
-        elif item_type == "GPSP":
-            self._dop = interpreted.interpreted
-        elif item_type == "SCAL":
-            self._scale = interpreted.interpreted
-        elif item_type == "GPS5":
-            if self._basetime is None:
-                self.report_drop("Unknown GPS time")
-            elif self._fix is None:
-                self.report_drop("Unknown GPS Fix status")
-            elif self._fix in (GPSFix.NO, GPSFix.UNKNOWN):
-                self.report_drop(f"GPS is not locked (Status = {self._fix})")
-            elif self._dop is None:
-                self.report_drop("Unknown GPS DOP/Accuracy")
-            elif self._scale is None:
-                self.report_drop("Unknown scale (metadata stream error?)")
-            else:
-                if self._dop > self._max_dop:
-                    self.report_drop(f"DOP Out of Range. DOP {self._dop} > Max DOP {self._max_dop}")
-                    return
-
-                points = interpreted.interpreted
-                hertz = self._samples.count()
-
-                if len(points) != hertz:
-                    # this will happen for first sample in when recording spans multiple files (for second file onwards)
-                    pass
-
-                for index, point in enumerate(points):
-                    scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
-                    scaled_point = GPS5._make(scaled)
-                    point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / len(points))))
-                    self._on_item(
-                        Entry(point_datetime,
-                              dop=self._units.Quantity(self._dop, self._units.location),
-                              packet=self._units.Quantity(self._packet_counter.packet, self._units.location),
-                              packet_index=self._units.Quantity(index, self._units.location),
-                              clock=self._clock.at(index, hertz),
-                              point=Point(scaled_point.lat, scaled_point.lon),
-                              speed=self._units.Quantity(scaled_point.speed, self._units.mps),
-                              alt=self._units.Quantity(scaled_point.alt, self._units.m))
-                    )
+    def v_end(self):
+        if self._dop > self._max_dop:
+            self.report_drop(f"DOP Out of Range. DOP {self._dop} > Max DOP {self._max_dop}")
+        elif self._fix in (GPSFix.NO, GPSFix.UNKNOWN):
+            self.report_drop(f"GPS is not locked (Status = {self._fix})")
+        elif self._dop is None:
+            self.report_drop("Unknown GPS DOP/Accuracy")
+        elif self._scale is None:
+            self.report_drop("Unknown scale (metadata stream error?)")
+        else:
+            for index, point in enumerate(self._points):
+                scaled = [float(x) / float(y) for x, y in zip(point._asdict().values(), self._scale)]
+                scaled_point = GPS5._make(scaled)
+                point_datetime = self._basetime + datetime.timedelta(seconds=(index * (1.0 / len(self._points))))
+                self._on_item(
+                    Entry(point_datetime,
+                          dop=self._units.Quantity(self._dop, self._units.location),
+                          packet=self._units.Quantity(self._counter, self._units.location),
+                          packet_index=self._units.Quantity(index, self._units.location),
+                          point=Point(scaled_point.lat, scaled_point.lon),
+                          speed=self._units.Quantity(scaled_point.speed, self._units.mps),
+                          alt=self._units.Quantity(scaled_point.alt, self._units.m))
+                )
 
 
-class XYZScaler:
+class GPSVisitor:
 
-    def __init__(self, units, stream_name, on_item):
-        self._on_item = on_item
-        self._units = units
-        self._clock = StreamClock()
-        self._stream_name = stream_name
-        self._samples = SampleCounter(stream_name)
-        self._reset()
+    def __init__(self, units, max_dop, on_item, on_drop):
+        self.on_drop = on_drop
+        self.on_item = on_item
+        self.max_dop = max_dop
+        self.units = units
+        self._counter = 0
 
-    def _reset(self):
-        self._scale = None
+    def vic_DEVC(self, item, contents):
+        self._counter += 1
+        return self
 
-    def accept(self, interpreted):
+    def vic_STRM(self, item, contents):
+        if "GPS5" in contents:
+            return GPS5StreamVisitor(self._counter, units=self.units, max_dop=self.max_dop, on_item=self.on_item,
+                                     on_drop=self.on_drop)
 
-        item_type = interpreted.fourcc
-
-        self._samples.accept(interpreted)
-        self._clock.accept(interpreted)
-
-        if item_type == "STRM":
-            self._reset()
-        elif item_type == "SCAL":
-            self._scale = interpreted.interpreted
-        elif item_type == self._stream_name:
-            points = interpreted.interpreted
-            hertz = self._samples.count()
-
-            if len(points) != hertz:
-                warnings.warn("Bug? - Δsamples != samples")
-
-            for index, point in enumerate(points):
-
-                components = point._asdict().values()
-
-                divisors = self._scale
-                if len(divisors) == 1 and len(components) > 1:
-                    divisors = itertools.repeat(divisors[0], len(components))
-
-                scaled = [float(x) / float(y) for x, y in zip(components, divisors)]
-                scaled_point = XYZ._make(scaled)
-
-                items = {
-                    "clock": self._clock.at(index, hertz),
-                    self._stream_name.lower(): Point3(scaled_point.x, scaled_point.y, scaled_point.z)
-                }
-
-                self._on_item(items)
-
-
-class StreamScalers:
-
-    def __init__(self, *args):
-        self.scalers = args
-
-    def accept(self, interpreted):
-        [s.accept(interpreted) for s in self.scalers]
+    def v_end(self):
+        pass
 
 
 def timeseries_from_data(data, units, unhandled=lambda x: None, on_drop=lambda reason: None):
-    meta = GPMDInterpreter(GPMDParser(data).items).interpret()
-    timeseries = Timeseries()
-    gps_scaler = GPS5Scaler(units=units,
-                            max_dop=6.0,
-                            on_item=lambda entry: timeseries.add(entry),
-                            on_drop=on_drop
-                            )
+    ts = Timeseries()
 
-    for item in meta:
-        if item.understood:
-            gps_scaler.accept(item)
-        else:
-            unhandled(item.item)
+    visitor = GPSVisitor(units=units, max_dop=6.0, on_item=lambda e: ts.add(e), on_drop=on_drop)
 
-    return timeseries
+    for i in GPMDParser(data).items():
+        i.accept(visitor)
+
+    return ts
 
 
 def timeseries_from(filepath, **kwargs):
     return timeseries_from_data(load_gpmd_from(filepath), **kwargs)
-
-
-class Clocked:
-
-    # Things that don't have a GPS time associated with them, just a stream time.
-    def __init__(self):
-        self.items = {}
-        self.clocks = None
-
-    def add(self, item):
-        self.clocks = None
-        entry = self.items.setdefault(item["clock"], {})
-        entry.update(item)
-
-    def closest(self, clock):
-        if self.clocks is None:
-            self.clocks = sorted(list(self.items.keys()))
-        return self.items[self.clocks[bisect.bisect_right(self.clocks, clock)]]
