@@ -216,6 +216,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.25.0
+  - (Change in behaviour) - Will now use speed from datasource, in preference to calculated. This should make it much more stable, if the datasource supplies it. (GoPro does, GPX not)
 - 0.24.0
   - Big internal restructuring of metadata parsing. Will make it easier to import GYRO/ACCL data soon. Incidentally, should be a bit faster.
   - Hopefully no externally visible effects.
