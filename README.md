@@ -216,6 +216,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.24.0
+  - Big internal restructuring of metadata parsing. Will make it easier to import GYRO/ACCL data soon. Incidentally, should be a bit faster.
+  - Hopefully no externally visible effects.
 - 0.23.0
   - Rename --no-overlay to --overlay-only as it was too confusing
 - 0.22.0

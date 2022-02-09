@@ -21,7 +21,7 @@ test_requirements = [
 
 setup(
     name="gopro-overlay",
-    version="0.23.0",
+    version="0.24.0",
     description="Overlay graphics dashboards onto GoPro footage",
     long_description=README,
     long_description_content_type="text/markdown",
