@@ -1,12 +1,13 @@
 import collections
 import datetime
-import pytest
 from datetime import timedelta
+
+import pytest
 
 from gopro_overlay import fake
 from gopro_overlay.gpmd import Point
 from gopro_overlay.timeseries import Timeseries, Entry, Window
-from gopro_overlay.timeseries_process import process_ses
+from gopro_overlay.timeseries_process import process_ses, calculate_speeds
 from gopro_overlay.units import units, metres
 
 TUP = collections.namedtuple("TUP", "time lat lon alt hr cad atemp")
@@ -116,6 +117,19 @@ def test_processing_with_simple_exp_smoothing():
     assert ts.get(datetime_of(2)).ns == 3.0
     assert ts.get(datetime_of(3)).ns == 3.8
     assert ts.get(datetime_of(4)).ns == 5.88
+
+
+def test_process_delta_speeds():
+    ts = Timeseries()
+    ts.add(
+        Entry(datetime_of(1), point=Point(51.50186, -0.14056)),
+        Entry(datetime_of(61), point=Point(51.50665, -0.12895)),
+    )
+    ts.process_deltas(calculate_speeds())
+
+    assert ts.get(datetime_of(1)).time == units.Quantity(60, units.s)
+    assert "{0.magnitude:.2f} {0.units}".format(ts.get(datetime_of(1)).dist) == "966.36 meter"
+    assert "{0.magnitude:.2f} {0.units:~P}".format(ts.get(datetime_of(1)).cspeed) == "16.11 m/s"
 
 
 def test_adding_multiple_items():

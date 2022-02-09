@@ -33,7 +33,7 @@ def calculate_speeds():
         speed = dist / time
 
         return {
-            "speed": speed,
+            "cspeed": speed,
             "dist": dist,
             "time": time,
             "azi": azi,

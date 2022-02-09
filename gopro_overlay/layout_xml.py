@@ -116,7 +116,8 @@ def metric_accessor_from(name):
     accessors = {
         "hr": lambda e: e.hr,
         "cadence": lambda e: e.cad,
-        "speed": lambda e: e.speed,
+        "speed": lambda e: e.speed or e.cspeed,
+        "cspeed": lambda e: e.cspeed,
         "temp": lambda e: e.atemp,
         "gradient": lambda e: e.grad,
         "alt": lambda e: e.alt,
