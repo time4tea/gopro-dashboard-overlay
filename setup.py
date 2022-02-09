@@ -49,6 +49,7 @@ setup(
         "bin/gopro-dashboard.py",
         "bin/gopro-to-gpx.py",
         "bin/gopro-join.py",
+        "bin/gopro-extract.py",
         "bin/gopro-cut.py",
         "bin/gopro-to-csv.py",
     ],
