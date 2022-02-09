@@ -67,10 +67,29 @@ def test_load_hero6_ble_raw():
 def test_load_extracted_meta():
     items = list(gpmd.GPMDParser(load_meta("gopro-meta.gpmd")).items())
 
-    for i in items:
-        i.accept(GPSVisitor(converter=lambda count, components: print(components)))
-
     assert len(items) == 707
+
+    visitor = CountingVisitor()
+    [i.accept(visitor) for i in items]
+
+    assert visitor.count == 108171
+
+
+class CountingVisitor:
+    def __init__(self):
+        self.count = 0
+
+    def inc(self):
+        self.count += 1
+
+    def __getattr__(self, item):
+        if item.startswith("vi_"):
+            return lambda x: self.inc()
+        if item.startswith("vic_"):
+            return lambda i, s: self
+
+    def v_end(self):
+        pass
 
 
 class DebuggingVisitor:
