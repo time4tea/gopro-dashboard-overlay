@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 
 from gopro_overlay.ffmpeg import load_gpmd_from
