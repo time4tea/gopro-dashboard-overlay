@@ -267,10 +267,13 @@ def interpret_item(item):
         raise KeyError(f"No interpreter is configured for packets of type {item.fourcc}") from None
 
 
+XYZComponents = collections.namedtuple("XYZComponents", ["timestamp", "samples", "scale", "temp", "points"])
+
+
 class XYZStreamVisitor:
 
-    def __init__(self, on_item):
-        self._on_item = on_item
+    def __init__(self, on_end):
+        self._on_end = on_end
 
     def vi_STMP(self, item):
         self._timestamp = item.interpret()
@@ -296,22 +299,54 @@ class XYZStreamVisitor:
         self._points = item.interpret()
 
     def v_end(self):
-        for index, point in enumerate(self._points):
+        self._on_end(
+            XYZComponents(
+                timestamp=self._timestamp,
+                samples=self._total_samples,
+                scale=self._scale,
+                temp=self._temperature,
+                points=self._points,
+            )
+        )
 
-            components = point._asdict().values()
 
-            divisors = self._scale
-            if len(divisors) == 1 and len(components) > 1:
-                divisors = itertools.repeat(divisors[0], len(components))
+class XYZComponentConverter:
 
-            scaled = [float(x) / float(y) for x, y in zip(components, divisors)]
+    def __init__(self, on_item):
+        self._on_item = on_item
+
+    def convert(self, counter, components):
+        divisors = components.scale
+        for index, point in enumerate(components.points):
+            axes = point._asdict().values()
+            if len(divisors) == 1 and len(axes) > 1:
+                divisors = list(itertools.repeat(divisors[0], len(axes)))
+
+            scaled = [float(x) / float(y) for x, y in zip(axes, divisors)]
             scaled_point = XYZ._make(scaled)
 
-            items = {
-                self._type.lower(): Point3(scaled_point.x, scaled_point.y, scaled_point.z)
-            }
+            self._on_item({
+                counter: Point3(scaled_point.x, scaled_point.y, scaled_point.z)
+            })
 
-            self._on_item(items)
+
+class XYZVisitor:
+
+    def __init__(self, name, on_item):
+        self._counter = 0
+        self._name = name
+        self._on_item = on_item
+
+    def vic_DEVC(self, item, contents):
+        self._counter += 1
+        return self
+
+    def vic_STRM(self, item, contents):
+        if self._name in contents:
+            return XYZStreamVisitor(on_end=lambda i: self._on_item(self._counter, i))
+
+    def v_end(self):
+        pass
 
 
 GPS5Components = collections.namedtuple("GPS5Components", ["samples", "basetime", "fix", "dop", "scale", "points"])
@@ -354,6 +389,26 @@ class GPS5StreamVisitor:
             scale=self._scale,
             points=self._points
         ))
+
+
+class GPSVisitor:
+
+    def __init__(self, converter):
+        self._converter = converter
+        self._counter = 0
+
+    def vic_DEVC(self, item, contents):
+        self._counter += 1
+        return self
+
+    def vic_STRM(self, item, contents):
+        if "GPS5" in contents:
+            return GPS5StreamVisitor(
+                on_end=lambda c: self._converter(self._counter, c)
+            )
+
+    def v_end(self):
+        pass
 
 
 class GPS5EntryConverter:
@@ -401,26 +456,6 @@ def gps_filters(report, dop_max):
                 return True
 
     return drop_item
-
-
-class GPSVisitor:
-
-    def __init__(self, converter):
-        self._converter = converter
-        self._counter = 0
-
-    def vic_DEVC(self, item, contents):
-        self._counter += 1
-        return self
-
-    def vic_STRM(self, item, contents):
-        if "GPS5" in contents:
-            return GPS5StreamVisitor(
-                on_end=lambda c: self._converter(self._counter, c)
-            )
-
-    def v_end(self):
-        pass
 
 
 def timeseries_from_data(data, units, on_drop=lambda reason: None):

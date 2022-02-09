@@ -4,7 +4,7 @@ from array import array
 from pathlib import Path
 
 from gopro_overlay import gpmd
-from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5
+from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter
 
 
 def load_meta(name):
@@ -18,8 +18,12 @@ def load_meta(name):
         return arr
 
 
+def load(name):
+    return list(gpmd.GPMDParser(load_meta(name)).items())
+
+
 def test_load_hero6_raw():
-    items = list(gpmd.GPMDParser(load_meta("hero6.raw")).items())
+    items = load("hero6.raw")
     assert len(items) == 1
 
     devc = items[0]
@@ -31,13 +35,13 @@ def test_load_hero6_raw():
 
 
 def test_debugging_visitor_at_least_doesnt_blow_up():
-    items = list(gpmd.GPMDParser(load_meta("hero6.raw")).items())
+    items = load("rotation-example.gpmd")
     for i in items:
         i.accept(DebuggingVisitor())
 
 
 def test_load_hero5_raw():
-    items = list(gpmd.GPMDParser(load_meta("hero5.raw")).items())
+    items = load("hero5.raw")
     assert len(items) == 1
 
     assert items[0].with_type("DVNM")[0].interpret() == "Camera"
@@ -57,7 +61,7 @@ def test_load_hero5_raw():
 
 
 def test_load_hero6_ble_raw():
-    items = list(gpmd.GPMDParser(load_meta("hero6+ble.raw")).items())
+    items = load("hero6+ble.raw")
     assert len(items) == 2
 
     assert items[0].with_type("DVNM")[0].interpret() == "Hero6 Black"
@@ -65,7 +69,7 @@ def test_load_hero6_ble_raw():
 
 
 def test_load_extracted_meta():
-    items = list(gpmd.GPMDParser(load_meta("gopro-meta.gpmd")).items())
+    items = load("gopro-meta.gpmd")
 
     assert len(items) == 707
 
@@ -73,6 +77,26 @@ def test_load_extracted_meta():
     [i.accept(visitor) for i in items]
 
     assert visitor.count == 108171
+
+
+def test_load_accel_meta():
+    items = load("rotation-example.gpmd")
+
+    converter = XYZComponentConverter(on_item=lambda i: print(i))
+    visitor = XYZVisitor("ACCL", on_item=converter.convert)
+
+    for i in items:
+        i.accept(visitor)
+
+
+def test_load_rotation_meta():
+    items = load("rotation-example.gpmd")
+
+    converter = XYZComponentConverter(on_item=lambda i: print(i))
+    visitor = XYZVisitor("GYRO", on_item=converter.convert)
+
+    for i in items:
+        i.accept(visitor)
 
 
 class CountingVisitor:
