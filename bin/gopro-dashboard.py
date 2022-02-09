@@ -83,8 +83,9 @@ if __name__ == "__main__":
 
     with PoorTimer("program").timing():
 
-        gopro_timeseries = timeseries_from(input_file, units=units,
-                                           on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
+        with PoorTimer("loading timeseries").timing():
+            gopro_timeseries = timeseries_from(input_file, units=units,
+                                               on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
 
         if len(gopro_timeseries) < 1:
             raise IOError(
@@ -109,12 +110,13 @@ if __name__ == "__main__":
 
         # smooth GPS points
         print("Processing....")
-        timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
-        timeseries.process_deltas(timeseries_process.calculate_speeds())
-        timeseries.process(timeseries_process.calculate_odo())
-        timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=10)
-        # smooth azimuth (heading) points to stop wild swings of compass
-        timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
+        with PoorTimer("processing").timing():
+            timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
+            timeseries.process_deltas(timeseries_process.calculate_speeds())
+            timeseries.process(timeseries_process.calculate_odo())
+            timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=10)
+            # smooth azimuth (heading) points to stop wild swings of compass
+            timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
         ourdir = Path.home().joinpath(".gopro-graphics")
         ourdir.mkdir(exist_ok=True)
