@@ -1,10 +1,13 @@
+import datetime
 import inspect
 import os
 from array import array
 from pathlib import Path
 
 from gopro_overlay import gpmd
-from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter
+from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter, GPS5EntryConverter, XYZ
+from gopro_overlay.point import Point
+from gopro_overlay.units import units
 
 
 def load_meta(name):
@@ -35,12 +38,12 @@ def test_load_hero6_raw():
 
 
 def test_debugging_visitor_at_least_doesnt_blow_up():
-    items = load("rotation-example.gpmd")
+    items = load("hero5.raw")
     for i in items:
         i.accept(DebuggingVisitor())
 
 
-def test_load_hero5_raw():
+def test_load_hero5_raw_gps5():
     items = load("hero5.raw")
     assert len(items) == 1
 
@@ -55,9 +58,50 @@ def test_load_hero5_raw():
         assert len(components.points) == 18
         assert len(components.points) == components.samples
         assert components.scale == (10000000, 10000000, 1000, 1000, 100)
-        assert components.points[0] == GPS5(lat=331264969, lon=-1173273542, alt=-20184, speed=167, speed3d=19)
+        assert components.points[0] == GPS5(lat=33.1264969, lon=-117.3273542, alt=-20.184, speed=0.167, speed3d=0.19)
 
     items[0].accept(GPSVisitor(converter=assert_components))
+
+
+def test_load_hero5_raw_entry():
+    items = load("hero5.raw")
+    assert len(items) == 1
+
+    assert items[0].with_type("DVNM")[0].interpret() == "Camera"
+
+    counter = [0]
+
+    def assert_item(entry):
+        counter[0] += 1
+        if entry.packet_index.magnitude == 0:
+            assert entry.dt == datetime.datetime(2017, 4, 17, 17, 31, 3, tzinfo=datetime.timezone.utc)
+            assert entry.dop.magnitude == 6.06
+            assert entry.packet.magnitude == 1
+            assert entry.packet_index.magnitude == 0
+            assert str(entry.point) == str(Point(lat=33.1264969, lon=-117.3273542))  # float comparison
+            assert entry.speed == units.Quantity(0.167, units.mps)
+            assert entry.alt == units.Quantity(-20.184, units.m)
+
+    converter = GPS5EntryConverter(units=units, on_item=assert_item)
+
+    items[0].accept(GPSVisitor(converter=converter.convert))
+
+    assert counter[0] == 18
+
+
+def test_load_hero5_raw_accl():
+    items = load("hero6.raw")
+    assert len(items) == 1
+
+    def assert_components(count, components):
+        print(components)
+        assert count == 1
+        assert components.samples_total == 806
+        assert len(components.points) == 204
+        assert components.scale == (418, )
+        assert components.points[0] == XYZ(y=9.97846889952153, x=0.05502392344497608, z=3.145933014354067)
+
+    items[0].accept(XYZVisitor("ACCL", on_item=assert_components))
 
 
 def test_load_hero6_ble_raw():
@@ -97,6 +141,36 @@ def test_load_rotation_meta():
 
     for i in items:
         i.accept(visitor)
+
+
+class GRAVisitor:
+
+    def __init__(self):
+        self._scale = None
+
+    def vic_DEVC(self, i, s):
+        return self
+
+    def vic_STRM(self, i, s):
+        if "GRAV" in s:
+            return self
+
+    def vi_SCAL(self, item):
+        self._scale = item.interpret()
+
+    def vi_GRAV(self, item):
+        vectors = item.interpret(self._scale)
+        print(vectors)
+
+    def v_end(self):
+        pass
+
+
+def test_load_gravity_meta():
+    items = load("rotation-example.gpmd")
+
+    for i in items:
+        i.accept(GRAVisitor())
 
 
 class CountingVisitor:
