@@ -251,8 +251,7 @@ class GPMDParser:
         padded_length = GPMDParser.extend(length)
 
         if type_char_code != 0 and padded_length >= 0:
-            fmt = '>' + str(padded_length) + 's'
-            s = struct.Struct(fmt)
+            s = struct.Struct('>' + str(padded_length) + 's')
             rawdata, = s.unpack_from(data, offset=offset + 8)
 
             return GPMDItem(fourcc, type_char_code, size, repeat, padded_length, rawdata)
@@ -262,12 +261,12 @@ class GPMDParser:
 
             children = []
 
-            bob_offset = 0
+            child_offset = 0
 
-            while bob_offset < len(child_data):
-                child = self.from_array(child_data, bob_offset)
+            while child_offset < len(child_data):
+                child = self.from_array(child_data, child_offset)
                 children.append(child)
-                bob_offset += child.bytecount
+                child_offset += child.bytecount
 
             return GPMDContainer(fourcc, size, repeat, padded_length, children)
 

@@ -98,7 +98,7 @@ def test_load_hero5_raw_accl():
         assert count == 1
         assert components.samples_total == 806
         assert len(components.points) == 204
-        assert components.scale == (418, )
+        assert components.scale == (418,)
         assert components.points[0] == XYZ(y=9.97846889952153, x=0.05502392344497608, z=3.145933014354067)
 
     items[0].accept(XYZVisitor("ACCL", on_item=assert_components))
@@ -113,8 +113,11 @@ def test_load_hero6_ble_raw():
 
 
 def test_load_extracted_meta():
-    items = load("gopro-meta.gpmd")
+    assert len(load("gopro-meta.gpmd")) == 707
 
+
+def test_load_and_visit_extracted_meta():
+    items = load("gopro-meta.gpmd")
     assert len(items) == 707
 
     visitor = CountingVisitor()
