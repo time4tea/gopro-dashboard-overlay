@@ -56,6 +56,10 @@ program will use this instead for the GPS.
 
 Privacy allows you to set a privacy zone. Various widgets will not draw points within that zone.
 
+The data recorded in the GoPro video will uses GPS time, which (broadly) is UTC. The renderer will use your local timezone
+to interpret this, and use the local timezone. This may produce strange results if you go on holiday somewhere, but then
+render the files when you get back home! On linux you can use the TZ variable to change the timezone that's used.
+
 ```
 sage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--privacy PRIVACY] [--overlay-only]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas}]
@@ -216,6 +220,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.26.0
+  - (Change in behaviour) - Will now use local timezone when rendering datetimes. (H/T [@tve](https://github.com/tve)
 - 0.25.0
   - (Change in behaviour) - Will now use speed from datasource, in preference to calculated. This should make it much more stable, if the datasource supplies it. (GoPro does, GPX not)
 - 0.24.0
