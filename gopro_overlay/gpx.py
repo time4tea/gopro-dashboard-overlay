@@ -21,10 +21,11 @@ def fudge(gpx):
                     "hr": None,
                     "cad": None
                 }
-                for element in point.extensions[0].iter():
-                    tag = element.tag[element.tag.find("}") + 1:]
-                    if tag in ("atemp", "hr", "cad"):
-                        data[tag] = float(element.text)
+                for extension in point.extensions:
+                    for element in extension.iter():
+                        tag = element.tag[element.tag.find("}") + 1:]
+                        if tag in ("atemp", "hr", "cad"):
+                            data[tag] = float(element.text)
                 yield GPX(**data)
 
 
@@ -42,7 +43,11 @@ def with_unit(gpx, units):
 
 def load(filepath, units):
     with open(filepath, 'r') as gpx_file:
-        gpx = gpxpy.parse(gpx_file)
+        return load_xml(gpx_file, units)
+
+
+def load_xml(file_or_str, units):
+    gpx = gpxpy.parse(file_or_str)
 
     return [with_unit(p, units) for p in fudge(gpx)]
 
