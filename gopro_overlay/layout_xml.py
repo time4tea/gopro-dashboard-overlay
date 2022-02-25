@@ -2,11 +2,13 @@ import importlib
 import os.path
 import sys
 import xml.etree.ElementTree as ET
+from typing import Callable
 
 from gopro_overlay import layouts
 from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient_chart, \
     text, metric
 from gopro_overlay.point import Coordinate
+from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite
 
@@ -189,20 +191,24 @@ def create_icon(element, **kwargs):
     )
 
 
-def date_formatter_from(element, entry):
+def date_formatter_from(entry: Callable[[], Entry], format_string, truncate=0, tz=None) -> Callable[[], str]:
+    if truncate > 0:
+        return lambda: entry().dt.astimezone(tz=tz).strftime(format_string)[:-truncate]
+    else:
+        return lambda: entry().dt.astimezone(tz=tz).strftime(format_string)
+
+
+def date_formatter_from_element(element, entry: Callable[[], Entry]):
     format_string = attrib(element, "format")
     truncate = iattrib(element, "truncate", d=0)
 
-    if truncate > 0:
-        return lambda: entry().dt.strftime(format_string)[:-truncate]
-    else:
-        return lambda: entry().dt.strftime(format_string)
+    return date_formatter_from(entry, format_string, truncate)
 
 
 def create_datetime(element, entry, font, **kwargs):
     return text(
         at=at(element),
-        value=date_formatter_from(element, entry),
+        value=date_formatter_from_element(element, entry),
         font=font(iattrib(element, "size", d=16)),
         align=attrib(element, "align", d="left"),
         cache=battrib(element, "cache", d=True),

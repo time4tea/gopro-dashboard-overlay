@@ -58,7 +58,7 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
     temp = Random1D(27, rng=rng)
 
     ts = Timeseries()
-    current_dt = datetime.datetime.fromtimestamp(0)
+    current_dt = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
     end_dt = current_dt + length
 
     while current_dt <= end_dt:

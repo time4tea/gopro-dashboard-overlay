@@ -100,7 +100,7 @@ def test_delta_processing():
 
 
 def datetime_of(i):
-    return datetime.datetime.fromtimestamp(i)
+    return datetime.datetime.fromtimestamp(i, tz=datetime.timezone.utc)
 
 
 def test_processing_with_simple_exp_smoothing():
