@@ -30,18 +30,55 @@ class PerceptibleMovementCheck:
         return True
 
 
+class MaybeRoundedBorder:
+
+    def __init__(self, size, corner_radius, opacity):
+        self.opacity = opacity
+        self.corner_radius = corner_radius
+        self.size = size
+        self.mask = None
+
+    def rounded(self, image):
+
+        draw = ImageDraw.Draw(image)
+
+        if self.corner_radius:
+            if self.mask is None:
+                self.mask = self.generate_mask()
+
+            image.putalpha(self.mask)
+
+            draw.rounded_rectangle(
+                (0, 0) + (self.size - 1, self.size - 1),
+                radius=self.corner_radius,
+                outline=(0, 0, 0)
+            )
+        else:
+            draw.line(
+                (0, 0, 0, self.size - 1, self.size - 1, self.size - 1, self.size - 1, 0, 0, 0),
+                fill=(0, 0, 0)
+            )
+            image.putalpha(int(255 * self.opacity))
+
+        return image
+
+    def generate_mask(self):
+        mask = Image.new('L', (self.size, self.size), 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (self.size - 1, self.size - 1), radius=self.corner_radius,
+                                               fill=int(self.opacity * 255))
+        return mask
+
+
 class JourneyMap:
     def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
                  privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
-
         self.at = at
         self.location = location
         self.renderer = renderer
-        self.corner_radius = corner_radius
-        self.opacity = opacity
         self.size = size
+        self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
         self.map = None
         self.image = None
 
@@ -68,23 +105,7 @@ class JourneyMap:
             draw = ImageDraw.Draw(image)
             draw.line(plots, fill=(255, 0, 0), width=4)
 
-            if self.corner_radius:
-                image = rounded_corners(image, self.corner_radius, self.opacity)
-
-                draw.rounded_rectangle(
-                    (0, 0) + (self.size - 1, self.size - 1),
-                    radius=self.corner_radius,
-                    outline=(0, 0, 0)
-                )
-            else:
-                draw.line(
-                    (0, 0, 0, self.size - 1, self.size - 1, self.size - 1, self.size - 1, 0, 0, 0),
-                    fill=(0, 0, 0)
-                )
-
-                image.putalpha(int(255 * self.opacity))
-
-            self.image = image
+            self.image = self.border.rounded(image)
 
     def draw(self, image, draw):
         self._init_maybe()
@@ -117,8 +138,6 @@ class MovingMap:
         self.location = location
         self.size = size
         self.zoom = zoom
-        self.corner_radius = corner_radius
-        self.opacity = opacity
         self.hypotenuse = int(math.sqrt((self.size ** 2) * 2))
 
         self.half_width_height = (self.hypotenuse / 2)
@@ -130,44 +149,23 @@ class MovingMap:
             self.half_width_height + (self.size / 2)
         )
         self.perceptible = PerceptibleMovementCheck()
+        self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
         self.cached = None
 
     def _redraw(self, map):
-        map_image = self.renderer(map)
+        image = self.renderer(map)
 
-        draw = ImageDraw.Draw(map_image)
+        draw = ImageDraw.Draw(image)
         draw_marker(draw, (self.half_width_height, self.half_width_height), 6)
         azimuth = self.azimuth()
         if azimuth and self.rotate:
             azi = azimuth.to("degree").magnitude
             angle = 0 + azi if azi >= 0 else 360 + azi
-            map_image = map_image.rotate(angle)
+            image = image.rotate(angle)
 
-        crop = map_image.crop(self.bounds)
+        crop = image.crop(self.bounds)
 
-        if self.corner_radius:
-            crop = rounded_corners(crop, self.corner_radius, self.opacity)
-
-            ImageDraw.Draw(crop).rounded_rectangle(
-                (0, 0) + (self.size - 1, self.size - 1),
-                radius=self.corner_radius,
-                outline=(0, 0, 0)
-            )
-        else:
-            ImageDraw.Draw(crop).line(
-                (
-                    0, 0,
-                    0, self.size - 1,
-                    self.size - 1, self.size - 1,
-                    self.size - 1, 0,
-                    0, 0
-                ),
-                fill=(0, 0, 0)
-            )
-
-            crop.putalpha(int(255 * self.opacity))
-
-        return crop
+        return self.border.rounded(crop)
 
     def draw(self, image, draw):
         location = self.location()
@@ -180,11 +178,3 @@ class MovingMap:
                 self.cached = self._redraw(map)
 
             image.paste(self.cached, self.at.tuple())
-
-
-def rounded_corners(frame, radius, opacity):
-    mask = Image.new('L', frame.size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (frame.size[0] - 1, frame.size[1] - 1), radius=radius,
-                                           fill=int(opacity * 255))
-    frame.putalpha(mask)
-    return frame
