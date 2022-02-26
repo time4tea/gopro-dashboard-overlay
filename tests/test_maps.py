@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 
+import pytest
 from PIL import ImageFont
 
 from gopro_overlay import fake
@@ -55,6 +56,7 @@ def a_real_journey(name, dimension, f_scene):
     print(timer)
 
 
+@pytest.mark.skip(reason="slow")
 def test_rendering_moving_map_journey():
     with renderer.open() as r:
         a_real_journey(
