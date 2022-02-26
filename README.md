@@ -2,6 +2,8 @@
 
 # Overlaying Dashboard onto GoPro MP4 Files
 
+[![Join the chat at https://gitter.im/gopro-dashboard-overlay/community](https://badges.gitter.im/gopro-dashboard-overlay/community.svg)](https://gitter.im/gopro-dashboard-overlay/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 - Overlaying exciting graphics
 - Converting to GPX files
 
