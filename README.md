@@ -220,6 +220,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.28.0
+  - Only rerender moving map if it has moved since last frame - will be much quicker under certain circumstances
+  - Refactorings in how map border/opacity is rendered (should have no visible effect, maybe marginally faster)
 - 0.27.0
   - Fix [Issue #20](https://github.com/time4tea/gopro-dashboard-overlay/issues/20) Minor improvement in GPX parsing. Hopefully more tolerant of GPX files that don't contain hr/cadence/temp extensions
 - 0.26.0
