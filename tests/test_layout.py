@@ -53,7 +53,7 @@ def test_render_speed_layout():
 
 
 @approve_image
-def test_render_xml_layout():
+def test_render_example_layout():
     # Avg: 0.04147, Rate: 24.12
     xmldoc = load_xml_layout("example")
 

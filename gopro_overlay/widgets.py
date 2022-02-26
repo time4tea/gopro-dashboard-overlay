@@ -175,8 +175,14 @@ class ImageTranslate:
         self.at = at
         self.image = image
 
-    def alpha_composite(self, im, dest=(0, 0)):
-        self.image.alpha_composite(im, dest=(dest[0] + self.at.x, dest[1] + self.at.y))
+    def _txy(self, xy):
+        return xy[0] + self.at.x, xy[1] + self.at.y
+
+    def alpha_composite(self, im, xy=(0, 0)):
+        self.image.alpha_composite(im, dest=self._txy(xy))
+
+    def paste(self, img, box):
+        self.image.paste(img, box=self._txy(box))
 
     def paste(self, im, box=(0, 0)):
         self.image.paste(im, box=(box[0] + self.at.x, box[1] + self.at.y))
@@ -195,6 +201,22 @@ class DrawTranslate:
 
     def rounded_rectangle(self, xy, *args, **kwargs):
         self.draw.rounded_rectangle([self._txy(pair) for pair in xy], *args, **kwargs)
+        self.draw.text(xy=self._txy(xy), text=text, **kwargs)
+
+    def point(self, xy, **kwargs):
+        self.draw.point(xy=self._txy(xy), **kwargs)
+
+    def rectangle(self, xy, *args, **kwargs):
+        self.draw.rectangle([self._txy(pair) for pair in xy], *args, **kwargs)
+
+    def line(self, xy, *args, **kwargs):
+        self.draw.line([self._txy(pair) for pair in xy], *args, **kwargs)
+
+    def arc(self, xy, *args, **kwargs):
+        self.draw.arc([self._txy(pair) for pair in xy], *args, **kwargs)
+
+    def pieslice(self, xy, *args, **kwargs):
+        self.draw.pieslice([self._txy(pair) for pair in xy], *args, **kwargs)
 
 
 class Translate:

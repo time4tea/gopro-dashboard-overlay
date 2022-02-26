@@ -11,6 +11,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite
+from gopro_overlay.widgets_compass import Compass
 
 
 def load_xml_layout(filename):
@@ -281,4 +282,22 @@ def create_gradient_chart(element, entry, timeseries, font, **kwargs):
         timeseries,
         entry,
         font_title=font(iattrib(element, "size_title", d=16))
+    )
+
+
+def create_compass(element, entry, timeseries, font, **kwargs):
+
+    def nonesafe(v):
+        if v is not None:
+            return v.magnitude
+        else:
+            return 0
+
+    return Compass(
+        size=iattrib(element, "size", d=256),
+        reading=lambda: nonesafe(entry().azi),
+        font=font(iattrib(element, "text", d=16)),
+        fg=rgbattr(element, "fg", d=(255, 255, 255)),
+        bg=rgbattr(element, "bg", d=(255, 255, 255)),
+        colour=rgbattr(element, "colour", d=(255, 255, 255)),
     )
