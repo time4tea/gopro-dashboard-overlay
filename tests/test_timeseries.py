@@ -127,9 +127,12 @@ def test_process_delta_speeds():
     )
     ts.process_deltas(calculate_speeds())
 
-    assert ts.get(datetime_of(1)).time == units.Quantity(60, units.s)
-    assert "{0.magnitude:.2f} {0.units}".format(ts.get(datetime_of(1)).dist) == "966.36 meter"
-    assert "{0.magnitude:.2f} {0.units:~P}".format(ts.get(datetime_of(1)).cspeed) == "16.11 m/s"
+    entry = ts.get(datetime_of(1))
+    assert entry.time == units.Quantity(60, units.s)
+    assert "{0.magnitude:.2f} {0.units}".format(entry.dist) == "966.36 meter"
+    assert "{0.magnitude:.2f} {0.units:~P}".format(entry.cspeed) == "16.11 m/s"
+    assert "{0.magnitude:.2f} {0.units:~P}".format(entry.azi) == "56.53 deg"
+    assert "{0.magnitude:.2f} {0.units:~P}".format(entry.cog) == "56.53 deg"
 
 
 def test_adding_multiple_items():

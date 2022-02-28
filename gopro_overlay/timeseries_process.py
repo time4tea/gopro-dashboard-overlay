@@ -29,7 +29,12 @@ def calculate_speeds():
         inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
         dist = units.Quantity(inverse['s12'], units.m)
         time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
-        azi = units.Quantity(inverse['azi1'], units.degree)
+        raw_azi = inverse['azi1']
+        azi = units.Quantity(raw_azi, units.degree)
+
+        raw_cog = 0 + raw_azi if raw_azi >= 0 else 360 + raw_azi
+        cog = units.Quantity(raw_cog, units.degree)
+
         speed = dist / time
 
         return {
@@ -37,6 +42,7 @@ def calculate_speeds():
             "dist": dist,
             "time": time,
             "azi": azi,
+            "cog": cog
         }
 
     return accept

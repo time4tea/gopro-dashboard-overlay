@@ -79,6 +79,15 @@ class Compass:
             fill=self.fg
         )
 
+        draw.polygon(
+            [
+                locate(-reading - 0, 0),
+                locate(-reading - 5, tiny_tick),
+                locate(-reading + 5, tiny_tick),
+            ],
+            fill=self.fg
+        )
+
         draw.text(locate(0, major_tick * 1.5), "N", font=self.font, anchor="mm", fill=self.colour)
         draw.text(locate(90, major_tick * 1.5), "E", font=self.font, anchor="mm", fill=self.colour)
         draw.text(locate(180, major_tick * 1.5), "S", font=self.font, anchor="mm", fill=self.colour)
