@@ -28,8 +28,8 @@ class Compass:
 
         def locate(angle, d):
             return (
-                centre + ((radius - d) * math.cos(math.radians(angle + reading))),
-                centre + ((radius - d) * math.sin(math.radians(angle + reading)))
+                centre + ((radius - d) * math.sin(math.radians(angle + reading))),
+                centre - ((radius - d) * math.cos(math.radians(angle + reading)))
             )
 
         draw.pieslice(
@@ -72,9 +72,9 @@ class Compass:
 
         draw.polygon(
             [
-                locate(-reading, 0),
-                locate(-reading - 5, minor_tick),
-                locate(-reading + 5, minor_tick),
+                locate(0, 0),
+                locate(- 5, minor_tick),
+                locate(5, minor_tick),
             ],
             fill=self.fg
         )
@@ -87,7 +87,7 @@ class Compass:
         return image
 
     def draw(self, image, draw):
-        reading = self.reading() - 90
+        reading = - self.reading()
 
         frame = self._redraw(reading)
 

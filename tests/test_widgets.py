@@ -215,7 +215,7 @@ def test_compass_med():
                 Coordinate(10, 10),
                 Composite(Compass(
                     size=200,
-                    reading=lambda: 320,
+                    reading=lambda: 45,
                     font=font, ),
                 )
             )
