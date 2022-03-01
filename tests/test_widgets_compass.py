@@ -53,7 +53,7 @@ def test_compass_small():
                     size=100,
                     reading=lambda: 20,
                     font=font,
-                    colour=(255, 255, 0),
+                    text=(255, 255, 0),
                     bg=(0, 255, 255),
                     fg=(0, 0, 0)
                 ), )
@@ -72,7 +72,7 @@ def test_compass_big():
                 Composite(Compass(size=400,
                                   reading=lambda: 20,
                                   font=font.font_variant(size=48),
-                                  colour=(255, 255, 255),
+                                  text=(255, 255, 255),
                                   bg=(0, 255, 255),
                                   fg=(255, 0, 255)
                                   ),

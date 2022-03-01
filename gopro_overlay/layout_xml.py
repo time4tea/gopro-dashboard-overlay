@@ -295,9 +295,9 @@ def create_compass(element, entry, timeseries, font, **kwargs):
 
     return Compass(
         size=iattrib(element, "size", d=256),
-        reading=lambda: nonesafe(entry().azi),
-        font=font(iattrib(element, "text", d=16)),
+        reading=lambda: nonesafe(entry().cog),
+        font=font(iattrib(element, "textsize", d=16)),
         fg=rgbattr(element, "fg", d=(255, 255, 255)),
         bg=rgbattr(element, "bg", d=(255, 255, 255)),
-        colour=rgbattr(element, "colour", d=(255, 255, 255)),
+        text=rgbattr(element, "text", d=(255, 255, 255)),
     )

@@ -86,7 +86,7 @@
     <!--    <component type="icon" x="64" y="100" file="/home/bob/blah.png" size="128"/>-->
 
     <composite name="compass" x="500" y="100">
-        <component type="compass" size="300" bg="0,0,0" fg="255,255,255"/>
+        <component type="compass" size="300" bg="0,0,0" fg="255,255,255" text="0,255,255" textsize="16"/>
     </composite>
 
 </layout>

@@ -5,13 +5,13 @@ from PIL import Image, ImageDraw
 
 class Compass:
 
-    def __init__(self, size, reading, font, fg=(255, 255, 255), bg=(0, 0, 0), colour=(255, 255, 255)):
+    def __init__(self, size, reading, font, fg=(255, 255, 255), bg=(0, 0, 0), text=(255, 255, 255)):
         self.reading = reading
         self.size = size
         self.font = font
         self.fg = fg
         self.bg = bg
-        self.colour = colour
+        self.text = text
         self.last_reading = None
         self.image = None
 
@@ -90,10 +90,10 @@ class Compass:
             fill=self.fg
         )
 
-        draw.text(locate(0, major_tick * 1.5), "N", font=self.font, anchor="mm", fill=self.colour)
-        draw.text(locate(90, major_tick * 1.5), "E", font=self.font, anchor="mm", fill=self.colour)
-        draw.text(locate(180, major_tick * 1.5), "S", font=self.font, anchor="mm", fill=self.colour)
-        draw.text(locate(270, major_tick * 1.5), "W", font=self.font, anchor="mm", fill=self.colour)
+        draw.text(locate(0, major_tick * 1.5), "N", font=self.font, anchor="mm", fill=self.text)
+        draw.text(locate(90, major_tick * 1.5), "E", font=self.font, anchor="mm", fill=self.text)
+        draw.text(locate(180, major_tick * 1.5), "S", font=self.font, anchor="mm", fill=self.text)
+        draw.text(locate(270, major_tick * 1.5), "W", font=self.font, anchor="mm", fill=self.text)
 
         return image
 
