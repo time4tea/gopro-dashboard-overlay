@@ -261,7 +261,7 @@ class Frame:
         if self.mask is None:
             self.mask = Image.new('L', (self.dimensions.x, self.dimensions.y), 0)
             ImageDraw.Draw(self.mask).rounded_rectangle(
-                (0, 0) + (self.dimensions.x, self.dimensions.y),
+                (0, 0) + (self.dimensions.x - 1, self.dimensions.y - 1),
                 radius=self.corner_radius,
                 fill=int(self.opacity * 255)
             )
