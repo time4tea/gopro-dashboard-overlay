@@ -1,8 +1,9 @@
 import itertools
 import random
 from datetime import timedelta
+from typing import Tuple, Any
 
-from PIL import ImageFont
+from PIL import ImageFont, Image, ImageDraw
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
@@ -11,7 +12,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate
+from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, EmptyDrawable, Frame
 from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_info import BigMetric, ComparativeEnergy
 from tests.approval import approve_image
@@ -197,6 +198,68 @@ def test_composite_viewport():
             Composite(
                 text(at=Coordinate(0, 0), cache=True, value=lambda: "String", font=font.font_variant(size=50)),
                 simple_icon(Coordinate(0, 50), "gauge-1.png", invert=True),
+            )
+        )
+    })
+
+
+@approve_image
+def test_frame_border_visible_over_content():
+    return time_rendering(name="viewport", widgets={
+        Translate(
+            Coordinate(10, 10),
+            Frame(
+                dimensions=Dimension(300, 200),
+                opacity=0.6,
+                fill=(0, 0, 0),
+                outline=(255,255,255),
+                child=CachingText(
+                    at=Coordinate(-8, 0),
+                    fill=(255, 255, 0),
+                    value=lambda: "Hello",
+                    font=font.font_variant(size=64)
+                ),
+            )
+        )
+    })
+
+@approve_image
+def test_frame_circular():
+    return time_rendering(name="viewport", widgets={
+        Translate(
+            Coordinate(100, 00),
+            Frame(
+                dimensions=Dimension(200, 200),
+                opacity=0.6,
+                fill=(0, 0, 0),
+                outline=(255,255,255),
+                corner_radius=100,
+                child=CachingText(
+                    at=Coordinate(0, 000),
+                    fill=(255, 255, 0),
+                    value=lambda: "Hello",
+                    font=font.font_variant(size=128)
+                ),
+            )
+        )
+    })
+
+
+@approve_image
+def test_frame_clipping():
+    return time_rendering(name="viewport", widgets={
+        Translate(
+            Coordinate(10, 10),
+            Frame(
+                dimensions=Dimension(300, 200),
+                opacity=0.5,
+                outline=(255, 255, 255),
+                fill=(0, 0, 0),
+                corner_radius=30,
+                child=Composite(
+                    CachingText(at=Coordinate(250, -20), value=lambda: "Hello", font=font.font_variant(size=48)),
+                    CachingText(at=Coordinate(-30, 50), value=lambda: "World", font=font.font_variant(size=48))
+                )
             )
         )
     })
