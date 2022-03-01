@@ -184,9 +184,6 @@ class ImageTranslate:
     def paste(self, img, box):
         self.image.paste(img, box=self._txy(box))
 
-    def paste(self, im, box=(0, 0)):
-        self.image.paste(im, box=(box[0] + self.at.x, box[1] + self.at.y))
-
 
 class DrawTranslate:
     def __init__(self, at, draw):
