@@ -201,7 +201,6 @@ class DrawTranslate:
 
     def rounded_rectangle(self, xy, *args, **kwargs):
         self.draw.rounded_rectangle([self._txy(pair) for pair in xy], *args, **kwargs)
-        self.draw.text(xy=self._txy(xy), text=text, **kwargs)
 
     def point(self, xy, **kwargs):
         self.draw.point(xy=self._txy(xy), **kwargs)
