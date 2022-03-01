@@ -12,6 +12,8 @@ class Compass:
         self.fg = fg
         self.bg = bg
         self.colour = colour
+        self.last_reading = None
+        self.image = None
 
     def _redraw(self, reading):
 
@@ -96,8 +98,10 @@ class Compass:
         return image
 
     def draw(self, image, draw):
-        reading = - self.reading()
+        reading = - int(self.reading())
 
-        frame = self._redraw(reading)
+        if self.image is None or reading != self.last_reading:
+            self.last_reading = reading
+            self.image = self._redraw(reading)
 
-        image.alpha_composite(frame, (0, 0))
+        image.alpha_composite(self.image, (0, 0))

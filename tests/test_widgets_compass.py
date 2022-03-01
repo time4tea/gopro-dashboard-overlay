@@ -24,7 +24,7 @@ ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=
 @approve_image
 def test_compass_med():
     return time_rendering(
-        name="viewport",
+        name="test_compass_med",
         dimensions=Dimension(250, 250),
         widgets=[
             Text(at=Coordinate(100, 150), value=lambda: "Partially Visible", font=font.font_variant(size=64)),
@@ -44,7 +44,7 @@ def test_compass_med():
 @approve_image
 def test_compass_small():
     return time_rendering(
-        name="viewport",
+        name="test_compass_small",
         dimensions=Dimension(250, 250),
         widgets=[
             Translate(
@@ -64,7 +64,7 @@ def test_compass_small():
 @approve_image
 def test_compass_big():
     return time_rendering(
-        name="viewport",
+        name="test_compass_big",
         dimensions=Dimension(400, 400),
         widgets=[
             Translate(
