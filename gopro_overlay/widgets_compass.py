@@ -100,4 +100,4 @@ class Compass:
 
         frame = self._redraw(reading)
 
-        image.paste(frame, (0, 0))
+        image.alpha_composite(frame, (0, 0))

@@ -283,7 +283,7 @@ class Frame:
 
         rect.putalpha(self.mask)
 
-        image.paste(rect, (0, 0))
+        image.alpha_composite(rect, (0, 0))
 
 
 class Scene:

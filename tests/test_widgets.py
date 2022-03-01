@@ -1,10 +1,8 @@
 import itertools
-import math
 import random
 from datetime import timedelta
-from typing import Tuple, Any
 
-from PIL import ImageFont, Image, ImageDraw
+from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
@@ -13,9 +11,8 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, EmptyDrawable, Frame
+from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, Frame
 from gopro_overlay.widgets_chart import SimpleChart
-from gopro_overlay.widgets_compass import Compass
 from gopro_overlay.widgets_info import BigMetric, ComparativeEnergy
 from tests.approval import approve_image
 from tests.testenvironment import is_make
@@ -194,7 +191,7 @@ def test_metric_component():
 
 @approve_image
 def test_composite_viewport():
-    return time_rendering(name="viewport", widgets={
+    return time_rendering(name="viewport", widgets=[
         Translate(
             Coordinate(330, 130),
             Composite(
@@ -202,76 +199,19 @@ def test_composite_viewport():
                 simple_icon(Coordinate(0, 50), "gauge-1.png", invert=True),
             )
         )
-    })
-
-
-@approve_image
-def test_compass_med():
-    return time_rendering(
-        name="viewport",
-        dimensions=Dimension(250, 250),
-        widgets={
-            Translate(
-                Coordinate(10, 10),
-                Composite(Compass(
-                    size=200,
-                    reading=lambda: 45,
-                    font=font, ),
-                )
-            )
-        })
-
-
-@approve_image
-def test_compass_small():
-    return time_rendering(
-        name="viewport",
-        dimensions=Dimension(250, 250),
-        widgets={
-            Translate(
-                Coordinate(10, 10),
-                Composite(Compass(
-                    size=100,
-                    reading=lambda: 20,
-                    font=font,
-                    colour=(255, 255, 0),
-                    bg=(0, 255, 255),
-                    fg=(0, 0, 0)
-                ), )
-            )
-        })
-
-
-@approve_image
-def test_compass_big():
-    return time_rendering(
-        name="viewport",
-        dimensions=Dimension(400, 400),
-        widgets={
-            Translate(
-                Coordinate(0, 0),
-                Composite(Compass(size=400,
-                                  reading=lambda: 20,
-                                  font=font.font_variant(size=48),
-                                  colour=(255, 255, 255),
-                                  bg=(0, 255, 255),
-                                  fg=(255, 0, 255)
-                                  ),
-                          )
-            )
-        })
+    ])
 
 
 @approve_image
 def test_frame_border_visible_over_content():
-    return time_rendering(name="viewport", widgets={
+    return time_rendering(name="viewport", widgets=[
         Translate(
             Coordinate(10, 10),
             Frame(
                 dimensions=Dimension(300, 200),
                 opacity=0.6,
                 fill=(0, 0, 0),
-                outline=(255,255,255),
+                outline=(255, 255, 255),
                 child=CachingText(
                     at=Coordinate(-8, 0),
                     fill=(255, 255, 0),
@@ -280,33 +220,37 @@ def test_frame_border_visible_over_content():
                 ),
             )
         )
-    })
+    ])
+
 
 @approve_image
 def test_frame_circular():
-    return time_rendering(name="viewport", widgets={
-        Translate(
-            Coordinate(100, 00),
-            Frame(
-                dimensions=Dimension(200, 200),
-                opacity=0.6,
-                fill=(0, 0, 0),
-                outline=(255,255,255),
-                corner_radius=100,
-                child=CachingText(
-                    at=Coordinate(0, 000),
-                    fill=(255, 255, 0),
-                    value=lambda: "Hello",
-                    font=font.font_variant(size=128)
-                ),
+    return time_rendering(name="viewport", widgets=[
+        Composite(
+            Text(at=Coordinate(100, 150), value=lambda: "Partially Visible", font=font.font_variant(size=64)),
+            Translate(
+                Coordinate(100, 00),
+                Frame(
+                    dimensions=Dimension(200, 200),
+                    opacity=0.6,
+                    fill=(0, 0, 0),
+                    outline=(255, 255, 255),
+                    corner_radius=100,
+                    child=CachingText(
+                        at=Coordinate(0, 000),
+                        fill=(255, 255, 0),
+                        value=lambda: "Hello",
+                        font=font.font_variant(size=128)
+                    ),
+                )
             )
         )
-    })
+    ])
 
 
 @approve_image
 def test_frame_clipping():
-    return time_rendering(name="viewport", widgets={
+    return time_rendering(name="viewport", widgets=[
         Translate(
             Coordinate(10, 10),
             Frame(
@@ -321,7 +265,7 @@ def test_frame_clipping():
                 )
             )
         )
-    })
+    ])
 
 
 def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=100):
