@@ -56,7 +56,7 @@ venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,
 
 Several dashboards are built-in to the software, but the dashboard layout is highly configurable, controlled by an XML file.
 
-For more information on the (extensive) configurability of the layout please see [docs/xml/README.md](docs/bin/xml/README.md)
+For more information on the (extensive) configurability of the layout please see [docs/xml/README.md](docs/xml/README.md)
 
 ## Converting to GPX files
 
