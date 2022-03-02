@@ -5,12 +5,13 @@ import xml.etree.ElementTree as ET
 from typing import Callable
 
 from gopro_overlay import layouts
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient_chart, \
     text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, Translate, Composite
+from gopro_overlay.widgets import simple_icon, Translate, Composite, Frame
 from gopro_overlay.widgets_compass import Compass
 
 
@@ -60,10 +61,27 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda nam
                 )
             )
 
+        def create_frame(element):
+            return Translate(
+                at(element),
+                Frame(
+                    dimensions=Dimension(x=iattrib(element, "width"), y=iattrib(element, "height")),
+                    opacity=fattrib(element, "opacity", d=1.0),
+                    corner_radius=iattrib(element, "cr", d=0),
+                    outline=rgbattr(element, "outline", d=(0, 0, 0)),
+                    fill=rgbattr(element, "bg", d=None),
+                    child=Composite(
+                        *[do_element(child) for child in element if want_element(child)]
+                    )
+                )
+            )
+
         def do_element(element):
             elements = {
                 "composite": create_composite,
-                "component": create_component
+                "translate": create_composite,
+                "component": create_component,
+                "frame": create_frame,
             }
             if element.tag not in elements:
                 raise IOError(f"Tag {element.tag} is not recognised. Should be one of '{list(elements.keys())}'")
@@ -106,13 +124,15 @@ def battrib(el, a, d):
 
 def rgbattr(el, a, d):
     v = attrib(el, a, f=lambda s: tuple(map(int, s.split(","))), d=d)
+    if v is None:
+        return v
     if len(v) != 3:
         raise ValueError(f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), not {len(v)}")
     return v
 
 
 def at(el):
-    return Coordinate(iattrib(el, "x"), iattrib(el, "y"))
+    return Coordinate(iattrib(el, "x", d=0), iattrib(el, "y", d=0))
 
 
 def metric_accessor_from(name):
@@ -286,7 +306,6 @@ def create_gradient_chart(element, entry, timeseries, font, **kwargs):
 
 
 def create_compass(element, entry, timeseries, font, **kwargs):
-
     def nonesafe(v):
         if v is not None:
             return v.magnitude
@@ -298,6 +317,6 @@ def create_compass(element, entry, timeseries, font, **kwargs):
         reading=lambda: nonesafe(entry().cog),
         font=font(iattrib(element, "textsize", d=16)),
         fg=rgbattr(element, "fg", d=(255, 255, 255)),
-        bg=rgbattr(element, "bg", d=(255, 255, 255)),
+        bg=rgbattr(element, "bg", d=None),
         text=rgbattr(element, "text", d=(255, 255, 255)),
     )

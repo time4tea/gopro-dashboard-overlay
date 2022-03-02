@@ -85,8 +85,18 @@
     <!-- icon somewhere on filesystem -->
     <!--    <component type="icon" x="64" y="100" file="/home/bob/blah.png" size="128"/>-->
 
+    <translate x="150" y="150">
+        <frame width="150" height="150" outline="255,255,0" opacity="0.6">
+            <component type="moving_map" x="0" y="0" size="256" zoom="16"/>
+        </frame>
+    </translate>
+
     <composite name="compass" x="500" y="100">
         <component type="compass" size="300" bg="0,0,0" fg="255,255,255" text="0,255,255" textsize="16"/>
+
+        <translate x="180">
+            <component type="compass" size="300" fg="255,255,255" text="0,255,255" textsize="32"/>
+        </translate>
     </composite>
 
 </layout>
