@@ -1,8 +1,8 @@
 ## Dashboard Configuration
 
 The dashboard is configured by an XML file. There are built-in dashboards, and these use the XML configuration. Have a
-look at the [example file](gopro_overlay/layouts/example.xml) to see an example, or see the
-[default layout](gopro_overlay/layouts/default-1920x1080.xml)
+look at the [example file](../../gopro_overlay/layouts/example.xml) to see an example, or see the
+[default layout](../../gopro_overlay/layouts/default-1920x1080.xml)
 
 ### Tiny Example
 
