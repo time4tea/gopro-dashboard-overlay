@@ -35,7 +35,6 @@ venv/bin/pip install gopro-overlay
 venv/bin/gopro-dashboard.py
 ```
 
-
 The GPS track in Hero 9 (at least) seems to be very poor. If you supply a GPX file from a Garmin or whatever, the 
 program will use this instead for the GPS.
 
@@ -48,6 +47,7 @@ render the files when you get back home! On linux you can use the TZ variable to
 
 ### Example
 
+For full instructions on all command lines see [docs/bin](docs/bin)
 ```shell
 venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,-0.40000,0.50 ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
@@ -56,7 +56,7 @@ venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,
 
 Several dashboards are built-in to the software, but the dashboard layout is highly configurable, controlled by an XML file.
 
-For more information on the (extensive) configurability of the layout please see [docs/xml/README.md](docs/xml/README.md)
+For more information on the (extensive) configurability of the layout please see [docs/xml](docs/xml)
 
 ## Converting to GPX files
 
