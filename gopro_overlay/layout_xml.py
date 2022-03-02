@@ -68,7 +68,7 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda nam
                     dimensions=Dimension(x=iattrib(element, "width"), y=iattrib(element, "height")),
                     opacity=fattrib(element, "opacity", d=1.0),
                     corner_radius=iattrib(element, "cr", d=0),
-                    outline=rgbattr(element, "outline", d=(0, 0, 0)),
+                    outline=rgbattr(element, "outline", None),
                     fill=rgbattr(element, "bg", d=None),
                     child=Composite(
                         *[do_element(child) for child in element if want_element(child)]
