@@ -147,6 +147,7 @@ def metric_accessor_from(name):
         "odo": lambda e: e.odo,
         "dist": lambda e: e.dist,
         "azi": lambda e: e.azi,
+        "cog": lambda e: e.cog,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
     }
@@ -166,6 +167,8 @@ def metric_converter_from(name):
 
         "degreeF": lambda u: u.to('degreeF'),
         "degreeC": lambda u: u.to('degreeC'),
+
+        "radian": lambda u: u.to("radian"),
 
         "feet": lambda u: u.to("international_feet"),
         "miles": lambda u: u.to("mile"),
