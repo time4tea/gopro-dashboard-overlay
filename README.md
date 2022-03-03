@@ -135,6 +135,10 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.29.0
+  - Add `compass` component (experimental!) - Draws a simple compass
+  - Add `frame` component - Draws a clipping maybe-rounded box to contain other components.
+  - Add initial docs for XML layout.
 - 0.28.0
   - Only rerender moving map if it has moved since last frame - will be much quicker under certain circumstances
   - Refactorings in how map border/opacity is rendered (should have no visible effect, maybe marginally faster)
