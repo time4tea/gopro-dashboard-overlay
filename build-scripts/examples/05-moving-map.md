@@ -46,11 +46,11 @@ The gopro video will be visible through the component, if it is not completely o
 
 Corners can be rounded with `corner_radius`.
 
-{{ <component type="moving_map" size="256" corner_radius="40" /> }}
+{{ <component type="moving_map" size="256" corner_radius="40" zoom="7"/> }}
 
 if `corner_radius` == half the width (ie. the radius) then the corners will be so rounded that the map becomes a circle
 
-{{ <component type="moving_map" size="256" corner_radius="128" /> }}
+{{ <component type="moving_map" size="256" corner_radius="128" zoom="8" /> }}
 
 ## Map Provider & Styles
 
@@ -61,7 +61,7 @@ It is possible to have multiple moving maps, though
 
 {{ 
 <component type="moving_map" size="128" zoom="4" /> 
-<component type="moving_map" x="64" y="64" size="128" corner_radius="64" zoom="16"/>
+<component type="moving_map" x="64" y="64" size="128" corner_radius="64" zoom="7"/>
 }}
 
 ## Copyright

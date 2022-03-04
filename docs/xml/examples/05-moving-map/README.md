@@ -87,7 +87,7 @@ Corners can be rounded with `corner_radius`.
 
 
 ```xml
-<component type="moving_map" size="256" corner_radius="40" />
+<component type="moving_map" size="256" corner_radius="40" zoom="7"/>
 ```
 <kbd>![05-moving-map-7.png](05-moving-map-7.png)</kbd>
 
@@ -96,7 +96,7 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 
 
 ```xml
-<component type="moving_map" size="256" corner_radius="128" />
+<component type="moving_map" size="256" corner_radius="128" zoom="8" />
 ```
 <kbd>![05-moving-map-8.png](05-moving-map-8.png)</kbd>
 
@@ -111,7 +111,7 @@ It is possible to have multiple moving maps, though
 
 ```xml
 <component type="moving_map" size="128" zoom="4" /> 
-<component type="moving_map" x="64" y="64" size="128" corner_radius="64" zoom="16"/>
+<component type="moving_map" x="64" y="64" size="128" corner_radius="64" zoom="7"/>
 ```
 <kbd>![05-moving-map-9.png](05-moving-map-9.png)</kbd>
 
