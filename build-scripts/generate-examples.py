@@ -8,9 +8,11 @@ from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
+from gopro_overlay.gpmd import timeseries_from_data
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.privacy import NoPrivacyZone
+from gopro_overlay.units import units
 
 mydir = os.path.dirname(__file__)
 
@@ -49,15 +51,10 @@ if __name__ == "__main__":
 
     renderer = CachingRenderer()
 
-    rng = random.Random()
-    rng.seed(54321)
+    with open(os.path.join(mydir, "..", "tests/meta/gopro-meta.gpmd"), "rb") as f:
+        data = f.read()
 
-    timeseries = fake.fake_timeseries(
-        start_timestamp=1644834668,
-        length=timedelta(minutes=10),
-        step=timedelta(seconds=1),
-        rng=rng
-    )
+    timeseries = timeseries_from_data(data=data, units=units)
 
     font = load_font("Roboto-Medium.ttf")
 
