@@ -82,21 +82,6 @@ Components are simple widgets that draw something onto the screen.
 [Moving Map](#moving-map), [Journey Map](#journey-map)
 [Icon](#icon)
 
-### Moving Map
-
-Shows a moving map, with the current GPS location at the centre of the map. The zoom level can be set to show a smaller
-or larger surrounding area. Zoom levels range from 0 (the whole world) to 20 (a mid-sized building) - although not all
-map privders will provide tiles for zoom levels 19 & 20. Zoom levels 18 and below should be widely supported.
-
-For more information on zoom levels see: [Zoom Levels](https://wiki.openstreetmap.org/wiki/Zoom_levels) on the
-OpenStreetMap wiki.
-
-Example:
-
-```xml
-
-<component type="moving_map" name="some-name" x="1644" y="100" size="256" zoom="16" corner_radius="35"/>
-```
 
 ### Journey Map
 

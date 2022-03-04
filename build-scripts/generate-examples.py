@@ -27,7 +27,7 @@ def alphanum_key(s):
 
 
 dimensions_by_file = {
-    "01-simple-text.xml": Dimension(100, 100)
+    "05-moving-map.md": Dimension(256,256)
 }
 
 

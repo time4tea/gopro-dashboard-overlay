@@ -13,4 +13,6 @@ Auto Generated File DO NOT EDIT
 [03-datetime](03-datetime/README.md)
 
 [04-metrics](04-metrics/README.md)
+
+[05-moving-map](05-moving-map/README.md)
         

@@ -118,7 +118,7 @@ class JourneyMap:
         current = self.map.rev_geocode((location.lon, location.lat))
         draw_marker(draw, current, 6)
 
-        image.paste(frame, self.at.tuple())
+        image.alpha_composite(frame, self.at.tuple())
 
 
 def draw_marker(draw, position, size, fill=None):
@@ -177,4 +177,4 @@ class MovingMap:
             if self.perceptible.moved(map, location):
                 self.cached = self._redraw(map)
 
-            image.paste(self.cached, self.at.tuple())
+            image.alpha_composite(self.cached, self.at.tuple())
