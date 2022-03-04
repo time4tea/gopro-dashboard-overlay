@@ -46,7 +46,8 @@ class Random2D:
 
 def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
                     step: datetime.timedelta = datetime.timedelta(seconds=0.1),
-                    rng: random.Random = None):
+                    rng: random.Random = None,
+                    start_timestamp: int = 0):
     rng = rng or random.Random()
 
     points = Random2D(Point(51.4972, -0.1499), 0.001, rng=rng)
@@ -58,7 +59,7 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
     temp = Random1D(27, rng=rng)
 
     ts = Timeseries()
-    current_dt = datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
+    current_dt = datetime.datetime.fromtimestamp(start_timestamp, tz=datetime.timezone.utc)
     end_dt = current_dt + length
 
     while current_dt <= end_dt:

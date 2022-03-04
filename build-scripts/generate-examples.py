@@ -35,6 +35,8 @@ def dimensions_for(filepath: str) -> Dimension:
     return dimensions_by_file.get(os.path.basename(filepath), Dimension(200, 100))
 
 
+AUTO_HEADER = "<!-- \n\nAuto Generated File DO NOT EDIT \n\n-->"
+
 # s = """
 # Hello {{ there }}
 # """
@@ -57,7 +59,12 @@ if __name__ == "__main__":
     rng = random.Random()
     rng.seed(54321)
 
-    timeseries = fake.fake_timeseries(length=timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
+    timeseries = fake.fake_timeseries(
+        start_timestamp=1644834668,
+        length=timedelta(minutes=10),
+        step=timedelta(seconds=1),
+        rng=rng
+    )
 
     font = load_font("Roboto-Medium.ttf")
 
@@ -110,5 +117,24 @@ if __name__ == "__main__":
                 output_path = os.path.join(dest, imagename)
                 image.save(fp=output_path)
 
+            example_markdown = AUTO_HEADER + example_markdown
+
             with open(os.path.join(dest, basename), "w") as f:
                 f.write(example_markdown)
+
+
+    def link(filename):
+        return f"[{filename}]({filename})"
+
+
+    links = "\n\n".join(
+        [link(os.path.basename(filepath)) for filepath in examples]
+    )
+
+    with open(os.path.join(dest, "README.md"), "w") as f:
+        f.write(f"""
+{AUTO_HEADER}
+# Layout Configuration Documentation
+
+{ links }
+        """)
