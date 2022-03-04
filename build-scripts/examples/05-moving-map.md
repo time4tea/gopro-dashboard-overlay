@@ -63,3 +63,14 @@ It is possible to have multiple moving maps, though
 <component type="moving_map" size="128" zoom="4" /> 
 <component type="moving_map" x="64" y="64" size="128" corner_radius="64" zoom="16"/>
 }}
+
+## Copyright
+
+All maps are © OpenStreetMap contributors
+
+Please see Copyright https://www.openstreetmap.org/copyright
+
+## Provider Copyright
+
+Other map renderings may require additional attribution. This can be placed on the video using a `text` component, or referenced elsewhere in 
+user documentation. The gopro-dashboard-overlay project is not responsible for the copyright usage of its users.
