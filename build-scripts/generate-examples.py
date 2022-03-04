@@ -37,13 +37,6 @@ def dimensions_for(filepath: str) -> Dimension:
 
 AUTO_HEADER = "<!-- \n\nAuto Generated File DO NOT EDIT \n\n-->"
 
-# s = """
-# Hello {{ there }}
-# """
-# for thing in re.finditer(r"{{(.+?)}}", s):
-#     print(thing)
-#     print(thing.group(1))
-
 if __name__ == "__main__":
     dest = os.path.join(os.path.dirname(mydir), "docs/xml/examples")
     example_dir = os.path.join(mydir, "examples")
