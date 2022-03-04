@@ -50,21 +50,21 @@ OpenStreetMap wiki.
 
 
 ```xml
-<component type="moving_map" size="128" zoom="4" />
+<component type="moving_map" size="256" zoom="4" />
 ```
 <kbd>![05-moving-map-3.png](05-moving-map-3.png)</kbd>
 
 
 
 ```xml
-<component type="moving_map" size="128" zoom="10" />
+<component type="moving_map" size="256" zoom="10" />
 ```
 <kbd>![05-moving-map-4.png](05-moving-map-4.png)</kbd>
 
 
 
 ```xml
-<component type="moving_map" size="128" zoom="17" />
+<component type="moving_map" size="256" zoom="17" />
 ```
 <kbd>![05-moving-map-5.png](05-moving-map-5.png)</kbd>
 
@@ -87,7 +87,7 @@ Corners can be rounded with `corner_radius`.
 
 
 ```xml
-<component type="moving_map" size="128" corner_radius="40" />
+<component type="moving_map" size="256" corner_radius="40" />
 ```
 <kbd>![05-moving-map-7.png](05-moving-map-7.png)</kbd>
 
@@ -96,7 +96,7 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 
 
 ```xml
-<component type="moving_map" size="128" corner_radius="64" />
+<component type="moving_map" size="256" corner_radius="128" />
 ```
 <kbd>![05-moving-map-8.png](05-moving-map-8.png)</kbd>
 

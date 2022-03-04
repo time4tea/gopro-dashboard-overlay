@@ -29,11 +29,11 @@ map providers will provide tiles for zoom levels 19 & 20. Zoom levels 18 and bel
 For more information on zoom levels see: [Zoom Levels](https://wiki.openstreetmap.org/wiki/Zoom_levels) on the
 OpenStreetMap wiki.
 
-{{ <component type="moving_map" size="128" zoom="4" /> }}
+{{ <component type="moving_map" size="256" zoom="4" /> }}
 
-{{ <component type="moving_map" size="128" zoom="10" /> }}
+{{ <component type="moving_map" size="256" zoom="10" /> }}
 
-{{ <component type="moving_map" size="128" zoom="17" /> }}
+{{ <component type="moving_map" size="256" zoom="17" /> }}
 
 ## Opacity
 
@@ -46,11 +46,11 @@ The gopro video will be visible through the component, if it is not completely o
 
 Corners can be rounded with `corner_radius`.
 
-{{ <component type="moving_map" size="128" corner_radius="40" /> }}
+{{ <component type="moving_map" size="256" corner_radius="40" /> }}
 
 if `corner_radius` == half the width (ie. the radius) then the corners will be so rounded that the map becomes a circle
 
-{{ <component type="moving_map" size="128" corner_radius="64" /> }}
+{{ <component type="moving_map" size="256" corner_radius="128" /> }}
 
 ## Map Provider & Styles
 
