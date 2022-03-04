@@ -54,9 +54,12 @@ Conversions that don't make sense for a given metric will fail with a suitable m
 
 GPS Location is just another metric...
 
+`cache="false"` is suggested for lat & lon metrics, as they will rarely repeat. By default text glyphs are cached, as they are
+quite slow to render. This can be ignored really unless there are memory errors while rendering.
+
 
 ```xml
-<component type="metric" metric="lat" dp="6" size="16" cache="False"/>
+<component type="metric" metric="lat" dp="6" size="16" cache="false"/>
 ```
 <kbd>![04-metrics-5.png](04-metrics-5.png)</kbd>
 

@@ -82,6 +82,8 @@ if __name__ == "__main__":
 
             basename = Path(os.path.basename(filepath))
 
+            example_dest = os.path.join(dest, basename.stem)
+
             while True:
                 match = re.search(r"{{(.+?)}}", example_markdown, re.MULTILINE | re.DOTALL)
                 if match is None:
@@ -112,19 +114,20 @@ if __name__ == "__main__":
                 overlay = Overlay(dimensions_for(filepath), timeseries=timeseries, create_widgets=layout)
                 image = overlay.draw(timeseries.min + (timeseries.max - timeseries.min))
 
-                os.makedirs(dest, exist_ok=True)
+                os.makedirs(example_dest, exist_ok=True)
 
-                output_path = os.path.join(dest, imagename)
+                output_path = os.path.join(example_dest, imagename)
                 image.save(fp=output_path)
 
             example_markdown = AUTO_HEADER + example_markdown
 
-            with open(os.path.join(dest, basename), "w") as f:
+            with open(os.path.join(example_dest, "README.md"), "w") as f:
                 f.write(example_markdown)
 
 
     def link(filename):
-        return f"[{filename}]({filename})"
+        stem = Path(filename).stem
+        return f"[{stem}]({stem}/README.md)"
 
 
     links = "\n\n".join(
