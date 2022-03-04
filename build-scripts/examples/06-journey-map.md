@@ -37,6 +37,11 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 {{ <component type="journey_map" size="256" corner_radius="128"/> }}
 
 
+## Copyright
+
+All maps are © OpenStreetMap contributors
+
+Please see Copyright https://www.openstreetmap.org/copyright
 
 
 

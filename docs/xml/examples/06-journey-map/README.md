@@ -71,6 +71,11 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 
 
 
+## Copyright
+
+All maps are © OpenStreetMap contributors
+
+Please see Copyright https://www.openstreetmap.org/copyright
 
 
 
