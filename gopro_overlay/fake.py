@@ -17,9 +17,9 @@ class Random1D:
         n = self.rng.random()
 
         if n < 0.45:
-            self._n = self._n - 1
+            self._n = self._n - 0.1
         elif n > 0.55:
-            self._n = self._n + 1
+            self._n = self._n + 0.1
 
         if self._n <= self._min_value:
             self._n = self._min_value

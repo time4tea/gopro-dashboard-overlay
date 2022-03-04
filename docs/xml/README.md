@@ -82,44 +82,6 @@ Components are simple widgets that draw something onto the screen.
 [Moving Map](#moving-map), [Journey Map](#journey-map)
 [Icon](#icon)
 
-### Text Component
-
-Draws some text on the screen at the given co-ordinates.
-
-```xml
-
-<component type="text" x="50" y="100" size="32" rgb="255,255,255">Hello</component>
-```
-
-### DateTime
-
-Draws the current frame's date and/or time. Uses the python strftime function, so any valid format string can be used.
-The truncate attribute allows for some characters to be stripped from the right hand side of the formatted output. This
-allows to format partial seconds when using the '%f' (which prints microseconds).
-
-```xml
-
-<component type="datetime" x="0" y="0" format="%Y/%m/%d" size="16" align="right"/>
-<component type="datetime" x="0" y="24" format="%H:%M:%S.%f" truncate="5" size="32" align="right"/>
-```
-
-### Icon
-
-Draws an icon onto the screen. Some icons are built-in, or the full path to the icon file can be specified. Icons can
-be 'inverted' so that black pixles are drawn as white, and this is in fact the default.
-
-Bundled icons are:
-
-`bicycle.png` `car.png` `gauge-1.png` `gauge.png` `heartbeat.png` `ice-cream-van.png` `mountain.png` `mountain-range.png` `ruler.png` `slope.png` `slope-triangle.png` `speedometer-variant-tool-symbol.png` `thermometer-1.png`
-`thermometer.png` `user.png` `van-black-side-view.png`
-
-Example:
-
-```xml
-
-<component type="icon" x="0" y="0" file="slope-triangle.png" size="64" invert="false"/>
-```
-
 ### Moving Map
 
 Shows a moving map, with the current GPS location at the centre of the map. The zoom level can be set to show a smaller
@@ -155,32 +117,6 @@ This component will be made more generic in a future version to chart any metric
 ```
 ### Metric Component
 
-Draws the value of a bit of meta-data on the screen at the given co-ordinate.
-
-```xml
-
-<component type="metric" x="-70" y="18" metric="cadence" dp="0" size="32" rgb="255,255,0" align="right"/>
-```
-
-The following metrics are supported:
-`hr`, `cadence`, `speed`, `cspeed`, `temp`,
-`gradient`, `alt`, `odo`, `dist`, `azi`, `lat`, `lon`,
-
-| Metric   | Description               | Unit                 |
-|----------|---------------------------|----------------------|
-| hr       | Heart Rate                | beats / minute       |
-| cadence  | Cadence                   | revolutions / minute |
-| speed    | Speed                     | metres / second      |
-| cspeed   | Computed Speed            | metres / second      |
-| temp     | Ambient Temperature       | degrees C            |
-| gradient | Gradient of Ascent        | -                    |
-| alt      | Height above sea level    | metres               |
-| odo      | Distance since start      | metres               |
-| dist     | Distance since last point | metres               |
-| azi      | Azimuth                   | degree               |
-| cog      | Course over Ground        | degree               |
-| lat      | Latitude                  | -                    | 
-| lon      | Longitude                 | -                    | 
 
 ##### Metric Units
 

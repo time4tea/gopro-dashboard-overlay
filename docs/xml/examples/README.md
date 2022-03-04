@@ -11,4 +11,6 @@ Auto Generated File DO NOT EDIT
 [02-icons.md](02-icons.md)
 
 [03-datetime.md](03-datetime.md)
+
+[04-metrics.md](04-metrics.md)
         

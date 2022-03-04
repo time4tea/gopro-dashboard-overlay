@@ -53,3 +53,10 @@ This component supports positioning with `x` and `y`.
 ```
 <kbd>![02-icons-3.png](02-icons-3.png)</kbd>
 
+
+## Bundled
+
+Bundled icons are:
+
+`bicycle.png` `car.png` `gauge-1.png` `gauge.png` `heartbeat.png` `ice-cream-van.png` `mountain.png` `mountain-range.png` `ruler.png` `slope.png` `slope-triangle.png` `speedometer-variant-tool-symbol.png` `thermometer-1.png`
+`thermometer.png` `user.png` `van-black-side-view.png`

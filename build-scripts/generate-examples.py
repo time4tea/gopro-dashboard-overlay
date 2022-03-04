@@ -74,6 +74,7 @@ if __name__ == "__main__":
 
     with renderer.open() as map_renderer:
         for filepath in examples:
+            print(filepath)
             with open(filepath) as f:
                 example_markdown = f.read()
 
@@ -84,7 +85,6 @@ if __name__ == "__main__":
             while True:
                 match = re.search(r"{{(.+?)}}", example_markdown, re.MULTILINE | re.DOTALL)
                 if match is None:
-                    print("End")
                     break
 
                 imagename = basename.with_name(basename.stem + f"-{count}" + basename.suffix).with_suffix(f".png")

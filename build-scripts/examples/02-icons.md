@@ -31,3 +31,10 @@ This component supports positioning with `x` and `y`.
 <component type="icon" x="0" y="0" file="bicycle.png"/> 
 <component type="icon" x="30" y="30" file="mountain.png" invert="false"/> 
 }}
+
+## Bundled
+
+Bundled icons are:
+
+`bicycle.png` `car.png` `gauge-1.png` `gauge.png` `heartbeat.png` `ice-cream-van.png` `mountain.png` `mountain-range.png` `ruler.png` `slope.png` `slope-triangle.png` `speedometer-variant-tool-symbol.png` `thermometer-1.png`
+`thermometer.png` `user.png` `van-black-side-view.png`

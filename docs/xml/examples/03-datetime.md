@@ -78,7 +78,7 @@ If you experience memory issues, use the `cache` directive, explained below.
 
 ## Combination of Dates and Times
 
-It may be better to combine a `text` and `dateime` component rather than rendering everything together.
+It may be better to combine a `text` and `datetime` component rather than rendering everything together.
 
 
 ```xml

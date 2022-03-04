@@ -186,6 +186,9 @@ def formatter_from(element):
     if format_string and dp:
         raise IOError("Cannot supply both 'format' and 'dp', just use one")
 
+    if format_string is None and dp is None:
+        dp=2
+
     if format_string:
         return lambda v: format(v, format_string)
     if dp:
