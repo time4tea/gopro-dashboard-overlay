@@ -50,6 +50,18 @@ The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `deg
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
+## Lat & Lon
+
+GPS Location is just another metric...
+
+
+```xml
+<component type="metric" metric="lat" dp="6" size="16" cache="False"/>
+```
+<kbd>![04-metrics-5.png](04-metrics-5.png)</kbd>
+
+
+
 ## Formatting
 
 Either a number of decimal places, or a specific python formatting string can be used.
@@ -63,19 +75,19 @@ use the `dp` attribute
 ```xml
 <component type="metric" metric="speed" dp="0" />
 ```
-<kbd>![04-metrics-5.png](04-metrics-5.png)</kbd>
+<kbd>![04-metrics-6.png](04-metrics-6.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" dp="2" />
 ```
-<kbd>![04-metrics-6.png](04-metrics-6.png)</kbd>
+<kbd>![04-metrics-7.png](04-metrics-7.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" dp="5" />
 ```
-<kbd>![04-metrics-7.png](04-metrics-7.png)</kbd>
+<kbd>![04-metrics-8.png](04-metrics-8.png)</kbd>
 
 
 ### Format string
@@ -86,7 +98,7 @@ Use the `format` attribute.
 ```xml
 <component type="metric" metric="speed" format=".4f" />
 ```
-<kbd>![04-metrics-8.png](04-metrics-8.png)</kbd>
+<kbd>![04-metrics-9.png](04-metrics-9.png)</kbd>
 
 
 ## Positioning
@@ -97,7 +109,7 @@ The same positioning as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" x="40" metric="speed" />
 ```
-<kbd>![04-metrics-9.png](04-metrics-9.png)</kbd>
+<kbd>![04-metrics-10.png](04-metrics-10.png)</kbd>
 
 
 ## Alignment
@@ -108,7 +120,7 @@ The same alignment as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" x="40" metric="speed" align="right" />
 ```
-<kbd>![04-metrics-10.png](04-metrics-10.png)</kbd>
+<kbd>![04-metrics-11.png](04-metrics-11.png)</kbd>
 
 
 ## Colour
@@ -119,7 +131,7 @@ The same colour as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" metric="speed" rgb="255,255,0" />
 ```
-<kbd>![04-metrics-11.png](04-metrics-11.png)</kbd>
+<kbd>![04-metrics-12.png](04-metrics-12.png)</kbd>
 
 
 ## Supported Metrics

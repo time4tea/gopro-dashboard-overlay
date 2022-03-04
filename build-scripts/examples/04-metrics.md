@@ -21,6 +21,16 @@ The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `deg
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
+## Lat & Lon
+
+GPS Location is just another metric...
+
+`cache="false"` is suggested for lat & lon metrics, as they will rarely repeat. By default text glyphs are cached, as they are
+quite slow to render. This can be ignored really unless there are memory errors while rendering.
+
+{{ <component type="metric" metric="lat" dp="6" size="16" cache="false"/> }}
+
+
 ## Formatting
 
 Either a number of decimal places, or a specific python formatting string can be used.
