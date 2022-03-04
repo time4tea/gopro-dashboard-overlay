@@ -15,4 +15,6 @@ Auto Generated File DO NOT EDIT
 [04-metrics](04-metrics/README.md)
 
 [05-moving-map](05-moving-map/README.md)
+
+[06-journey-map](06-journey-map/README.md)
         

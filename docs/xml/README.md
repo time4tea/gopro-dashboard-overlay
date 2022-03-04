@@ -83,15 +83,6 @@ Components are simple widgets that draw something onto the screen.
 [Icon](#icon)
 
 
-### Journey Map
-
-Shows an 'overall' journey map, with the entire GPS trace shown over a map. The map is scaled appropriately to fit the
-entire journey.
-
-```xml
-
-<component type="journey_map" name="some-name" x="1644" y="376" size="256" corner_radius="35"/>
-```
 
 ### Gradient Chart
 
