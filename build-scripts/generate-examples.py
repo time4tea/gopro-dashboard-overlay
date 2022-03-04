@@ -1,10 +1,7 @@
 import os
-import random
 import re
-from datetime import timedelta
 from pathlib import Path
 
-from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
@@ -29,8 +26,10 @@ def alphanum_key(s):
 
 
 dimensions_by_file = {
-    "05-moving-map.md": Dimension(256,256),
-    "06-journey-map.md": Dimension(256,256),
+    "05-moving-map.md": Dimension(256, 256),
+    "06-journey-map.md": Dimension(256, 256),
+    "08-translate.md": Dimension(256, 256),
+    "09-frame.md": Dimension(256, 256),
 }
 
 
@@ -130,5 +129,5 @@ if __name__ == "__main__":
 {AUTO_HEADER}
 # Layout Configuration Documentation
 
-{ links }
+{links}
         """)

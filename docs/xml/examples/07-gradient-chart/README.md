@@ -25,3 +25,9 @@ use `x` and `y` to set the position of the chart
 <component type="gradient_chart" name="gradient_chart" x="100" />
 ```
 <kbd>![07-gradient-chart-1.png](07-gradient-chart-1.png)</kbd>
+
+
+
+## Colours / Sizing
+
+These attributes are not currently configurable.

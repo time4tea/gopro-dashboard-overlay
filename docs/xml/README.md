@@ -24,55 +24,6 @@ The main element is `layout`: everything is contained within these tags.
 
 Some components can contain other components, these are called "containers".
 
-### Translate Component
-
-The `translate` component moves its child elements around on the screen. For example, the `compass` component doesn't
-take an x/y co-ordinate to indicate where it should be drawn on the screen, so by default it will draw at (0,0) - the
-top-left of the screen. By placing the `compass` inside a `translate` the compass can be drawn anywhere on the screen
-
-```xml
-
-<translate x="180" y="50">
-    <component type="compass" size="300" fg="255,255,255" text="0,255,255" textsize="32"/>
-</translate>
-```
-
-### Frame Component
-
-A `frame` is a box that can contain other components. It can optionally be filled with a background colour, and have an
-outline drawn around it. The corners of the box can be rounded with `cr` and opacity with `opacity`.
-
-Any child can be placed inside a `frame` - much like a `composite` - however, child components will be clipped to the
-size of the frame. This could be used to create some interesting effects. A square `frame` with `cr` set to half the
-width (i.e. the radius) will create a circular frame!
-
-```xml
-
-<frame width="200" height="200" cr="100" opacity="0.5" outline="255,255,255">
-    <!-- child components ... -->
-</frame>
-```
-
-### Composite Component
-
-This works identically to the `translate` component
-
-### Naming Containers
-
-Optionally, any container component can be named, this allows you to include or exclude it for a given rendering run on
-the command line Names don't have to be unique, so a dashboard could have a number of different containers all named "
-with-hr", which could be excluded when rendering a GPX track that doesn't have any heartrate data in it.
-
-```xml
-
-<translate name="with-hr" x="180" y="50">
-    <component type="text">HR</component>
-    <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
-</translate>
-```
-
-If you didn't want to render the metric and the text, you could add `--exclude with-hr` when running the program, and
-this container would be skipped.
 
 ## Components
 
