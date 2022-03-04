@@ -115,3 +115,14 @@ It is possible to have multiple moving maps, though
 ```
 <kbd>![05-moving-map-9.png](05-moving-map-9.png)</kbd>
 
+
+## Copyright
+
+All maps are © OpenStreetMap contributors
+
+Please see Copyright https://www.openstreetmap.org/copyright
+
+## Provider Copyright
+
+Other map renderings may require additional attribution. This can be placed on the video using a `text` component, or referenced elsewhere in 
+user documentation. The gopro-dashboard-overlay project is not responsible for the copyright usage of its users.
