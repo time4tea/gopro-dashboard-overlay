@@ -14,6 +14,8 @@ Render an icon using the `icon` component
 Right now, all icons have their colour scheme inverted by default. This is a bit odd, and will change... but to keep 
 the icon's actual colour scheme, use `invert`.
 
+(As the icon is black, you might not see this well in GitHub 'dark' mode ! )
+
 {{ <component type="icon" file="bicycle.png" invert="false" /> }}
 
 
