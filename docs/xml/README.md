@@ -20,44 +20,8 @@ The main element is `layout`: everything is contained within these tags.
 </layout>
 ```
 
-## Containers
 
-Some components can contain other components, these are called "containers".
+# Examples
 
-
-## Components
-
-Components are simple widgets that draw something onto the screen.
-
-[Text](#text-component), [Metric](#metric-component), [Datetime](#datetime)
-[Moving Map](#moving-map), [Journey Map](#journey-map)
-[Icon](#icon)
-
-
-
-### Gradient Chart
-
-This component will be made more generic in a future version to chart any metric.
-
-```xml
-<component type="gradient_chart" name="some-name" x="400" y="980"/>
-```
-### Metric Component
-
-
-##### Metric Units
-
-Metrics all are associated with a given unit. For example, speed is always in `m/s`. Metrics can be converted to
-different units using the `units` attribute.
-
-```xml
-
-<component type="metric" metric="temp" units="degreeF" dp="1"/>
-```
-
-The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `nautical_miles`, `radian`
-
-Conversions that don't make sense for a given metric will fail with a suitable message.
-
-
+Please see the extensive collection of examples - [here](examples/README.md)
 

@@ -56,7 +56,7 @@ venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,
 
 Several dashboards are built-in to the software, but the dashboard layout is highly configurable, controlled by an XML file.
 
-For more information on the (extensive) configurability of the layout please see [docs/xml](docs/xml)
+For more information on the (extensive) configurability of the layout please see [docs/xml](docs/xml) and lots of [examples](docs/xml/examples/README.md])
 
 ## Converting to GPX files
 
@@ -138,7 +138,7 @@ https://github.com/JuanIrache/gopro-telemetry
 - 0.29.0
   - Add `compass` component (experimental!) - Draws a simple compass
   - Add `frame` component - Draws a clipping maybe-rounded box to contain other components.
-  - Add initial docs for XML layout.
+  - Add initial docs for XML layout
 - 0.28.0
   - Only rerender moving map if it has moved since last frame - will be much quicker under certain circumstances
   - Refactorings in how map border/opacity is rendered (should have no visible effect, maybe marginally faster)
