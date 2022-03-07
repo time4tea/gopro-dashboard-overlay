@@ -66,6 +66,12 @@ ensure-not-released:
 ensure-pristine:
 	build-scripts/ensure-working-directory-clean.sh
 
+
+.PHONY: doc
+doc:
+	PYTHONPATH=. $(BIN)/python3 build-scripts/generate-examples.py
+
+
 .PHONY: publish
 publish: ensure-not-released ensure-pristine clean test-distribution
 	$(BIN)/pip install twine
