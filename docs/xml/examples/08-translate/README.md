@@ -58,7 +58,7 @@ with-hr", which could be excluded when rendering a GPX track that doesn't have a
 ```xml
 <translate name="with-hr" x="180" y="50">
     <component type="text">HR</component>
-    <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
+    <component type="metric" x="-70" y="18" metric="alt" dp="0" size="32" align="right"/>
 </translate>
 ```
 <kbd>![08-translate-4.png](08-translate-4.png)</kbd>
@@ -84,10 +84,10 @@ might be less confusing, as it won't be translating anything.
         </frame>
         </translate>
     </translate>
-    <translate x="10" y="64" name="with-hr">
-        <component type="text" x="0" y="128" size="16" >BPM</component>
-        <component type="icon" x="64" y="128" file="heartbeat.png" size="64"/>
-        <component type="metric" x="150" y="128" metric="alt" dp="0" size="32"/>
+    <translate x="10" y="80" name="with-hr">
+        <component type="text" x="0" y="0" size="16" >BPM</component>
+        <component type="icon" x="64" y="0" file="heartbeat.png" size="64"/>
+        <component type="metric" x="150" y="0" metric="alt" dp="0" size="32"/>
     </translate>
 </composite>
 ```
