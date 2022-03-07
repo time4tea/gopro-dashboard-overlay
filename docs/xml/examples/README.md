@@ -18,6 +18,8 @@ Auto Generated File DO NOT EDIT
 
 [06-journey-map](06-journey-map/README.md)
 
+[07-compass](07-compass/README.md)
+
 [07-gradient-chart](07-gradient-chart/README.md)
 
 [08-translate](08-translate/README.md)
