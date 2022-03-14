@@ -14,6 +14,7 @@ GPMDStruct = struct.Struct('>4sBBH')
 GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
 XYZ = collections.namedtuple('XYZ', "y x z")
 VECTOR = collections.namedtuple("VECTOR", "x y z")
+QUATERNION = collections.namedtuple("QUATERNION", "w x y z")
 
 
 class GPSFix(Enum):
@@ -87,6 +88,10 @@ def _interpret_vector(item, scale):
     return [VECTOR._make(it) for it in _interpret_element(item, scale)]
 
 
+def _interpret_quaternion(item, scale):
+    return [QUATERNION._make(it) for it in _interpret_element(item, scale)]
+
+
 def _interpret_gps_lock(item, *args):
     return GPSFix(_interpret_atom(item))
 
@@ -120,6 +125,7 @@ interpreters = {
     "TOCK": _interpret_atom,
     "GRAV": _interpret_vector,
     "WNDM": _interpret_list,
+    "CORI": _interpret_quaternion,
 }
 
 
@@ -329,9 +335,7 @@ class XYZComponentConverter:
 
     def convert(self, counter, components):
         for index, point in enumerate(components.points):
-            self._on_item({
-                counter: Point3(point.x, point.y, point.z)
-            })
+            self._on_item((counter, index, Point3(point.x, point.y, point.z)))
 
 
 class XYZVisitor:

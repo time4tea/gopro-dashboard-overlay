@@ -6,7 +6,7 @@ from pathlib import Path
 
 from gopro_overlay import gpmd
 from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter, GPS5EntryConverter, XYZ
-from gopro_overlay.point import Point
+from gopro_overlay.point import Point, Point3, Quaternion
 from gopro_overlay.units import units
 
 
@@ -127,27 +127,54 @@ def test_load_and_visit_extracted_meta():
 
 
 def test_load_accel_meta():
-    items = load("rotation-example.gpmd")
+    items = load("accel/rotation-example.gpmd")
 
-    converter = XYZComponentConverter(on_item=lambda i: print(i))
+    converter = XYZComponentConverter(on_item=lambda i: print(f"{i} = {i[2].length()}"))
     visitor = XYZVisitor("ACCL", on_item=converter.convert)
 
     for i in items:
         i.accept(visitor)
 
 
-def test_load_rotation_meta():
-    items = load("rotation-example.gpmd")
+class CORIVisitor:
 
-    converter = XYZComponentConverter(on_item=lambda i: print(i))
-    visitor = XYZVisitor("GYRO", on_item=converter.convert)
+    def __init__(self, on_item=lambda x: None):
+        self._scale = None
+        self._on_item = on_item
+
+    def vic_DEVC(self, i, s):
+        return self
+
+    def vic_STRM(self, i, s):
+        if "CORI" in s:
+            return self
+
+    def vi_SCAL(self, item):
+        self._scale = item.interpret()
+
+    def vi_CORI(self, item):
+        self._on_item(item.interpret(self._scale))
+
+    def v_end(self):
+        pass
+
+
+def test_load_rotation_meta():
+    items = load("accel/rotation-example.gpmd")
+
+    def process_quaternions(qlist):
+        for q in qlist:
+            qq = Quaternion(q.w, Point3(x=q.x, y=q.y, z=q.z))
+            print(f"{qq} -> {qq.to_axis_angle()}")
+
+    visitor = CORIVisitor(on_item=process_quaternions)
 
     for i in items:
         i.accept(visitor)
 
 
 def test_debug_rotation_meta():
-    items = load("rotation-example.gpmd")
+    items = load("accel/rotation-example.gpmd")
 
     visitor = DebuggingVisitor()
 
@@ -157,8 +184,9 @@ def test_debug_rotation_meta():
 
 class GRAVisitor:
 
-    def __init__(self):
+    def __init__(self, on_item=lambda x: None):
         self._scale = None
+        self._on_item = on_item
 
     def vic_DEVC(self, i, s):
         return self
@@ -171,18 +199,23 @@ class GRAVisitor:
         self._scale = item.interpret()
 
     def vi_GRAV(self, item):
-        vectors = item.interpret(self._scale)
-        print(vectors)
+        self._on_item(item.interpret(self._scale))
 
     def v_end(self):
         pass
 
 
 def test_load_gravity_meta():
-    items = load("rotation-example.gpmd")
+    items = load("accel/rotation-example.gpmd")
+
+    def process_gravities(gravs):
+        for g in gravs:
+            print(f"{g}  = {Point3(g.x, g.y, g.z).length()}")
 
     for i in items:
-        i.accept(GRAVisitor())
+        i.accept(GRAVisitor(
+            process_gravities
+        ))
 
 
 class CountingVisitor:
