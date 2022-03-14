@@ -146,6 +146,15 @@ def test_load_rotation_meta():
         i.accept(visitor)
 
 
+def test_debug_rotation_meta():
+    items = load("rotation-example.gpmd")
+
+    visitor = DebuggingVisitor()
+
+    for i in items:
+        i.accept(visitor)
+
+
 class GRAVisitor:
 
     def __init__(self):
