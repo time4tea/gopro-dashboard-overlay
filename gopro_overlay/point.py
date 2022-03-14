@@ -147,8 +147,7 @@ class Quaternion:
     def to_axis_angle(self) -> Tuple:
         theta = 2.0 * math.acos(self.w)
         if theta != 0.0:
-            sin_half_theta = math.sin(theta / 2.0)
-            return theta, self.v / sin_half_theta
+            return theta, self.v / math.sin(theta / 2.0)
         else:
             return 0.0, Point3(1, 0, 0)
 
