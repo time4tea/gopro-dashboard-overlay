@@ -6,14 +6,15 @@ from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.layout_components import gps_info, text, metric
+from gopro_overlay.layout import BigMetric, gps_info
+from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Window, View
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, Frame
 from gopro_overlay.widgets_chart import SimpleChart
-from gopro_overlay.widgets_info import BigMetric, ComparativeEnergy
+from gopro_overlay.widgets_info import ComparativeEnergy
 from tests.approval import approve_image
 from tests.testenvironment import is_make
 
@@ -158,14 +159,17 @@ def test_render_comparative_energy():
     return time_rendering(name="comparative energy",
                           dimensions=Dimension(x=1300, y=200),
                           widgets=[
-                              ComparativeEnergy(Coordinate(10, 50),
-                                                font=font,
-                                                speed=lambda: speed,
-                                                person=units.Quantity(60, units.kg),
-                                                bike=units.Quantity(12, units.kg),
-                                                car=units.Quantity(2678, units.kg),
-                                                van=units.Quantity(3500, units.kg)
-                                                )
+                              Translate(
+                                  Coordinate(10, 50),
+                                  ComparativeEnergy(
+                                      font=font,
+                                      speed=lambda: speed,
+                                      person=units.Quantity(60, units.kg),
+                                      bike=units.Quantity(12, units.kg),
+                                      car=units.Quantity(2678, units.kg),
+                                      van=units.Quantity(3500, units.kg)
+                                  )
+                              )
                           ])
 
 

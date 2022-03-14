@@ -6,7 +6,7 @@ from typing import Callable
 
 from gopro_overlay import layouts
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.layout_components import date_and_time, gps_info, moving_map, journey_map, big_mph, gradient_chart, \
+from gopro_overlay.layout_components import moving_map, journey_map, gradient_chart, \
     text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
@@ -187,7 +187,7 @@ def formatter_from(element):
         raise IOError("Cannot supply both 'format' and 'dp', just use one")
 
     if format_string is None and dp is None:
-        dp=2
+        dp = 2
 
     if format_string:
         return lambda v: format(v, format_string)
@@ -257,17 +257,6 @@ def create_text(element, font, **kwargs):
     )
 
 
-def create_date_and_time(element, entry, font, **kwargs):
-    font_title = font(iattrib(element, "size_date", d=16))
-    font_metric = font(iattrib(element, "size_time", d=32))
-
-    return date_and_time(at(element), entry=entry, font_title=font_title, font_metric=font_metric)
-
-
-def create_gps_info(element, entry, font, **kwargs):
-    return gps_info(at(element), entry=entry, font=font(iattrib(element, "size", d=16)))
-
-
 def create_moving_map(element, entry, renderer, **kwargs):
     return moving_map(
         at=at(element),
@@ -290,15 +279,6 @@ def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
         size=iattrib(element, "size", d=256),
         corner_radius=iattrib(element, "corner_radius", 0),
         opacity=fattrib(element, "opacity", 0.7)
-    )
-
-
-def create_big_mph(element, entry, font, **kwargs):
-    return big_mph(
-        at(element),
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16)),
-        font_metric=font(iattrib(element, "size_metric", d=160))
     )
 
 

@@ -3,24 +3,9 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets import Composite, simple_icon, CachingText, Translate
 
 
-class BigMetric:
-
-    def __init__(self, at, title, value, font_title, font_metric=None):
-        self.widget = Translate(
-            at,
-            Composite(
-                CachingText(Coordinate(0, 0), title, font_title),
-                CachingText(Coordinate(0, 0), value, font_metric),
-            )
-        )
-
-    def draw(self, image, draw):
-        self.widget.draw(image, draw)
-
-
 class ComparativeEnergy:
 
-    def __init__(self, at, font, speed, person, bike, car, van):
+    def __init__(self, font, speed, person, bike, car, van):
         font = font.font_variant(size=48)
         small_font = font.font_variant(size=24)
 
@@ -58,10 +43,10 @@ class ComparativeEnergy:
             )
 
         self.widget = Composite(
-            Translate(at + Coordinate(0, 0), thing("user.png", person, person_model)),
-            Translate(at + Coordinate(300, 0), thing("bicycle.png", bike + person, bike_model)),
-            Translate(at + Coordinate(600, 0), thing("car.png", car + person, car_model)),
-            Translate(at + Coordinate(900, 0), thing("van-black-side-view.png", van + person, van_model)),
+            Translate(Coordinate(0, 0), thing("user.png", person, person_model)),
+            Translate(Coordinate(300, 0), thing("bicycle.png", bike + person, bike_model)),
+            Translate(Coordinate(600, 0), thing("car.png", car + person, car_model)),
+            Translate(Coordinate(900, 0), thing("van-black-side-view.png", van + person, van_model)),
         )
 
     def draw(self, image, draw):

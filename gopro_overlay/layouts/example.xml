@@ -1,9 +1,24 @@
 <layout>
     <!--    Some bundled components-->
-    <component type="date_and_time" x="260" y="30" size_time="48" size_date="16"/>
-    <component type="gps_info" x="1900" y="36" size="16"/>
-    <component type="big_mph" x="16" y="800" size_title="16" size_metric="160"/>
     <component type="gradient_chart" x="400" y="980"/>
+
+    <composite x="260" y="30" name="date_and_time">
+        <component type="datetime" x="0" y="0" format="%Y/%m/%d" size="16" align="right"/>
+        <component type="datetime" x="0" y="24" format="%H:%M:%S.%f" truncate="5" size="32" align="right"/>
+    </composite>
+
+    <composite x="1644" y="36" name="gps_info">
+        <component type="text" x="256" y="0" size="16" align="right">GPS INFO</component>
+        <component type="text" x="0" y="24" size="16" align="left">Lat: </component>
+        <component type="text" x="128" y="24" size="16" align="left">Lon: </component>
+        <component type="metric" x="118" y="24" metric="lat" dp="6" size="16" align="right" cache="False"/>
+        <component type="metric" x="256"    y="24" metric="lon" dp="6" size="16" align="right" cache="False"/>
+    </composite>
+
+    <composite x="16" y="800" name="big_mph">
+        <component type="text" x="0" y="0" size="16">MPH</component>
+        <component type="metric" x="0" y="0" metric="speed" units="mph" dp="0" size="160" />
+    </composite>
 
     <!-- components with metric and icon -->
     <composite x="220" y="980" name="gradient">
