@@ -16,7 +16,7 @@ def run(cmd, **kwargs):
 
 def invoke(cmd, **kwargs):
     try:
-        return run(cmd, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8")
+        return run(cmd, **kwargs, text=True, capture_output=True)
     except subprocess.CalledProcessError as e:
         raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
