@@ -19,6 +19,14 @@ def gps_info(at, entry, font):
     )
 
 
+def time(clock):
+    return lambda: clock().strftime("%H:%M:%S.%f")[:-5]
+
+
+def date(clock):
+    return lambda: clock().strftime("%Y/%m/%d")
+
+
 def date_and_time(at, entry, font_title, font_metric):
     return Composite(
         CachingText(at + Coordinate(0, 0), date(lambda: entry().dt), font_title, align="right"),

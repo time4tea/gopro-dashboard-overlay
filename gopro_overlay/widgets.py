@@ -122,14 +122,6 @@ class Drawable:
         image.alpha_composite(self.drawable, self.at.tuple())
 
 
-def time(clock):
-    return lambda: clock().strftime("%H:%M:%S.%f")[:-5]
-
-
-def date(clock):
-    return lambda: clock().strftime("%Y/%m/%d")
-
-
 def icon(file, at, transform=lambda x: x):
     if os.path.exists(file):
         image = Image.open(file)
