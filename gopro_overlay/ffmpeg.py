@@ -191,11 +191,11 @@ def flatten(list_of_lists):
 
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = FFMPEGOptions(), vsize=1080, redirect=None,
+    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, redirect=None,
                  popen=subprocess.Popen):
         self.output = output
         self.input = input
-        self.options = options
+        self.options = options if options else FFMPEGOptions()
         self.overlay_size = overlay_size
         self.vsize = vsize
         self.popen = popen
@@ -224,6 +224,7 @@ class FFMPEGOverlay:
         ])
 
         try:
+            print(f"Running FFMPEG as '{' '.join(cmd)}'")
             if self.redirect:
                 with open(self.redirect, "w") as std:
                     process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)

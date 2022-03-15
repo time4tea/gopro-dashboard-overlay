@@ -44,4 +44,6 @@ def gopro_dashboard_arguments(args=None):
 
     parser.add_argument("--output-size", default="1080", type=int, help="Vertical size of output movie")
 
+    parser.add_argument("--profile", help="(EXPERIMENTAL) Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
+
     return parser.parse_args(args)

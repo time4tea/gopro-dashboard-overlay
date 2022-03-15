@@ -13,6 +13,7 @@ from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams
+from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.gpmd import timeseries_from
@@ -23,6 +24,8 @@ from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
+
+ourdir = Path.home().joinpath(".gopro-graphics")
 
 
 def accepter_from_args(include, exclude):
@@ -118,7 +121,6 @@ if __name__ == "__main__":
             # smooth azimuth (heading) points to stop wild swings of compass
             timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
-        ourdir = Path.home().joinpath(".gopro-graphics")
         ourdir.mkdir(exist_ok=True)
 
         # privacy zone applies everywhere, not just at start, so might not always be suitable...
@@ -157,9 +159,15 @@ if __name__ == "__main__":
                     redirect = temp_file_name()
                     print(f"FFMPEG Output is in {redirect}")
 
+                if args.profile:
+                    ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
+                else:
+                    ffmpeg_options = None
+
                 ffmpeg = FFMPEGOverlay(
                     input=input_file,
                     output=args.output,
+                    options=ffmpeg_options,
                     vsize=args.output_size,
                     overlay_size=dimensions,
                     redirect=redirect
