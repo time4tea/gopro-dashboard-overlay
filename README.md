@@ -141,6 +141,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
 
+- 0.33.0
+  - Add *experimental* support for 'ffmpeg profiles' as documented above
 - 0.32.0
     - Add option to disable rotation in moving map (thanks  [@SECtim](https://github.com/SECtim))
 - 0.31.0
