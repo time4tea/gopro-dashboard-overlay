@@ -56,7 +56,7 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 
 Map rotation can be turned off with `rotate`.
 
-{{ <component type="moving_map" size="256" rotate="False" /> }}
+{{ <component type="moving_map" size="256" rotate="false" /> }}
 
 ## Map Provider & Styles
 

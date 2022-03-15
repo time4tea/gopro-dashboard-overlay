@@ -49,8 +49,6 @@ Colours can be controlled with `fg`, `bg` and `text` attributes
 <kbd>![07-compass-4.png](07-compass-4.png)</kbd>
 
 
-By default the `bg` is fully transparent
-
 ## Fonts
 
 Text size can be controlled with the `textsize` attribute
