@@ -265,7 +265,8 @@ def create_moving_map(element, entry, renderer, **kwargs):
         zoom=iattrib(element, "zoom", d=16, r=range(1, 18)),
         renderer=renderer,
         corner_radius=iattrib(element, "corner_radius", 0),
-        opacity=fattrib(element, "opacity", 0.7)
+        opacity=fattrib(element, "opacity", 0.7),
+        rotate=battrib(element, "rotate", d=True)
     )
 
 

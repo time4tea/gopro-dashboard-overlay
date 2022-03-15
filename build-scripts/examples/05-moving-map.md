@@ -52,6 +52,12 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 
 {{ <component type="moving_map" size="256" corner_radius="128" zoom="8" /> }}
 
+## Map Rotation
+
+Map rotation can be turned off with `rotate`.
+
+{{ <component type="moving_map" size="256" rotate="False" /> }}
+
 ## Map Provider & Styles
 
 The map provider, and the map style, can be selected using the command line arguments when running the dashboard program. 
