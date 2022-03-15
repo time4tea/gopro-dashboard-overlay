@@ -186,7 +186,6 @@ class FFMPEGOverlay:
             "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
             "-pix_fmt", "rgba",
             "-i", "-",
-            "-r", "30",
             "-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
             "-vcodec", "libx264",
             "-preset", "veryfast",
