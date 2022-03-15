@@ -135,6 +135,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.32.0
+  - Add option to disable rotation in moving map (thanks  [@SECtim](https://github.com/SECtim))
 - 0.31.0
   - (Change in behaviour) Use input file framerate as output file framerate. This may make output files bigger.
     - A more comprehensive mechanism to control ffmpeg options is planned for a later release
