@@ -114,4 +114,7 @@
         </translate>
     </composite>
 
+    <translate x="700" y="800">
+        <component type="asi" vs0="10"/>
+    </translate>
 </layout>

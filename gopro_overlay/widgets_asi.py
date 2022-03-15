@@ -10,9 +10,9 @@ def roundup(x, n=10):
 class AirspeedIndicator:
     """Modelled on https://aerotoolbox.com/airspeed-indicator/"""
 
-    def __init__(self, size, font, reading, Vs0, Vs, Vfe, Vn0, Vne):
+    def __init__(self, size, font, reading, Vs0, Vs, Vfe, Vno, Vne):
         self.Vne = Vne
-        self.Vn0 = Vn0
+        self.Vno = Vno
         self.Vfe = Vfe
         self.Vs = Vs
         self.Vs0 = Vs0
@@ -21,7 +21,7 @@ class AirspeedIndicator:
 
         self.step = 5
 
-        self.asi_max = roundup((Vne - Vs0) * 0.20 + Vne, self.step * 4)
+        self.asi_max = roundup((Vne - Vs0) * 0.05 + Vne, self.step * 4)
 
         self.range = self.asi_max - Vs0
 
@@ -91,7 +91,7 @@ class AirspeedIndicator:
                 (widths + offset, widths + offset),
                 (0 + self.size - (widths + offset), 0 + self.size - (widths + offset))),
             self.xa(self.Vs),
-            self.xa(self.Vn0),
+            self.xa(self.Vno),
             fill=(51, 193, 25),
             width=widths
         )
@@ -100,7 +100,7 @@ class AirspeedIndicator:
             (
                 (widths + offset, widths + offset),
                 (0 + self.size - (widths + offset), 0 + self.size - (widths + offset))),
-            self.xa(self.Vn0),
+            self.xa(self.Vno),
             self.xa(self.Vne),
             fill=(237, 239, 42),
             width=widths
@@ -143,6 +143,12 @@ class AirspeedIndicator:
         image.alpha_composite(self.image, (0, 0))
 
         reading = self.reading()
+
+        if reading < self.Vs0:
+            reading = self.Vs0 - 1
+
+        if reading < 0:
+            reading = 0
 
         draw.polygon(
             [

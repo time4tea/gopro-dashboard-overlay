@@ -28,6 +28,7 @@ def alphanum_key(s):
 dimensions_by_file = {
     "05-moving-map.md": Dimension(256, 256),
     "06-journey-map.md": Dimension(256, 256),
+    "07-air-speed-indicator.md": Dimension(256, 256),
     "08-translate.md": Dimension(256, 256),
     "09-frame.md": Dimension(256, 256),
 }

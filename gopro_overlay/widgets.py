@@ -206,6 +206,9 @@ class DrawTranslate:
     def pieslice(self, xy, *args, **kwargs):
         self.draw.pieslice([self._txy(pair) for pair in xy], *args, **kwargs)
 
+    def polygon(self, xy, *args, **kwargs):
+        self.draw.polygon([self._txy(pair) for pair in xy], *args, **kwargs)
+
 
 class Translate:
     """Extremely rudimentary translation support!

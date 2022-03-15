@@ -7,11 +7,12 @@ from typing import Callable
 from gopro_overlay import layouts
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.layout_components import moving_map, journey_map, gradient_chart, \
-    text, metric
+    text, metric, metric_value
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite, Frame
+from gopro_overlay.widgets_asi import AirspeedIndicator
 from gopro_overlay.widgets_compass import Compass
 
 
@@ -292,13 +293,14 @@ def create_gradient_chart(element, entry, timeseries, font, **kwargs):
     )
 
 
-def create_compass(element, entry, timeseries, font, **kwargs):
-    def nonesafe(v):
-        if v is not None:
-            return v.magnitude
-        else:
-            return 0
+def nonesafe(v):
+    if v is not None:
+        return v.magnitude
+    else:
+        return 0
 
+
+def create_compass(element, entry, timeseries, font, **kwargs):
     return Compass(
         size=iattrib(element, "size", d=256),
         reading=lambda: nonesafe(entry().cog),
@@ -306,4 +308,23 @@ def create_compass(element, entry, timeseries, font, **kwargs):
         fg=rgbattr(element, "fg", d=(255, 255, 255)),
         bg=rgbattr(element, "bg", d=None),
         text=rgbattr(element, "text", d=(255, 255, 255)),
+    )
+
+
+def create_asi(element, entry, timeseries, font, **kwargs):
+    return AirspeedIndicator(
+        size=iattrib(element, "size", d=256),
+        reading=metric_value(
+            entry,
+            accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
+            converter=metric_converter_from(attrib(element, "units", d="knots")),
+            formatter=lambda x: x,
+            default=0
+        ),
+        font=font(iattrib(element, "textsize", d=16)),
+        Vs0=iattrib(element, "vs0", d=40),
+        Vs=iattrib(element, "vs", d=46),
+        Vfe=iattrib(element, "vfe", d=103),
+        Vno=iattrib(element, "vno", d=126),
+        Vne=iattrib(element, "vne", d=180),
     )

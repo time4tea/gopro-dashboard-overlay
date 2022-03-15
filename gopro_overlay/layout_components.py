@@ -23,13 +23,13 @@ def moving_map(at, entry, **kwargs):
     )
 
 
-def metric_value(entry, accessor, converter, formatter):
+def metric_value(entry, accessor, converter, formatter, default="-"):
     def value():
         v = accessor(entry())
         if v is not None:
             v = converter(v)
             return formatter(v.magnitude)
-        return "-"
+        return default
 
     return value
 
