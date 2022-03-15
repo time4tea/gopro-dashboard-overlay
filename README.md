@@ -145,7 +145,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
-
+- 0.34.0
+  - Add new component `asi` - an Airspeed Indicator - see [docs](docs/xml/examples/07-air-speed-indicator)
 - 0.33.0
   - Add *experimental* support for 'ffmpeg profiles' as documented above
 - 0.32.0
