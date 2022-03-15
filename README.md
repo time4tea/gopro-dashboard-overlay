@@ -135,6 +135,9 @@ https://github.com/JuanIrache/gopro-telemetry
 
 
 ## Latest Changes
+- 0.31.0
+  - (Change in behaviour) Use input file framerate as output file framerate. This may make output files bigger.
+    - A more comprehensive mechanism to control ffmpeg options is planned for a later release
 - 0.30.0
   - Attempt to fix character encoding issues on Mac (can't test, as I don't have a Mac)
 - 0.29.0
