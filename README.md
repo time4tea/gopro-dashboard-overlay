@@ -103,10 +103,15 @@ You might be able to get some more performance out of the program by using pillo
 complicated. You'll need a compiler etc. Follow the installation instructions
 at https://github.com/uploadcare/pillow-simd#pillow-simd
 
-On my computer, although for sure the frame-drawing is a bit faster ( 36fps v 25fps ), ffmpeg itself is the limiting
-factor, so overall it doesn't make much difference, it's 5 seconds faster for an 8-minute render. This is on an 4/8HT
-core Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz (2015-Skylake), if you have a lot more CPU cores it might make a bigger
-difference.
+Short version:
+```bash
+venv/bin/pip uninstall pillow
+venv/bin/pip install pillow-simd==8.3.2.post0
+```
+The frame drawing rate is quite a bit faster, but won't make a huge difference unless GPU settings are used with ffmpeg.
+
+No tests are run in this project with pillow-simd, so output may vary (but their tests are good, so I wouldn't expect any huge differences, if any)
+
 
 ## Known Bugs / Issues
 
