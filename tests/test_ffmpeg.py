@@ -2,7 +2,7 @@ from io import BytesIO
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGGenerate
+from gopro_overlay.ffmpeg import FFMPEGGenerate, FFMPEGOverlay, FFMPEGOptions
 
 ffprobe_output = """[mov,mp4,m4a,3gp,3g2,mj2 @ 0x559b7fad8f00] Using non-standard frame rate 59/1
 Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH010091.MP4':
@@ -97,16 +97,75 @@ def test_ffmpeg_generate_execute():
         pass
 
     assert fake.args == [
-        "ffmpeg",                                                    #
-        "-y",                                                        # overwrite targets
+        "ffmpeg",  #
+        "-y",  # overwrite targets
         "-loglevel", "info",
-        "-f", "rawvideo",                                            # input format 'raw'
-        "-framerate", "10.0",                                        # input framerate
-        "-s", "100x200",                                             # input dimension
-        "-pix_fmt", "rgba",                                          # input pixel format
-        "-i", "-",                                                   # input file stdin
-        "-r", "30",                                                  # output framerate
-        "-vcodec", "libx264",                                        # output format
-        "-preset", "veryfast",                                       # output quality/encoding preset
-        "output"                                                     # output file
+        "-f", "rawvideo",  # input format 'raw'
+        "-framerate", "10.0",  # input framerate
+        "-s", "100x200",  # input dimension
+        "-pix_fmt", "rgba",  # input pixel format
+        "-i", "-",  # input file stdin
+        "-r", "30",  # output framerate
+        "-vcodec", "libx264",  # output format
+        "-preset", "veryfast",  # output quality/encoding preset
+        "output"  # output file
     ]
+
+
+def test_ffmpeg_overlay_execute_default():
+    fake = FakePopen()
+
+    ffmpeg = FFMPEGOverlay(input="input", output="output", overlay_size=Dimension(3, 4), popen=fake.popen)
+
+    with ffmpeg.generate():
+        pass
+
+    assert fake.args == [
+        "ffmpeg",
+        "-y",
+        "-hide_banner",
+        "-loglevel", "info",
+        "-i", "input",  # input 0
+        "-f", "rawvideo",
+        "-framerate", "10.0",
+        "-s", "3x4",
+        "-pix_fmt", "rgba",
+        "-i", "-",  # input 1
+        "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
+        "-vcodec", "libx264",
+        "-preset", "veryfast",
+        "output"
+    ]
+
+
+def test_ffmpeg_overlay_execute_options():
+    fake = FakePopen()
+
+    ffmpeg = FFMPEGOverlay(input="input", output="output",
+                           options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
+                           overlay_size=Dimension(3, 4), popen=fake.popen)
+
+    with ffmpeg.generate():
+        pass
+
+    assert fake.args == [
+        "ffmpeg",
+        "-y",
+        "-hide_banner",
+        "-loglevel", "info",
+        "-input-option",   # input option goes before input 0
+        "-i", "input",  # input 0
+        "-f", "rawvideo",
+        "-framerate", "10.0",
+        "-s", "3x4",
+        "-pix_fmt", "rgba",
+        "-i", "-",  # input 1
+        "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
+        "-output-option",   # output option goes before output
+        "output"
+    ]
+
+
+def test_flatten():
+    l = ["a", ["b", "c"], "d", ["e", "f", "g"]]
+    assert ffmpeg.flatten(l) == ["a", "b", "c", "d", "e", "f", "g"]

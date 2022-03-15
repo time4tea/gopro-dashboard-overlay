@@ -161,13 +161,44 @@ class FFMPEGGenerate:
         process.wait(10)
 
 
+class FFMPEGOptions:
+
+    def __init__(self, input=None, output=None):
+        self.input = input if input is not None else []
+        self.output = output if output is not None else ["-vcodec", "libx264", "-preset", "veryfast"]
+        self.general = ["-hide_banner", "-loglevel", "info"]
+
+    def set_input_options(self, options):
+        self.input = options
+
+    def set_output_options(self, options):
+        self.output = options
+
+
+def flatten(list_of_lists):
+    result = []
+
+    def flatten_part(part):
+        for item in part:
+            if type(item) == list:
+                flatten_part(item)
+            else:
+                result.append(item)
+
+    flatten_part(list_of_lists)
+    return result
+
+
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, overlay_size: Dimension, vsize=1080, redirect=None):
+    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = FFMPEGOptions(), vsize=1080, redirect=None,
+                 popen=subprocess.Popen):
         self.output = output
         self.input = input
+        self.options = options
         self.overlay_size = overlay_size
         self.vsize = vsize
+        self.popen = popen
         self.redirect = redirect
 
     @contextlib.contextmanager
@@ -176,10 +207,11 @@ class FFMPEGOverlay:
             filter_extra = ""
         else:
             filter_extra = f",scale=-1:{self.vsize}"
-        cmd = [
+        cmd = flatten([
             "ffmpeg",
             "-y",
-            "-loglevel", "info",
+            self.options.general,
+            self.options.input,
             "-i", self.input,
             "-f", "rawvideo",
             "-framerate", "10.0",
@@ -187,17 +219,16 @@ class FFMPEGOverlay:
             "-pix_fmt", "rgba",
             "-i", "-",
             "-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
-            "-vcodec", "libx264",
-            "-preset", "veryfast",
+            self.options.output,
             self.output
-        ]
+        ])
 
         try:
             if self.redirect:
                 with open(self.redirect, "w") as std:
-                    process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
+                    process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
             else:
-                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
+                process = self.popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
 
             try:
                 yield process.stdin
