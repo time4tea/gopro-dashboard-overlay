@@ -47,27 +47,26 @@ class Arc:
         )
 
 
-def scale(min_value, max_value):
+def scale(min_value, max_value, rotate=0):
+    start_angle = 30
+    end_angle = 360 - start_angle
+
+    a_range = end_angle - start_angle
+
     def s(v):
-        return v - min_value / (max_value - min_value)
+        v_point = (v - min_value) / (max_value - min_value)
+
+        a_point = a_range * v_point
+
+        return a_point + start_angle + rotate
 
     return s
-
-
-class Circular:
-
-    def __init__(self, radius, start, end, rotate):
-        self.rotate = rotate
-        self.end = end
-        self.start = start
-        self.radius = radius
-        self.range = end - start
 
 
 class AirspeedIndicator:
     """Modelled on https://aerotoolbox.com/airspeed-indicator/"""
 
-    def __init__(self, size, font, reading, Vs0, Vs, Vfe, Vno, Vne):
+    def __init__(self, size, font, reading, Vs0, Vs, Vfe, Vno, Vne, rotate=0):
         self.Vne = Vne
         self.Vno = Vno
         self.Vfe = Vfe
@@ -80,26 +79,14 @@ class AirspeedIndicator:
 
         self.asi_max = roundup((Vne - Vs0) * 0.05 + Vne, self.step * 4)
 
-        self.range = self.asi_max - Vs0
-
         self.size = size
         self.bg = None
         self.fg = (255, 255, 255)
         self.text = (255, 255, 255)
 
+        self.xa = scale(self.Vs0, self.asi_max, rotate)
+
         self.image = None
-
-    def xa(self, value):
-
-        start_angle = 30
-        end_angle = 360 - start_angle
-
-        a_range = end_angle - start_angle
-        v_point = (value - self.Vs0) / self.range
-
-        a_point = a_range * v_point
-
-        return a_point + start_angle
 
     def draw_asi(self):
 
@@ -120,7 +107,8 @@ class AirspeedIndicator:
         arc.pieslice(draw, 0, outline=(0, 0, 0, 128), fill=(0, 0, 0, 128), width=2)
         arc.arc(draw, offset, start=self.xa(self.Vs0), end=self.xa(self.Vfe), fill=self.fg, width=widths)
         arc.arc(draw, offset + widths, start=self.xa(self.Vs), end=self.xa(self.Vno), fill=(51, 193, 25), width=widths)
-        arc.arc(draw, offset + widths, start=self.xa(self.Vno), end=self.xa(self.Vne), fill=(237, 239, 42), width=widths)
+        arc.arc(draw, offset + widths, start=self.xa(self.Vno), end=self.xa(self.Vne), fill=(237, 239, 42),
+                width=widths)
 
         arc.line(draw, [(self.xa(self.Vne), 40), (self.xa(self.Vne), 0)], fill=(246, 34, 21), width=5)
 
