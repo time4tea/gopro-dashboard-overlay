@@ -3,6 +3,21 @@
 
 Newest changes are always in [README.md](README.md)
 
+- 0.25.0
+    - (Change in behaviour) - Will now use speed from datasource, in preference to calculated. This should make it much
+      more stable, if the datasource supplies it. (GoPro does, GPX not)
+- 0.24.0
+    - Big internal restructuring of metadata parsing. Will make it easier to import GYRO/ACCL data soon. Incidentally,
+      should be a bit faster.
+    - Hopefully no externally visible effects.
+- 0.23.0
+    - Rename --no-overlay to --overlay-only as it was too confusing
+- 0.22.0
+    - Filter points that have DOP too large.
+- 0.21.0
+    - Built-in support for 4k videos, with a supporting overlay. Feedback welcomed.
+    - Use --overlay-size with --layout xml to use custom overlay sizes and layouts
+    - Minor Bugfixes
 - 0.20.0
   - Add "opacity"  and "corner_radius" to maps xml components (H/T [@KyleGW](https://github.com/KyleGW))
   - New Utility: gopro-cut.py - Extract a section of a GoPro recording, with metadata

@@ -145,6 +145,9 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.35.0
+  - Add `rotate` to `asi` component. see [docs](docs/xml/examples/07-air-speed-indicator)
+  - Some refactoring (should have no visible effect)
 - 0.34.0
   - Add new component `asi` - an Airspeed Indicator - see [docs](docs/xml/examples/07-air-speed-indicator)
 - 0.33.0
@@ -169,21 +172,6 @@ https://github.com/JuanIrache/gopro-telemetry
 - 0.26.0
     - (Change in behaviour) - Fix [Issue #17](https://github.com/time4tea/gopro-dashboard-overlay/issues/17) Will now
       use local timezone when rendering datetimes. (H/T [@tve](https://github.com/tve) )
-- 0.25.0
-    - (Change in behaviour) - Will now use speed from datasource, in preference to calculated. This should make it much
-      more stable, if the datasource supplies it. (GoPro does, GPX not)
-- 0.24.0
-    - Big internal restructuring of metadata parsing. Will make it easier to import GYRO/ACCL data soon. Incidentally,
-      should be a bit faster.
-    - Hopefully no externally visible effects.
-- 0.23.0
-    - Rename --no-overlay to --overlay-only as it was too confusing
-- 0.22.0
-    - Filter points that have DOP too large.
-- 0.21.0
-    - Built-in support for 4k videos, with a supporting overlay. Feedback welcomed.
-    - Use --overlay-size with --layout xml to use custom overlay sizes and layouts
-    - Minor Bugfixes
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
