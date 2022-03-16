@@ -7,6 +7,63 @@ def roundup(x, n=10):
     return int(math.ceil(x / n)) * n
 
 
+class Arc:
+    def __init__(self, size):
+        self.centre = size / 2
+        self.correction = 90
+
+    def bbox(self, r_delta):
+        return (
+            (self.centre - (self.centre - r_delta), self.centre - (self.centre - r_delta)),
+            (self.centre + (self.centre - r_delta), self.centre + (self.centre - r_delta))
+        )
+
+    def arc(self, draw, r_delta, start=0, end=360, **kwargs):
+        draw.arc(
+            self.bbox(r_delta),
+            start=start - self.correction,
+            end=end - self.correction,
+            **kwargs
+        )
+
+    def pieslice(self, draw, r_delta, start=0, end=360, **kwargs):
+        draw.pieslice(
+            self.bbox(r_delta),
+            start=start - self.correction,
+            end=end - self.correction,
+            **kwargs
+        )
+
+    def locate(self, angle, r_delta):
+        return (
+            self.centre + ((self.centre - r_delta) * math.sin(math.radians(angle))),
+            self.centre - ((self.centre - r_delta) * math.cos(math.radians(angle)))
+        )
+
+    def line(self, draw, places, **kwargs):
+        draw.line(
+            [self.locate(a, d) for a, d in places],
+            **kwargs
+        )
+
+
+def scale(min_value, max_value):
+    def s(v):
+        return v - min_value / (max_value - min_value)
+
+    return s
+
+
+class Circular:
+
+    def __init__(self, radius, start, end, rotate):
+        self.rotate = rotate
+        self.end = end
+        self.start = start
+        self.radius = radius
+        self.range = end - start
+
+
 class AirspeedIndicator:
     """Modelled on https://aerotoolbox.com/airspeed-indicator/"""
 
@@ -30,10 +87,10 @@ class AirspeedIndicator:
         self.fg = (255, 255, 255)
         self.text = (255, 255, 255)
 
-
         self.image = None
 
-    def xa(self, value, arc=True):
+    def xa(self, value):
+
         start_angle = 30
         end_angle = 360 - start_angle
 
@@ -42,19 +99,7 @@ class AirspeedIndicator:
 
         a_point = a_range * v_point
 
-        correction = 90 if arc else 0
-
-        return a_point + start_angle - correction
-
-    def locate(self, angle, d):
-
-        centre = self.size / 2
-        radius = self.size / 2
-
-        return (
-            centre + ((radius - d) * math.sin(math.radians(angle))),
-            centre - ((radius - d) * math.cos(math.radians(angle)))
-        )
+        return a_point + start_angle
 
     def draw_asi(self):
 
@@ -68,65 +113,24 @@ class AirspeedIndicator:
                 return 33, 2
             return 27, 1
 
-        draw.pieslice(
-            ((0, 0), (0 + self.size, 0 + self.size)),
-            0,
-            360,
-            outline=(0, 0, 0, 128),
-            fill=(0, 0, 0, 128),
-            width=2
-        )
+        arc = Arc(self.size)
 
         offset = 5
-        draw.arc(
-            ((offset, offset), (0 + self.size - offset, 0 + self.size - offset)),
-            self.xa(self.Vs0),
-            self.xa(self.Vfe),
-            fill=self.fg,
-            width=widths
-        )
 
-        draw.arc(
-            (
-                (widths + offset, widths + offset),
-                (0 + self.size - (widths + offset), 0 + self.size - (widths + offset))),
-            self.xa(self.Vs),
-            self.xa(self.Vno),
-            fill=(51, 193, 25),
-            width=widths
-        )
+        arc.pieslice(draw, 0, outline=(0, 0, 0, 128), fill=(0, 0, 0, 128), width=2)
+        arc.arc(draw, offset, start=self.xa(self.Vs0), end=self.xa(self.Vfe), fill=self.fg, width=widths)
+        arc.arc(draw, offset + widths, start=self.xa(self.Vs), end=self.xa(self.Vno), fill=(51, 193, 25), width=widths)
+        arc.arc(draw, offset + widths, start=self.xa(self.Vno), end=self.xa(self.Vne), fill=(237, 239, 42), width=widths)
 
-        draw.arc(
-            (
-                (widths + offset, widths + offset),
-                (0 + self.size - (widths + offset), 0 + self.size - (widths + offset))),
-            self.xa(self.Vno),
-            self.xa(self.Vne),
-            fill=(237, 239, 42),
-            width=widths
-        )
-
-        draw.line([
-            self.locate(self.xa(self.Vne, arc=False), 40),
-            self.locate(self.xa(self.Vne, arc=False), 0)
-        ],
-            fill=(246, 34, 21),
-            width=5,
-        )
+        arc.line(draw, [(self.xa(self.Vne), 40), (self.xa(self.Vne), 0)], fill=(246, 34, 21), width=5)
 
         for value in range(self.Vs0, self.asi_max + self.step, self.step):
             ticklen, width = ticklenwidth(value)
-            draw.line([
-                self.locate(self.xa(value, arc=False), ticklen),
-                self.locate(self.xa(value, arc=False), 0)
-            ],
-                fill=self.fg,
-                width=width,
-            )
+            arc.line(draw, [(self.xa(value), ticklen), (self.xa(value), 0)], fill=self.fg, width=width)
 
         for value in range(self.Vs0, self.asi_max + (self.step * 4), self.step * 4):
             draw.text(
-                self.locate(self.xa(value, arc=False), int(self.size / 4.5)),
+                arc.locate(self.xa(value), int(self.size / 4.5)),
                 str(value),
                 font=self.font,
                 anchor="mm",
@@ -150,12 +154,14 @@ class AirspeedIndicator:
         if reading < 0:
             reading = 0
 
+        arc = Arc(self.size)
+
         draw.polygon(
             [
-                self.locate(self.xa(reading, arc=False) - 0, 0),
-                self.locate(self.xa(reading, arc=False) - 90, (self.size / 2) - 8),
-                self.locate(self.xa(reading, arc=False) - 180, (self.size / 2) - 8),
-                self.locate(self.xa(reading, arc=False) + 90, (self.size / 2) - 8),
+                arc.locate(self.xa(reading) - 0, 0),
+                arc.locate(self.xa(reading) - 90, (self.size / 2) - 8),
+                arc.locate(self.xa(reading) - 180, (self.size / 2) - 8),
+                arc.locate(self.xa(reading) + 90, (self.size / 2) - 8),
             ],
             fill=self.fg
         )
