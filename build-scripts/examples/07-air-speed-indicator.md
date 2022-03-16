@@ -46,6 +46,14 @@ The component can be sized - sizes that are too small or big might not render qu
 
 {{ <component type="asi" size="128" /> }}
 
+# Rotation
+
+Can rotate the entire gauge clockwise using `rotate`
+
+{{ <component type="asi" rotate="45" /> }}
+{{ <component type="asi" rotate="90" /> }}
+{{ <component type="asi" rotate="180" /> }}
+
 # Font
 
 The text font can be changed in size

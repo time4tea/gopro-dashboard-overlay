@@ -327,4 +327,5 @@ def create_asi(element, entry, timeseries, font, **kwargs):
         Vfe=iattrib(element, "vfe", d=103),
         Vno=iattrib(element, "vno", d=126),
         Vne=iattrib(element, "vne", d=180),
+        rotate=iattrib(element, "rotate", d=0),
     )

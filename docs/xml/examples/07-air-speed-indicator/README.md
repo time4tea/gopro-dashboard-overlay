@@ -75,6 +75,29 @@ The component can be sized - sizes that are too small or big might not render qu
 <kbd>![07-air-speed-indicator-4.png](07-air-speed-indicator-4.png)</kbd>
 
 
+# Rotation
+
+Can rotate the entire gauge clockwise using `rotate`
+
+
+```xml
+<component type="asi" rotate="45" />
+```
+<kbd>![07-air-speed-indicator-5.png](07-air-speed-indicator-5.png)</kbd>
+
+
+```xml
+<component type="asi" rotate="90" />
+```
+<kbd>![07-air-speed-indicator-6.png](07-air-speed-indicator-6.png)</kbd>
+
+
+```xml
+<component type="asi" rotate="180" />
+```
+<kbd>![07-air-speed-indicator-7.png](07-air-speed-indicator-7.png)</kbd>
+
+
 # Font
 
 The text font can be changed in size
@@ -83,5 +106,5 @@ The text font can be changed in size
 ```xml
 <component type="asi" textsize="24" />
 ```
-<kbd>![07-air-speed-indicator-5.png](07-air-speed-indicator-5.png)</kbd>
+<kbd>![07-air-speed-indicator-8.png](07-air-speed-indicator-8.png)</kbd>
 
