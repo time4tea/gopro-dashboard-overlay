@@ -36,6 +36,35 @@ def test_gauge():
     )
 
 
+@approve_image
+def test_gauge_rotate_90():
+    size = 256
+    return time_rendering(
+        name="test_gauge_rotate_90",
+        dimensions=Dimension(size, size),
+        widgets=[
+            AirspeedIndicator(
+                size=size, font=font, Vs0=40, Vs=46, Vfe=84, Vno=130, Vne=200, rotate=90,
+                reading=lambda: 125
+            )
+        ]
+    )
+
+@approve_image
+def test_gauge_rotate_180():
+    size = 256
+    return time_rendering(
+        name="test_gauge_rotate_180",
+        dimensions=Dimension(size, size),
+        widgets=[
+            AirspeedIndicator(
+                size=size, font=font, Vs0=40, Vs=46, Vfe=84, Vno=130, Vne=200, rotate=180,
+                reading=lambda: 125
+            )
+        ]
+    )
+
+
 
 @approve_image
 def test_gauge_below_min():
