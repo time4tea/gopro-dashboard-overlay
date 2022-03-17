@@ -17,7 +17,7 @@ if __name__ == "__main__":
     if not os.path.exists(args.input):
         raise IOError(f"File not found {args.input}")
 
-    directory = os.path.dirname(args.input)
+    directory = os.path.realpath(os.path.dirname(args.input))
     filename = os.path.basename(args.input)
 
     file = GoProFile(filename)
