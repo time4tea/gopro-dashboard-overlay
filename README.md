@@ -145,6 +145,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.36.0
+  - Fix for `gopro-join.py` when MPEG files are in current directory. - [Issue #24](https://github.com/time4tea/gopro-dashboard-overlay/issues/24)
 - 0.35.0
   - Add `rotate` to `asi` component. see [docs](docs/xml/examples/07-air-speed-indicator)
   - Some refactoring (should have no visible effect)
