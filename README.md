@@ -145,6 +145,9 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.37.0
+  - Added new component "Moving Journey Map", which displays the whole journey on a moving map. See [docs](docs/xml/examples/06-moving-journey-map/README.md)
+    - Possible fix for [feature request](https://github.com/time4tea/gopro-dashboard-overlay/issues/16) 
 - 0.36.0
   - Fix for `gopro-join.py` when MPEG files are in current directory. - [Issue #24](https://github.com/time4tea/gopro-dashboard-overlay/issues/24)
 - 0.35.0
