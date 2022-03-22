@@ -3,6 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+
 # Gradient Chart
 
 Notice: This component is poorly-named and will be modified in a future release.

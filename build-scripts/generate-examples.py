@@ -28,6 +28,7 @@ def alphanum_key(s):
 dimensions_by_file = {
     "05-moving-map.md": Dimension(256, 256),
     "06-journey-map.md": Dimension(256, 256),
+    "06-moving-journey-map.md": Dimension(384, 384),
     "07-air-speed-indicator.md": Dimension(256, 256),
     "08-translate.md": Dimension(256, 256),
     "09-frame.md": Dimension(256, 256),
@@ -38,7 +39,7 @@ def dimensions_for(filepath: str) -> Dimension:
     return dimensions_by_file.get(os.path.basename(filepath), Dimension(200, 100))
 
 
-AUTO_HEADER = "<!-- \n\nAuto Generated File DO NOT EDIT \n\n-->"
+AUTO_HEADER = "<!-- \n\nAuto Generated File DO NOT EDIT \n\n-->\n"
 
 if __name__ == "__main__":
     dest = os.path.join(os.path.dirname(mydir), "docs/xml/examples")

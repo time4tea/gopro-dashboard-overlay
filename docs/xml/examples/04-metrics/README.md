@@ -3,6 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+
 # Metrics
 
 Metrics are fields that are extracted or derived from the GoPro or GPX data.

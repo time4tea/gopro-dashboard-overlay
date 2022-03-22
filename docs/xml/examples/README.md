@@ -4,6 +4,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+
 # Layout Configuration Documentation
 
 [01-simple-text](01-simple-text/README.md)
@@ -17,6 +18,8 @@ Auto Generated File DO NOT EDIT
 [05-moving-map](05-moving-map/README.md)
 
 [06-journey-map](06-journey-map/README.md)
+
+[06-moving-journey-map](06-moving-journey-map/README.md)
 
 [07-air-speed-indicator](07-air-speed-indicator/README.md)
 

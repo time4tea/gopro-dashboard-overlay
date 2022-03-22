@@ -3,6 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+
 # Journey Map
 
 Shows an 'overall' journey map, with the entire GPS trace shown over a map. The map is scaled appropriately to fit the

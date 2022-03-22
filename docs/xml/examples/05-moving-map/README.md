@@ -3,6 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+
 # Moving Map
 
 Shows a moving map, with the current GPS location at the centre of the map. The zoom level can be set to show a smaller

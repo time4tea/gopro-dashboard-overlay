@@ -3,6 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+
 # Frame
 
 Frame is a __container__ and can contain other components.
