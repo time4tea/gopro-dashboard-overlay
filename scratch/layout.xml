@@ -1,0 +1,7 @@
+<layout>
+    <translate x="1644" y="100">
+        <frame width="256" height="256" outline="0,0,0" opacity="0.6" cr="128">
+            <component type="moving_journey_map" name="moving_map" size="256" zoom="16"/>
+        </frame>
+    </translate>
+</layout>

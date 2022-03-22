@@ -123,7 +123,7 @@ class JourneyMap:
 
 def draw_marker(draw, position, size, fill=None):
     fill = fill if fill is not None else (0, 0, 255)
-    draw.ellipse((position[0] - size, position[1] - size, position[0] + size, position[1] + size),
+    draw.ellipse([(position[0] - size, position[1] - size), (position[0] + size, position[1] + size)],
                  fill=fill,
                  outline=(0, 0, 0))
 
@@ -178,3 +178,75 @@ class MovingMap:
                 self.cached = self._redraw(map)
 
             image.alpha_composite(self.cached, self.at.tuple())
+
+
+def view_window(size, d):
+    def f(n):
+        start = max(0, min(d - size, n - int(size / 2)))
+        end = start + size
+        return start, end
+
+    return f
+
+
+class MovingJourneyMap:
+
+    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer):
+        self.privacy_zone = privacy_zone
+        self.timeseries = timeseries
+        self.size = size
+        self.renderer = renderer
+        self.zoom = zoom
+        self.location = location
+
+        self.cached_map_image = None
+        self.cached_map = None
+
+    def _redraw(self):
+        journey = Journey()
+        self.timeseries.process(journey.accept)
+
+        bbox_min, bbox_max = journey.bounding_box
+
+        map = geotiler.Map(
+            extent=(
+                bbox_min.lon, bbox_min.lat,
+                bbox_max.lon, bbox_max.lat
+            ),
+            zoom=self.zoom
+        )
+
+        # add self.size / 2 to eash side of the map, so adding self.size overall
+        map.size = (map.size[0] + self.size), (map.size[1] + self.size)
+
+        print(f"{self.__class__.__name__} Rendering backing map ({map.size}) (can be slow)", end="")
+
+        map_image = self.renderer(map)
+
+        print(f"... done")
+
+        plots = [
+            map.rev_geocode((location.lon, location.lat))
+            for location in journey.locations if not self.privacy_zone.encloses(location)
+        ]
+
+        draw = ImageDraw.Draw(map_image)
+        draw.line(plots, fill=(255, 0, 0), width=4)
+
+        return map, map_image
+
+    def draw(self, image, draw):
+        if self.cached_map is None:
+            self.cached_map, self.cached_map_image = self._redraw()
+
+        location = self.location()
+        if location.lon is not None and location.lat is not None:
+            current_position_in_big_map = self.cached_map.rev_geocode((location.lon, location.lat))
+
+            map_size = self.cached_map_image.size
+
+            lr = view_window(self.size, map_size[0])(int(current_position_in_big_map[0]))
+            tb = view_window(self.size, map_size[1])(int(current_position_in_big_map[1]))
+
+            image.alpha_composite(self.cached_map_image, (0, 0), source=(lr[0], tb[0], lr[1], tb[1]))
+            draw_marker(draw, (int(self.size / 2), int(self.size / 2)), 6)

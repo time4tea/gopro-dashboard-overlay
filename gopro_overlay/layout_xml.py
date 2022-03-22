@@ -14,6 +14,7 @@ from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite, Frame
 from gopro_overlay.widgets_asi import AirspeedIndicator
 from gopro_overlay.widgets_compass import Compass
+from gopro_overlay.widgets_map import MovingJourneyMap
 
 
 def load_xml_layout(filename):
@@ -263,7 +264,7 @@ def create_moving_map(element, entry, renderer, **kwargs):
         at=at(element),
         entry=entry,
         size=iattrib(element, "size", d=256),
-        zoom=iattrib(element, "zoom", d=16, r=range(1, 18)),
+        zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
         renderer=renderer,
         corner_radius=iattrib(element, "corner_radius", 0),
         opacity=fattrib(element, "opacity", 0.7),
@@ -281,6 +282,17 @@ def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
         size=iattrib(element, "size", d=256),
         corner_radius=iattrib(element, "corner_radius", 0),
         opacity=fattrib(element, "opacity", 0.7)
+    )
+
+
+def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
+    return MovingJourneyMap(
+        location=lambda: entry().point,
+        privacy_zone=privacy,
+        renderer=renderer,
+        timeseries=timeseries,
+        size=iattrib(element, "size", d=256),
+        zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
     )
 
 

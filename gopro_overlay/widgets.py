@@ -170,8 +170,8 @@ class ImageTranslate:
     def _txy(self, xy):
         return xy[0] + self.at.x, xy[1] + self.at.y
 
-    def alpha_composite(self, im, dest=(0, 0)):
-        self.image.alpha_composite(im, dest=self._txy(dest))
+    def alpha_composite(self, im, dest=(0, 0), source=(0, 0)):
+        self.image.alpha_composite(im, dest=self._txy(dest), source=source)
 
     def paste(self, img, box):
         self.image.paste(img, box=self._txy(box))
@@ -199,6 +199,9 @@ class DrawTranslate:
 
     def line(self, xy, *args, **kwargs):
         self.draw.line([self._txy(pair) for pair in xy], *args, **kwargs)
+
+    def ellipse(self, xy, *args, **kwargs):
+        self.draw.ellipse([self._txy(pair) for pair in xy], *args, **kwargs)
 
     def arc(self, xy, *args, **kwargs):
         self.draw.arc([self._txy(pair) for pair in xy], *args, **kwargs)

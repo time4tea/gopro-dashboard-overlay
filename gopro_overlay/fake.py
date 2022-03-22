@@ -47,10 +47,11 @@ class Random2D:
 def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
                     step: datetime.timedelta = datetime.timedelta(seconds=0.1),
                     rng: random.Random = None,
+                    point_step = 0.001,
                     start_timestamp: int = 0):
     rng = rng or random.Random()
 
-    points = Random2D(Point(51.4972, -0.1499), 0.001, rng=rng)
+    points = Random2D(Point(51.4972, -0.1499), point_step, rng=rng)
     speed = Random1D(10, rng=rng)
     cad = Random1D(50, rng=rng)
     grad = Random1D(23, rng=rng)

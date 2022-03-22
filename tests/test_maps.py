@@ -14,6 +14,8 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
+from gopro_overlay.widgets import Translate, Frame
+from gopro_overlay.widgets_map import MovingJourneyMap, view_window
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 from tests.testenvironment import is_make
@@ -141,3 +143,78 @@ def test_render_moving_map_very_rounded():
             moving_map(at=Coordinate(100, 20), entry=lambda: ts.get(ts.min), size=256, zoom=15, renderer=map_renderer,
                        corner_radius=128)
         ])
+
+
+@approve_image
+def test_moving_journey_map_at_start():
+    with renderer.open() as map_renderer:
+        return time_rendering(
+            "test_moving_journey_map_at_start",
+            widgets=[
+                MovingJourneyMap(
+                    timeseries=ts,
+                    privacy_zone=NoPrivacyZone(),
+                    location=lambda: ts.get(ts.min).point,
+                    size=256,
+                    zoom=15,
+                    renderer=map_renderer,
+                ),
+            ])
+
+@approve_image
+def test_moving_journey_map_halfway():
+    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
+
+    with renderer.open() as map_renderer:
+        return time_rendering(
+            "test_moving_journey_map_halfway",
+            widgets=[
+                Translate(
+                    Coordinate(256, 0),
+                    MovingJourneyMap(
+                        timeseries=ts,
+                        privacy_zone=NoPrivacyZone(),
+                        location=lambda: ts.get(ts.min + ((ts.max - ts.min) / 3)).point,
+                        size=256,
+                        zoom=17,
+                        renderer=map_renderer,
+                    )
+                ),
+            ])
+
+@approve_image
+def test_moving_journey_map_in_frame():
+    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
+
+    with renderer.open() as map_renderer:
+        return time_rendering(
+            "test_moving_journey_map_halfway",
+            widgets=[
+                Translate(
+                    Coordinate(256, 0),
+                    Frame(
+                        dimensions=Dimension(256, 256),
+                        opacity=0.7,
+                        corner_radius=128,
+                        child=MovingJourneyMap(
+                            timeseries=ts,
+                            privacy_zone=NoPrivacyZone(),
+                            location=lambda: ts.get(ts.min + ((ts.max - ts.min) / 3)).point,
+                            size=256,
+                            zoom=17,
+                            renderer=map_renderer,
+                        )
+                    )
+                ),
+            ])
+
+
+def test_view_window():
+    window = view_window(size=256, d=1336)
+
+    assert window(1336) == (1336 - 256, 1336)
+    assert window(0) == (0, 256)
+    assert window(1) == (0, 256)
+    assert window(128) == (0, 256)
+    assert window(129) == (1, 257)
+    assert window(1336 - 100) == (1336 - 256, 1336)
