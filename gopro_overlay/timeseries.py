@@ -144,10 +144,10 @@ class Timeseries:
         index_min = bisect.bisect_left(self.dates, dt_min)
         index_max = bisect.bisect_right(self.dates, dt_max)
 
-        if self.dates[index_min] > dt_min and index_min > 0:
+        if index_min > 0 and self.dates[index_min] > dt_min :
             index_min = index_min - 1
 
-        if self.dates[index_max] < dt_max and index_max < len(self.dates) - 1:
+        if index_max < len(self.dates) - 1 and self.dates[index_max] < dt_max:
             index_max = index_max + 1
 
         dates = self.dates[index_min:index_max + 1]
