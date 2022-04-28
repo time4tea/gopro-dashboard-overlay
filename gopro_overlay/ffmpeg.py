@@ -1,13 +1,13 @@
 import contextlib
 import itertools
-import re
+import json
 import subprocess
 import sys
 from array import array
 from collections import namedtuple
 
 from gopro_overlay.common import temporary_file
-from gopro_overlay.dimensions import dimension_from, Dimension
+from gopro_overlay.dimensions import Dimension
 
 
 def run(cmd, **kwargs):
@@ -74,28 +74,37 @@ def join_files(filepaths, output):
 
 
 def find_streams(filepath, invoke=invoke):
-    ffprobe_output = str(invoke(["ffprobe", "-hide_banner", filepath]).stderr)
+    ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
-    video_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Video.*, (\d+x\d+)")
-    audio_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Audio")
-    meta_re = re.compile(r"Stream #\d+:(\d+)\(.+\): Data: bin_data \(gpmd")
+    ffprobe_json = json.loads(ffprobe_output)
+
+    video_selector = lambda s: s["codec_type"] == "video"
+    audio_selector = lambda s: s["codec_type"] == "audio"
+    data_selector = lambda s: s["codec_type"] == "data" and s["codec_tag_string"] == "gpmd"
 
     video_stream = None
     video_dimension = None
     audio_stream = None
     meta_stream = None
 
-    for line in ffprobe_output.split("\n"):
-        video_match = video_re.search(line)
-        if video_match:
-            video_stream = int(video_match.group(1))
-            video_dimension = dimension_from(video_match.group(2))
-        audio_match = audio_re.search(line)
-        if audio_match:
-            audio_stream = int(audio_match.group(1))
-        meta_match = meta_re.search(line)
-        if meta_match:
-            meta_stream = int(meta_match.group(1))
+    def first_and_only(what, l, p):
+        matches = list(filter(p, l))
+        if not matches:
+            raise IOError(f"Unable to find {what} in ffprobe output")
+        if len(matches) > 1:
+            raise IOError(f"Multiple matching streams for {what} in ffprobe output")
+        return matches[0]
+
+    streams = ffprobe_json["streams"]
+    video = first_and_only("video stream", streams, video_selector)
+    video_stream = video["index"]
+    video_dimension = Dimension(video["width"], video["height"])
+
+    audio = first_and_only("audio stream", streams, audio_selector)
+    audio_stream = audio["index"]
+
+    meta = first_and_only("metadata stream", streams, data_selector)
+    meta_stream = meta["index"]
 
     if video_stream is None or audio_stream is None or meta_stream is None or video_dimension is None:
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
