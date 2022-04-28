@@ -145,7 +145,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
-- 0.38.0 Fix #30 thanks @tve 
+- 0.39.0 Fix [#29](https://github.com/time4tea/gopro-dashboard-overlay/issues/29)  
+- 0.38.0 Fix [#30](https://github.com/time4tea/gopro-dashboard-overlay/issues/30) thanks @tve 
 - 0.37.0
   - Added new component "Moving Journey Map", which displays the whole journey on a moving map. See [docs](docs/xml/examples/06-moving-journey-map/README.md)
     - Possible fix for [feature request](https://github.com/time4tea/gopro-dashboard-overlay/issues/16) 
