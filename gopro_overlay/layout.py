@@ -3,6 +3,7 @@ from typing import Callable
 from PIL import ImageFont
 
 from .dimensions import Dimension
+from .framemeta import FrameMeta
 from .layout_components import moving_map
 from .point import Coordinate
 from .timeseries import Timeseries
@@ -92,14 +93,14 @@ def speed_awareness_layout(renderer, font: ImageFont):
 
 class Overlay:
 
-    def __init__(self, dimensions: Dimension, timeseries: Timeseries, create_widgets: Callable):
+    def __init__(self, dimensions: Dimension, framemeta: FrameMeta, create_widgets: Callable):
         self.scene = Scene(dimensions, create_widgets(self.entry))
-        self.timeseries = timeseries
+        self.framemeta = framemeta
         self._entry = None
 
     def entry(self):
         return self._entry
 
-    def draw(self, dt):
-        self._entry = self.timeseries.get(dt)
+    def draw(self, pts):
+        self._entry = self.framemeta.get(pts)
         return self.scene.draw()

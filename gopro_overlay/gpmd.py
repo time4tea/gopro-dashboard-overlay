@@ -5,9 +5,8 @@ import itertools
 import struct
 from enum import Enum
 
-from .ffmpeg import load_gpmd_from
+from .entry import Entry
 from .point import Point, Point3
-from .timeseries import Timeseries, Entry
 
 GPMDStruct = struct.Struct('>4sBBH')
 
@@ -238,6 +237,27 @@ class GPMDItem:
                f" [{rawdata}] [{rawdatas}]"
 
 
+class GoproMeta:
+
+    def __init__(self, items):
+        self._items = items
+
+    def __len__(self):
+        return len(self._items)
+
+    def __getitem__(self, key):
+        return self._items[key]
+
+    def accept(self, visitor):
+        for item in self._items:
+            item.accept(visitor)
+        return visitor
+
+    @staticmethod
+    def parse(data):
+        return GoproMeta(list(GPMDParser(data).items()))
+
+
 class GPMDParser:
 
     def __init__(self, data: array.array):
@@ -287,11 +307,17 @@ class GPMDParser:
 XYZComponents = collections.namedtuple("XYZComponents", ["timestamp", "samples_total", "scale", "temp", "points"])
 
 
+# noinspection PyPep8Naming
 class XYZStreamVisitor:
 
     def __init__(self, on_end):
         self._on_end = on_end
+        self._samples_total = None
         self._timestamp = None
+        self._scale = None
+        self._temperature = None
+        self._type = None
+        self._points = None
 
     def vi_STMP(self, item):
         self._timestamp = item.interpret()
@@ -338,6 +364,7 @@ class XYZComponentConverter:
             self._on_item((counter, index, Point3(point.x, point.y, point.z)))
 
 
+# noinspection PyPep8Naming
 class XYZVisitor:
 
     def __init__(self, name, on_item):
@@ -357,9 +384,11 @@ class XYZVisitor:
         pass
 
 
-GPS5Components = collections.namedtuple("GPS5Components", ["samples", "basetime", "fix", "dop", "scale", "points"])
+GPS5Components = collections.namedtuple("GPS5Components",
+                                        ["samples", "timestamp", "basetime", "fix", "dop", "scale", "points"])
 
 
+# noinspection PyPep8Naming
 class GPS5StreamVisitor:
 
     def __init__(self, on_end):
@@ -369,6 +398,10 @@ class GPS5StreamVisitor:
         self._fix = None
         self._scale = None
         self._points = None
+        self._timestamp = None
+
+    def vi_STMP(self, item):
+        self._timestamp = interpret_item(item)
 
     def vi_TSMP(self, item):
         self._samples = interpret_item(item)
@@ -391,6 +424,7 @@ class GPS5StreamVisitor:
     def v_end(self):
         self._on_end(GPS5Components(
             samples=self._samples,
+            timestamp=self._timestamp,
             basetime=self._basetime,
             fix=self._fix,
             dop=self._dop,
@@ -399,6 +433,7 @@ class GPS5StreamVisitor:
         ))
 
 
+# noinspection PyPep8Naming
 class GPSVisitor:
 
     def __init__(self, converter):
@@ -406,7 +441,6 @@ class GPSVisitor:
         self._counter = 0
 
     def vic_DEVC(self, item, contents):
-        self._counter += 1
         return self
 
     def vic_STRM(self, item, contents):
@@ -416,6 +450,7 @@ class GPSVisitor:
             )
 
     def v_end(self):
+        self._counter += 1
         pass
 
 
@@ -433,51 +468,97 @@ class GPS5EntryConverter:
                     seconds=(index * (1.0 / len(components.points)))
                 )
                 self._on_item(
-                    Entry(point_datetime,
-                          dop=self._units.Quantity(components.dop, self._units.location),
-                          packet=self._units.Quantity(counter, self._units.location),
-                          packet_index=self._units.Quantity(index, self._units.location),
-                          point=Point(point.lat, point.lon),
-                          speed=self._units.Quantity(point.speed, self._units.mps),
-                          alt=self._units.Quantity(point.alt, self._units.m))
+                    Entry(
+                        dt=point_datetime,
+                        dop=self._units.Quantity(components.dop, self._units.location),
+                        packet=self._units.Quantity(counter, self._units.location),
+                        packet_index=self._units.Quantity(index, self._units.location),
+                        point=Point(point.lat, point.lon),
+                        speed=self._units.Quantity(point.speed, self._units.mps),
+                        alt=self._units.Quantity(point.alt, self._units.m),
+                        gpsfix=components.fix
+                    )
                 )
 
 
-def gps_filters(report, dop_max):
-    do_report = lambda t, c, m: report(f"Packet {t}, GPS Time {c.basetime} Discarding GPS Location: {m}")
+class TimestampTracker:
+    def __init__(self, cori_timestamp):
+        self._cori_timestamp = cori_timestamp
+        self._first_timestamp = None
+        self._last_timestamp = None
+        self._adjust = None
 
-    filters = [
-        (lambda t, c: c.basetime is None, lambda t, c: do_report(t, c, f"Unknown GPS Time")),
-        (lambda t, c: c.fix is None, lambda t, c: do_report(t, c, f"Unknown GPS Fix Status")),
-        (lambda t, c: c.fix in (GPSFix.NO, GPSFix.UNKNOWN),
-         lambda t, c: do_report(t, c, f"GPS Not Locked (Status = {c.fix})")),
-        (lambda t, c: c.dop > dop_max, lambda t, c: do_report(t, c, f"DOP Out of Range. {c.dop} > {dop_max}")),
-        (lambda t, c: c.scale is None, lambda t, c: do_report(t, c, f"Unknown Item Scale")),
-    ]
+    def next_timestamp(self, timestamp, num_samples):
+        if self._first_timestamp is None:
+            self._first_timestamp = timestamp
+            self._adjust = timestamp - self._cori_timestamp
 
-    def drop_item(t, c):
-        for (d, r) in filters:
-            if d(t, c):
-                r(t, c)
-                return True
+        if self._last_timestamp is None:
+            self._last_timestamp = timestamp
+            time_per_sample = 1001000 / num_samples
+        else:
+            time_per_sample = (timestamp - self._last_timestamp) / num_samples
+            self._last_timestamp = timestamp
 
-    return drop_item
-
-
-def timeseries_from_data(data, units, on_drop=lambda reason: None):
-    ts = Timeseries()
-
-    converter = GPS5EntryConverter(units=units,
-                                   drop_item=gps_filters(on_drop, 6.0),
-                                   on_item=lambda entry: ts.add(entry))
-
-    visitor = GPSVisitor(converter=converter.convert)
-
-    for i in GPMDParser(data).items():
-        i.accept(visitor)
-
-    return ts
+        return lambda index: (
+            timestamp + self._adjust - self._first_timestamp + (index * time_per_sample), index * time_per_sample
+        )
 
 
-def timeseries_from(filepath, **kwargs):
-    return timeseries_from_data(load_gpmd_from(filepath), **kwargs)
+class NewGPS5EntryConverter:
+    def __init__(self, units, cori_timestamp, on_item=lambda c, e: None):
+        self._units = units
+        self._on_item = on_item
+        self._tracker = TimestampTracker(cori_timestamp)
+
+    def convert(self, counter, components):
+        sample_time_calculator = self._tracker.next_timestamp(components.timestamp, len(components.points))
+
+        for index, point in enumerate(components.points):
+            sample_frame_timestamp_us, sample_time_offset_us = sample_time_calculator(index)
+
+            point_datetime = components.basetime + datetime.timedelta(
+                microseconds=sample_time_offset_us
+            )
+            self._on_item(
+                int(sample_frame_timestamp_us / 1000),
+                Entry(
+                    dt=point_datetime,
+                    timestamp=self._units.Quantity(sample_frame_timestamp_us / 1000, self._units.number),
+                    dop=self._units.Quantity(components.dop, self._units.number),
+                    packet=self._units.Quantity(counter, self._units.number),
+                    packet_index=self._units.Quantity(index, self._units.number),
+                    point=Point(point.lat, point.lon),
+                    speed=self._units.Quantity(point.speed, self._units.mps),
+                    alt=self._units.Quantity(point.alt, self._units.m),
+                    gpsfix=components.fix.value
+                )
+            )
+
+
+# noinspection PyPep8Naming
+class DetermineTimestampOfFirstSHUTVisitor:
+    """
+        Seems like first SHUT frame is correlated with video frame?
+        https://github.com/gopro/gpmf-parser/blob/151bb352ab3d1af8feb31e0cf8277ff86c70095d/demo/GPMF_demo.c#L414
+    """
+
+    def __init__(self):
+        self._initial_timestamp = None
+
+    @property
+    def timestamp(self):
+        return self._initial_timestamp
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def vi_STMP(self, item):
+        self._initial_timestamp = interpret_item(item)
+
+    def vic_STRM(self, item, contents):
+        if "SHUT" in contents and not self._initial_timestamp:
+            return self
+
+    def v_end(self):
+        pass

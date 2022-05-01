@@ -4,8 +4,8 @@ import os
 from array import array
 from pathlib import Path
 
-from gopro_overlay import gpmd
-from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter, GPS5EntryConverter, XYZ
+from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter, GPS5EntryConverter, XYZ, \
+    GoproMeta, interpret_item, DetermineTimestampOfFirstSHUTVisitor
 from gopro_overlay.point import Point, Point3, Quaternion
 from gopro_overlay.units import units
 
@@ -22,14 +22,14 @@ def load_meta(name):
 
 
 def load(name):
-    return list(gpmd.GPMDParser(load_meta(name)).items())
+    return GoproMeta.parse(load_meta(name))
 
 
 def test_load_hero6_raw():
-    items = load("hero6.raw")
-    assert len(items) == 1
+    meta = load("hero6.raw")
+    assert len(meta) == 1
 
-    devc = items[0]
+    devc = meta[0]
     assert devc.with_type("DVNM")[0].interpret() == "Hero6 Black"
     assert devc.with_type("TICK")[0].interpret() == 342433
     assert devc.fourcc == "DEVC"
@@ -38,20 +38,19 @@ def test_load_hero6_raw():
 
 
 def test_debugging_visitor_at_least_doesnt_blow_up():
-    items = load("hero5.raw")
-    for i in items:
-        i.accept(DebuggingVisitor())
+    meta = load("hero5.raw")
+    meta.accept(DebuggingVisitor())
 
 
 def test_load_hero5_raw_gps5():
-    items = load("hero5.raw")
-    assert len(items) == 1
+    meta = load("hero5.raw")
+    assert len(meta) == 1
 
-    assert items[0].with_type("DVNM")[0].interpret() == "Camera"
+    assert meta[0].with_type("DVNM")[0].interpret() == "Camera"
 
     def assert_components(count, components):
         print(components)
-        assert count == 1
+        assert count == 0
         assert components.samples == 18
         assert components.dop == 6.06
         assert components.fix == GPSFix.LOCK_3D
@@ -60,14 +59,14 @@ def test_load_hero5_raw_gps5():
         assert components.scale == (10000000, 10000000, 1000, 1000, 100)
         assert components.points[0] == GPS5(lat=33.1264969, lon=-117.3273542, alt=-20.184, speed=0.167, speed3d=0.19)
 
-    items[0].accept(GPSVisitor(converter=assert_components))
+    meta[0].accept(GPSVisitor(converter=assert_components))
 
 
 def test_load_hero5_raw_entry():
-    items = load("hero5.raw")
-    assert len(items) == 1
+    meta = load("hero5.raw")
+    assert len(meta) == 1
 
-    assert items[0].with_type("DVNM")[0].interpret() == "Camera"
+    assert meta[0].with_type("DVNM")[0].interpret() == "Camera"
 
     counter = [0]
 
@@ -76,7 +75,7 @@ def test_load_hero5_raw_entry():
         if entry.packet_index.magnitude == 0:
             assert entry.dt == datetime.datetime(2017, 4, 17, 17, 31, 3, tzinfo=datetime.timezone.utc)
             assert entry.dop.magnitude == 6.06
-            assert entry.packet.magnitude == 1
+            assert entry.packet.magnitude == 0
             assert entry.packet_index.magnitude == 0
             assert str(entry.point) == str(Point(lat=33.1264969, lon=-117.3273542))  # float comparison
             assert entry.speed == units.Quantity(0.167, units.mps)
@@ -84,14 +83,14 @@ def test_load_hero5_raw_entry():
 
     converter = GPS5EntryConverter(units=units, on_item=assert_item)
 
-    items[0].accept(GPSVisitor(converter=converter.convert))
+    meta[0].accept(GPSVisitor(converter=converter.convert))
 
     assert counter[0] == 18
 
 
 def test_load_hero5_raw_accl():
-    items = load("hero6.raw")
-    assert len(items) == 1
+    meta = load("hero6.raw")
+    assert len(meta) == 1
 
     def assert_components(count, components):
         print(components)
@@ -101,39 +100,43 @@ def test_load_hero5_raw_accl():
         assert components.scale == (418,)
         assert components.points[0] == XYZ(y=9.97846889952153, x=0.05502392344497608, z=3.145933014354067)
 
-    items[0].accept(XYZVisitor("ACCL", on_item=assert_components))
+    meta[0].accept(XYZVisitor("ACCL", on_item=assert_components))
 
 
 def test_load_hero6_ble_raw():
-    items = load("hero6+ble.raw")
-    assert len(items) == 2
+    meta = load("hero6+ble.raw")
+    assert len(meta) == 2
 
-    assert items[0].with_type("DVNM")[0].interpret() == "Hero6 Black"
-    assert items[1].with_type("DVNM")[0].interpret() == "SENSORB6"
+    assert meta[0].with_type("DVNM")[0].interpret() == "Hero6 Black"
+    assert meta[1].with_type("DVNM")[0].interpret() == "SENSORB6"
 
 
 def test_load_extracted_meta():
     assert len(load("gopro-meta.gpmd")) == 707
 
+    load("gopro-meta.gpmd").accept(DebuggingVisitor())
+
 
 def test_load_and_visit_extracted_meta():
-    items = load("gopro-meta.gpmd")
-    assert len(items) == 707
+    meta = load("gopro-meta.gpmd")
+    assert len(meta) == 707
 
-    visitor = CountingVisitor()
-    [i.accept(visitor) for i in items]
-
-    assert visitor.count == 108171
+    assert meta.accept(CountingVisitor()).count == 108171
 
 
 def test_load_accel_meta():
-    items = load("accel/rotation-example.gpmd")
+    meta = load("accel/rotation-example.gpmd")
 
     converter = XYZComponentConverter(on_item=lambda i: print(f"{i} = {i[2].length()}"))
     visitor = XYZVisitor("ACCL", on_item=converter.convert)
 
-    for i in items:
-        i.accept(visitor)
+    meta.accept(visitor)
+
+
+def test_find_first_shut_timestamp():
+    meta = load("gopro-meta.gpmd")
+
+    assert meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp == 3538581891
 
 
 class CORIVisitor:
@@ -160,26 +163,20 @@ class CORIVisitor:
 
 
 def test_load_rotation_meta():
-    items = load("accel/rotation-example.gpmd")
+    meta = load("accel/rotation-example.gpmd")
 
     def process_quaternions(qlist):
         for q in qlist:
             qq = Quaternion(q.w, Point3(x=q.x, y=q.y, z=q.z))
             print(f"{qq} -> {qq.to_axis_angle()}")
 
-    visitor = CORIVisitor(on_item=process_quaternions)
-
-    for i in items:
-        i.accept(visitor)
+    meta.accept(CORIVisitor(on_item=process_quaternions))
 
 
 def test_debug_rotation_meta():
-    items = load("accel/rotation-example.gpmd")
+    meta = load("accel/rotation-example.gpmd")
 
-    visitor = DebuggingVisitor()
-
-    for i in items:
-        i.accept(visitor)
+    meta.accept(DebuggingVisitor())
 
 
 class GRAVisitor:
@@ -206,16 +203,13 @@ class GRAVisitor:
 
 
 def test_load_gravity_meta():
-    items = load("accel/rotation-example.gpmd")
+    meta = load("accel/rotation-example.gpmd")
 
     def process_gravities(gravs):
         for g in gravs:
             print(f"{g}  = {Point3(g.x, g.y, g.z).length()}")
 
-    for i in items:
-        i.accept(GRAVisitor(
-            process_gravities
-        ))
+    meta.accept(GRAVisitor(process_gravities))
 
 
 class CountingVisitor:

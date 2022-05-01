@@ -33,7 +33,7 @@ if __name__ == "__main__":
     else:
         ts = timeseries_from(args.input,
                              units=units,
-                             on_drop=lambda reason: print(reason),
+                             on_drop=lambda reason: print(reason, file=sys.stderr),
                              )
 
     ts.process_deltas(timeseries_process.calculate_speeds())
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     with smart_open(args.output) as f:
         writer = csv.DictWriter(f=f,
-                                fieldnames=["packet", "packet_index", "date", "lat", "lon", "dop", "alt", "speed",
+                                fieldnames=["packet", "packet_index", "fix", "date", "lat", "lon", "dop", "alt", "speed",
                                             "dist", "time", "azi", "odo",
                                             "grad"])
         writer.writeheader()
@@ -57,6 +57,7 @@ if __name__ == "__main__":
             writer.writerow({
                 "packet": printable_unit(entry.packet),
                 "packet_index": printable_unit(entry.packet_index),
+                "fix": entry.gpsfix.name,
                 "date": entry.dt,
                 "dop": printable_unit(entry.dop),
                 "lat": entry.point.lat,

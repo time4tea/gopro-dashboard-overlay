@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import datetime
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -15,9 +14,8 @@ from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_instal
     find_streams
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
+from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.geo import CachingRenderer
-from gopro_overlay.gpmd import timeseries_from
-from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
@@ -87,39 +85,32 @@ if __name__ == "__main__":
     with PoorTimer("program").timing():
 
         with PoorTimer("loading timeseries").timing():
-            gopro_timeseries = timeseries_from(input_file, units=units,
-                                               on_drop=lambda x: print(x) if args.debug_metadata else lambda x: None)
+            gopro_frame_meta = framemeta_from(input_file, units=units)
 
-        if len(gopro_timeseries) < 1:
+        if len(gopro_frame_meta) < 1:
             raise IOError(
                 f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
 
-        print(f"GoPro Timeseries has {len(gopro_timeseries)} data points")
+        print(f"GoPro Timeseries has {len(gopro_frame_meta)} data points")
 
-        if args.gpx:
-            gpx_timeseries = load_timeseries(args.gpx, units)
-            print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
-            timeseries = gpx_timeseries.clip_to(gopro_timeseries)
-            print(f"GPX Timeseries overlap with GoPro - {len(timeseries)}")
-            if len(timeseries) < 1:
-                raise ValueError("No overlap between GoPro and GPX file - Is this the correct GPX file?")
-        else:
-            timeseries = gopro_timeseries
+        # if args.gpx:
+        #     gpx_timeseries = load_timeseries(args.gpx, units)
+        #     print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
+        #     timeseries = gpx_timeseries.clip_to(gopro_timeseries)
+        #     print(f"GPX Timeseries overlap with GoPro - {len(timeseries)}")
+        #     if len(timeseries) < 1:
+        #         raise ValueError("No overlap between GoPro and GPX file - Is this the correct GPX file?")
+        # else:
+        #     timeseries = gopro_timeseries
 
-        # bodge- fill in missing points to make smoothing easier to write.
-        backfilled = timeseries.backfill(datetime.timedelta(seconds=1))
-        if backfilled:
-            print(f"Created {backfilled} missing points...")
-
-        # smooth GPS points
         print("Processing....")
         with PoorTimer("processing").timing():
-            timeseries.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
-            timeseries.process_deltas(timeseries_process.calculate_speeds())
-            timeseries.process(timeseries_process.calculate_odo())
-            timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=10)
+            gopro_frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
+            gopro_frame_meta.process_deltas(timeseries_process.calculate_speeds())
+            gopro_frame_meta.process(timeseries_process.calculate_odo())
+            gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=10)
             # smooth azimuth (heading) points to stop wild swings of compass
-            timeseries.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
+            gopro_frame_meta.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
         ourdir.mkdir(exist_ok=True)
 
@@ -140,12 +131,12 @@ if __name__ == "__main__":
 
             overlay = Overlay(
                 dimensions=dimensions,
-                timeseries=timeseries,
+                framemeta=gopro_frame_meta,
                 create_widgets=create_desired_layout(
                     layout=args.layout, layout_xml=args.layout_xml,
                     dimensions=dimensions,
                     include=args.include, exclude=args.exclude,
-                    renderer=renderer, timeseries=timeseries, font=font, privacy_zone=privacy_zone)
+                    renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone)
             )
 
             if args.overlay_only:
@@ -178,7 +169,7 @@ if __name__ == "__main__":
             draw_timer = PoorTimer("drawing frames")
 
             # Draw an overlay frame every 0.1 seconds
-            stepper = timeseries.stepper(timedelta(seconds=0.1))
+            stepper = gopro_frame_meta.stepper(timedelta(seconds=0.1))
             progress = progressbar.ProgressBar(
                 widgets=[
                     'Render: ',

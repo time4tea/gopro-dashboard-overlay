@@ -2,7 +2,10 @@ import bisect
 import datetime
 import itertools
 import math
-from datetime import timedelta
+
+from gopro_overlay.entry import Entry
+from gopro_overlay.ffmpeg import load_gpmd_from
+from gopro_overlay.gpmd import GPS5EntryConverter, GPSVisitor, GoproMeta
 
 
 def pairwise(iterable):  # Added in itertools v3.10
@@ -12,58 +15,9 @@ def pairwise(iterable):  # Added in itertools v3.10
     return zip(a, b)
 
 
-class Entry:
-
-    def __init__(self, dt, **kwargs):
-        self.dt = dt
-        self.items = {k: v for k, v in dict(**kwargs).items() if v is not None}
-
-    def update(self, **kwargs):
-        self.items.update(**kwargs)
-
-    def __getattr__(self, item):
-        return self.items.get(item, None)
-
-    def __str__(self):
-        return f"Entry: {self.dt} - {self.items}"
-
-    def interpolate(self, other, dt):
-        if self.dt == other.dt:
-            raise ValueError("Cannot interpolate between equal points")
-        if self.dt > other.dt:
-            raise ValueError("Lower point must be first")
-        if dt < self.dt:
-            raise ValueError("Wanted point before lower")
-        if dt > other.dt:
-            raise ValueError("Wanted point after other")
-
-        if dt == self.dt:
-            return self
-        elif dt == other.dt:
-            return other
-
-        range = (other.dt - self.dt) / timedelta(milliseconds=1)
-        point = (dt - self.dt) / timedelta(milliseconds=1)
-
-        position = point / range
-
-        items = {}
-        for key in self.items.keys():
-            start = self.items[key]
-            try:
-                end = other.items[key]
-                diff = end - start
-                interp = start + (diff * position)
-            except KeyError:
-                interp = None
-            items[key] = interp
-
-        return Entry(dt, **items)
-
-
 class Stepper:
 
-    def __init__(self, timeseries, step: timedelta):
+    def __init__(self, timeseries, step: datetime.timedelta):
         self._timeseries = timeseries
         self._step = step
 
@@ -97,7 +51,7 @@ class Timeseries:
         self.check_modified()
         return self.dates[-1]
 
-    def stepper(self, step: timedelta):
+    def stepper(self, step: datetime.timedelta):
         self.check_modified()
         return Stepper(self, step)
 
@@ -144,7 +98,7 @@ class Timeseries:
         index_min = bisect.bisect_left(self.dates, dt_min)
         index_max = bisect.bisect_right(self.dates, dt_max)
 
-        if index_min > 0 and self.dates[index_min] > dt_min :
+        if index_min > 0 and self.dates[index_min] > dt_min:
             index_min = index_min - 1
 
         if index_max < len(self.dates) - 1 and self.dates[index_max] < dt_max:
@@ -245,3 +199,42 @@ class Window:
         self.last_view = View(data, self.version)
 
         return self.last_view
+
+
+def gps_filters(report, dop_max):
+    do_report = lambda t, c, m: report(f"Packet {t}, GPS Time {c.basetime} Discarding GPS Location: {m}")
+
+    filters = [
+        (lambda t, c: c.basetime is None, lambda t, c: do_report(t, c, f"Unknown GPS Time")),
+        (lambda t, c: c.fix is None, lambda t, c: do_report(t, c, f"Unknown GPS Fix Status")),
+        (lambda t, c: c.fix in (GPSFix.NO, GPSFix.UNKNOWN),
+         lambda t, c: do_report(t, c, f"GPS Not Locked (Status = {c.fix})")),
+        (lambda t, c: c.dop > dop_max, lambda t, c: do_report(t, c, f"DOP Out of Range. {c.dop} > {dop_max}")),
+        (lambda t, c: c.scale is None, lambda t, c: do_report(t, c, f"Unknown Item Scale")),
+    ]
+
+    def drop_item(t, c):
+        for (d, r) in filters:
+            if d(t, c):
+                r(t, c)
+                return True
+
+    return drop_item
+
+
+def timeseries_from_data(data, units, on_drop=lambda reason: None):
+    ts = Timeseries()
+
+    converter = GPS5EntryConverter(units=units,
+                                   drop_item=gps_filters(on_drop, 6.0),
+                                   on_item=lambda entry: ts.add(entry))
+
+    visitor = GPSVisitor(converter=converter.convert)
+
+    GoproMeta.parse(data).accept(visitor)
+
+    return ts
+
+
+def timeseries_from(filepath, **kwargs):
+    return timeseries_from_data(load_gpmd_from(filepath), **kwargs)

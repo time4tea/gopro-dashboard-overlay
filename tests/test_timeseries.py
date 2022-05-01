@@ -5,8 +5,9 @@ from datetime import timedelta
 import pytest
 
 from gopro_overlay import fake
+from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import Point
-from gopro_overlay.timeseries import Timeseries, Entry, Window
+from gopro_overlay.timeseries import Timeseries, Window
 from gopro_overlay.timeseries_process import process_ses, calculate_speeds
 from gopro_overlay.units import units, metres
 
