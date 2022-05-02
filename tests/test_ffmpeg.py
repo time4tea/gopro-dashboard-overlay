@@ -38,7 +38,10 @@ def test_parsing_stream_information():
     assert streams.video == 0
     assert streams.video_dimension == Dimension(1920, 1080)
     assert streams.audio == 1
-    assert streams.meta == 3
+    assert streams.meta.stream == 3
+    assert streams.meta.count == 707
+    assert streams.meta.timebase == 1000
+    assert streams.meta.frame_duration == 1001
 
 
 class FakePopen:

@@ -73,6 +73,9 @@ def join_files(filepaths, output):
         run(args)
 
 
+MetaMeta = namedtuple("MetaMeta", ["stream", "frame_count", "timebase", "frame_duration"])
+
+
 def find_streams(filepath, invoke=invoke):
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
@@ -81,11 +84,6 @@ def find_streams(filepath, invoke=invoke):
     video_selector = lambda s: s["codec_type"] == "video"
     audio_selector = lambda s: s["codec_type"] == "audio"
     data_selector = lambda s: s["codec_type"] == "data" and s["codec_tag_string"] == "gpmd"
-
-    video_stream = None
-    video_dimension = None
-    audio_stream = None
-    meta_stream = None
 
     def first_and_only(what, l, p):
         matches = list(filter(p, l))
@@ -104,16 +102,23 @@ def find_streams(filepath, invoke=invoke):
     audio_stream = audio["index"]
 
     meta = first_and_only("metadata stream", streams, data_selector)
-    meta_stream = meta["index"]
 
-    if video_stream is None or audio_stream is None or meta_stream is None or video_dimension is None:
+    # meta_frame_duration isn't available here in ffprobe, need to look at first packet, see comment.
+    meta_meta = MetaMeta(
+        stream = int(meta["index"]),
+        frame_count=int(meta["nb_frames"]),
+        timebase=int(meta["time_base"].split("/")[1]),
+        frame_duration=1001
+     )
+
+    if video_stream is None or audio_stream is None or meta_meta.stream is None or video_dimension is None:
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
 
-    return StreamInfo(audio_stream, video_stream, meta_stream, video_dimension)
+    return StreamInfo(audio_stream, video_stream, meta=meta_meta, video_dimension=video_dimension)
 
 
 def load_gpmd_from(filepath):
-    track = find_streams(filepath).meta
+    track = find_streams(filepath).meta.stream
     if track:
         cmd = ["ffmpeg", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
         result = run(cmd, capture_output=True, timeout=10)
@@ -136,6 +141,26 @@ def ffmpeg_libx264_is_installed():
     output = invoke(["ffmpeg", "-v", "quiet", "-codecs"]).stdout
     libx264s = [x for x in output.split('\n') if "libx264" in x]
     return len(libx264s) > 0
+
+
+# ffprobe -hide_banner -print_format json -show_packets -select_streams 3 -read_intervals '%+#1'  GH010278.MP4
+# {
+#     "packets": [
+#         {
+#             "codec_type": "data",
+#             "stream_index": 3,
+#             "pts": 0,
+#             "pts_time": "0.000000",
+#             "dts": 0,
+#             "dts_time": "0.000000",
+#             "duration": 1001,
+#             "duration_time": "1.001000",
+#             "size": "4248",
+#             "pos": "7867500",
+#             "flags": "K_"
+#         }
+#     ]
+# }
 
 
 class FFMPEGGenerate:

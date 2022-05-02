@@ -481,7 +481,7 @@ class GPS5EntryConverter:
                 )
 
 
-class TimestampTracker:
+class CoriTimestampPacketTimeCalculator:
     def __init__(self, cori_timestamp):
         self._cori_timestamp = cori_timestamp
         self._first_timestamp = None
@@ -509,7 +509,7 @@ class NewGPS5EntryConverter:
     def __init__(self, units, cori_timestamp, on_item=lambda c, e: None):
         self._units = units
         self._on_item = on_item
-        self._tracker = TimestampTracker(cori_timestamp)
+        self._tracker = CoriTimestampPacketTimeCalculator(cori_timestamp)
 
     def convert(self, counter, components):
         sample_time_calculator = self._tracker.next_timestamp(components.timestamp, len(components.points))

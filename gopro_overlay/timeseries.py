@@ -222,7 +222,7 @@ def gps_filters(report, dop_max):
     return drop_item
 
 
-def timeseries_from_data(data, units, on_drop=lambda reason: None):
+def timeseries_from_meta(meta, units, on_drop=lambda reason: None):
     ts = Timeseries()
 
     converter = GPS5EntryConverter(units=units,
@@ -231,10 +231,10 @@ def timeseries_from_data(data, units, on_drop=lambda reason: None):
 
     visitor = GPSVisitor(converter=converter.convert)
 
-    GoproMeta.parse(data).accept(visitor)
+    meta.accept(visitor)
 
     return ts
 
 
 def timeseries_from(filepath, **kwargs):
-    return timeseries_from_data(load_gpmd_from(filepath), **kwargs)
+    return timeseries_from_meta(GoproMeta.parse(load_gpmd_from(filepath)), **kwargs)
