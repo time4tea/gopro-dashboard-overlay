@@ -2,6 +2,7 @@ import datetime
 import random
 
 from .framemeta import FrameMeta
+from .gpmd import GPSFix
 from .point import Point
 from .timeseries import Entry, Timeseries
 from .timeunits import timeunits
@@ -79,7 +80,8 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                 hr=units.Quantity(hr.step(), units.bpm),
                 alt=units.Quantity(alt.step(), units.m),
                 atemp=units.Quantity(temp.step(), units.celsius),
-                grad=units.Quantity(grad.step())
+                grad=units.Quantity(grad.step()),
+                gpsfix=GPSFix.LOCK_2D.value,
             )
         )
         current_dt = current_dt + step
