@@ -20,6 +20,7 @@ from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 
@@ -169,7 +170,7 @@ if __name__ == "__main__":
             draw_timer = PoorTimer("drawing frames")
 
             # Draw an overlay frame every 0.1 seconds
-            stepper = gopro_frame_meta.stepper(timedelta(seconds=0.1))
+            stepper = gopro_frame_meta.stepper(timeunits(seconds=0.1))
             progress = progressbar.ProgressBar(
                 widgets=[
                     'Render: ',

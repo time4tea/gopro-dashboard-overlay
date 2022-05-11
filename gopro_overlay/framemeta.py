@@ -1,28 +1,29 @@
 import bisect
-import datetime
 
+from gopro_overlay import ffmpeg
 from gopro_overlay.ffmpeg import load_gpmd_from
-from gopro_overlay.gpmd import NewGPS5EntryConverter, DetermineTimestampOfFirstSHUTVisitor, GPSVisitor, GoproMeta
+from gopro_overlay.gpmd import NewGPS5EntryConverter, DetermineTimestampOfFirstSHUTVisitor, GPSVisitor, GoproMeta, \
+    CalculateCorrectionFactorsVisitor, CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
+from gopro_overlay.timeunits import Timeunit, timeunits
 
 
 class Stepper:
 
-    def __init__(self, framemeta, step: datetime.timedelta):
+    def __init__(self, framemeta, step: Timeunit):
         self._framemeta = framemeta
         self._step = step
 
     def __len__(self):
         max_ms = self._framemeta.framelist[-1]
-        duration = datetime.timedelta(milliseconds=max_ms)
-        steps = int(duration / self._step) + 1
+        steps = int(max_ms / self._step) + 1
         return steps
 
     def steps(self):
         end = self._framemeta.framelist[-1]
-        running = 0
+        running = timeunits(millis=0)
         while running <= end:
             yield running
-            running += int(self._step.microseconds / 1000)
+            running += self._step
 
 
 class FrameMeta:
@@ -35,7 +36,7 @@ class FrameMeta:
         self.check_modified()
         return len(self.framelist)
 
-    def stepper(self, step):
+    def stepper(self, step: Timeunit):
         self.check_modified()
         return Stepper(self, step)
 
@@ -61,20 +62,20 @@ class FrameMeta:
         if self.modified:
             self._update()
 
-    def get(self, time_ms, interpolate=True):
+    def get(self, frame_time: Timeunit, interpolate=True):
         self.check_modified()
 
-        if time_ms in self.frames:
-            return self.frames[time_ms]
+        if frame_time in self.frames:
+            return self.frames[frame_time]
 
         if not interpolate:
-            raise KeyError(f"Frame at {time_ms}ms not found")
+            raise KeyError(f"Frame at {frame_time}ms not found")
 
-        if time_ms < self.min:
-            print(f"Request for data at time {time_ms}, before start of metadata, returning first item")
+        if frame_time < self.min:
+            print(f"Request for data at time {frame_time}, before start of metadata, returning first item")
             return self.frames[self.framelist[0]]
 
-        later_idx = bisect.bisect_left(self.framelist, time_ms)
+        later_idx = bisect.bisect_left(self.framelist, frame_time)
         earlier_idx = later_idx - 1
 
         later_time = self.framelist[later_idx]
@@ -84,8 +85,9 @@ class FrameMeta:
         earlier_item = self.frames[earlier_time]
 
         pts_delta = later_time - earlier_time
-        wanted_date = ((((later_item.dt - earlier_item.dt) / pts_delta) * (
-            (time_ms - earlier_time) / pts_delta))) + earlier_item.dt
+        gps_delta = timeunits(seconds=(later_item.dt - earlier_item.dt).total_seconds())
+        delta = (gps_delta * ((frame_time - earlier_time) / pts_delta))
+        wanted_date = delta.timedelta() + earlier_item.dt
 
         return earlier_item.interpolate(other=later_item, dt=wanted_date)
 
@@ -110,14 +112,24 @@ class FrameMeta:
                 self.frames[e].update(**updates)
 
 
-def framemeta_from_meta(meta, units):
+def framemeta_from_meta(meta, units, metameta=None):
     frame_meta = FrameMeta()
 
     cori_timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
 
+    if cori_timestamp is None:
+        assert metameta is not None
+        correction_factors = meta.accept(
+            CalculateCorrectionFactorsVisitor("GPS5", metameta)
+        ).factors()
+
+        calculator = CorrectionFactorsPacketTimeCalculator(correction_factors)
+    else:
+        calculator = CoriTimestampPacketTimeCalculator(cori_timestamp)
+
     converter = NewGPS5EntryConverter(
         units,
-        cori_timestamp=cori_timestamp,
+        calculator=calculator,
         on_item=lambda c, e: frame_meta.add(c, e)
     )
 
@@ -127,4 +139,9 @@ def framemeta_from_meta(meta, units):
 
 
 def framemeta_from(filepath, units):
-    return framemeta_from_meta(GoproMeta.parse(load_gpmd_from(filepath)), units)
+    gopro_meta = GoproMeta.parse(load_gpmd_from(filepath))
+    return framemeta_from_meta(
+        gopro_meta,
+        units,
+        metameta=ffmpeg.find_streams(filepath)
+    )

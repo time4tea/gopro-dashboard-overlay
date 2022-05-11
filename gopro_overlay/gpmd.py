@@ -4,9 +4,12 @@ import datetime
 import itertools
 import struct
 from enum import Enum
+from typing import Optional
 
 from .entry import Entry
+from .ffmpeg import MetaMeta
 from .point import Point, Point3
+from .timeunits import timeunits, Timeunit
 
 GPMDStruct = struct.Struct('>4sBBH')
 
@@ -39,7 +42,7 @@ def _interpret_string(item, *args):
     return item.rawdata.decode('utf-8', errors='replace').strip('\0')
 
 
-def _interpret_timestamp(item, *args):
+def _interpret_gps_timestamp(item, *args):
     return datetime.datetime.strptime(item.rawdata.decode('utf-8', errors='replace'), '%y%m%d%H%M%S.%f').replace(
         tzinfo=datetime.timezone.utc)
 
@@ -51,6 +54,10 @@ def _struct_mapping_for(item, repeat=None):
 
 def _interpret_atom(item, *args):
     return _struct_mapping_for(item).unpack_from(item.rawdata)[0]
+
+
+def _interpret_timestamp(item, *args):
+    return timeunits(micros=_interpret_atom(item, *args))
 
 
 def _interpret_list(item, *args):
@@ -110,12 +117,12 @@ interpreters = {
     "GPS5": _interpret_gps5,
     "GPSF": _interpret_gps_lock,
     "GPSP": _interpret_gps_precision,
-    "GPSU": _interpret_timestamp,
+    "GPSU": _interpret_gps_timestamp,
     "GYRO": _interpret_xyz,
     "MWET": _interpret_list,
     "SCAL": _interpret_list,
     "SIUN": _interpret_string,
-    "STMP": _interpret_atom,
+    "STMP": _interpret_timestamp,
     "TMPC": _interpret_atom,
     "STNM": _interpret_string,
     "STRM": _interpret_stream_marker,
@@ -454,6 +461,81 @@ class GPSVisitor:
         pass
 
 
+class PayloadMaths:
+    def __init__(self, metameta: MetaMeta):
+        self._metameta = metameta
+        self._max_time = metameta.frame_count * metameta.frame_duration / metameta.timebase
+
+    def time_of_out_packet(self, packet_number):
+        packet_time = (packet_number + 1) * self._metameta.frame_duration / self._metameta.timebase
+        return min(packet_time, self._max_time)
+
+
+CorrectionFactors = collections.namedtuple("CorrectionFactors", ["first_frame", "last_frame", "frames_s"])
+
+
+class CalculateCorrectionFactorsVisitor:
+    """This implements GetGPMFSampleRate in GPMF_utils.c"""
+
+    def __init__(self, wanted, metameta: MetaMeta):
+        self.wanted = wanted
+        self.wanted_method_name = f"vi_{self.wanted}"
+        self._payload_maths = PayloadMaths(metameta)
+        self.count = 0
+        self.samples = 0
+        self.meanY = 0
+        self.meanX = 0
+        self.repeatarray = []
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def __getattr__(self, name, *args):
+        if name == self.wanted_method_name:
+            return self._handle_item
+        else:
+            raise AttributeError(f"{name}")
+
+    def vic_STRM(self, item, contents):
+        if self.wanted in contents:
+            return self
+
+    def _handle_item(self, item):
+        self.samples += item.repeat
+        self.meanY += self.samples
+        self.meanX += self._payload_maths.time_of_out_packet(self.count)
+        self.repeatarray.append(self.samples)
+        self.count += 1
+
+    def v_end(self):
+        pass
+
+    # no idea how this works, but the numbers that come out of it are the same numbers as in GPMF_utils.c
+    def factors(self):
+        meanY = self.meanY / self.count
+        meanX = self.meanX / self.count
+
+        top = 0
+        bottom = 0
+        for index, sample in enumerate(self.repeatarray):
+            time_of_out_packet = self._payload_maths.time_of_out_packet(index)
+            top += (time_of_out_packet - meanX) * (sample - meanY)
+            bottom += (time_of_out_packet - meanX) * (time_of_out_packet - meanX)
+
+        slope = top / bottom
+        rate = slope
+
+        intercept = meanY - slope * meanX
+        first = -intercept / rate
+        last = first + self.samples / rate
+
+        return CorrectionFactors(
+            first_frame=timeunits(seconds=first),
+            last_frame=timeunits(seconds=last),
+            frames_s=rate
+        )
+
+
 class GPS5EntryConverter:
 
     def __init__(self, units, drop_item=lambda t, c: False, on_item=lambda e: None):
@@ -482,20 +564,20 @@ class GPS5EntryConverter:
 
 
 class CoriTimestampPacketTimeCalculator:
-    def __init__(self, cori_timestamp):
+    def __init__(self, cori_timestamp: Timeunit):
         self._cori_timestamp = cori_timestamp
-        self._first_timestamp = None
-        self._last_timestamp = None
-        self._adjust = None
+        self._first_timestamp: Optional[Timeunit] = None
+        self._last_timestamp: Optional[Timeunit] = None
+        self._adjust: Optional[Timeunit] = None
 
-    def next_timestamp(self, timestamp, num_samples):
+    def next_packet(self, timestamp, samples_before_this, num_samples):
         if self._first_timestamp is None:
             self._first_timestamp = timestamp
             self._adjust = timestamp - self._cori_timestamp
 
         if self._last_timestamp is None:
             self._last_timestamp = timestamp
-            time_per_sample = 1001000 / num_samples
+            time_per_sample = timeunits(millis=1001) / num_samples
         else:
             time_per_sample = (timestamp - self._last_timestamp) / num_samples
             self._last_timestamp = timestamp
@@ -505,26 +587,43 @@ class CoriTimestampPacketTimeCalculator:
         )
 
 
+class CorrectionFactorsPacketTimeCalculator:
+    def __init__(self, correction_factors: CorrectionFactors):
+        self.correction_factors = correction_factors
+
+    def next_packet(self, timestamp, samples_before_this, num_samples):
+        return lambda index: (
+            self.correction_factors.first_frame + timeunits(
+                seconds=(samples_before_this + index) / self.correction_factors.frames_s),
+            timeunits(seconds=index / self.correction_factors.frames_s)
+        )
+
+
 class NewGPS5EntryConverter:
-    def __init__(self, units, cori_timestamp, on_item=lambda c, e: None):
+    def __init__(self, units, calculator, on_item=lambda c, e: None):
         self._units = units
         self._on_item = on_item
-        self._tracker = CoriTimestampPacketTimeCalculator(cori_timestamp)
+        self._total_samples = 0
+        self._frame_calculator = calculator
 
     def convert(self, counter, components):
-        sample_time_calculator = self._tracker.next_timestamp(components.timestamp, len(components.points))
+        sample_time_calculator = self._frame_calculator.next_packet(
+            components.timestamp,
+            self._total_samples,
+            len(components.points)
+        )
 
         for index, point in enumerate(components.points):
-            sample_frame_timestamp_us, sample_time_offset_us = sample_time_calculator(index)
+            sample_frame_timestamp, sample_time_offset = sample_time_calculator(index)
 
             point_datetime = components.basetime + datetime.timedelta(
-                microseconds=sample_time_offset_us
+                microseconds=sample_time_offset.us
             )
             self._on_item(
-                int(sample_frame_timestamp_us / 1000),
+                sample_frame_timestamp,
                 Entry(
                     dt=point_datetime,
-                    timestamp=self._units.Quantity(sample_frame_timestamp_us / 1000, self._units.number),
+                    timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
                     dop=self._units.Quantity(components.dop, self._units.number),
                     packet=self._units.Quantity(counter, self._units.number),
                     packet_index=self._units.Quantity(index, self._units.number),
@@ -534,9 +633,11 @@ class NewGPS5EntryConverter:
                     gpsfix=components.fix.value
                 )
             )
+        self._total_samples += len(components.points)
+
+    # noinspection PyPep8Naming
 
 
-# noinspection PyPep8Naming
 class DetermineTimestampOfFirstSHUTVisitor:
     """
         Seems like first SHUT frame is correlated with video frame?
@@ -551,7 +652,8 @@ class DetermineTimestampOfFirstSHUTVisitor:
         return self._initial_timestamp
 
     def vic_DEVC(self, item, contents):
-        return self
+        if not self._initial_timestamp:
+            return self
 
     def vi_STMP(self, item):
         self._initial_timestamp = interpret_item(item)
@@ -562,3 +664,25 @@ class DetermineTimestampOfFirstSHUTVisitor:
 
     def v_end(self):
         pass
+
+
+class DebuggingVisitor:
+
+    def __init__(self):
+        self._indent = 0
+
+    def __getattr__(self, item):
+        if item.startswith("vi_"):
+            return lambda a: print(f"{' ' * self._indent}{a}")
+        if item.startswith("vic_"):
+            def thing(a, b):
+                print(f"{' ' * self._indent}{a}")
+                self._indent += 1
+
+                return self
+
+            return thing
+        raise AttributeError(item)
+
+    def v_end(self):
+        self._indent -= 1

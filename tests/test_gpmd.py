@@ -4,18 +4,28 @@ import os
 from array import array
 from pathlib import Path
 
+import pytest
+
+from gopro_overlay import ffmpeg
 from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter, GPS5EntryConverter, XYZ, \
-    GoproMeta, interpret_item, DetermineTimestampOfFirstSHUTVisitor
+    GoproMeta, DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
+    CorrectionFactorsPacketTimeCalculator, CorrectionFactors, DebuggingVisitor
 from gopro_overlay.point import Point, Point3, Quaternion
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
+from tests.test_framedata import load_file
 
 
-def load_meta(name):
-    sourcefile = Path(inspect.getfile(load_meta))
+def path_of_meta(name):
+    sourcefile = Path(inspect.getfile(path_of_meta))
 
     meta_dir = sourcefile.parents[0].joinpath("meta")
 
-    with open(os.path.join(meta_dir, name), "rb") as f:
+    return os.path.join(meta_dir, name)
+
+
+def load_meta(name):
+    with open(path_of_meta(name), "rb") as f:
         arr = array("b")
         arr.frombytes(f.read())
         return arr
@@ -212,6 +222,42 @@ def test_load_gravity_meta():
     meta.accept(GRAVisitor(process_gravities))
 
 
+def test_estimation_of_timestamps():
+    ''' use GetGPMFSampleRate on the same file to get the values to assert... '''
+    filepath = path_of_meta("hero7.mp4")
+
+    metameta = ffmpeg.find_streams(filepath).meta
+    meta = load_file(filepath)
+
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", metameta))
+
+    factors = visitor.factors()
+
+    assert visitor.count == 12
+    assert visitor.samples == 219
+    assert visitor.meanY == 1427
+    assert visitor.meanX == 78.078000000000003
+
+    assert factors.first_frame == timeunits(seconds=-0.0241305)
+    assert factors.last_frame == timeunits(seconds=12.002847)
+    assert factors.frames_s == pytest.approx(18.209063, 0.0000001)
+
+
+def test_correction_factors_calculator():
+    calculator = CorrectionFactorsPacketTimeCalculator(
+        CorrectionFactors(
+            first_frame=timeunits(seconds=1),
+            last_frame=timeunits(seconds=10),
+            frames_s=20
+        )
+    )
+
+    assert calculator.next_packet(-1000, 0, 20)(0) == (timeunits(millis=1000), timeunits(millis=0))
+    assert calculator.next_packet(-1000, 0, 20)(1) == (timeunits(millis=1050), timeunits(millis=50))
+    assert calculator.next_packet(-1000, 0, 20)(19) == (timeunits(millis=1950), timeunits(millis=950))
+    assert calculator.next_packet(-1000, 20, 20)(0) == (timeunits(millis=2000), timeunits(millis=0))
+
+
 class CountingVisitor:
     def __init__(self):
         self.count = 0
@@ -227,25 +273,3 @@ class CountingVisitor:
 
     def v_end(self):
         pass
-
-
-class DebuggingVisitor:
-
-    def __init__(self):
-        self._indent = 0
-
-    def __getattr__(self, item):
-        if item.startswith("vi_"):
-            return lambda a: print(f"{' ' * self._indent}{a}")
-        if item.startswith("vic_"):
-            def thing(a, b):
-                print(f"{' ' * self._indent}{a}")
-                self._indent += 1
-
-                return self
-
-            return thing
-        raise AttributeError(item)
-
-    def v_end(self):
-        self._indent -= 1
