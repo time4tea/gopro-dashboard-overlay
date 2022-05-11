@@ -86,7 +86,11 @@ if __name__ == "__main__":
     with PoorTimer("program").timing():
 
         with PoorTimer("loading timeseries").timing():
-            gopro_frame_meta = framemeta_from(input_file, units=units)
+            gopro_frame_meta = framemeta_from(
+                input_file,
+                metameta=stream_info.meta,
+                units=units
+            )
 
         if len(gopro_frame_meta) < 1:
             raise IOError(
