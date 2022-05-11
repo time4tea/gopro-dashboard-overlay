@@ -27,7 +27,7 @@ def load_xml_layout(filename):
             return f.read()
 
 
-def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda name: True):
+def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -53,7 +53,7 @@ def layout_from_xml(xml, renderer, timeseries, font, privacy, include=lambda nam
                 raise IOError(f"Component of type of '{component_type}' is not recognised, check spelling / examples")
 
             method = getattr(sys.modules[__name__], attr)
-            return method(child, entry=entry, renderer=renderer, timeseries=timeseries, font=font_at, privacy=privacy)
+            return method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at, privacy=privacy)
 
         def create_composite(element):
             return Translate(

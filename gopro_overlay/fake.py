@@ -1,8 +1,10 @@
 import datetime
 import random
 
+from .framemeta import FrameMeta
 from .point import Point
 from .timeseries import Entry, Timeseries
+from .timeunits import timeunits
 from .units import units
 
 
@@ -44,11 +46,12 @@ class Random2D:
         return self._point
 
 
-def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
-                    step: datetime.timedelta = datetime.timedelta(seconds=0.1),
-                    rng: random.Random = None,
-                    point_step = 0.001,
-                    start_timestamp: int = 0):
+def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
+                   step: datetime.timedelta = datetime.timedelta(seconds=0.1),
+                   rng: random.Random = None,
+                   point_step = 0.001,
+                   start_timestamp: int = 0) -> FrameMeta:
+
     rng = rng or random.Random()
 
     points = Random2D(Point(51.4972, -0.1499), point_step, rng=rng)
@@ -59,12 +62,15 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
     alt = Random1D(1000, rng=rng)
     temp = Random1D(27, rng=rng)
 
-    ts = Timeseries()
+    fm = FrameMeta()
     current_dt = datetime.datetime.fromtimestamp(start_timestamp, tz=datetime.timezone.utc)
+    current_frame_time = timeunits(millis=0)
+
     end_dt = current_dt + length
 
     while current_dt <= end_dt:
-        ts.add(
+        fm.add(
+            current_frame_time,
             Entry(
                 current_dt,
                 point=points.step(),
@@ -77,5 +83,5 @@ def fake_timeseries(length: datetime.timedelta = datetime.timedelta(seconds=20),
             )
         )
         current_dt = current_dt + step
-
-    return ts
+        current_frame_time = current_frame_time + timeunits(seconds=step.total_seconds())
+    return fm

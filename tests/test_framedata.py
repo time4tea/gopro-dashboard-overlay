@@ -13,8 +13,8 @@ def load_file(path):
     return GoproMeta.parse(ffmpeg.load_gpmd_from(path))
 
 
-def test_file_path(name):
-    sourcefile = Path(inspect.getfile(test_file_path))
+def file_path_of_test_asset(name):
+    sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 
     meta_dir = sourcefile.parents[0].joinpath("meta")
 
@@ -23,7 +23,7 @@ def test_file_path(name):
 
 def test_loading_data_by_frame():
     # filepath = "/data/richja/gopro/GH010079.MP4"
-    filepath = test_file_path("hero7.mp4")
+    filepath = file_path_of_test_asset("hero7.mp4")
     meta = load_file(filepath)
 
     # meta.accept(DebuggingVisitor())

@@ -16,7 +16,7 @@ from tests.testenvironment import is_make
 rng = random.Random()
 rng.seed(12345)
 
-timeseries = fake.fake_timeseries(length=timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
+framemeta = fake.fake_framemeta(length=timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 renderer = CachingRenderer()
 
@@ -30,7 +30,7 @@ def test_render_default_layout():
     xmldoc = load_xml_layout("default-1920x1080")
 
     with renderer.open() as map_renderer:
-        return time_layout("default", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))
+        return time_layout("default", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
 
 @approve_image
@@ -40,7 +40,7 @@ def test_render_default_layout_4k():
     with renderer.open() as map_renderer:
         return time_layout(
             "default-4k",
-            layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()),
+            layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()),
             dimensions=Dimension(3840, 2160)
         )
 
@@ -58,7 +58,7 @@ def test_render_example_layout():
     xmldoc = load_xml_layout("example")
 
     with renderer.open() as map_renderer:
-        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))
+        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
 
 @approve_image
@@ -74,7 +74,7 @@ def test_render_xml_component():
     """
 
     with renderer.open() as map_renderer:
-        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, timeseries, font, privacy=NoPrivacyZone()))
+        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
 
 @approve_image
@@ -99,7 +99,7 @@ def test_render_xml_component_with_exclusions():
                            layout_from_xml(
                                xmldoc,
                                map_renderer,
-                               timeseries,
+                               framemeta,
                                font,
                                privacy=NoPrivacyZone(),
                                include=lambda name: name == "alice"
@@ -107,12 +107,12 @@ def test_render_xml_component_with_exclusions():
 
 
 def time_layout(name, layout, repeat=20, dimensions=Dimension(1920, 1080)):
-    overlay = Overlay(dimensions, timeseries=timeseries, create_widgets=layout)
+    overlay = Overlay(dimensions, framemeta=framemeta, create_widgets=layout)
 
     timer = PoorTimer(name)
 
     for i in range(0, repeat):
-        draw = timer.time(lambda: overlay.draw(timeseries.min))
+        draw = timer.time(lambda: overlay.draw(framemeta.min))
 
     print(timer)
 

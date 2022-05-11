@@ -146,7 +146,7 @@ def test_load_accel_meta():
 def test_find_first_shut_timestamp():
     meta = load("gopro-meta.gpmd")
 
-    assert meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp == 3538581891
+    assert meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp == timeunits(micros=3538581891)
 
 
 class CORIVisitor:

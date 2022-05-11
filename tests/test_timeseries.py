@@ -292,7 +292,7 @@ def test_no_filling_missing_entries_2():
 
 
 def test_taking_a_view():
-    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
+    ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1))
 
     window = Window(ts, timedelta(minutes=1), samples=100, key=lambda e: e.alt, missing=0)
 
@@ -310,7 +310,7 @@ def test_taking_a_view():
 
 
 def test_missing_window_entries():
-    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
+    ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1))
 
     window = Window(ts, timedelta(minutes=1), samples=100, key=lambda e: e.bob, fmt=lambda v: v.magnitude, missing=0)
 
@@ -318,7 +318,7 @@ def test_missing_window_entries():
 
 
 def test_stepping_through_time():
-    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1))
+    ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1))
     stepper = ts.stepper(timedelta(minutes=1))
 
     steps = []

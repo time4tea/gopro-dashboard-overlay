@@ -6,8 +6,8 @@ from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.framemeta import framemeta_from_meta
 from gopro_overlay.geo import CachingRenderer
-from gopro_overlay.gpmd import timeseries_from_data
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
 from gopro_overlay.point import Coordinate
@@ -27,7 +27,7 @@ title_font = font.font_variant(size=16)
 rng = random.Random()
 rng.seed(12345)
 
-ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
+ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 renderer = CachingRenderer()
 
@@ -36,15 +36,15 @@ def a_real_journey(name, dimension, f_scene):
     with open("meta/gopro-meta.gpmd", "rb") as f:
         data = f.read()
 
-    timeseries = timeseries_from_data(data=data, units=units)
+    framemeta = framemeta_from_meta(meta=data, units=units)
 
     overlay = Overlay(
         dimensions=dimension,
-        timeseries=timeseries,
+        framemeta=framemeta,
         create_widgets=f_scene
     )
 
-    stepper = timeseries.stepper(timedelta(seconds=0.1))
+    stepper = framemeta.stepper(timedelta(seconds=0.1))
 
     timer = PoorTimer(name)
 
@@ -161,9 +161,10 @@ def test_moving_journey_map_at_start():
                 ),
             ])
 
+
 @approve_image
 def test_moving_journey_map_halfway():
-    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
+    ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
 
     with renderer.open() as map_renderer:
         return time_rendering(
@@ -182,9 +183,10 @@ def test_moving_journey_map_halfway():
                 ),
             ])
 
+
 @approve_image
 def test_moving_journey_map_in_frame():
-    ts = fake.fake_timeseries(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
+    ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
 
     with renderer.open() as map_renderer:
         return time_rendering(

@@ -5,7 +5,7 @@ import math
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.ffmpeg import load_gpmd_from
-from gopro_overlay.gpmd import GPS5EntryConverter, GPSVisitor, GoproMeta
+from gopro_overlay.gpmd import GPS5EntryConverter, GPSVisitor, GoproMeta, GPSFix
 
 
 def pairwise(iterable):  # Added in itertools v3.10
