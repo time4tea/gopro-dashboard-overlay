@@ -26,6 +26,9 @@ class GPSFix(Enum):
     LOCK_3D = 3
 
 
+GPS_FIXED = {GPSFix.LOCK_3D, GPSFix.LOCK_2D}
+GPS_FIXED_VALUES = {GPSFix.LOCK_3D.value, GPSFix.LOCK_2D.value}
+
 type_mappings = {'c': 'c',
                  'L': 'L',
                  's': 'h',

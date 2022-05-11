@@ -1,3 +1,4 @@
+from .gpmd import GPS_FIXED_VALUES
 from .point import Point
 
 
@@ -52,9 +53,10 @@ class Journey:
         self.lon = MinMax("lon")
 
     def accept(self, item):
-        self.locations.append(item.point)
-        self.lat.update(item.point.lat)
-        self.lon.update(item.point.lon)
+        if item.gpsfix in GPS_FIXED_VALUES:
+            self.locations.append(item.point)
+            self.lat.update(item.point.lat)
+            self.lon.update(item.point.lon)
 
     @property
     def bounding_box(self):

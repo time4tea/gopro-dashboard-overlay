@@ -1,6 +1,5 @@
 import bisect
 
-from gopro_overlay import ffmpeg
 from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import NewGPS5EntryConverter, DetermineTimestampOfFirstSHUTVisitor, GPSVisitor, GoproMeta, \
     CalculateCorrectionFactorsVisitor, CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
