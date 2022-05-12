@@ -8,6 +8,9 @@ class Timeunit:
     def millis(self):
         return self.us / 1000
 
+    def __abs__(self):
+        return Timeunit(abs(self.us))
+
     def __add__(self, other):
         return Timeunit(self.us + other.us)
 
@@ -52,14 +55,21 @@ class Timeunit:
         return datetime.timedelta(microseconds=self.us)
 
 
+multipliers = {
+    "micros": 1,
+    "millis": 1000,
+    "seconds": 1000 * 1000,
+    "minutes": 1000 * 1000 * 60,
+    "hours": 1000 * 1000 * 60 * 60,
+    "days": 1000 * 1000 * 60 * 60 * 24,
+}
+
+
 def timeunits(**kwargs):
     if len(kwargs) > 1:
         raise NotImplemented(f"Can only supply a single arg, not {kwargs}")
-    if "seconds" in kwargs:
-        return Timeunit(kwargs["seconds"] * 1000 * 1000)
-    elif "millis" in kwargs:
-        return Timeunit(kwargs["millis"] * 1000)
-    elif "micros" in kwargs:
-        return Timeunit(kwargs["micros"])
-    else:
-        raise AttributeError(f"Arg {kwargs} not supported")
+    for k, v in multipliers.items():
+        if k in kwargs:
+            return Timeunit(kwargs[k] * v)
+
+    raise AttributeError(f"Arg {kwargs} not supported")

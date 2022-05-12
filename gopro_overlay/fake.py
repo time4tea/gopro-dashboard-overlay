@@ -4,7 +4,7 @@ import random
 from .framemeta import FrameMeta
 from .gpmd import GPSFix
 from .point import Point
-from .timeseries import Entry, Timeseries
+from .timeseries import Entry
 from .timeunits import timeunits
 from .units import units
 
@@ -50,9 +50,8 @@ class Random2D:
 def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                    step: datetime.timedelta = datetime.timedelta(seconds=0.1),
                    rng: random.Random = None,
-                   point_step = 0.001,
+                   point_step=0.001,
                    start_timestamp: int = 0) -> FrameMeta:
-
     rng = rng or random.Random()
 
     points = Random2D(Point(51.4972, -0.1499), point_step, rng=rng)
@@ -74,6 +73,7 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
             current_frame_time,
             Entry(
                 current_dt,
+                timestamp=units.Quantity(current_frame_time.millis(), units.number),
                 point=points.step(),
                 speed=units.Quantity(speed.step(), units.mps),
                 cad=units.Quantity(cad.step(), units.rpm),

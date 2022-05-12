@@ -149,57 +149,6 @@ class Timeseries:
                 self.entries[e].update(**updates)
 
 
-class View:
-    def __init__(self, data, version):
-        self.data = data
-        self.version = version
-
-
-class Window:
-
-    def __init__(self, ts, duration, samples, key=lambda e: 1, fmt=lambda v: v, missing=None):
-        self.ts = ts
-        self.duration = duration
-        self.samples = samples
-        self.tick = duration / samples
-        self.key = key
-        self.fmt = fmt
-        self.missing = missing
-
-        self.last_time = None
-        self.last_view = None
-
-        self.version = 0
-
-    def view(self, at):
-
-        if self.last_time is not None and abs(at - self.last_time) < self.tick:
-            return self.last_view
-
-        start = at - self.duration / 2
-        end = at + self.duration / 2
-
-        current = start
-
-        data = []
-
-        while current < end:
-            if current < self.ts.min or current > self.ts.max:
-                data.append(self.missing)
-            else:
-                value = self.key(self.ts.get(current))
-                if value is not None:
-                    data.append(self.fmt(value))
-                else:
-                    data.append(self.missing)
-            current += self.tick
-
-        self.version += 1
-        self.last_time = at
-        self.last_view = View(data, self.version)
-
-        return self.last_view
-
 
 def gps_filters(report, dop_max):
     do_report = lambda t, c, m: report(f"Packet {t}, GPS Time {c.basetime} Discarding GPS Location: {m}")

@@ -10,6 +10,9 @@ def test_simple_timeunits():
 def test_conversions():
     assert timeunits(millis=1) == timeunits(micros=1000)
     assert timeunits(seconds=1) == timeunits(micros=1000000)
+    assert timeunits(minutes=1) == timeunits(seconds=60)
+    assert timeunits(hours=1) == timeunits(minutes=60)
+    assert timeunits(days=1) == timeunits(hours=24)
 
 
 def test_add():
@@ -32,6 +35,10 @@ def test_divide():
 
 def test_ignores_partial_us():
     assert timeunits(micros=1000.1) == timeunits(micros=1000)
+
+
+def test_abs():
+    assert abs(timeunits(seconds=-1)) == timeunits(seconds=1)
 
 
 def test_comparison():

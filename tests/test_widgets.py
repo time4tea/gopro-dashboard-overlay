@@ -6,10 +6,11 @@ from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.framemeta import View, Window
 from gopro_overlay.layout import BigMetric, gps_info
 from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate
-from gopro_overlay.timeseries import Window, View
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, Frame
@@ -100,7 +101,7 @@ def test_render_simple_chart():
 def test_render_chart():
     # Avg: 0.00019, Rate: 5,325.79
     window = Window(ts,
-                    duration=timedelta(minutes=2),
+                    duration=timeunits(minutes=2),
                     samples=256,
                     key=lambda e: e.alt, fmt=lambda v: v.magnitude)
 
@@ -113,7 +114,7 @@ def test_render_chart():
 
 def test_render_chart_with_no_data():
     window = Window(ts,
-                    duration=timedelta(minutes=2),
+                    duration=timeunits(minutes=2),
                     samples=256,
                     key=lambda e: e.bob, fmt=lambda v: v.magnitude)
 
@@ -127,12 +128,12 @@ def test_render_chart_with_no_data():
 # start = 0.04 / 24.52
 def test_render_moving_chart():
     window = Window(ts,
-                    duration=timedelta(minutes=2),
+                    duration=timeunits(minutes=2),
                     samples=256,
                     key=lambda e: e.alt.magnitude if e.alt else 0,
                     missing=None)
 
-    stepper = iter(ts.stepper(timedelta(seconds=1)).steps())
+    stepper = iter(ts.stepper(timeunits(seconds=1)).steps())
 
     def get_view():
         return window.view(next(stepper))
@@ -276,6 +277,7 @@ def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300
     timer = PoorTimer(name)
 
     scene = Scene(dimensions, widgets)
+    draw = None
     for i in range(0, repeat):
         draw = timer.time(lambda: scene.draw())
 
