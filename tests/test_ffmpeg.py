@@ -73,6 +73,7 @@ def test_ffmpeg_generate_execute():
 
     assert fake.args == [
         "ffmpeg",  #
+        '-hide_banner',
         "-y",  # overwrite targets
         "-loglevel", "info",
         "-f", "rawvideo",  # input format 'raw'
