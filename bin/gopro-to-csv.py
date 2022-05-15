@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     ts.process_deltas(timeseries_process.calculate_speeds())
     ts.process(timeseries_process.calculate_odo())
-    ts.process_deltas(timeseries_process.calculate_gradient(), skip=10)
+    ts.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)  # gradient hack
 
 
     def printable_unit(v):
