@@ -5,7 +5,6 @@ from pathlib import Path
 from gopro_overlay import ffmpeg
 from gopro_overlay.framemeta import framemeta_from_meta
 from gopro_overlay.gpmd import GoproMeta
-from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 
 
@@ -18,32 +17,21 @@ def file_path_of_test_asset(name):
 
     meta_dir = sourcefile.parents[0].joinpath("meta")
 
-    return os.path.join(meta_dir, name)
+    the_path = os.path.join(meta_dir, name)
 
+    if not os.path.exists(the_path):
+        raise IOError(f"Test file {the_path} does not exist")
+
+    return the_path
 
 def test_loading_data_by_frame():
-    # filepath = "/data/richja/gopro/GH010079.MP4"
     filepath = file_path_of_test_asset("hero7.mp4")
     meta = load_file(filepath)
 
-    # meta.accept(DebuggingVisitor())
-
     metameta = ffmpeg.find_streams(filepath).meta
 
-    frames = framemeta_from_meta(
+    framemeta_from_meta(
         meta,
         metameta=metameta,
         units=units
     )
-
-    print(frames)
-
-    print(frames.get(timeunits(millis=4013)))
-    print(frames.get(timeunits(millis=4065)))
-    print(frames.get(timeunits(millis=4030)))
-
-    print(frames.items()[-1])
-
-    stepper = frames.stepper(timeunits(seconds=0.1))
-    for step in stepper.steps():
-        print(step)

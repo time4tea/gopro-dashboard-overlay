@@ -14,7 +14,9 @@ from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_instal
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
+from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro
 from gopro_overlay.geo import CachingRenderer
+from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
@@ -97,22 +99,17 @@ if __name__ == "__main__":
 
         print(f"GoPro Timeseries has {len(gopro_frame_meta)} data points")
 
-        # if args.gpx:
-        #     gpx_timeseries = load_timeseries(args.gpx, units)
-        #     print(f"GPX Timeseries has {len(gpx_timeseries)} data points")
-        #     timeseries = gpx_timeseries.clip_to(gopro_timeseries)
-        #     print(f"GPX Timeseries overlap with GoPro - {len(timeseries)}")
-        #     if len(timeseries) < 1:
-        #         raise ValueError("No overlap between GoPro and GPX file - Is this the correct GPX file?")
-        # else:
-        #     timeseries = gopro_timeseries
+        if args.gpx:
+            gpx_timeseries = load_timeseries(args.gpx, units)
+            print(f"GPX Timeseries has {len(gpx_timeseries)} data points.. merging...")
+            merge_gpx_with_gopro(gpx_timeseries, gopro_frame_meta)
 
         print("Processing....")
         with PoorTimer("processing").timing():
             gopro_frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
             gopro_frame_meta.process_deltas(timeseries_process.calculate_speeds())
             gopro_frame_meta.process(timeseries_process.calculate_odo())
-            gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3) # hack approx 18 frames/sec * 3 secs
+            gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)  # hack approx 18 frames/sec * 3 secs
             # smooth azimuth (heading) points to stop wild swings of compass
             gopro_frame_meta.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 

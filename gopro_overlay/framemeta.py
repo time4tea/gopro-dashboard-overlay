@@ -33,6 +33,10 @@ class Window:
         if self.last_time is not None and abs(at - self.last_time) < self.tick:
             return self.last_view
 
+        return self._view_recalc(at)
+
+    def _view_recalc(self, at: Timeunit):
+
         start = at - self.duration / 2
         end = at + self.duration / 2
 
@@ -122,6 +126,10 @@ class FrameMeta:
         if not interpolate:
             raise KeyError(f"Frame at {frame_time}ms not found")
 
+        return self._get_interpolate(frame_time)
+
+    def _get_interpolate(self, frame_time):
+
         if frame_time < self.min:
             print(f"Request for data at time {frame_time}, before start of metadata, returning first item")
             return self.frames[self.framelist[0]]
@@ -193,10 +201,15 @@ def framemeta_from_meta(meta, units, metameta=None):
     return frame_meta
 
 
+def parse_gopro(gpmd_from, units, metameta: MetaMeta):
+    return framemeta_from_meta(GoproMeta.parse(gpmd_from), units, metameta=metameta)
+
+
 def framemeta_from(filepath, units, metameta: MetaMeta):
-    gopro_meta = GoproMeta.parse(load_gpmd_from(filepath))
-    return framemeta_from_meta(
-        gopro_meta,
-        units,
-        metameta=metameta
-    )
+    gpmd_from = load_gpmd_from(filepath)
+    return parse_gopro(gpmd_from, units, metameta)
+
+
+def framemeta_from_datafile(datapath, units, metameta: MetaMeta):
+    with open(datapath, "rb") as data:
+        return parse_gopro(data.read(), units, metameta)

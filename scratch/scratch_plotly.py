@@ -14,7 +14,6 @@ if __name__ == "__main__":
 
     # timeseries = gpx_timeseries.clip_to_datetimes(dt_min, dt_max)
 
-    ts.backfill(datetime.timedelta(seconds=1))
 
 
     def missing(a, b):

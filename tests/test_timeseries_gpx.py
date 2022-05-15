@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries, Entry
-from gopro_overlay.timeseries_gpx import timeseries_to_gpx
+from gopro_overlay.framemeta_gpx import framemeta_to_gpx
 from gopro_overlay.units import metres
 from tests.test_timeseries import datetime_of
 
@@ -16,7 +16,7 @@ def test_converting_timeseries_to_gpx():
     ts.add(Entry(dt2, point=Point(lat=2.0, lon=2.0), alt=metres(11)))
     ts.add(Entry(dt3, point=Point(lat=3.0, lon=3.0), alt=metres(10)))
 
-    gpx = timeseries_to_gpx(ts)
+    gpx = framemeta_to_gpx(ts)
 
     assert len(gpx.tracks[0].segments[0].points) == 3
     assert gpx.tracks[0].segments[0].points[0].latitude == 1.0

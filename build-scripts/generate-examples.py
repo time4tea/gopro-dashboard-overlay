@@ -4,8 +4,8 @@ from pathlib import Path
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
+from gopro_overlay.framemeta import framemeta_from_data
 from gopro_overlay.geo import CachingRenderer
-from gopro_overlay.gpmd import timeseries_from_data
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.privacy import NoPrivacyZone
@@ -53,10 +53,8 @@ if __name__ == "__main__":
 
     renderer = CachingRenderer()
 
-    with open(os.path.join(mydir, "..", "tests/meta/gopro-meta.gpmd"), "rb") as f:
-        data = f.read()
-
-    timeseries = timeseries_from_data(data=data, units=units)
+    datapath = os.path.join(mydir, "..", "tests/meta/gopro-meta.gpmd")
+    timeseries = framemeta_from_data(datapath=datapath, units=units)
 
     font = load_font("Roboto-Medium.ttf")
 

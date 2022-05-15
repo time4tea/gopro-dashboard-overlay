@@ -1,6 +1,12 @@
+import inspect
+import os
+from pathlib import Path
+
 import gpxpy
 
-from gopro_overlay import gpx
+from gopro_overlay import gpx, framemeta
+from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
@@ -72,3 +78,34 @@ def test_bugfix_20_gpsbabel_converted():
     assert entries[0].lon == -119.842140907
     assert entries[0].hr.magnitude == 153
     assert entries[0].atemp.magnitude == 20
+
+
+def file_path_of_test_asset(name, in_dir="gpx"):
+    sourcefile = Path(inspect.getfile(file_path_of_test_asset))
+
+    meta_dir = sourcefile.parents[0].joinpath(in_dir)
+
+    the_path = os.path.join(meta_dir, name)
+
+    if not os.path.exists(the_path):
+        raise IOError(f"Test file {the_path} does not exist")
+
+    return the_path
+
+
+def test_loading_gpx_file():
+    gpx.load(file_path_of_test_asset("test.gpx.gz"), units)
+
+
+def test_merge_gpx_with_gopro():
+    # the two files should be of the same trip
+    gpx_timeseries = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
+    gopro_framemeta = framemeta.framemeta_from_datafile(
+        file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
+        units,
+        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001)
+    )
+    assert gpx_timeseries.min < gopro_framemeta.get(gopro_framemeta.min).dt
+    assert gpx_timeseries.max > gopro_framemeta.get(gopro_framemeta.max).dt
+
+    merge_gpx_with_gopro(gpx_timeseries, gopro_framemeta)

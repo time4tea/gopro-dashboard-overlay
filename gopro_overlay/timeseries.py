@@ -1,11 +1,8 @@
 import bisect
 import datetime
 import itertools
-import math
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.ffmpeg import load_gpmd_from
-from gopro_overlay.gpmd import GPS5EntryConverter, GPSVisitor, GoproMeta, GPSFix
 
 
 def pairwise(iterable):  # Added in itertools v3.10
@@ -13,23 +10,6 @@ def pairwise(iterable):  # Added in itertools v3.10
     a, b = itertools.tee(iterable)
     next(b, None)
     return zip(a, b)
-
-
-class Stepper:
-
-    def __init__(self, timeseries, step: datetime.timedelta):
-        self._timeseries = timeseries
-        self._step = step
-
-    def __len__(self):
-        return int((self._timeseries.max - self._timeseries.min) / self._step) + 1
-
-    def steps(self):
-        end = self._timeseries.max
-        running = self._timeseries.min
-        while running <= end:
-            yield running
-            running += self._step
 
 
 class Timeseries:
@@ -50,10 +30,6 @@ class Timeseries:
     def max(self) -> datetime.datetime:
         self.check_modified()
         return self.dates[-1]
-
-    def stepper(self, step: datetime.timedelta):
-        self.check_modified()
-        return Stepper(self, step)
 
     def __len__(self):
         self.check_modified()
@@ -93,45 +69,6 @@ class Timeseries:
         self.check_modified()
         return [self.entries[k] for k in self.dates]
 
-    def clip_to_datetimes(self, dt_min, dt_max):
-        self.check_modified()
-        index_min = bisect.bisect_left(self.dates, dt_min)
-        index_max = bisect.bisect_right(self.dates, dt_max)
-
-        if index_min > 0 and self.dates[index_min] > dt_min:
-            index_min = index_min - 1
-
-        if index_max < len(self.dates) - 1 and self.dates[index_max] < dt_max:
-            index_max = index_max + 1
-
-        dates = self.dates[index_min:index_max + 1]
-
-        wanted = [self.entries[d] for d in dates]
-
-        if not wanted:
-            return Timeseries()
-
-        return Timeseries(entries=wanted)
-
-    def clip_to(self, other):
-        self.check_modified()
-        return self.clip_to_datetimes(other.min, other.max)
-
-    def backfill(self, delta):
-        self.check_modified()
-        to_add = []
-        for a, b in pairwise(self.dates):
-            if b - a > delta:
-                num_of_segments = int(math.ceil((b - a) / delta))
-                seg_len = (b - a) / num_of_segments
-                nxt = a + seg_len
-                for _ in range(num_of_segments - 1):
-                    to_add.append(self.get(nxt))
-                    nxt += seg_len
-        if to_add:
-            self.add(*to_add)
-        return len(to_add)
-
     def process_deltas(self, processor, skip=1):
         self.check_modified()
         diffs = list(zip(self.dates, self.dates[skip:]))
@@ -147,43 +84,3 @@ class Timeseries:
             updates = processor(self.entries[e])
             if updates:
                 self.entries[e].update(**updates)
-
-
-
-def gps_filters(report, dop_max):
-    do_report = lambda t, c, m: report(f"Packet {t}, GPS Time {c.basetime} Discarding GPS Location: {m}")
-
-    filters = [
-        (lambda t, c: c.basetime is None, lambda t, c: do_report(t, c, f"Unknown GPS Time")),
-        (lambda t, c: c.fix is None, lambda t, c: do_report(t, c, f"Unknown GPS Fix Status")),
-        (lambda t, c: c.fix in (GPSFix.NO, GPSFix.UNKNOWN),
-         lambda t, c: do_report(t, c, f"GPS Not Locked (Status = {c.fix})")),
-        (lambda t, c: c.dop > dop_max, lambda t, c: do_report(t, c, f"DOP Out of Range. {c.dop} > {dop_max}")),
-        (lambda t, c: c.scale is None, lambda t, c: do_report(t, c, f"Unknown Item Scale")),
-    ]
-
-    def drop_item(t, c):
-        for (d, r) in filters:
-            if d(t, c):
-                r(t, c)
-                return True
-
-    return drop_item
-
-
-def timeseries_from_meta(meta, units, on_drop=lambda reason: None):
-    ts = Timeseries()
-
-    converter = GPS5EntryConverter(units=units,
-                                   drop_item=gps_filters(on_drop, 6.0),
-                                   on_item=lambda entry: ts.add(entry))
-
-    visitor = GPSVisitor(converter=converter.convert)
-
-    meta.accept(visitor)
-
-    return ts
-
-
-def timeseries_from(filepath, **kwargs):
-    return timeseries_from_meta(GoproMeta.parse(load_gpmd_from(filepath)), **kwargs)

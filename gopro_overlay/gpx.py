@@ -1,4 +1,5 @@
 import collections
+import gzip
 
 import gpxpy
 
@@ -42,8 +43,12 @@ def with_unit(gpx, units):
 
 
 def load(filepath, units):
-    with open(filepath, 'r') as gpx_file:
-        return load_xml(gpx_file, units)
+    if filepath.endswith(".gz"):
+        with gzip.open(filepath, 'rb') as gpx_file:
+            return load_xml(gpx_file, units)
+    else:
+        with open(filepath, 'r') as gpx_file:
+            return load_xml(gpx_file, units)
 
 
 def load_xml(file_or_str, units):

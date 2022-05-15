@@ -1,37 +1,10 @@
 import datetime
-from datetime import timedelta
-
-import pytest
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import Point
 from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeseries_process import process_ses, calculate_speeds
-from gopro_overlay.units import units, metres
-
-
-def test_clipping():
-    ts1 = Timeseries()
-    ts2 = Timeseries()
-    ts1.add(Entry(datetime_of(1)))
-    ts1.add(Entry(datetime_of(2)))
-    ts1.add(Entry(datetime_of(3)))
-    ts1.add(Entry(datetime_of(3.5)))
-    ts1.add(Entry(datetime_of(4)))
-    ts1.add(Entry(datetime_of(5)))
-    ts1.add(Entry(datetime_of(6)))
-
-    ts2.add(Entry(datetime_of(2.5)))
-    ts2.add(Entry(datetime_of(3)))
-    ts2.add(Entry(datetime_of(4)))
-    ts2.add(Entry(datetime_of(4.5)))
-
-    clipped = ts1.clip_to(ts2)
-
-    assert clipped.min == datetime_of(2)
-    assert clipped.max == datetime_of(5)
-
-    assert len(clipped) == 5
+from gopro_overlay.units import units
 
 
 def test_delta_processing():
@@ -83,68 +56,3 @@ def test_process_delta_speeds():
     assert "{0.magnitude:.2f} {0.units:~P}".format(entry.cspeed) == "16.11 m/s"
     assert "{0.magnitude:.2f} {0.units:~P}".format(entry.azi) == "56.53 deg"
     assert "{0.magnitude:.2f} {0.units:~P}".format(entry.cog) == "56.53 deg"
-
-
-def test_filling_missing_entries():
-    dt1 = datetime_of(1631178710)
-    dt2 = dt1 + timedelta(seconds=1)
-    dt3 = dt2 + timedelta(seconds=1)
-    ts = Timeseries()
-    ts.add(Entry(dt1, alt=metres(10)))
-    # no entry for dt2
-    ts.add(Entry(dt3, alt=metres(30)))
-
-    ts.get(dt1, interpolate=False)
-    with pytest.raises(KeyError):
-        ts.get(dt2, interpolate=False)
-
-    filled = ts.backfill(timedelta(seconds=1))
-    assert filled == 1
-    assert ts.get(dt2, interpolate=False).alt.magnitude == 20
-
-
-def test_filling_missing_entries_2():
-    dt1 = datetime_of(1631178710)
-    dt2 = dt1 + timedelta(seconds=0.9)
-    dt3 = dt2 + timedelta(seconds=0.9)
-    ts = Timeseries()
-    ts.add(Entry(dt1, alt=metres(10)))
-    # no entry for dt2
-    ts.add(Entry(dt3, alt=metres(30)))
-
-    ts.get(dt1, interpolate=False)
-
-    with pytest.raises(KeyError):
-        ts.get(dt2, interpolate=False)
-
-    filled = ts.backfill(timedelta(seconds=1))
-    assert filled == 1
-    assert ts.get(dt2, interpolate=False).alt.magnitude == 20
-
-
-def test_no_filling_missing_entries():
-    dt1 = datetime_of(1631178710)
-    dt2 = dt1 + timedelta(seconds=1)
-    ts = Timeseries()
-    ts.add(Entry(dt1, alt=metres(10)))
-    ts.add(Entry(dt2, alt=metres(20)))
-
-    ts.get(dt1, interpolate=False)
-    ts.get(dt2, interpolate=False)
-
-    filled = ts.backfill(timedelta(seconds=1))
-    assert filled == 0
-
-
-def test_no_filling_missing_entries_2():
-    dt1 = datetime_of(1631178710)
-    dt2 = dt1 + timedelta(seconds=0.9)
-    ts = Timeseries()
-    ts.add(Entry(dt1, alt=metres(10)))
-    ts.add(Entry(dt2, alt=metres(19)))
-
-    ts.get(dt1, interpolate=False)
-    ts.get(dt2, interpolate=False)
-
-    filled = ts.backfill(timedelta(seconds=1))
-    assert filled == 0
