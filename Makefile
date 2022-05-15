@@ -85,6 +85,11 @@ bump:
 	$(BIN)/pip install bumpversion
 	$(BIN)/bumpversion minor
 
+.PHONY: bump-major
+bump-major:
+	$(BIN)/pip install bumpversion
+	$(BIN)/bumpversion major
+
 
 .PHONY: help
 help:
