@@ -18,14 +18,14 @@ class Window:
         self.ts = ts
         self.duration = duration
         self.samples = samples
-        self.tick = duration / samples
+        self.tick = (duration / samples).align(timeunits(millis=100))
         self.key = key
         self.fmt = fmt
         self.missing = missing
 
         self.last_time = None
         self.last_view = None
-
+        self.cache = {}
         self.version = 0
 
     def view(self, at: Timeunit):
@@ -36,6 +36,8 @@ class Window:
         return self._view_recalc(at)
 
     def _view_recalc(self, at: Timeunit):
+
+        at = at.align(timeunits(millis=100))
 
         start = at - self.duration / 2
         end = at + self.duration / 2
@@ -48,7 +50,8 @@ class Window:
             if current < self.ts.min or current > self.ts.max:
                 data.append(self.missing)
             else:
-                value = self.key(self.ts.get(current))
+                entry = self.cache.setdefault(current, self.ts.get(current))
+                value = self.key(entry)
                 if value is not None:
                     data.append(self.fmt(value))
                 else:

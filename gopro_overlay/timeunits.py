@@ -51,6 +51,9 @@ class Timeunit:
     def __repr__(self):
         return f"Timeunit ms={self.us / 1000.0}"
 
+    def align(self, other):
+        return Timeunit((self.us // other.us) * other.us)
+
     def timedelta(self):
         return datetime.timedelta(microseconds=self.us)
 
