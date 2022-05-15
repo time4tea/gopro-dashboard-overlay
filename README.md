@@ -152,6 +152,9 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.40.0 BIG CHANGE - Hopefully align metadata with video *much* better. Please please raise issues if there are problems.
+  - This has been tested with GOPRO Hero 9 and GOPRO Hero 7 - which use two different timing schemes, and appears to work.
+  - This changes the way that GPX metadata is aligned with the track, which should also make it better
 - 0.39.0 Fix [#29](https://github.com/time4tea/gopro-dashboard-overlay/issues/29)  
 - 0.38.0 Fix [#30](https://github.com/time4tea/gopro-dashboard-overlay/issues/30) thanks @tve 
 - 0.37.0
