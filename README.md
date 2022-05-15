@@ -9,7 +9,7 @@
 
 ## Examples
 
-![Example Dashboard Image](examples/2021-09-22-example.png)
+![Example Dashboard Image](examples/2022-05-15-example.png)
 
 ## Requirements
 
