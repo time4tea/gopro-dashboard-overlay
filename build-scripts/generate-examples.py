@@ -3,8 +3,9 @@ import re
 from pathlib import Path
 
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta import framemeta_from_data
+from gopro_overlay.framemeta import framemeta_from_datafile
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
@@ -54,7 +55,11 @@ if __name__ == "__main__":
     renderer = CachingRenderer()
 
     datapath = os.path.join(mydir, "..", "tests/meta/gopro-meta.gpmd")
-    timeseries = framemeta_from_data(datapath=datapath, units=units)
+    timeseries = framemeta_from_datafile(
+        datapath=datapath,
+        units=units,
+        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001)
+    )
 
     font = load_font("Roboto-Medium.ttf")
 
@@ -101,7 +106,7 @@ if __name__ == "__main__":
                     privacy=NoPrivacyZone()
                 )
 
-                overlay = Overlay(dimensions_for(filepath), timeseries=timeseries, create_widgets=layout)
+                overlay = Overlay(dimensions_for(filepath), framemeta=timeseries, create_widgets=layout)
                 image = overlay.draw(timeseries.min + (timeseries.max - timeseries.min))
 
                 os.makedirs(example_dest, exist_ok=True)
