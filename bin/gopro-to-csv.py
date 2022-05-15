@@ -7,7 +7,9 @@ from pathlib import Path
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.common import smart_open
-from gopro_overlay.gpmd import timeseries_from
+from gopro_overlay.ffmpeg import find_streams
+from gopro_overlay.framemeta import framemeta_from
+from gopro_overlay.gpmd import GPSFix
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.units import units
 
@@ -31,10 +33,11 @@ if __name__ == "__main__":
     if args.gpx:
         ts = load_timeseries(args.input, units)
     else:
-        ts = timeseries_from(args.input,
-                             units=units,
-                             on_drop=lambda reason: print(reason, file=sys.stderr),
-                             )
+        stream_info = find_streams(args.input)
+        ts = framemeta_from(args.input,
+                            units=units,
+                            metameta=stream_info.meta
+                            )
 
     ts.process_deltas(timeseries_process.calculate_speeds())
     ts.process(timeseries_process.calculate_odo())
@@ -49,7 +52,8 @@ if __name__ == "__main__":
 
     with smart_open(args.output) as f:
         writer = csv.DictWriter(f=f,
-                                fieldnames=["packet", "packet_index", "fix", "date", "lat", "lon", "dop", "alt", "speed",
+                                fieldnames=["packet", "packet_index", "gps_fix", "date", "lat", "lon", "dop", "alt",
+                                            "speed",
                                             "dist", "time", "azi", "odo",
                                             "grad"])
         writer.writeheader()
@@ -57,7 +61,7 @@ if __name__ == "__main__":
             writer.writerow({
                 "packet": printable_unit(entry.packet),
                 "packet_index": printable_unit(entry.packet_index),
-                "fix": entry.gpsfix.name,
+                "gps_fix": GPSFix(entry.gpsfix).name,
                 "date": entry.dt,
                 "dop": printable_unit(entry.dop),
                 "lat": entry.point.lat,

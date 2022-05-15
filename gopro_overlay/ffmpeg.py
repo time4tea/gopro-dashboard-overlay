@@ -28,9 +28,10 @@ def cut_file(input, output, start, duration):
     streams = find_streams(input)
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta]]))
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream]]))
 
     args = ["ffmpeg",
+            "-hide_banner",
             "-y",
             "-i", input,
             "-map_metadata", "0",
@@ -52,7 +53,7 @@ def join_files(filepaths, output):
     streams = find_streams(filepaths[0])
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta]]))
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream]]))
 
     with temporary_file() as commandfile:
         with open(commandfile, "w") as f:
@@ -60,6 +61,7 @@ def join_files(filepaths, output):
                 f.write(f"file '{path}\n")
 
         args = ["ffmpeg",
+                "-hide_banner",
                 "-y",
                 "-f", "concat",
                 "-safe", "0",
@@ -120,7 +122,7 @@ def find_streams(filepath, invoke=invoke):
 def load_gpmd_from(filepath):
     track = find_streams(filepath).meta.stream
     if track:
-        cmd = ["ffmpeg", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
+        cmd = ["ffmpeg", "-hide_banner", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
         result = run(cmd, capture_output=True, timeout=10)
         if result.returncode != 0:
             raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")
@@ -174,6 +176,7 @@ class FFMPEGGenerate:
     def generate(self):
         cmd = [
             "ffmpeg",
+            "-hide_banner",
             "-y",
             "-loglevel", "info",
             "-f", "rawvideo",

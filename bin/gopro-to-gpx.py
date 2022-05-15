@@ -5,8 +5,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+from gopro_overlay import ffmpeg
 from gopro_overlay.common import smart_open
-from gopro_overlay.gpmd import timeseries_from
+from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.timeseries_gpx import timeseries_to_gpx
 from gopro_overlay.units import units
 
@@ -27,7 +28,12 @@ if __name__ == "__main__":
 
     counter = Counter()
 
-    ts = timeseries_from(args.input, units=units, on_drop=lambda reason: counter.update([reason]))
+    stream_info = ffmpeg.find_streams(args.input)
+    ts = framemeta_from(
+        args.input,
+        units=units,
+        metameta=stream_info.meta
+    )
 
     gpx = timeseries_to_gpx(ts)
 

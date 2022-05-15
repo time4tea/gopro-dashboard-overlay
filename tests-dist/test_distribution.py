@@ -10,6 +10,8 @@ distribution = os.environ.get("DISTRIBUTION", os.path.join(top, "tmp/dist-test/v
 
 expected_binaries = list(map(lambda f: os.path.join(distribution, "bin", f), os.listdir(os.path.join(top, "bin"))))
 
+clip = os.path.join(top, "render", "clip.MP4")
+
 
 @contextlib.contextmanager
 def working_directory(d):
@@ -53,21 +55,20 @@ def test_init_pys_are_in_right_subfolders():
 
 
 def test_maybe_renders_something():
-    clip = os.path.join(top, "render", "clip.MP4")
-    if os.path.exists(clip):
-        prog = os.path.join(distribution, "bin", "gopro-dashboard.py")
-        subprocess.run([prog, clip, "/tmp/render-clip.MP4"], check=True)
+    prog = os.path.join(distribution, "bin", "gopro-dashboard.py")
+    subprocess.run([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"], check=True)
+
+
+def test_maybe_makes_a_cvs():
+    prog = os.path.join(distribution, "bin", "gopro-to-csv.py")
+    subprocess.run([prog, clip, "-"])
 
 
 def test_maybe_clips_something():
-    clip = os.path.join(top, "render", "clip.MP4")
-    if os.path.exists(clip):
-        prog = os.path.join(distribution, "bin", "gopro-cut.py")
-        subprocess.run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"], check=True)
+    prog = os.path.join(distribution, "bin", "gopro-cut.py")
+    subprocess.run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"], check=True)
 
 
 def test_maybe_clips_something_with_duration():
-    clip = os.path.join(top, "render", "clip.MP4")
-    if os.path.exists(clip):
-        prog = os.path.join(distribution, "bin", "gopro-cut.py")
-        subprocess.run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"], check=True)
+    prog = os.path.join(distribution, "bin", "gopro-cut.py")
+    subprocess.run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"], check=True)

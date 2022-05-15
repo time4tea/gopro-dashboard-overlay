@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-from datetime import timedelta
 from pathlib import Path
 
 import progressbar
