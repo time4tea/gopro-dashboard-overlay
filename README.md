@@ -97,6 +97,13 @@ You can cut a section of the gopro file, with metadata.
 Performance isn't really a major goal... Right now it processes video just a bit faster than realtime, so your 10 minute
 video will probably take about 10 minutes to render. This is highly dependent on your CPU though.
 
+### GPU
+
+Using the `--profile` option you can get a lot of extra performance out of the software. Please see the section on 
+FFMPEG profiles in [docs/bin](docs/bin)
+
+Using this option on my computer more than doubles the performance from 10 to 22 frames/s
+
 ### Pillow-SIMD
 
 You might be able to get some more performance out of the program by using pillow-simd. Installing it is a bit more
