@@ -5,7 +5,7 @@ from pathlib import Path
 
 import progressbar
 
-from gopro_overlay import timeseries_process
+from gopro_overlay import timeseries_process, progress_frames
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
@@ -174,6 +174,7 @@ if __name__ == "__main__":
                     'Render: ',
                     progressbar.Counter(),
                     ' [', progressbar.Percentage(), '] ',
+                    ' [', progress_frames.Rate(), '] ',
                     progressbar.Bar(), ' ', progressbar.ETA()
                 ],
                 poll_interval=2.0,
