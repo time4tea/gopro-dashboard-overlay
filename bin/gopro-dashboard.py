@@ -107,11 +107,9 @@ if __name__ == "__main__":
         print("Processing....")
         with PoorTimer("processing").timing():
             gopro_frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
-            gopro_frame_meta.process_deltas(timeseries_process.calculate_speeds())
+            gopro_frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
             gopro_frame_meta.process(timeseries_process.calculate_odo())
             gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)  # hack approx 18 frames/sec * 3 secs
-            # smooth azimuth (heading) points to stop wild swings of compass
-            gopro_frame_meta.process(timeseries_process.process_ses("azi", lambda i: i.azi, alpha=0.2))
 
         ourdir.mkdir(exist_ok=True)
 

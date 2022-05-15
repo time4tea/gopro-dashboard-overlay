@@ -9,6 +9,8 @@ def process_ses(new, key, alpha=0.4):
 
     def ses(item):
         current = key(item)
+        if current is None:
+            current = 0.0
         try:
             if forecast:
                 predicted = alpha * previous[0] + (1 - alpha) * forecast[-1]
@@ -25,7 +27,6 @@ def process_ses(new, key, alpha=0.4):
 
 def calculate_speeds():
     def accept(a, b, c):
-        assert c == 1
         inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
         dist = units.Quantity(inverse['s12'], units.m)
         time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
@@ -39,7 +40,7 @@ def calculate_speeds():
 
         return {
             "cspeed": speed,
-            "dist": dist,
+            "dist": dist / c,  # suspect this isn't right!
             "time": time,
             "azi": azi,
             "cog": cog
