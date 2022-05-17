@@ -3,6 +3,24 @@
 
 Newest changes are always in [README.md](README.md)
 
+- 0.31.0
+    - (Change in behaviour) Use input file framerate as output file framerate. This may make output files bigger.
+        - A more comprehensive mechanism to control ffmpeg options is planned for a later release
+- 0.30.0
+    - Attempt to fix character encoding issues on Mac (can't test, as I don't have a Mac)
+- 0.29.0
+    - Add `compass` component (experimental!) - Draws a simple compass
+    - Add `frame` component - Draws a clipping maybe-rounded box to contain other components.
+    - Add initial docs for XML layout
+- 0.28.0
+    - Only rerender moving map if it has moved since last frame - will be much quicker under certain circumstances
+    - Refactorings in how map border/opacity is rendered (should have no visible effect, maybe marginally faster)
+- 0.27.0
+    - Fix [Issue #20](https://github.com/time4tea/gopro-dashboard-overlay/issues/20) Minor improvement in GPX parsing.
+      Hopefully more tolerant of GPX files that don't contain hr/cadence/temp extensions
+- 0.26.0
+    - (Change in behaviour) - Fix [Issue #17](https://github.com/time4tea/gopro-dashboard-overlay/issues/17) Will now
+      use local timezone when rendering datetimes. (H/T [@tve](https://github.com/tve) )
 - 0.25.0
     - (Change in behaviour) - Will now use speed from datasource, in preference to calculated. This should make it much
       more stable, if the datasource supplies it. (GoPro does, GPX not)
