@@ -33,7 +33,9 @@ Text size can be controlled with the `textsize` attribute
 
 ## Transparency
 
-By default the `bg` is fully transparent
+By default the `bg` is fully transparent, but like the `text` component, the transparency 
+of the `fg`, `bg` and `text` can be controlled with an alpha component in the colour.
+
 
 {{
 <component type="text" size="64" rgb="255,255,0">Hello</component>
@@ -42,16 +44,10 @@ By default the `bg` is fully transparent
 
 {{
 <component type="text" size="64" rgb="255,255,0">Hello</component>
-<component type="compass" size="256" textsize="32" bg="0,0,0"/>
+<component type="compass" size="256" textsize="32" bg="0,0,0,128"/>
 }}
-
-To make it partially transparent, use a `frame`, with `cr` (corner radius) set appropriately
 
 {{
 <component type="text" size="64" rgb="255,255,0">Hello</component>
-<frame width="256" height="256" opacity="0.3" cr="128">
-<component type="compass" size="256" textsize="32" bg="0,0,0"/>
-</frame>
+<component type="compass" size="256" textsize="32" bg="0,0,0,128" text="0,255,255,128"/>
 }}
-
-

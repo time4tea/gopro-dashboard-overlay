@@ -138,6 +138,13 @@ The same colour as in the [text](01-simple-text.md) component
 <kbd>![04-metrics-12.png](04-metrics-12.png)</kbd>
 
 
+
+```xml
+<component type="metric" metric="speed" rgb="255,255,0,128" />
+```
+<kbd>![04-metrics-13.png](04-metrics-13.png)</kbd>
+
+
 ## Supported Metrics
 
 The following metrics are supported:

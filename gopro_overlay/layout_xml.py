@@ -128,8 +128,8 @@ def rgbattr(el, a, d):
     v = attrib(el, a, f=lambda s: tuple(map(int, s.split(","))), d=d)
     if v is None:
         return v
-    if len(v) != 3:
-        raise ValueError(f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), not {len(v)}")
+    if len(v) != 3 and len(v) != 4:
+        raise ValueError(f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), or 4 (r,g,b,a) not {len(v)}")
     return v
 
 

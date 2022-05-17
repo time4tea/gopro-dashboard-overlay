@@ -107,7 +107,7 @@
     </translate>
 
     <composite name="compass" x="500" y="100">
-        <component type="compass" size="300" bg="0,0,0" fg="255,255,255" text="0,255,255" textsize="16"/>
+        <component type="compass" size="300" bg="0,0,0,128" fg="255,255,255" text="0,255,255" textsize="16"/>
 
         <translate x="180">
             <component type="compass" size="300" fg="255,255,255" text="0,255,255" textsize="32"/>

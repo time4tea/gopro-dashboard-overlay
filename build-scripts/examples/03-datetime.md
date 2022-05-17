@@ -51,3 +51,16 @@ It may be better to combine a `text` and `datetime` component rather than render
         <component x="50" y="20" type="datetime" format="%H:%M:%S.%f" truncate="5" cache="false" />
     </composite>
 }}
+
+## Sizes
+
+Text size can be controlled with with `size`
+
+{{ <component type="datetime" format="%Y-%m-%d" size="32" /> }}
+
+## Colours
+
+Text colour and transparency is set with the `rgb` attribute. `rgb` is either 3 or 4 values for the (r,g,b) or (r,g,b,a)
+values for the text.
+
+{{ <component type="datetime" format="%Y-%m-%d" rgb="255,255,0,128" /> }}

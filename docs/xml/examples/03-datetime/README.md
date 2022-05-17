@@ -98,3 +98,26 @@ It may be better to combine a `text` and `datetime` component rather than render
     </composite>
 ```
 <kbd>![03-datetime-8.png](03-datetime-8.png)</kbd>
+
+
+## Sizes
+
+Text size can be controlled with with `size`
+
+
+```xml
+<component type="datetime" format="%Y-%m-%d" size="32" />
+```
+<kbd>![03-datetime-9.png](03-datetime-9.png)</kbd>
+
+
+## Colours
+
+Text colour and transparency is set with the `rgb` attribute. `rgb` is either 3 or 4 values for the (r,g,b) or (r,g,b,a)
+values for the text.
+
+
+```xml
+<component type="datetime" format="%Y-%m-%d" rgb="255,255,0,128" />
+```
+<kbd>![03-datetime-10.png](03-datetime-10.png)</kbd>

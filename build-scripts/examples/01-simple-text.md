@@ -17,6 +17,12 @@ Use `rgb` to control the colour of the text
 
 {{ <component type="text" rgb="255,255,0">Simple Text</component> }}
 
+## Transparency
+
+`rgb` can also accept an 'alpha' value, from 0 (completely transparent) to 255 (completely opaque)
+
+{{ <component type="text" rgb="255,255,0,128">Simple Text</component> }}
+
 ## Size
 
 Use `size` to control the font size.

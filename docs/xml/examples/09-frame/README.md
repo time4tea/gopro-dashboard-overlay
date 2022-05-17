@@ -13,6 +13,9 @@ draw them, optionally with an outline, rounding, background, and opacity into th
 
 Some examples might make this clearer.
 
+The `outline` and `bg` parameters can also accept a "colour-with-alpha" (r,g,b,a) to allow a bit more
+more control over the transparency of the various bits.
+
 
 ```xml
 <component type="text" size="64">Background</component>

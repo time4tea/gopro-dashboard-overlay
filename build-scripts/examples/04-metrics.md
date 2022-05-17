@@ -68,6 +68,8 @@ The same colour as in the [text](01-simple-text.md) component
 
 {{ <component type="metric" metric="speed" rgb="255,255,0" /> }}
 
+{{ <component type="metric" metric="speed" rgb="255,255,0,128" /> }}
+
 ## Supported Metrics
 
 The following metrics are supported:
