@@ -6,7 +6,7 @@ from PIL import ImageFont
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets import Composite, Translate, Text, CachingText
+from gopro_overlay.widgets import Composite, Translate, CachingText
 from gopro_overlay.widgets_compass import Compass
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
@@ -34,6 +34,7 @@ def test_compass_med():
                     Compass(
                         size=200,
                         reading=lambda: 45,
+                        bg=(117, 175, 255),
                         font=font,
                     ),
                 )

@@ -1,3 +1,4 @@
+import functools
 import math
 
 from PIL import Image, ImageDraw
@@ -15,27 +16,31 @@ class Compass:
         self.last_reading = None
         self.image = None
 
+    @staticmethod
+    def locate(centre, radius, reading, angle, d):
+        return (
+            centre + ((radius - d) * math.sin(math.radians(angle + reading))),
+            centre - ((radius - d) * math.cos(math.radians(angle + reading)))
+        )
+
     def _redraw(self, reading):
 
-        image = Image.new(mode="RGBA", size=(self.size, self.size))
+        size = self.size * 2
+        image = Image.new(mode="RGBA", size=(size, size))
         draw = ImageDraw.Draw(image)
 
-        centre = self.size / 2
-        radius = self.size / 2
+        centre = size / 2
+        radius = size / 2
 
-        major_tick = self.size / 7
-        minor_tick = self.size / 10
-        tiny_tick = self.size / 20
-        teeny_tick = self.size / 30
+        major_tick = size / 7
+        minor_tick = size / 10
+        tiny_tick = size / 20
+        teeny_tick = size / 30
 
-        def locate(angle, d):
-            return (
-                centre + ((radius - d) * math.sin(math.radians(angle + reading))),
-                centre - ((radius - d) * math.cos(math.radians(angle + reading)))
-            )
+        locate = functools.partial(Compass.locate, centre, radius, reading)
 
         draw.pieslice(
-            ((0, 0), (0 + self.size, 0 + self.size)),
+            ((0, 0), (0 + size, 0 + size)),
             0,
             360,
             outline=self.fg,
@@ -44,12 +49,13 @@ class Compass:
         )
 
         draw.arc(
-            ((0 + self.size * 0.35, 0 + self.size * 0.35), (0 + self.size * 0.65, 0 + self.size * 0.65)),
+            ((0 + size * 0.35, 0 + size * 0.35), (0 + size * 0.65, 0 + size * 0.65)),
             0,
             360,
             width=2,
             fill=self.fg
         )
+
         draw.point((centre, centre), fill=self.fg)
 
         def ticklen(angle):
@@ -90,12 +96,19 @@ class Compass:
             fill=self.fg
         )
 
-        draw.text(locate(0, major_tick * 1.5), "N", font=self.font, anchor="mm", fill=self.text)
-        draw.text(locate(90, major_tick * 1.5), "E", font=self.font, anchor="mm", fill=self.text)
-        draw.text(locate(180, major_tick * 1.5), "S", font=self.font, anchor="mm", fill=self.text)
-        draw.text(locate(270, major_tick * 1.5), "W", font=self.font, anchor="mm", fill=self.text)
+        actual = image.resize((self.size, self.size), Image.BILINEAR)
 
-        return image
+        locate = functools.partial(Compass.locate, self.size / 2, self.size / 2, reading)
+
+        draw = ImageDraw.Draw(actual)
+        draw.text(locate(0, self.size / 4), "N", font=self.font, anchor="mm", fill=self.text)
+        draw.text(locate(90, self.size / 4), "E", font=self.font, anchor="mm", fill=self.text)
+        draw.text(locate(180, self.size / 4), "S", font=self.font, anchor="mm", fill=self.text)
+        draw.text(locate(270, self.size / 4), "W", font=self.font, anchor="mm", fill=self.text)
+
+        draw.point((self.size / 2, self.size / 2), fill=self.fg)
+
+        return actual
 
     def draw(self, image, draw):
         reading = - int(self.reading())
