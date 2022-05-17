@@ -152,7 +152,7 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
-- 0.41.1 Allow alpha channel in colours everywhere. This means all text, backgrounds etc can now specify alpha component for colours
+- 0.41.0 Allow alpha channel in colours everywhere. This means all text, backgrounds etc can now specify alpha component for colours
   - See docs for text component for [example](docs/xml/examples/01-simple-text/README.md)
 - 0.40.0 BIG CHANGE - Hopefully align metadata with video *much* better. Please please raise issues if there are problems.
   - This has been tested with GOPRO Hero 9 and GOPRO Hero 7 - which use two different timing schemes, and appears to work.
