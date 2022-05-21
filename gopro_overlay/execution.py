@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import asyncio
-import os
+import queue
 import subprocess
 import sys
-from asyncio import Protocol, StreamWriter
-from multiprocessing import Process
-
-from gopro_overlay.timing import PoorTimer
+import threading
+from queue import Queue
 
 
 class InProcessExecution:
@@ -42,72 +39,62 @@ class InProcessExecution:
             raise IOError(f"Process {cmd[0]} failed") from None
 
 
-class CopyingProtocol(Protocol):
+class ThreadedTransport:
 
-    def __init__(self, writer: StreamWriter) -> None:
-        super().__init__()
-        self.timer = PoorTimer(name="CopyProtocol")
-        self.writer = writer
+    def __init__(self, q, stream):
+        self.q = q
+        self.stream = stream
+        self.should_stop = threading.Event()
 
-    def data_received(self, data: bytes) -> None:
-        print(f"Got {len(data)} bytes")
-        self.timer.time(lambda: self.writer.write(data))
+    def run(self):
+        try:
+            while True:
+                try:
+                    to_send = self.q.get(timeout=0.1)
+                except queue.Empty:
+                    to_send = None
+                if to_send:
+                    self.stream.write(to_send)
+                else:
+                    if self.should_stop.is_set():
+                        break
+        finally:
+            self.stream.close()
 
-    def connection_lost(self, exc: Exception | None) -> None:
-        self.writer.close()
-        print(self.timer)
-
-
-async def connect_input(input, writer):
-    loop = asyncio.get_event_loop()
-
-    proto = CopyingProtocol(writer)
-    await loop.connect_read_pipe(lambda: proto, input)
-
-
-async def exec_copy_streams(input, redirect, cmd):
-
-    limit = 1920 * 1080 * 4
-
-    if redirect:
-        with open(redirect, "w") as std:
-            process = await asyncio.create_subprocess_exec(*cmd, stdin=subprocess.PIPE, stdout=std, stderr=std, limit=limit)
-    else:
-        process = await asyncio.create_subprocess_exec(*cmd, stdin=subprocess.PIPE, limit=limit)
-
-    await connect_input(input=input, writer=process.stdin)
-
-    await process.wait()
+    def stop(self):
+        self.should_stop.set()
 
 
-class ForkingExecution:
+class QueueWriter:
+    def __init__(self, q):
+        self.q = q
+
+    def write(self, b):
+        self.q.put(b)
+
+
+class ThreadingExecution:
     def __init__(self, redirect=None):
         self.redirect = redirect
-
-    @staticmethod
-    def child(input, output, redirect, cmd):
-        os.close(output)
-        return asyncio.run(exec_copy_streams(os.fdopen(input, "rb"), redirect, cmd))
+        self.popen = subprocess.Popen
 
     def execute(self, cmd):
+        if self.redirect:
+            with open(self.redirect, "w") as std:
+                process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
+        else:
+            process = self.popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
 
-        child_in, parent_out = os.pipe()
+        queue = Queue(maxsize=20)
 
-        process = Process(
-            target=ForkingExecution.child,
-            args=(child_in, parent_out, self.redirect, cmd),
-            name=f"iobuffer process for {cmd[0]}"
-        )
+        transport = ThreadedTransport(queue, process.stdin)
 
-        process.start()
-        os.close(child_in)
-        try:
-            out = os.fdopen(parent_out, "wb")
-            yield out
-            out.close()
+        thread = threading.Thread(target=transport.run)
+        thread.start()
 
-            print("Waiting for process to finish...")
-            process.join()
-        except Exception as e:
-            print(f"Exception! {e}")
-            process.terminate()
+        yield QueueWriter(queue)
+
+        transport.stop()
+
+        thread.join(5 * 60)
+        process.wait(5 * 60)

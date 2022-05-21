@@ -45,5 +45,5 @@ def gopro_dashboard_arguments(args=None):
 
     parser.add_argument("--profile", help="(EXPERIMENTAL) Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
 
-    parser.add_argument("--fork", action="store_true", help="(VERY EXPERIMENTAL MAY CRASH) Use an intermediate buffer before ffmpeg as possible performance enhancement")
+    parser.add_argument("--thread", action="store_true", help="(VERY EXPERIMENTAL MAY CRASH) Use an intermediate buffer before ffmpeg as possible performance enhancement")
     return parser.parse_args(args)

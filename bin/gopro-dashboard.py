@@ -9,7 +9,7 @@ from gopro_overlay import timeseries_process, progress_frames
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
-from gopro_overlay.execution import InProcessExecution, ForkingExecution
+from gopro_overlay.execution import InProcessExecution, ThreadingExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams, FFMPEGNull
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
@@ -110,7 +110,8 @@ if __name__ == "__main__":
             gopro_frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
             gopro_frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
             gopro_frame_meta.process(timeseries_process.calculate_odo())
-            gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)  # hack approx 18 frames/sec * 3 secs
+            gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(),
+                                            skip=18 * 3)  # hack approx 18 frames/sec * 3 secs
 
         ourdir.mkdir(exist_ok=True)
 
@@ -149,8 +150,8 @@ if __name__ == "__main__":
             else:
                 redirect = None if args.show_ffmpeg else temp_file_name()
 
-                if args.fork:
-                    execution = ForkingExecution(redirect=redirect)
+                if args.thread:
+                    execution = ThreadingExecution(redirect=redirect)
                 else:
                     execution = InProcessExecution(redirect=redirect)
 
@@ -195,7 +196,9 @@ if __name__ == "__main__":
                         frame = draw_timer.time(lambda: overlay.draw(dt))
                         tobytes = byte_timer.time(lambda: frame.tobytes())
                         write_timer.time(lambda: writer.write(tobytes))
-                    progress.finish()
+                print("Finished drawing frames. waiting for ffmpeg to catch up")
+                progress.finish()
+
             except KeyboardInterrupt:
                 print("...Stopping...")
                 pass
