@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import json
 
@@ -98,7 +100,7 @@ def dump(input_file, fourcc, output_file):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Extract GoPro metadata")
+    parser = argparse.ArgumentParser(description="Extract GoPro metadata - Contributed by https://github.com/gregbaker")
     parser.add_argument("input", help="Input file")
     parser.add_argument("output", help="Output NDJSON file")
     parser.add_argument("--fourcc", "-f", action="store", default='ACCL', help='GPMD fourcc field to extract')

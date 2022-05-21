@@ -47,6 +47,7 @@ setup(
     tests_require=test_requirements,
     scripts=[
         "bin/gopro-dashboard.py",
+        "bin/gopro-contrib-data-extract.py",
         "bin/gopro-to-gpx.py",
         "bin/gopro-join.py",
         "bin/gopro-extract.py",

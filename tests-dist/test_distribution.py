@@ -8,7 +8,15 @@ top = mydir.parent.absolute()
 
 distribution = os.environ.get("DISTRIBUTION", os.path.join(top, "tmp/dist-test/venv"))
 
-expected_binaries = list(map(lambda f: os.path.join(distribution, "bin", f), os.listdir(os.path.join(top, "bin"))))
+
+def python_files_below(d):
+    for root, dirs, files in os.walk(d):
+        for name in [f for f in files if f.endswith(".py")]:
+            rel = os.path.relpath(root, d)
+            yield Path(rel,  name)
+
+
+expected_binaries = list(map(lambda f: os.path.join(distribution, "bin", f), python_files_below(Path(top, "bin"))))
 
 clip = os.path.join(top, "render", "clip.MP4")
 
