@@ -104,7 +104,7 @@ These indicative figures are from Ubuntu on Intel Core i7-6700K CPU @ 4.00GHz wi
 
 | Performance Option    | Frames/s "null" | Frames/s normal | Frames/s --profile nvgpu |
 |-----------------------|-----------------|-----------------|--------------------------|
-| Default (python 3.8)  | ~30             |                 | ~21                      | 
+| Default (python 3.8)  | ~30             | ~10             | ~21                      | 
 | PyPy                  | ~27             |                 |                          |
 | Default + Pillow SIMD | ~60             | ~10             | ~25                      |
 
@@ -164,6 +164,10 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.42.0 Experimental threading mode `--thread` which just sends data to ffmpeg on a background thread. 
+  - The result of lots of experimentation on timing, but basically if the GPU is maxed out, that's a limiting factor.
+  - This gets a marginal performance gain of about 0.2frames/s for me. Use `nvtop` to check the "ENC" load on the GPU. 
+  - Demonstrate that on a `null` ffmpeg, we can generate about 60 overlay frames a second, or 6 seconds/second
 - 0.41.0 Allow alpha channel in colours everywhere. This means all text, backgrounds etc can now specify alpha component for colours
   - See docs for text component for [example](docs/xml/examples/01-simple-text/README.md)
 - 0.40.0 BIG CHANGE - Hopefully align metadata with video *much* better. Please please raise issues if there are problems.
