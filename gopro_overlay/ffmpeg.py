@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 import contextlib
 import itertools
 import json
 import subprocess
-import sys
 from array import array
 from collections import namedtuple
 from io import BytesIO
 
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.execution import InProcessExecution
 
 
 def run(cmd, **kwargs):
@@ -108,11 +110,11 @@ def find_streams(filepath, invoke=invoke):
 
     # meta_frame_duration isn't available here in ffprobe, need to look at first packet, see comment.
     meta_meta = MetaMeta(
-        stream = int(meta["index"]),
+        stream=int(meta["index"]),
         frame_count=int(meta["nb_frames"]),
         timebase=int(meta["time_base"].split("/")[1]),
         frame_duration=1001
-     )
+    )
 
     if video_stream is None or audio_stream is None or meta_meta.stream is None or video_dimension is None:
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
@@ -123,7 +125,8 @@ def find_streams(filepath, invoke=invoke):
 def load_gpmd_from(filepath):
     track = find_streams(filepath).meta.stream
     if track:
-        cmd = ["ffmpeg", "-hide_banner", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
+        cmd = ["ffmpeg", "-hide_banner", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f',
+               'rawvideo', "-"]
         result = run(cmd, capture_output=True, timeout=10)
         if result.returncode != 0:
             raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")
@@ -183,10 +186,10 @@ class FFMPEGNull:
 
 class FFMPEGGenerate:
 
-    def __init__(self, output, overlay_size: Dimension, popen=subprocess.Popen):
+    def __init__(self, output, overlay_size: Dimension, execution=None):
         self.output = output
         self.overlay_size = overlay_size
-        self.popen = popen
+        self.execution = execution if execution else InProcessExecution()
 
     @contextlib.contextmanager
     def generate(self):
@@ -205,13 +208,8 @@ class FFMPEGGenerate:
             "-preset", "veryfast",
             self.output
         ]
-        process = self.popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
-        try:
-            yield process.stdin
-        finally:
-            process.stdin.flush()
-        process.stdin.close()
-        process.wait(10)
+
+        yield from self.execution.execute(cmd)
 
 
 class FFMPEGOptions:
@@ -244,15 +242,13 @@ def flatten(list_of_lists):
 
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, redirect=None,
-                 popen=subprocess.Popen):
+    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, execution=None):
         self.output = output
         self.input = input
         self.options = options if options else FFMPEGOptions()
         self.overlay_size = overlay_size
         self.vsize = vsize
-        self.popen = popen
-        self.redirect = redirect
+        self.execution = execution if execution else InProcessExecution()
 
     @contextlib.contextmanager
     def generate(self):
@@ -276,29 +272,7 @@ class FFMPEGOverlay:
             self.output
         ])
 
-        try:
-            print(f"Running FFMPEG as '{' '.join(cmd)}'")
-            if self.redirect:
-                with open(self.redirect, "w") as std:
-                    process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
-            else:
-                process = self.popen(cmd, stdin=subprocess.PIPE, stdout=None, stderr=None)
-
-            try:
-                yield process.stdin
-            finally:
-                process.stdin.flush()
-            process.stdin.close()
-            # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
-            process.wait(5 * 60)
-        except FileNotFoundError:
-            raise IOError("Unable to start the 'ffmpeg' process - is FFMPEG installed?") from None
-        except BrokenPipeError:
-            if self.redirect:
-                print("FFMPEG Output:")
-                with open(self.redirect) as f:
-                    print("".join(f.readlines()), file=sys.stderr)
-            raise IOError("FFMPEG reported an error - can't continue") from None
+        yield from self.execution.execute(cmd)
 
 
 if __name__ == "__main__":

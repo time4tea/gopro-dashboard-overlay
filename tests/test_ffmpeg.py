@@ -59,13 +59,23 @@ class FakePopen:
         })
 
 
+class FakeExecution:
+
+    def __init__(self):
+        self.args = None
+
+    def execute(self, args):
+        self.args = args
+        yield BytesIO()
+
+
 def test_ffmpeg_generate_execute():
-    fake = FakePopen()
+    fake = FakeExecution()
 
     ffmpeg = FFMPEGGenerate(
         output="output",
         overlay_size=Dimension(100, 200),
-        popen=fake.popen
+        execution=fake
     )
 
     with ffmpeg.generate():
@@ -89,9 +99,9 @@ def test_ffmpeg_generate_execute():
 
 
 def test_ffmpeg_overlay_execute_default():
-    fake = FakePopen()
+    fake = FakeExecution()
 
-    ffmpeg = FFMPEGOverlay(input="input", output="output", overlay_size=Dimension(3, 4), popen=fake.popen)
+    ffmpeg = FFMPEGOverlay(input="input", output="output", overlay_size=Dimension(3, 4), execution=fake)
 
     with ffmpeg.generate():
         pass
@@ -115,11 +125,11 @@ def test_ffmpeg_overlay_execute_default():
 
 
 def test_ffmpeg_overlay_execute_options():
-    fake = FakePopen()
+    fake = FakeExecution()
 
     ffmpeg = FFMPEGOverlay(input="input", output="output",
                            options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
-                           overlay_size=Dimension(3, 4), popen=fake.popen)
+                           overlay_size=Dimension(3, 4), execution=fake)
 
     with ffmpeg.generate():
         pass
