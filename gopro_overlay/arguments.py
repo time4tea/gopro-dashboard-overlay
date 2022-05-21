@@ -17,8 +17,6 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
-    parser.add_argument("--overlay-only", action="store_true", help="Only output the overlay, don't mix with video")
-
     parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
     parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
 
@@ -33,6 +31,7 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--include", nargs="+",
                         help="include named component (will exclude all others)")
 
+    parser.add_argument("--generate", choices=["default", "overlay", "none"], default="default", help="Type of output to generate")
     parser.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
 
     parser.add_argument("--debug-metadata", action="store_true", default=False,

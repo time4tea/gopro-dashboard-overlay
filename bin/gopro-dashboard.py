@@ -10,7 +10,7 @@ from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
-    find_streams
+    find_streams, FFMPEGNull
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
@@ -138,7 +138,9 @@ if __name__ == "__main__":
                     renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone)
             )
 
-            if args.overlay_only:
+            if args.generate == "none":
+                ffmpeg = FFMPEGNull()
+            elif args.output == "overlay":
                 ffmpeg = FFMPEGGenerate(
                     output=args.output,
                     overlay_size=dimensions

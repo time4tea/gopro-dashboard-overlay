@@ -5,6 +5,7 @@ import subprocess
 import sys
 from array import array
 from collections import namedtuple
+from io import BytesIO
 
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
@@ -163,6 +164,21 @@ def ffmpeg_libx264_is_installed():
 #         }
 #     ]
 # }
+
+class DiscardingBytesIO(BytesIO):
+
+    def __init__(self, initial_bytes: bytes = ...) -> None:
+        super().__init__(bytes())
+
+    def write(self, buffer) -> int:
+        return len(buffer)
+
+
+class FFMPEGNull:
+
+    @contextlib.contextmanager
+    def generate(self):
+        yield DiscardingBytesIO()
 
 
 class FFMPEGGenerate:

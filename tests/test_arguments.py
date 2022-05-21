@@ -9,8 +9,9 @@ def test_input_output():
 
 
 def test_overlay_only():
-    assert do_args().overlay_only is False
-    assert do_args("--overlay-only").overlay_only is True
+    assert do_args().generate == "default"
+    assert do_args("--generate", "overlay").generate == "overlay"
+    assert do_args("--generate", "none").generate == "none"
 
 
 def test_show_ffmpeg():
