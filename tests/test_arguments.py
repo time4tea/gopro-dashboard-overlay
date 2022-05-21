@@ -41,6 +41,11 @@ def test_font():
     assert do_args("--font", "Bob.ttf").font == "Bob.ttf"
 
 
+def test_fork():
+    assert not do_args().fork
+    assert do_args("--fork").font
+
+
 def test_include():
     assert do_args().include is None
     assert do_args("--include", "something").include == ["something"]

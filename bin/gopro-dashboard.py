@@ -9,7 +9,7 @@ from gopro_overlay import timeseries_process, progress_frames
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
-from gopro_overlay.execution import InProcessExecution
+from gopro_overlay.execution import InProcessExecution, ForkingExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams, FFMPEGNull
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
@@ -147,11 +147,14 @@ if __name__ == "__main__":
                     overlay_size=dimensions
                 )
             else:
-                execution = InProcessExecution()
-                if not args.show_ffmpeg:
-                    redirect = temp_file_name()
+                redirect = None if args.show_ffmpeg else temp_file_name()
+
+                if args.fork:
+                    execution = ForkingExecution(redirect=redirect)
+                else:
                     execution = InProcessExecution(redirect=redirect)
-                    print(f"FFMPEG Output is in {redirect}")
+
+                print(f"FFMPEG Output is in {redirect}")
 
                 if args.profile:
                     ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
