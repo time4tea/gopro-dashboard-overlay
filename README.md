@@ -15,6 +15,8 @@
 
 Almost 30 different map styles are supported! - See [map styles](docs/maps/README.md) for more
 
+*Example*
+
 | .                                   | .                                             | .                                                     | .                                                     |
 |-------------------------------------|-----------------------------------------------|-------------------------------------------------------|-------------------------------------------------------|
 | ![osm](docs/maps/map_style_osm.png) | ![tf-cycle](docs/maps/map_style_tf-cycle.png) | ![tf-transport](docs/maps/map_style_tf-transport.png) | ![tf-landscape](docs/maps/map_style_tf-landscape.png) |
@@ -173,6 +175,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.43.0 Support for [Geoapify](https://geoapify.com/) maps, as well as existing [Thunderforest](https://www.thunderforest.com/) and [OSM](https://www.openstreetmap.org/) 
+  - Small improvements in API Key handling. See [map styles docs](docs/maps/README.md)
 - 0.42.0 Experimental threading mode `--thread` which just sends data to ffmpeg on a background thread. 
   - The result of lots of experimentation on timing, but basically if the GPU is maxed out, that's a limiting factor.
   - This gets a marginal performance gain of about 0.2frames/s for me. Use `nvtop` to check the "ENC" load on the GPU. 
