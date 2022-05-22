@@ -11,6 +11,15 @@
 
 ![Example Dashboard Image](examples/2022-05-15-example.png)
 
+## Map Styles
+
+Almost 30 different map styles are supported! - See [map styles](docs/maps/README.md) for more
+
+| .                                   | .                                             | .                                                     | .                                                     |
+|-------------------------------------|-----------------------------------------------|-------------------------------------------------------|-------------------------------------------------------|
+| ![osm](docs/maps/map_style_osm.png) | ![tf-cycle](docs/maps/map_style_tf-cycle.png) | ![tf-transport](docs/maps/map_style_tf-transport.png) | ![tf-landscape](docs/maps/map_style_tf-landscape.png) |
+
+
 ## Requirements
 
 - Python3.8

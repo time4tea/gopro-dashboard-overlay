@@ -70,6 +70,7 @@ ensure-pristine:
 .PHONY: doc
 doc:
 	PYTHONPATH=. $(BIN)/python3 build-scripts/generate-examples.py
+	PYTHONPATH=. $(BIN)/python3 build-scripts/generate-map-examples.py
 
 
 .PHONY: publish
