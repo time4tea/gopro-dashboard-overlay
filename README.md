@@ -175,6 +175,7 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.44.0 Add [PR#44](https://github.com/time4tea/gopro-dashboard-overlay/pull/34) for extracting GPMF to ndjson. Thanks [@gregbaker](https://github.com/gregbaker)
 - 0.43.0 Support for [Geoapify](https://geoapify.com/) maps, as well as existing [Thunderforest](https://www.thunderforest.com/) and [OSM](https://www.openstreetmap.org/) 
   - Small improvements in API Key handling. See [map styles docs](docs/maps/README.md)
 - 0.42.0 Experimental threading mode `--thread` which just sends data to ffmpeg on a background thread. 
