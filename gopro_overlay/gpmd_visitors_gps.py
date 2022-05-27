@@ -60,6 +60,7 @@ class GPS5StreamVisitor:
         self._scale = None
         self._points = None
         self._timestamp = None
+        self._dop = None
 
     def vi_STMP(self, item):
         self._timestamp = interpret_item(item)
@@ -122,6 +123,7 @@ class GPSVisitor:
 # 123,0,LOCK_2D,2022-05-05 10:22:56.325000+00:00,43.3438812,31.8257702,3.16
 # 123,1,LOCK_2D,2022-05-05 10:22:56.380320+00:00,39.7817877,2.7167594,3.16
 
+# noinspection PyPep8Naming
 class DetermineFirstLockedGPSUVisitor:
     _count = 0
     _basetime = None
