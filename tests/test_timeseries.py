@@ -1,7 +1,7 @@
 import datetime
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import Point
+from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeseries_process import process_ses, calculate_speeds
 from gopro_overlay.units import units

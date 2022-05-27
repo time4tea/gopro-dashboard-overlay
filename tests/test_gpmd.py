@@ -7,9 +7,13 @@ from pathlib import Path
 import pytest
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.gpmd import GPSVisitor, GPSFix, GPS5, XYZVisitor, XYZComponentConverter, GPS5EntryConverter, XYZ, \
-    GoproMeta, DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
-    CorrectionFactorsPacketTimeCalculator, CorrectionFactors, DebuggingVisitor
+from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ
+from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator
+from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
+    CorrectionFactors
+from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
+from gopro_overlay.gpmd_visitors_gps import GPSVisitor, NewGPS5EntryConverter, DetermineFirstLockedGPSUVisitor
+from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.point import Point, Point3, Quaternion
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
@@ -80,7 +84,7 @@ def test_load_hero5_raw_entry():
 
     counter = [0]
 
-    def assert_item(entry):
+    def assert_item(frame_timestamp, entry):
         counter[0] += 1
         if entry.packet_index.magnitude == 0:
             assert entry.dt == datetime.datetime(2017, 4, 17, 17, 31, 3, tzinfo=datetime.timezone.utc)
@@ -91,7 +95,15 @@ def test_load_hero5_raw_entry():
             assert entry.speed == units.Quantity(0.167, units.mps)
             assert entry.alt == units.Quantity(-20.184, units.m)
 
-    converter = GPS5EntryConverter(units=units, on_item=assert_item)
+    converter = NewGPS5EntryConverter(
+        units=units,
+        on_item=assert_item,
+        calculator=CorrectionFactorsPacketTimeCalculator(CorrectionFactors(
+            first_frame=timeunits(seconds=0),
+            last_frame=timeunits(seconds=10),
+            frames_s=18
+        ))
+    )
 
     meta[0].accept(GPSVisitor(converter=converter.convert))
 
@@ -147,6 +159,12 @@ def test_find_first_shut_timestamp():
     meta = load("gopro-meta.gpmd")
 
     assert meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp == timeunits(micros=3538581891)
+
+
+def test_find_first_locked_gpsu():
+    expected = datetime.datetime(2021, 9, 24, 10, 59, 36, 474000, tzinfo=datetime.timezone.utc)
+
+    assert load("gopro-meta.gpmd").accept(DetermineFirstLockedGPSUVisitor()).packet_time == expected
 
 
 class CORIVisitor:
