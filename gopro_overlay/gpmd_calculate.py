@@ -1,6 +1,7 @@
 from typing import Optional
 
-from gopro_overlay.gpmd_visitors import CorrectionFactors
+from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
+    CalculateCorrectionFactorsVisitor
 from gopro_overlay.timeunits import Timeunit, timeunits
 
 
@@ -38,3 +39,17 @@ class CorrectionFactorsPacketTimeCalculator:
                 seconds=(samples_before_this + index) / self.correction_factors.frames_s),
             timeunits(seconds=index / self.correction_factors.frames_s)
         )
+
+
+def timestamp_calculator_for_packet_type(meta, metameta, packet_type):
+    cori_timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
+    if cori_timestamp is None:
+        assert metameta is not None
+        correction_factors = meta.accept(
+            CalculateCorrectionFactorsVisitor(packet_type, metameta)
+        ).factors()
+
+        calculator = CorrectionFactorsPacketTimeCalculator(correction_factors)
+    else:
+        calculator = CoriTimestampPacketTimeCalculator(cori_timestamp)
+    return calculator
