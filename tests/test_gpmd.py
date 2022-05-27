@@ -12,7 +12,7 @@ from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
     CorrectionFactors
 from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
-from gopro_overlay.gpmd_visitors_gps import GPSVisitor, NewGPS5EntryConverter, DetermineFirstLockedGPSUVisitor
+from gopro_overlay.gpmd_visitors_gps import GPSVisitor, GPS5EntryConverter, DetermineFirstLockedGPSUVisitor
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.point import Point, Point3, Quaternion
 from gopro_overlay.timeunits import timeunits
@@ -95,7 +95,7 @@ def test_load_hero5_raw_entry():
             assert entry.speed == units.Quantity(0.167, units.mps)
             assert entry.alt == units.Quantity(-20.184, units.m)
 
-    converter = NewGPS5EntryConverter(
+    converter = GPS5EntryConverter(
         units=units,
         on_item=assert_item,
         calculator=CorrectionFactorsPacketTimeCalculator(CorrectionFactors(

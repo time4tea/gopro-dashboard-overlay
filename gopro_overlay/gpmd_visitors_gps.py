@@ -6,9 +6,7 @@ from gopro_overlay.gpmd import interpret_item, GPS_FIXED
 from gopro_overlay.point import Point
 
 
-
-
-class NewGPS5EntryConverter:
+class GPS5EntryConverter:
     def __init__(self, units, calculator, on_item=lambda c, e: None):
         self._units = units
         self._on_item = on_item

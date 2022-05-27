@@ -4,7 +4,7 @@ from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor
-from gopro_overlay.gpmd_visitors_gps import NewGPS5EntryConverter, GPSVisitor
+from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor
 from gopro_overlay.timeunits import Timeunit, timeunits
 
 
@@ -195,7 +195,7 @@ def framemeta_from_meta(meta, units, metameta=None):
     else:
         calculator = CoriTimestampPacketTimeCalculator(cori_timestamp)
 
-    converter = NewGPS5EntryConverter(
+    converter = GPS5EntryConverter(
         units,
         calculator=calculator,
         on_item=lambda c, e: frame_meta.add(c, e)
