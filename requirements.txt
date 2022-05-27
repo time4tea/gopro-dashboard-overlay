@@ -9,3 +9,4 @@ gpxpy==1.4.2
 # for lat/lon/speed calcs
 geographiclib==1.52
 progressbar2==3.53.3
+requests==2.27.1

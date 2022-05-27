@@ -161,8 +161,9 @@ def test_find_first_shut_timestamp():
     assert meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp == timeunits(micros=3538581891)
 
 
+# note that this isn't the actual first packet due to firmware bug
 def test_find_first_locked_gpsu():
-    expected = datetime.datetime(2021, 9, 24, 10, 59, 36, 474000, tzinfo=datetime.timezone.utc)
+    expected = datetime.datetime(2021, 9, 24, 10, 59, 38, 509000, tzinfo=datetime.timezone.utc)
 
     assert load("gopro-meta.gpmd").accept(DetermineFirstLockedGPSUVisitor()).packet_time == expected
 

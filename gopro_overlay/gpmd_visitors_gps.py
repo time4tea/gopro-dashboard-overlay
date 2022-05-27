@@ -2,7 +2,7 @@ import collections
 import datetime
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import interpret_item, GPS_FIXED
+from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5
 from gopro_overlay.point import Point
 
 
@@ -115,9 +115,19 @@ class GPSVisitor:
         pass
 
 
+# have seen stuff like this: lock acquired, DOP reduced, but still location way wrong.
+# 121,17,NO,2022-05-05 10:22:55.276481+00:00,43.7064837,31.3332034,99.99
+# 122,0,LOCK_2D,2022-05-05 10:22:55.335000+00:00,43.7063872,31.333535,3.16
+# ...
+# 123,0,LOCK_2D,2022-05-05 10:22:56.325000+00:00,43.3438812,31.8257702,3.16
+# 123,1,LOCK_2D,2022-05-05 10:22:56.380320+00:00,39.7817877,2.7167594,3.16
+
 class DetermineFirstLockedGPSUVisitor:
+    _count = 0
     _basetime = None
     _fix = None
+    _scale = None
+    _point = None
 
     def vic_DEVC(self, i, s):
         if self._basetime is None:
@@ -127,16 +137,31 @@ class DetermineFirstLockedGPSUVisitor:
         if "GPS5" in s:
             return self
 
+    # Crazy bug where first couple of "FIX" GPS packets are not actually fixed, they gradually become correct..
     def vi_GPSU(self, item):
         if self._fix in GPS_FIXED:
-            self._basetime = interpret_item(item)
+            self._count += 1
+
+            if self._count == 3:
+                self._basetime = interpret_item(item)
 
     def vi_GPSF(self, item):
         self._fix = interpret_item(item)
 
+    def vi_SCAL(self, item):
+        self._scale = interpret_item(item)
+
+    def vi_GPS5(self, item):
+        if self._basetime is not None:
+            self._point = interpret_item(item, self._scale)[0]
+
     @property
-    def packet_time(self):
+    def packet_time(self) -> datetime.datetime:
         return self._basetime
+
+    @property
+    def point(self) -> GPS5:
+        return self._point
 
     def v_end(self):
         pass

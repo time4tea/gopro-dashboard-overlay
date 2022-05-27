@@ -4,6 +4,7 @@ import datetime
 import itertools
 import struct
 from enum import Enum
+from typing import List
 
 from .timeunits import timeunits
 
@@ -77,31 +78,31 @@ def _interpret_element(item, scale):
     return [unpack_single(r) for r in range(item.repeat)]
 
 
-def _interpret_gps5(item, scale):
+def _interpret_gps5(item, scale) -> List[GPS5]:
     return [GPS5._make(it) for it in _interpret_element(item, scale)]
 
 
-def _interpret_gps_precision(item, *args):
+def _interpret_gps_precision(item, *args) -> float:
     return _interpret_atom(item) / 100.0
 
 
-def _interpret_xyz(item, scale):
+def _interpret_xyz(item, scale) -> List[XYZ]:
     return [XYZ._make(it) for it in _interpret_element(item, scale)]
 
 
-def _interpret_vector(item, scale):
+def _interpret_vector(item, scale) -> List[VECTOR]:
     return [VECTOR._make(it) for it in _interpret_element(item, scale)]
 
 
-def _interpret_quaternion(item, scale):
+def _interpret_quaternion(item, scale) -> List[QUATERNION]:
     return [QUATERNION._make(it) for it in _interpret_element(item, scale)]
 
 
-def _interpret_gps_lock(item, *args):
+def _interpret_gps_lock(item, *args) -> GPSFix:
     return GPSFix(_interpret_atom(item))
 
 
-def _interpret_stream_marker(item, *args):
+def _interpret_stream_marker(item, *args) -> str:
     return "Stream Marker"
 
 

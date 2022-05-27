@@ -13,6 +13,7 @@ requires = [
     "pillow==8.3.2",
     "pint==0.17",
     "progressbar2==3.53.3",
+    "requests==2.27.1",
 ]
 
 test_requirements = [
@@ -46,13 +47,14 @@ setup(
     install_requires=requires,
     tests_require=test_requirements,
     scripts=[
-        "bin/gopro-dashboard.py",
         "bin/gopro-contrib-data-extract.py",
-        "bin/gopro-to-gpx.py",
-        "bin/gopro-join.py",
-        "bin/gopro-extract.py",
         "bin/gopro-cut.py",
+        "bin/gopro-dashboard.py",
+        "bin/gopro-extract.py",
+        "bin/gopro-join.py",
+        "bin/gopro-rename.py",
         "bin/gopro-to-csv.py",
+        "bin/gopro-to-gpx.py",
     ],
     python_requires=">=3.8",
     include_package_data=True,

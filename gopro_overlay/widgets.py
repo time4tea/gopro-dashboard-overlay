@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 
 from . import icons
 from .dimensions import Dimension
+from .functional import compose
 from .point import Coordinate
 
 anchors = {
@@ -294,7 +295,3 @@ class Scene:
             w.draw(image, draw)
 
         return image
-
-
-def compose(*functions):
-    return functools.reduce(lambda f, g: lambda x: f(g(x)), reversed(functions))

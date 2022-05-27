@@ -11,6 +11,7 @@ from io import BytesIO
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.execution import InProcessExecution
+from gopro_overlay.functional import flatten
 
 
 def run(cmd, **kwargs):
@@ -225,19 +226,6 @@ class FFMPEGOptions:
     def set_output_options(self, options):
         self.output = options
 
-
-def flatten(list_of_lists):
-    result = []
-
-    def flatten_part(part):
-        for item in part:
-            if type(item) == list:
-                flatten_part(item)
-            else:
-                result.append(item)
-
-    flatten_part(list_of_lists)
-    return result
 
 
 class FFMPEGOverlay:
