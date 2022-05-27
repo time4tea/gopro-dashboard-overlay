@@ -182,15 +182,15 @@ class FrameMeta:
 def framemeta_from_meta(meta, units, metameta=None):
     frame_meta = FrameMeta()
 
-    calculator = timestamp_calculator_for_packet_type(meta, metameta, "GPS5")
-
-    converter = GPS5EntryConverter(
-        units,
-        calculator=calculator,
-        on_item=lambda c, e: frame_meta.add(c, e)
+    meta.accept(
+        GPSVisitor(
+            converter=GPS5EntryConverter(
+                units,
+                calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS5"),
+                on_item=lambda c, e: frame_meta.add(c, e)
+            ).convert
+        )
     )
-
-    meta.accept(GPSVisitor(converter=converter.convert))
 
     return frame_meta
 
