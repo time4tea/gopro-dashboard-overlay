@@ -94,7 +94,11 @@ bump-major:
 
 .PHONY: help
 help:
-	PYTHONPATH=. $(BIN)/python bin/gopro-to-gpx.py --help
-	PYTHONPATH=. $(BIN)/python bin/gopro-dashboard.py --help
-	PYTHONPATH=. $(BIN)/python bin/gopro-join.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-contrib-data-extract.py --help
 	PYTHONPATH=. $(BIN)/python bin/gopro-cut.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-dashboard.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-extract.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-join.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-rename.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-to-csv.py --help
+	PYTHONPATH=. $(BIN)/python bin/gopro-to-gpx.py --help
