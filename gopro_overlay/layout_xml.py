@@ -14,6 +14,7 @@ from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite, Frame
 from gopro_overlay.widgets_asi import AirspeedIndicator
 from gopro_overlay.widgets_compass import Compass
+from gopro_overlay.widgets_compass_arrow import CompassArrow
 from gopro_overlay.widgets_map import MovingJourneyMap
 
 
@@ -45,7 +46,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         def create_component(child):
             if not child.tag == "component":
                 raise ValueError(f"Was expecting 'component' element, not '{child.tag}'")
-            component_type = child.attrib["type"]
+            component_type = child.attrib["type"].replace("-", "_")
 
             attr = f"create_{component_type}"
 
@@ -129,7 +130,8 @@ def rgbattr(el, a, d):
     if v is None:
         return v
     if len(v) != 3 and len(v) != 4:
-        raise ValueError(f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), or 4 (r,g,b,a) not {len(v)}")
+        raise ValueError(
+            f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), or 4 (r,g,b,a) not {len(v)}")
     return v
 
 
@@ -320,6 +322,19 @@ def create_compass(element, entry, timeseries, font, **kwargs):
         fg=rgbattr(element, "fg", d=(255, 255, 255)),
         bg=rgbattr(element, "bg", d=None),
         text=rgbattr(element, "text", d=(255, 255, 255)),
+    )
+
+
+def create_compass_arrow(element, entry, timeseries, font, **kwargs):
+    return CompassArrow(
+        size=iattrib(element, "size", d=256),
+        reading=lambda: nonesafe(entry().cog),
+        font=font(iattrib(element, "textsize", d=32)),
+        arrow=rgbattr(element, "arrow", d=(255, 255, 255)),
+        bg=rgbattr(element, "bg", d=(0, 0, 0, 0)),
+        text=rgbattr(element, "text", d=(255, 255, 255)),
+        outline=rgbattr(element, "outline", d=(0, 0, 0)),
+        arrow_outline=rgbattr(element, "arrow_outline", d=(0, 0, 0)),
     )
 
 

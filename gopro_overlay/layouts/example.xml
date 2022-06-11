@@ -112,6 +112,10 @@
         <translate x="180">
             <component type="compass" size="300" fg="255,255,255" text="0,255,255" textsize="32"/>
         </translate>
+
+        <translate x="350">
+            <component type="compass-arrow" size="200" bg="0,0,0,0" arrow="255,0,255" text="0,0,0" textsize="32"/>
+        </translate>
     </composite>
 
     <translate x="700" y="800">
