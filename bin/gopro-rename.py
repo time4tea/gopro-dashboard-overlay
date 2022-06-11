@@ -28,7 +28,9 @@ if __name__ == "__main__":
         if os.path.isdir(path) and not args.dirs:
             raise IOError(f"{path} is a directory, please use --dirs")
 
-    file_list = sorted(functional.flatten([filenaming.gopro_files_in(path) for path in args.file]))
+    potentials = functional.flatten([filenaming.gopro_files_in(path) for path in args.file])
+    potentials = filter(None, potentials)
+    file_list = sorted(potentials)
 
     for file in file_list:
         meta = GoproMeta.parse(ffmpeg.load_gpmd_from(file))
@@ -36,7 +38,7 @@ if __name__ == "__main__":
         gps_datetime = found.packet_time
         if gps_datetime is None:
             print(f"Unable to determine GPS date for {file} - GPS never locked")
-            exit(1)
+            continue
 
         formatted_datetime = gps_datetime.strftime("%Y%m%d-%H%M%S")
 
