@@ -3,7 +3,7 @@ import datetime
 from gopro_overlay.entry import Entry
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries
-from gopro_overlay.timeseries_process import process_ses, calculate_speeds
+from gopro_overlay.timeseries_process import process_ses, calculate_speeds, calculate_gradient
 from gopro_overlay.units import units
 
 
@@ -56,3 +56,26 @@ def test_process_delta_speeds():
     assert "{0.magnitude:.2f} {0.units:~P}".format(entry.cspeed) == "16.11 m/s"
     assert "{0.magnitude:.2f} {0.units:~P}".format(entry.azi) == "56.53 deg"
     assert "{0.magnitude:.2f} {0.units:~P}".format(entry.cog) == "56.53 deg"
+
+
+def metres(n):
+    return units.Quantity(n, units.m)
+
+
+def test_process_gradient():
+    processor = calculate_gradient()
+    r = processor(
+        a=Entry(datetime_of(0), alt=metres(5), odo=metres(10)),
+        b=Entry(datetime_of(0), alt=metres(6), odo=metres(26)),
+        c=None
+    )
+    assert r["grad"].magnitude == 6.25
+
+
+def test_process_gradient_missing_alt():
+    processor = calculate_gradient()
+    assert processor(
+        a=Entry(datetime_of(0), odo=metres(10)),
+        b=Entry(datetime_of(0), alt=metres(6), odo=metres(26)),
+        c=None
+    ) is None
