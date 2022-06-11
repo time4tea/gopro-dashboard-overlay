@@ -10,6 +10,7 @@
 ## Examples
 
 ![Example Dashboard Image](examples/2022-05-15-example.png)
+![Example Dashboard Image](examples/2022-06-11-contrib-example.png)
 
 ## Map Styles
 
