@@ -1,4 +1,3 @@
-import itertools
 import random
 from datetime import timedelta
 
@@ -6,15 +5,12 @@ from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.framemeta import View, Window
 from gopro_overlay.layout import BigMetric, gps_info
 from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate
-from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, Frame
-from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_info import ComparativeEnergy
 from tests.approval import approve_image
 from tests.testenvironment import is_make
@@ -83,72 +79,6 @@ def test_render_gps_info():
         name="gps info",
         widgets=[gps_info(Coordinate(400, 10), lambda: entry, font)]
     )
-
-
-@approve_image
-def test_render_simple_chart():
-    # Avg: 0.00018, Rate: 5,491.91
-    view = View(data=list(itertools.chain(
-        itertools.repeat(0, 128),
-        itertools.repeat(1, 128)
-    )), version=1)
-    return time_rendering("Simple Chart", [
-        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
-    ])
-
-
-@approve_image
-def test_render_chart():
-    # Avg: 0.00019, Rate: 5,325.79
-    window = Window(
-        ts,
-        duration=timeunits(minutes=2),
-        samples=256,
-        key=lambda e: e.alt,
-        fmt=lambda v: v.magnitude
-    )
-
-    view = window.view(ts.min)
-
-    return time_rendering(name="Simple Chart with view", widgets=[
-        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
-    ])
-
-
-def test_render_chart_with_no_data():
-    window = Window(
-        ts,
-        duration=timeunits(minutes=2),
-        samples=256,
-        key=lambda e: e.bob, fmt=lambda v: v.magnitude
-    )
-
-    view = window.view(ts.min)
-
-    return time_rendering(name="Simple Chart with no valid data", widgets=[
-        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
-    ])
-
-
-# start = 0.04 / 24.52
-def test_render_moving_chart():
-    window = Window(
-        ts,
-        duration=timeunits(minutes=2),
-        samples=256,
-        key=lambda e: e.alt,
-        fmt=lambda v: v.magnitude,
-        missing=0
-    )
-
-    stepper = iter(ts.stepper(timeunits(seconds=1)).steps())
-
-    def get_view():
-        return window.view(next(stepper))
-
-    return time_rendering(name="Moving Chart", repeat=50, widgets=[
-        SimpleChart(Coordinate(50, 50), get_view, filled=True, font=font)
-    ])
 
 
 @approve_image

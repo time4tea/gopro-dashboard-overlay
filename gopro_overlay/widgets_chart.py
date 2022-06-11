@@ -14,6 +14,10 @@ class SimpleChart:
         else:
             self.font = None
 
+        self.fill = (91, 113, 146)
+        self.line = (255, 255, 255)
+        self.text = (255, 255, 255)
+
         self.view = None
         self.image = None
 
@@ -48,15 +52,17 @@ class SimpleChart:
                 for x, y in filtered:
                     # (0,0) is top left
                     points = ((x, size[1] - 1), (x, y_pos(y)))
-                    draw.line(points, width=1, fill=(91, 113, 146))
+
+                    draw.line(points, width=1, fill=self.fill)
 
             points = [(x, y_pos(y)) for x, y in filtered]
-            draw.line(points, width=2, fill=(255, 255, 255))
+
+            draw.line(points, width=2, fill=self.line)
 
             if self.font:
-                draw.text((10, 4), f"{max_val:.0f}", font=self.font, fill=(255, 255, 255), stroke_width=2,
+                draw.text((10, 4), f"{max_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
                           stroke_fill=(0, 0, 0))
-                draw.text((10, 40), f"{min_val:.0f}", font=self.font, fill=(255, 255, 255), stroke_width=2,
+                draw.text((10, 40), f"{min_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
                           stroke_fill=(0, 0, 0))
 
             marker_val = data[int(size[0] / 2)]
