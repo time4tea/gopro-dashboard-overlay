@@ -28,6 +28,9 @@ class Point:
         self.lon = lon
         self.lat = lat
 
+    def __eq__(self, other):
+        return self.lat == other.lat and self.lon == other.lon
+
     def __sub__(self, other):
         return Point(self.lat - other.lat, self.lon - other.lon)
 

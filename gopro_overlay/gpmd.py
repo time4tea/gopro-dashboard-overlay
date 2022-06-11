@@ -307,5 +307,5 @@ class GoproMeta:
         return visitor
 
     @staticmethod
-    def parse(data):
+    def parse(data) -> 'GoproMeta':
         return GoproMeta(list(GPMDParser(data).items()))

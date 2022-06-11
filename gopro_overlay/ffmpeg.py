@@ -5,8 +5,9 @@ import itertools
 import json
 import subprocess
 from array import array
-from collections import namedtuple
+from dataclasses import dataclass
 from io import BytesIO
+from typing import Optional
 
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
@@ -25,14 +26,27 @@ def invoke(cmd, **kwargs):
         raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
 
-StreamInfo = namedtuple("StreamInfo", ["audio", "video", "meta", "video_dimension"])
+@dataclass
+class MetaMeta:
+    stream: int
+    frame_count: int
+    timebase: int
+    frame_duration: int
+
+
+@dataclass
+class StreamInfo:
+    audio: Optional[int]
+    video: int
+    meta: MetaMeta
+    video_dimension: Dimension
 
 
 def cut_file(input, output, start, duration):
     streams = find_streams(input)
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream]]))
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if stream is not None]))
 
     args = ["ffmpeg",
             "-hide_banner",
@@ -57,7 +71,7 @@ def join_files(filepaths, output):
     streams = find_streams(filepaths[0])
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream]]))
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if stream is not None]))
 
     with temporary_file() as commandfile:
         with open(commandfile, "w") as f:
@@ -79,10 +93,27 @@ def join_files(filepaths, output):
         run(args)
 
 
-MetaMeta = namedtuple("MetaMeta", ["stream", "frame_count", "timebase", "frame_duration"])
+def find_frame_duration(filepath, data_stream_number, invoke=invoke):
+
+    ffprobe_output = str(invoke(
+        ["ffprobe",
+         "-hide_banner",
+         "-print_format", "json",
+         "-show_packets",
+         "-select_streams", str(data_stream_number),
+         "-read_intervals", "%+#1",
+         filepath]
+    ).stdout)
+
+    ffprobe_packet_data = json.loads(ffprobe_output)
+    packet = ffprobe_packet_data["packets"][0]
+
+    duration = int(packet["duration"])
+
+    return duration
 
 
-def find_streams(filepath, invoke=invoke):
+def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duration) -> StreamInfo:
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
     ffprobe_json = json.loads(ffprobe_output)
@@ -99,28 +130,36 @@ def find_streams(filepath, invoke=invoke):
             raise IOError(f"Multiple matching streams for {what} in ffprobe output")
         return matches[0]
 
+    def only_if_present(what, l, p):
+        matches = list(filter(p, l))
+        if matches:
+            return first_and_only(what, l, p)
+
     streams = ffprobe_json["streams"]
     video = first_and_only("video stream", streams, video_selector)
     video_stream = video["index"]
     video_dimension = Dimension(video["width"], video["height"])
 
-    audio = first_and_only("audio stream", streams, audio_selector)
-    audio_stream = audio["index"]
+    audio = only_if_present("audio stream", streams, audio_selector)
+    audio_stream = None
+    if audio:
+        audio_stream = audio["index"]
 
     meta = first_and_only("metadata stream", streams, data_selector)
 
-    # meta_frame_duration isn't available here in ffprobe, need to look at first packet, see comment.
+    data_stream_number = int(meta["index"])
+
     meta_meta = MetaMeta(
-        stream=int(meta["index"]),
+        stream=data_stream_number,
         frame_count=int(meta["nb_frames"]),
         timebase=int(meta["time_base"].split("/")[1]),
-        frame_duration=1001
+        frame_duration=find_frame_duration(filepath, data_stream_number, invoke)
     )
 
-    if video_stream is None or audio_stream is None or meta_meta.stream is None or video_dimension is None:
-        raise IOError("Invalid File? The data stream doesn't seem to contain GoPro audio, video & metadata ")
+    if video_stream is None or meta_meta.stream is None or video_dimension is None:
+        raise IOError("Invalid File? The data stream doesn't seem to contain GoPro video & metadata ")
 
-    return StreamInfo(audio_stream, video_stream, meta=meta_meta, video_dimension=video_dimension)
+    return StreamInfo(audio=audio_stream, video=video_stream, meta=meta_meta, video_dimension=video_dimension)
 
 
 def load_gpmd_from(filepath):
@@ -227,10 +266,10 @@ class FFMPEGOptions:
         self.output = options
 
 
-
 class FFMPEGOverlay:
 
-    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, execution=None):
+    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080,
+                 execution=None):
         self.output = output
         self.input = input
         self.options = options if options else FFMPEGOptions()

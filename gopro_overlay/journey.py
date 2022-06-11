@@ -1,3 +1,5 @@
+import math
+
 from .gpmd import GPS_FIXED_VALUES
 from .point import Point
 
@@ -15,6 +17,9 @@ class MinMax:
     def update(self, new):
         if new is not None:
             self._items.append(new)
+
+    def __len__(self):
+        return len(self._items)
 
     @property
     def min(self):
@@ -45,19 +50,33 @@ class Extents:
         self.hr.update(item.hr)
 
 
+MIN_BOX_SIZE = 0.0001
+
+
 class Journey:
 
     def __init__(self):
         self.locations = []
         self.lat = MinMax("lat")
         self.lon = MinMax("lon")
+        self.badlat = MinMax("badlat")
+        self.badlon = MinMax("badlon")
 
     def accept(self, item):
         if item.gpsfix in GPS_FIXED_VALUES:
             self.locations.append(item.point)
             self.lat.update(item.point.lat)
             self.lon.update(item.point.lon)
+        else:
+            self.badlat.update(item.point.lat)
+            self.badlon.update(item.point.lon)
 
     @property
     def bounding_box(self):
-        return Point(self.lat.min, self.lon.min), Point(self.lat.max, self.lon.max)
+        lat = self.lat if self.lat else self.badlat
+        lon = self.lon if self.lon else self.badlon
+
+        if math.dist([lat.min, lon.min], [lat.max, lon.max]) < MIN_BOX_SIZE:
+            return Point(lat.min, lon.min), Point(lat.min + MIN_BOX_SIZE, lon.min + MIN_BOX_SIZE)
+
+        return Point(lat.min, lon.min), Point(lat.max, lon.max)

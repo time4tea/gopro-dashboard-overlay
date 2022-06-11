@@ -49,7 +49,7 @@ CorrectionFactors = collections.namedtuple("CorrectionFactors", ["first_frame", 
 class CalculateCorrectionFactorsVisitor:
     """This implements GetGPMFSampleRate in GPMF_utils.c"""
 
-    def __init__(self, wanted, metameta: MetaMeta):
+    def __init__(self, wanted: str, metameta: MetaMeta):
         self.wanted = wanted
         self.wanted_method_name = f"vi_{self.wanted}"
         self._payload_maths = PayloadMaths(metameta)

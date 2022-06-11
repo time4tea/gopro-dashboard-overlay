@@ -3,10 +3,12 @@ import inspect
 import os
 from array import array
 from pathlib import Path
+from typing import Tuple
 
 import pytest
 
 from gopro_overlay import ffmpeg
+from gopro_overlay.ffmpeg import StreamInfo
 from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
@@ -168,6 +170,7 @@ def test_find_first_locked_gpsu():
     assert load("gopro-meta.gpmd").accept(DetermineFirstLockedGPSUVisitor()).packet_time == expected
 
 
+# noinspection PyPep8Naming
 class CORIVisitor:
 
     def __init__(self, on_item=lambda x: None):
@@ -241,14 +244,58 @@ def test_load_gravity_meta():
     meta.accept(GRAVisitor(process_gravities))
 
 
+def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[StreamInfo, GoproMeta]:
+    filepath = path_of_meta(test_file_name)
+
+    if not os.path.exists(filepath):
+        if missing_ok:
+            pytest.xfail(f"Missing file {filepath} and this is OK")
+
+    return ffmpeg.find_streams(filepath), load_file(filepath)
+
+
+# TODO - get time-lapse and time-warp for inclusion
+
+def test_loading_time_lapse_file():
+    streams, _ = load_mp4_meta("time-lapse.mp4", missing_ok=True)
+    assert streams.audio is None
+    assert streams.video == 0
+    assert streams.meta.stream == 2
+    assert streams.meta.frame_count == 63
+    assert streams.meta.frame_duration == 500
+    assert streams.meta.timebase == 15000
+
+
+def test_estimation_of_timestamps_for_timelapse():
+    stream_info, meta = load_mp4_meta("time-lapse.mp4", missing_ok=True)
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.meta))
+
+    factors = visitor.factors()
+
+    assert factors.first_frame == timeunits(seconds=-0.000000)
+    assert factors.last_frame == timeunits(seconds=2.100000)
+    assert factors.frames_s == pytest.approx(30.000000, 0.0000001)
+
+
+def test_loading_time_warp_file():
+    stream_info, meta = load_mp4_meta("time-warp.mp4", missing_ok=True)
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.meta))
+
+    factors = visitor.factors()
+
+    assert factors.first_frame == timeunits(seconds=0.000000)
+    assert factors.last_frame == timeunits(seconds=2.235566)  # differs by 0.000001 from gpmf-parser frame time
+    assert factors.frames_s == pytest.approx(29.970030, 0.0000001)
+
+
 def test_estimation_of_timestamps():
     ''' use GetGPMFSampleRate on the same file to get the values to assert... '''
-    filepath = path_of_meta("hero7.mp4")
 
-    metameta = ffmpeg.find_streams(filepath).meta
-    meta = load_file(filepath)
+    stream_info, meta = load_mp4_meta("hero7.mp4")
 
-    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", metameta))
+    assert stream_info.meta.frame_duration == 1001
+
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.meta))
 
     factors = visitor.factors()
 

@@ -18,7 +18,7 @@ class Entry:
 
     def interpolate(self, other, dt):
         if self.dt == other.dt:
-            raise ValueError(f"Cannot interpolate between equal points")
+            return other
         if self.dt > other.dt:
             print(f"**Note** Requested interpolation [{self.dt} < *{dt}* < {other.dt}] : Lower point should be first - data out of order?")
             return other.interpolate(self, dt)

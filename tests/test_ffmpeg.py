@@ -26,13 +26,48 @@ def fake_invoke(stderr="", stdout="", expected=None):
     return invoked
 
 
+def test_finding_frame_duration():
+    duration = ffmpeg.find_frame_duration(
+        "whatever-file",
+        data_stream_number=306,
+        invoke=fake_invoke(
+            expected=['ffprobe', '-hide_banner', '-print_format', 'json', '-show_packets', '-select_streams', "306",
+                      '-read_intervals', '%+#1', 'whatever-file'],
+            stdout="""{    "packets": [
+        {
+            "codec_type": "data",
+            "stream_index": 2,
+            "pts": 0,
+            "pts_time": "0.000000",
+            "dts": 0,
+            "dts_time": "0.000000",
+            "duration": 500,
+            "duration_time": "0.033333",
+            "size": "1728",
+            "pos": "195407",
+            "flags": "K_"
+        }
+    ]
+}"""
+        )
+    )
+    assert duration == 500
+
+
 def test_parsing_stream_information():
+
+    def find_frame(filepath, data_stream, *args):
+        assert filepath == "whatever"
+        assert data_stream == 3
+        return 1001
+
     streams = ffmpeg.find_streams(
         "whatever",
-        fake_invoke(
+        invoke=fake_invoke(
             expected=["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", "whatever"],
             stdout=ffprobe_output
-        )
+        ),
+        find_frame_duration=find_frame
     )
 
     assert streams.video == 0

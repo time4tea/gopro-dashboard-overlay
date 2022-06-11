@@ -85,6 +85,15 @@ def test_getting_point_after_end_returns_last_item():
     assert fm.get(timeunits(seconds=2)).lat == 1.0
 
 
+def test_interpolating_entries_with_same_date_returns_other():
+    # this can happen with time lapse entries
+    fm = FrameMeta()
+    fm.add(timeunits(seconds=0), Entry(datetime_of(0), lat=1.0))
+    fm.add(timeunits(seconds=2), Entry(datetime_of(0), lat=2.0))
+
+    assert fm.get(timeunits(seconds=1)).lat == 2.0
+
+
 def test_getting_intermediate_point_gets_interpolated():
     fm = FrameMeta()
     fm.add(timeunits(seconds=0), Entry(datetime_of(0), lat=1.0))

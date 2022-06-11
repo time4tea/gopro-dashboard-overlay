@@ -8,7 +8,7 @@ from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.units import units
 
 
-def load_file(path):
+def load_file(path) -> GoproMeta:
     return GoproMeta.parse(ffmpeg.load_gpmd_from(path))
 
 
@@ -23,6 +23,7 @@ def file_path_of_test_asset(name):
         raise IOError(f"Test file {the_path} does not exist")
 
     return the_path
+
 
 def test_loading_data_by_frame():
     filepath = file_path_of_test_asset("hero7.mp4")
