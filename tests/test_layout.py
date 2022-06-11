@@ -34,6 +34,18 @@ def test_render_default_layout():
 
 
 @approve_image
+def test_render_default_layout_27k():
+    xmldoc = load_xml_layout("default-2704x1520")
+
+    with renderer.open() as map_renderer:
+        return time_layout(
+            "default",
+            layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()),
+            dimensions=Dimension(2704, 1520)
+        )
+
+
+@approve_image
 def test_render_default_layout_4k():
     xmldoc = load_xml_layout("default-3840x2160")
 
@@ -43,7 +55,6 @@ def test_render_default_layout_4k():
             layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()),
             dimensions=Dimension(3840, 2160)
         )
-
 
 
 @approve_image
