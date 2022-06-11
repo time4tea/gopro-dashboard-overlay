@@ -26,7 +26,7 @@ def invoke(cmd, **kwargs):
         raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
 
-@dataclass
+@dataclass(frozen=True)
 class MetaMeta:
     stream: int
     frame_count: int
@@ -34,7 +34,7 @@ class MetaMeta:
     frame_duration: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class StreamInfo:
     audio: Optional[int]
     video: int
