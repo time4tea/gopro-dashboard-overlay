@@ -179,7 +179,7 @@ class FrameMeta:
                 self.frames[e].update(**updates)
 
 
-def framemeta_from_meta(meta, units, metameta=None):
+def gps_framemeta(meta, units, metameta=None):
     frame_meta = FrameMeta()
 
     meta.accept(
@@ -196,7 +196,7 @@ def framemeta_from_meta(meta, units, metameta=None):
 
 
 def parse_gopro(gpmd_from, units, metameta: MetaMeta):
-    return framemeta_from_meta(GoproMeta.parse(gpmd_from), units, metameta=metameta)
+    return gps_framemeta(GoproMeta.parse(gpmd_from), units, metameta=metameta)
 
 
 def framemeta_from(filepath, units, metameta: MetaMeta):

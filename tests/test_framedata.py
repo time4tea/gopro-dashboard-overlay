@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.framemeta import framemeta_from_meta
+from gopro_overlay.framemeta import gps_framemeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.units import units
 
@@ -31,7 +31,7 @@ def test_loading_data_by_frame():
 
     metameta = ffmpeg.find_streams(filepath).meta
 
-    framemeta_from_meta(
+    gps_framemeta(
         meta,
         metameta=metameta,
         units=units

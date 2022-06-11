@@ -6,7 +6,7 @@ from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.framemeta import framemeta_from_meta
+from gopro_overlay.framemeta import gps_framemeta
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
@@ -36,7 +36,7 @@ def a_real_journey(name, dimension, f_scene):
     with open("meta/gopro-meta.gpmd", "rb") as f:
         data = f.read()
 
-    framemeta = framemeta_from_meta(meta=data, units=units)
+    framemeta = gps_framemeta(meta=data, units=units)
 
     overlay = Overlay(
         dimensions=dimension,
