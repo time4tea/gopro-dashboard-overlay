@@ -203,17 +203,6 @@ https://github.com/JuanIrache/gopro-telemetry
 - 0.37.0
   - Added new component "Moving Journey Map", which displays the whole journey on a moving map. See [docs](docs/xml/examples/06-moving-journey-map/README.md)
     - Possible fix for [feature request](https://github.com/time4tea/gopro-dashboard-overlay/issues/16) 
-- 0.36.0
-  - Fix for `gopro-join.py` when MPEG files are in current directory. - [Issue #24](https://github.com/time4tea/gopro-dashboard-overlay/issues/24)
-- 0.35.0
-  - Add `rotate` to `asi` component. see [docs](docs/xml/examples/07-air-speed-indicator)
-  - Some refactoring (should have no visible effect)
-- 0.34.0
-  - Add new component `asi` - an Airspeed Indicator - see [docs](docs/xml/examples/07-air-speed-indicator)
-- 0.33.0
-  - Add *experimental* support for 'ffmpeg profiles' as documented above
-- 0.32.0
-    - Add option to disable rotation in moving map (thanks  [@SECtim](https://github.com/SECtim))
 
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)

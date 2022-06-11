@@ -2,7 +2,17 @@
 # Changelog
 
 Newest changes are always in [README.md](README.md)
-
+- 0.36.0
+  - Fix for `gopro-join.py` when MPEG files are in current directory. - [Issue #24](https://github.com/time4tea/gopro-dashboard-overlay/issues/24)
+- 0.35.0
+  - Add `rotate` to `asi` component. see [docs](docs/xml/examples/07-air-speed-indicator)
+  - Some refactoring (should have no visible effect)
+- 0.34.0
+  - Add new component `asi` - an Airspeed Indicator - see [docs](docs/xml/examples/07-air-speed-indicator)
+- 0.33.0
+  - Add *experimental* support for 'ffmpeg profiles' as documented above
+- 0.32.0
+    - Add option to disable rotation in moving map (thanks  [@SECtim](https://github.com/SECtim))
 - 0.31.0
     - (Change in behaviour) Use input file framerate as output file framerate. This may make output files bigger.
         - A more comprehensive mechanism to control ffmpeg options is planned for a later release
