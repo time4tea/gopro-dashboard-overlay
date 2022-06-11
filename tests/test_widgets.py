@@ -100,10 +100,13 @@ def test_render_simple_chart():
 @approve_image
 def test_render_chart():
     # Avg: 0.00019, Rate: 5,325.79
-    window = Window(ts,
-                    duration=timeunits(minutes=2),
-                    samples=256,
-                    key=lambda e: e.alt, fmt=lambda v: v.magnitude)
+    window = Window(
+        ts,
+        duration=timeunits(minutes=2),
+        samples=256,
+        key=lambda e: e.alt,
+        fmt=lambda v: v.magnitude
+    )
 
     view = window.view(ts.min)
 
@@ -113,10 +116,12 @@ def test_render_chart():
 
 
 def test_render_chart_with_no_data():
-    window = Window(ts,
-                    duration=timeunits(minutes=2),
-                    samples=256,
-                    key=lambda e: e.bob, fmt=lambda v: v.magnitude)
+    window = Window(
+        ts,
+        duration=timeunits(minutes=2),
+        samples=256,
+        key=lambda e: e.bob, fmt=lambda v: v.magnitude
+    )
 
     view = window.view(ts.min)
 
@@ -127,11 +132,14 @@ def test_render_chart_with_no_data():
 
 # start = 0.04 / 24.52
 def test_render_moving_chart():
-    window = Window(ts,
-                    duration=timeunits(minutes=2),
-                    samples=256,
-                    key=lambda e: e.alt.magnitude if e.alt else 0,
-                    missing=None)
+    window = Window(
+        ts,
+        duration=timeunits(minutes=2),
+        samples=256,
+        key=lambda e: e.alt,
+        fmt=lambda v: v.magnitude,
+        missing=0
+    )
 
     stepper = iter(ts.stepper(timeunits(seconds=1)).steps())
 
