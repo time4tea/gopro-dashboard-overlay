@@ -176,6 +176,9 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.46.0 New component `compass-arrow` - see layout docs [examples](docs/xml/examples/README.md)
+  - progress on support of time-lapse and time-warp files, but they don't work properly yet
+  - built-in layout for 2.7k files
 - 0.45.0 New Program `gopro-rename.py` - turn idiosyncratically named gopro files GX0100123.MP4 into 20220405-123416-london-england.MP4 using either provided description,
   - or looks up the location from the GPS, and makes file name from that.
   - uses the GPS timestamp to determine the time of the file. 
