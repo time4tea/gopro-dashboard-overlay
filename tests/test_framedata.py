@@ -3,8 +3,10 @@ import os
 from pathlib import Path
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.framemeta import gps_framemeta
+from gopro_overlay.framemeta import gps_framemeta, FrameMeta
 from gopro_overlay.gpmd import GoproMeta
+from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
+from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.units import units
 
 
@@ -36,3 +38,30 @@ def test_loading_data_by_frame():
         metameta=metameta,
         units=units
     )
+
+
+def accl_framemeta(meta, units, metameta=None):
+    framemeta = FrameMeta()
+
+    meta.accept(
+        XYZVisitor(
+            "ACCL",
+            XYZComponentConverter(
+                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "ACCL"),
+                units=units,
+                on_item=lambda t, x: framemeta.add(t, x)
+            ).convert
+        )
+    )
+
+    print(meta)
+
+
+def test_loading_accel():
+    filepath = "/home/richja/dev/gopro-graphics/render/2022-03-17-richmond-park-1.mp4"
+    meta = load_file(filepath)
+    stream_info = ffmpeg.find_streams(filepath)
+
+    framemeta = accl_framemeta(meta, units, stream_info.meta)
+
+    print(framemeta)

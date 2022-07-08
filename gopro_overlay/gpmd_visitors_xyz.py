@@ -1,8 +1,27 @@
 import collections
+import datetime
 
-from gopro_overlay.point import Point3
+from gopro_overlay.entry import Entry
+from gopro_overlay.gpmd import XYZ
 
-XYZComponents = collections.namedtuple("XYZComponents", ["timestamp", "samples_total", "scale", "temp", "points"])
+XYZComponents = collections.namedtuple("XYZComponents",
+                                       ["timestamp", "samples_total", "scale", "orin", "siun", "temp", "points"])
+
+
+class ORIN:
+
+    def __init__(self, conversion):
+        if conversion == "ZXY":
+            self.convert = lambda xyz: XYZ(x=xyz.y, y=xyz.z, z=xyz.x)
+        elif conversion == "YxZ":
+            self.convert = lambda xyz: XYZ(x=-xyz.y, y=xyz.x, z=xyz.z)
+        elif conversion == "yXZ":
+            self.convert = lambda xyz: XYZ(x=xyz.y, y=-xyz.x, z=xyz.z)
+        else:
+            raise IOError(f"Unhandled ORIN spec: {conversion}")
+
+    def apply(self, xyz):
+        return self.convert(xyz)
 
 
 # noinspection PyPep8Naming
@@ -16,6 +35,8 @@ class XYZStreamVisitor:
         self._temperature = None
         self._type = None
         self._points = None
+        self._orin = None
+        self._siun = None
 
     def vi_STMP(self, item):
         self._timestamp = item.interpret()
@@ -23,8 +44,11 @@ class XYZStreamVisitor:
     def vi_TSMP(self, item):
         self._samples_total = item.interpret()
 
+    def vi_SIUN(self, item):
+        self._siun = item.interpret()
+
     def vi_ORIN(self, item):
-        pass
+        self._orin = ORIN(item.interpret())
 
     def vi_SCAL(self, item):
         self._scale = item.interpret()
@@ -46,20 +70,62 @@ class XYZStreamVisitor:
                 timestamp=self._timestamp,
                 samples_total=self._samples_total,
                 scale=self._scale,
+                orin=self._orin,
+                siun=self._siun,
                 temp=self._temperature,
                 points=self._points,
             )
         )
 
 
+units_acceleration = "m/s²"
+
+
 class XYZComponentConverter:
 
-    def __init__(self, on_item):
+    def __init__(self, frame_calculator, units, on_item):
         self._on_item = on_item
+        self._frame_calculator = frame_calculator
+        self._units = units
+        self._total_samples = 0
 
+    # This only converts 1 in 10 of the XYZ Items - they run at 200Hz, and that's too much for our needs.
     def convert(self, counter, components):
+        sample_time_calculator = self._frame_calculator.next_packet(
+            components.timestamp,
+            self._total_samples,
+            len(components.points)
+        )
+
+        if components.siun == units_acceleration:
+            unit = "m/s^2"
+        else:
+            raise IOError(f"Unsupported units {components.siun}")
+
         for index, point in enumerate(components.points):
-            self._on_item((counter, index, Point3(point.x, point.y, point.z)))
+            if index % 10 != 0:
+                continue
+            sample_frame_timestamp, _ = sample_time_calculator(index)
+
+            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000)
+
+            self._on_item(
+                sample_frame_timestamp,
+                Entry(
+                    dt=point_datetime,
+                    timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
+                    packet=self._units.Quantity(counter, self._units.number),
+                    packet_index=self._units.Quantity(index, self._units.number),
+                    accel=components.orin.apply(
+                        XYZ(
+                            x=self._units.Quantity(point.x, unit),
+                            y=self._units.Quantity(point.y, unit),
+                            z=self._units.Quantity(point.z, unit)
+                        )
+                    )
+                )
+            )
+        self._total_samples += len(components.points)
 
 
 # noinspection PyPep8Naming

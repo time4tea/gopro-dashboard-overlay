@@ -9,7 +9,7 @@ import pytest
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.ffmpeg import StreamInfo
-from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ
+from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
     CorrectionFactors
@@ -339,3 +339,7 @@ class CountingVisitor:
 
     def v_end(self):
         pass
+
+
+def test_interpreting_strings():
+    assert interpret_item(GPMDItem("SIUN", 143, 4, 1, 12, bytes([0x6d, 0x2f, 0x73, 0xb2]))) == "m/s²"

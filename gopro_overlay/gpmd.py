@@ -11,7 +11,7 @@ from .timeunits import timeunits
 GPMDStruct = struct.Struct('>4sBBH')
 
 GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
-XYZ = collections.namedtuple('XYZ', "y x z")
+XYZ = collections.namedtuple('XYZ', "x y z")
 VECTOR = collections.namedtuple("VECTOR", "x y z")
 QUATERNION = collections.namedtuple("QUATERNION", "w x y z")
 
@@ -39,12 +39,16 @@ type_mappings = {'c': 'c',
 
 
 def _interpret_string(item, *args):
-    return item.rawdata.decode('utf-8', errors='replace').strip('\0')
+    return str(item.rawdata, encoding='unicode_escape', errors="replace").strip('\0')
 
 
 def _interpret_gps_timestamp(item, *args):
-    return datetime.datetime.strptime(item.rawdata.decode('utf-8', errors='replace'), '%y%m%d%H%M%S.%f').replace(
-        tzinfo=datetime.timezone.utc)
+    return datetime.datetime.strptime(
+        item.rawdata.decode(
+            'utf-8',
+            errors='replace'
+        ),
+        '%y%m%d%H%M%S.%f').replace(tzinfo=datetime.timezone.utc)
 
 
 def _struct_mapping_for(item, repeat=None):
@@ -112,26 +116,27 @@ def _interpret_device_marker(item, *args):
 
 interpreters = {
     "ACCL": _interpret_xyz,
+    "CORI": _interpret_quaternion,
     "DEVC": _interpret_device_marker,
     "DVNM": _interpret_string,
     "GPS5": _interpret_gps5,
     "GPSF": _interpret_gps_lock,
     "GPSP": _interpret_gps_precision,
     "GPSU": _interpret_gps_timestamp,
+    "GRAV": _interpret_vector,
     "GYRO": _interpret_xyz,
     "MWET": _interpret_list,
+    "ORIN": _interpret_string,
     "SCAL": _interpret_list,
     "SIUN": _interpret_string,
     "STMP": _interpret_timestamp,
-    "TMPC": _interpret_atom,
     "STNM": _interpret_string,
     "STRM": _interpret_stream_marker,
-    "TSMP": _interpret_atom,
     "TICK": _interpret_atom,
+    "TMPC": _interpret_atom,
     "TOCK": _interpret_atom,
-    "GRAV": _interpret_vector,
+    "TSMP": _interpret_atom,
     "WNDM": _interpret_list,
-    "CORI": _interpret_quaternion,
 }
 
 
