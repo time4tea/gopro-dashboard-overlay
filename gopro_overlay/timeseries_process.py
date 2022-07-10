@@ -1,28 +1,34 @@
 from geographiclib.geodesic import Geodesic
 
+from .gpmd import XYZ
+from .smoothing import Kalman, SimpleExponential
 from .units import units
 
 
+# this is almost certainly wrong? - we are treating this as 3x1D samples, but its not.
+def process_kalman_xyz(new, key):
+    kx = Kalman()
+    ky = Kalman()
+    kz = Kalman()
+
+    def process(item):
+        xyz = key(item)
+        return {new: XYZ(
+            x=kx.update(xyz.x),
+            y=ky.update(xyz.y),
+            z=kz.update(xyz.z)
+        )}
+
+    return process
+
+
 def process_ses(new, key, alpha=0.4):
-    forecast = []
-    previous = [None]
+    ses = SimpleExponential(alpha=alpha)
 
-    def ses(item):
-        current = key(item)
-        if current is None:
-            current = 0.0
-        try:
-            if forecast:
-                predicted = alpha * previous[0] + (1 - alpha) * forecast[-1]
-                forecast.append(predicted)
-                return {new: predicted}
-            else:
-                forecast.append(current)
-                return {new: current}
-        finally:
-            previous[0] = current
+    def process(item):
+        return {new: ses.update(key(item))}
 
-    return ses
+    return process
 
 
 def calculate_speeds():

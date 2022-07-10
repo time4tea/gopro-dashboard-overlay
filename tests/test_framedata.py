@@ -2,7 +2,7 @@ import inspect
 import os
 from pathlib import Path
 
-from gopro_overlay import ffmpeg
+from gopro_overlay import ffmpeg, timeseries_process
 from gopro_overlay.framemeta import gps_framemeta, FrameMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
@@ -54,11 +54,18 @@ def accl_framemeta(meta, units, metameta=None):
         )
     )
 
+    kalman = timeseries_process.process_kalman_xyz("accel", lambda i: i.accel)
+    framemeta.process(kalman)
+
+    for item in framemeta.items():
+        print(f"{item.dt},{item.accel.y.magnitude}")
+
+
     print(meta)
 
 
 def test_loading_accel():
-    filepath = "/home/richja/dev/gopro-graphics/render/2022-03-17-richmond-park-1.mp4"
+    filepath = "/home/richja/dev/gopro-graphics/render/test-rotating-slowly.MP4"
     meta = load_file(filepath)
     stream_info = ffmpeg.find_streams(filepath)
 
