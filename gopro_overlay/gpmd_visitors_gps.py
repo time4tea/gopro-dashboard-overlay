@@ -125,11 +125,13 @@ class GPSVisitor:
 
 # noinspection PyPep8Naming
 class DetermineFirstLockedGPSUVisitor:
-    _count = 0
-    _basetime = None
-    _fix = None
-    _scale = None
-    _point = None
+
+    def __init__(self):
+        self._count = 0
+        self._basetime = None
+        self._fix = None
+        self._scale = None
+        self._point = None
 
     def vic_DEVC(self, i, s):
         if self._basetime is None:
