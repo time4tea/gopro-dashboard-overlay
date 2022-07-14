@@ -178,6 +178,8 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 - 0.47.0 Fix [#47](https://github.com/time4tea/gopro-dashboard-overlay/issues/47) - h/t [@osresearch](https://github.com/osresearch)  
   - using --layout-xml abc on the command line now implies --layout xml
+  - Fix [#31](https://github.com/time4tea/gopro-dashboard-overlay/issues/31) h/t [@tve](https://github.com/tve)
+  - When alt isn't available, don't blow up trying to calculate gradient
 - 0.46.0 New component `compass-arrow` - see layout docs [examples](docs/xml/examples/README.md)
   - progress on support of time-lapse and time-warp files, but they don't work properly yet
   - built-in layout for 2.7k files
