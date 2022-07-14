@@ -44,6 +44,9 @@ def accepter_from_args(include, exclude):
 def create_desired_layout(dimensions, layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone):
     accepter = accepter_from_args(include, exclude)
 
+    if layout_xml:
+        layout = "xml"
+
     if layout == "default":
         resource_name = f"default-{dimensions.x}x{dimensions.y}"
         try:
