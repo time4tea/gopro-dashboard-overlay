@@ -25,6 +25,8 @@ class Bar:
         self.size = size
         self.corner_radius = 5
         self.outline = (255, 255, 255)
+        self.highlight_colour_positive = (0, 0, 255)
+        self.highlight_colour_negative = (255, 0, 0)
         self.line_width = 3
         self.min_value = -10
         self.max_value = 10
@@ -52,10 +54,11 @@ class Bar:
             ((self.x_coord(current), self.line_width + 1), (self.x_coord(0), self.size.y - (self.line_width + 2))),
             fill=(255, 255, 255)
         )
+        highlight_colour = self.highlight_colour_positive if current >= 0 else self.highlight_colour_negative
         draw.rectangle(
             ((self.x_coord(current * 0.95), self.line_width + 1),
              (self.x_coord(current), self.size.y - (self.line_width + 2))),
-            fill=(0, 255, 0)
+            fill=highlight_colour
         )
 
 
@@ -71,6 +74,7 @@ def test_gauge():
             )
         ]
     )
+
 
 @approve_image
 def test_gauge_negative():
