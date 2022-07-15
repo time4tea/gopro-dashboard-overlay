@@ -176,6 +176,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.48.0 Fix [#48](https://github.com/time4tea/gopro-dashboard-overlay/issues/48) - h/t [@osresearch](https://github.com/osresearch)  
+  - allow 'km' units where appropriate
 - 0.47.0 Fix [#47](https://github.com/time4tea/gopro-dashboard-overlay/issues/47) - h/t [@osresearch](https://github.com/osresearch)  
   - using --layout-xml abc on the command line now implies --layout xml
   - Fix [#31](https://github.com/time4tea/gopro-dashboard-overlay/issues/31) h/t [@tve](https://github.com/tve)

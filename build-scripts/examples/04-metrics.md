@@ -17,7 +17,7 @@ for each metric.
 {{ <component type="metric" metric="speed" units="mph" /> }}
 {{ <component type="metric" metric="speed" units="knots" /> }}
 
-The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `nautical_miles`, `radian`
+The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `km`, `nautical_miles`, `radian`
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
