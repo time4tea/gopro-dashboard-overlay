@@ -176,6 +176,7 @@ def metric_converter_from(name):
 
         "feet": lambda u: u.to("international_feet"),
         "miles": lambda u: u.to("mile"),
+        "km": lambda u: u.to("km"),
         "nautical_miles": lambda u: u.to("nautical_mile"),
     }
     if name in converters:

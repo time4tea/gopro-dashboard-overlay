@@ -1,6 +1,7 @@
 import datetime
 import random
 
+from . import timeseries_process
 from .framemeta import FrameMeta
 from .gpmd import GPSFix
 from .point import Point
@@ -86,4 +87,7 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
         )
         current_dt = current_dt + step
         current_frame_time = current_frame_time + timeunits(seconds=step.total_seconds())
+
+        fm.process(timeseries_process.calculate_odo())
+
     return fm
