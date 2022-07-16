@@ -1,9 +1,12 @@
 import bisect
+from typing import Callable
 
+from gopro_overlay import timeseries_process
 from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
 from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor
+from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.timeunits import Timeunit, timeunits
 
 
@@ -193,6 +196,33 @@ def gps_framemeta(meta, units, metameta=None):
     )
 
     return frame_meta
+
+
+def accl_framemeta(meta, units, metameta=None):
+    framemeta = FrameMeta()
+
+    meta.accept(
+        XYZVisitor(
+            "ACCL",
+            XYZComponentConverter(
+                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "ACCL"),
+                units=units,
+                on_item=lambda t, x: framemeta.add(t, x)
+            ).convert
+        )
+    )
+
+    kalman = timeseries_process.process_kalman_pp3("accl", lambda i: i.accl)
+    framemeta.process(kalman)
+
+    return framemeta
+
+
+def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMeta], dict]):
+    for item in gps.items():
+        frame_time = item.timestamp
+        interpolated = other.get(timeunits(millis=frame_time.magnitude))
+        item.update(**update(interpolated))
 
 
 def parse_gopro(gpmd_from, units, metameta: MetaMeta):

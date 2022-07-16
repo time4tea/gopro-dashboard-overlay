@@ -2,11 +2,9 @@ import inspect
 import os
 from pathlib import Path
 
-from gopro_overlay import ffmpeg, timeseries_process
-from gopro_overlay.framemeta import gps_framemeta, FrameMeta
+from gopro_overlay import ffmpeg
+from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta
 from gopro_overlay.gpmd import GoproMeta
-from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
-from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.units import units
 
 
@@ -40,28 +38,8 @@ def test_loading_data_by_frame():
     )
 
 
-def accl_framemeta(meta, units, metameta=None):
-    framemeta = FrameMeta()
-
-    meta.accept(
-        XYZVisitor(
-            "ACCL",
-            XYZComponentConverter(
-                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "ACCL"),
-                units=units,
-                on_item=lambda t, x: framemeta.add(t, x)
-            ).convert
-        )
-    )
-
-    kalman = timeseries_process.process_kalman_pp3("accl", lambda i: i.accel)
-    framemeta.process(kalman)
-
-    return framemeta
-
-
 def test_loading_accl():
-    filepath = "/home/richja/dev/gopro-graphics/render/test-rotating-slowly.MP4"
+    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4")
     meta = load_file(filepath)
     stream_info = ffmpeg.find_streams(filepath)
 
@@ -73,3 +51,16 @@ def test_loading_accl():
     assert f"{item.accl.z.units:P~}" == "m/s²"
 
 
+def test_loading_gps_and_accl():
+    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4")
+    meta = load_file(filepath)
+    stream_info = ffmpeg.find_streams(filepath)
+
+    gps_frame_meta = gps_framemeta(meta, units, stream_info.meta)
+    accl_frame_meta = accl_framemeta(meta, units, stream_info.meta)
+
+    merge_frame_meta(gps_frame_meta, accl_frame_meta, lambda a: {"accl": a.accl})
+
+    for item in gps_frame_meta.items():
+        assert item.accl
+        assert item.point

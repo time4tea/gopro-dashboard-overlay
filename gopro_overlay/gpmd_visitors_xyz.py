@@ -118,7 +118,7 @@ class XYZComponentConverter:
                     timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
                     packet=self._units.Quantity(counter, self._units.number),
                     packet_index=self._units.Quantity(index, self._units.number),
-                    accel=PintPoint3(
+                    accl=PintPoint3(
                         x=self._units.Quantity(correct_orientation.x, unit),
                         y=self._units.Quantity(correct_orientation.y, unit),
                         z=self._units.Quantity(correct_orientation.z, unit),

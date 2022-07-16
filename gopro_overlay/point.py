@@ -109,6 +109,8 @@ class PintPoint3(Point3):
     def length(self) -> float:
         return units.Quantity(math.sqrt(self.sum_squares().magnitude), self.x.units)
 
+    def __str__(self):
+        return f"Pint" + super().__str__()
 
 
 class Quaternion:
