@@ -10,7 +10,7 @@ import pytest
 from gopro_overlay import ffmpeg
 from gopro_overlay.ffmpeg import StreamInfo
 from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
-from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator
+from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
     CorrectionFactors
 from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
@@ -122,7 +122,7 @@ def test_load_hero5_raw_accl():
         assert components.samples_total == 806
         assert len(components.points) == 204
         assert components.scale == (418,)
-        assert components.points[0] == XYZ(y=9.97846889952153, x=0.05502392344497608, z=3.145933014354067)
+        assert components.points[0] == XYZ(x=9.97846889952153, y=0.05502392344497608, z=3.145933014354067)
 
     meta[0].accept(XYZVisitor("ACCL", on_item=assert_components))
 
@@ -151,7 +151,11 @@ def test_load_and_visit_extracted_meta():
 def test_load_accel_meta():
     meta = load("accel/rotation-example.gpmd")
 
-    converter = XYZComponentConverter(on_item=lambda i: print(f"{i} = {i[2].length()}"))
+    converter = XYZComponentConverter(
+        on_item=lambda t, i: print(f"{t} = {i}"),
+        units=units,
+        frame_calculator=CoriTimestampPacketTimeCalculator(cori_timestamp=timeunits(millis=1))
+    )
     visitor = XYZVisitor("ACCL", on_item=converter.convert)
 
     meta.accept(visitor)
