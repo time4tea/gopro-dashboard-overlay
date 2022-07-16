@@ -1,6 +1,7 @@
 import pytest
 
-from gopro_overlay.point import Point3, Quaternion
+from gopro_overlay.point import Point3, Quaternion, PintPoint3
+from gopro_overlay.units import units
 
 
 def test_point3_length():
@@ -81,3 +82,14 @@ def test_rotate_point_by_quaternion():
 
     assert q_flat.rotate(point).tuple() == pytest.approx(point.tuple(), abs=0.01)
     assert q_up.rotate(point).tuple() == pytest.approx(Point3(0, 0, -1).tuple(), abs=0.02)
+
+
+def test_pint_point():
+
+    p = PintPoint3(
+        x=units.Quantity(3, units.m),
+        y=units.Quantity(3, units.m),
+        z=units.Quantity(3, units.m),
+    )
+
+    print(f"{p.length()}")

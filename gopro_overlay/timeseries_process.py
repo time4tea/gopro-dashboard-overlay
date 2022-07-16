@@ -1,19 +1,20 @@
 from geographiclib.geodesic import Geodesic
 
 from .gpmd import XYZ
+from .point import PintPoint3
 from .smoothing import Kalman, SimpleExponential
 from .units import units
 
 
 # this is almost certainly wrong? - we are treating this as 3x1D samples, but its not.
-def process_kalman_xyz(new, key):
+def process_kalman_pp3(new, key):
     kx = Kalman()
     ky = Kalman()
     kz = Kalman()
 
     def process(item):
         xyz = key(item)
-        return {new: XYZ(
+        return {new: PintPoint3(
             x=kx.update(xyz.x),
             y=ky.update(xyz.y),
             z=kz.update(xyz.z)

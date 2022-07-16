@@ -3,6 +3,7 @@ import datetime
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import XYZ
+from gopro_overlay.point import PintPoint3
 
 XYZComponents = collections.namedtuple("XYZComponents",
                                        ["timestamp", "samples_total", "scale", "orin", "siun", "temp", "points"])
@@ -109,6 +110,7 @@ class XYZComponentConverter:
 
             point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000)
 
+            correct_orientation = components.orin.apply(point)
             self._on_item(
                 sample_frame_timestamp,
                 Entry(
@@ -116,12 +118,10 @@ class XYZComponentConverter:
                     timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
                     packet=self._units.Quantity(counter, self._units.number),
                     packet_index=self._units.Quantity(index, self._units.number),
-                    accel=components.orin.apply(
-                        XYZ(
-                            x=self._units.Quantity(point.x, unit),
-                            y=self._units.Quantity(point.y, unit),
-                            z=self._units.Quantity(point.z, unit)
-                        )
+                    accel=PintPoint3(
+                        x=self._units.Quantity(correct_orientation.x, unit),
+                        y=self._units.Quantity(correct_orientation.y, unit),
+                        z=self._units.Quantity(correct_orientation.z, unit),
                     )
                 )
             )

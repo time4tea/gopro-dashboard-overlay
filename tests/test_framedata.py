@@ -54,21 +54,22 @@ def accl_framemeta(meta, units, metameta=None):
         )
     )
 
-    kalman = timeseries_process.process_kalman_xyz("accel", lambda i: i.accel)
+    kalman = timeseries_process.process_kalman_pp3("accl", lambda i: i.accel)
     framemeta.process(kalman)
 
-    for item in framemeta.items():
-        print(f"{item.dt},{item.accel.y.magnitude}")
+    return framemeta
 
 
-    print(meta)
-
-
-def test_loading_accel():
+def test_loading_accl():
     filepath = "/home/richja/dev/gopro-graphics/render/test-rotating-slowly.MP4"
     meta = load_file(filepath)
     stream_info = ffmpeg.find_streams(filepath)
 
     framemeta = accl_framemeta(meta, units, stream_info.meta)
 
-    print(framemeta)
+    item = framemeta.items()[0]
+    assert f"{item.accl.x.units:P~}" == "m/s²"
+    assert f"{item.accl.y.units:P~}" == "m/s²"
+    assert f"{item.accl.z.units:P~}" == "m/s²"
+
+

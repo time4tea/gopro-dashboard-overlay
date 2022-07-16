@@ -1,6 +1,8 @@
 import math
 from typing import Tuple
 
+from gopro_overlay.units import units
+
 
 class Coordinate:
     def __init__(self, x, y):
@@ -95,6 +97,18 @@ class Point3:
 
     def tuple(self):
         return self.x, self.y, self.z
+
+
+class PintPoint3(Point3):
+
+    def __init__(self, x, y, z):
+        if x.units != y.units or y.units != z.units:
+            raise ValueError(f"Units not the same :x={x} y={y} z={z}")
+        super().__init__(x, y, z)
+
+    def length(self) -> float:
+        return units.Quantity(math.sqrt(self.sum_squares().magnitude), self.x.units)
+
 
 
 class Quaternion:
