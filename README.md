@@ -114,12 +114,23 @@ means 1 second of video is processed in 1 second.
 
 These indicative figures are from Ubuntu on Intel Core i7-6700K CPU @ 4.00GHz with NVIDIA GeForce GTX 750 Ti
 
+Here nvtop shows ENC is 100% in use.
+
 | Performance Option    | Frames/s "null" | Frames/s normal | Frames/s --profile nvgpu |
 |-----------------------|-----------------|-----------------|--------------------------|
 | Default (python 3.8)  | ~30             | ~10             | ~21                      | 
 | PyPy                  | ~27             |                 |                          |
 | Default + Pillow SIMD | ~60             | ~10             | ~25                      |
 
+These indicative figures are from Ubuntu on Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz with NVIDIA GeForce GTX 1650
+
+Here nvtop shows that the ENC is only 25% in use, so further optimization would give benefit.
+
+| Performance Option    | Frames/s "null" | Frames/s normal | Frames/s --profile nvgpu |
+|-----------------------|-----------------|-----------------|--------------------------|
+| Default (python 3.8)  | ~30             | ~18             | ~22                      | 
+
+Using newer GPUs, the GPU is pretty much chilling, so perhaps using Pillow-SIMD will give a big boost.
 
 ### GPU
 
@@ -140,9 +151,6 @@ venv/bin/pip install pillow-simd==8.3.2.post0
 The frame drawing rate is quite a bit faster, but won't make a huge difference unless GPU settings are used with ffmpeg.
 
 No tests are run in this project with pillow-simd, so output may vary (but their tests are good, so I wouldn't expect any huge differences, if any)
-
-Using the `--generate none` setting, which 
-
 
 ## Known Bugs / Issues
 

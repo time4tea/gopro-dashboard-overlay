@@ -88,6 +88,19 @@
     <component type="metric" x="250" y="700" metric="lat" dp="5" size="32" cache="False"/>
     <component type="metric" x="250" y="750" metric="lon" dp="5" size="32" cache="False"/>
 
+    <component type="metric" x="950" y="50" metric="accl.x" units="gravity" dp="2" size="32" rgb="255,0,255"/>
+    <component type="metric" x="1000" y="50" metric="accl.y" units="G" dp="2" size="32" rgb="255,0,255"/>
+    <component type="metric" x="1050" y="50" metric="accl.z" units="G" dp="2" size="32" rgb="255,0,255"/>
+
+    <!-- Bar / Acceleration -->
+    <translate x="50" y="550">
+        <component type="bar" width="400" height="50" metric="accl.x" outline="0,0,0,0" fill="255,0,255"/>
+    </translate>
+
+    <translate x="50" y="600">
+        <component type="bar" width="400" height="50" metric="accl.y" units="G"/>
+    </translate>
+
     <!--    Date and time-->
     <component type="datetime" x="1000" y="250" format="%Y/%m/%d" size="32" />
     <component type="datetime" x="1000" y="300" format="%H:%M:%S.%f" size="32" cache="False"/>

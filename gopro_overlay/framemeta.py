@@ -226,7 +226,13 @@ def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMe
 
 
 def parse_gopro(gpmd_from, units, metameta: MetaMeta):
-    return gps_framemeta(GoproMeta.parse(gpmd_from), units, metameta=metameta)
+    gopro_meta = GoproMeta.parse(gpmd_from)
+    gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta)
+    accl_frame_meta = accl_framemeta(gopro_meta, units, metameta=metameta)
+
+    merge_frame_meta(gps_frame_meta, accl_frame_meta, lambda a: {"accl": a.accl})
+
+    return gps_frame_meta
 
 
 def framemeta_from(filepath, units, metameta: MetaMeta):

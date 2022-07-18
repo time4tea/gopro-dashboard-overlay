@@ -1,3 +1,20 @@
 <layout>
+    <translate x="50" y="550">
+        <component type="bar" width="400" height="50" metric="accl.x"/>
+        <component type="text" size="24" rgb="255,255,255">X Accl</component>
+        <component type="metric" x="200" metric="accl.x" size="24" rgb="255,255,255" dp="2"/>
+    </translate>
+
+    <translate x="50" y="600">
+        <component type="bar" width="400" height="50" metric="accl.y" />
+        <component type="text" size="24" rgb="255,255,255">Y Accl</component>
+        <component type="metric" x="200" metric="accl.y" size="24" rgb="255,255,255" dp="2"/>
+    </translate>
+
+    <translate x="50" y="650">
+        <component type="bar" width="400" height="50" metric="accl.z" />
+        <component type="text" size="24" rgb="255,255,255">Z Accl</component>
+        <component type="metric" x="200" metric="accl.z" size="24" rgb="255,255,255" dp="2"/>
+    </translate>
 
 </layout>

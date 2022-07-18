@@ -4,7 +4,7 @@ import random
 from . import timeseries_process
 from .framemeta import FrameMeta
 from .gpmd import GPSFix
-from .point import Point
+from .point import Point, PintPoint3
 from .timeseries import Entry
 from .timeunits import timeunits
 from .units import units
@@ -63,6 +63,8 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
     alt = Random1D(1000, rng=rng)
     temp = Random1D(27, rng=rng)
 
+    accl = Random1D(5, -10)
+
     fm = FrameMeta()
     current_dt = datetime.datetime.fromtimestamp(start_timestamp, tz=datetime.timezone.utc)
     current_frame_time = timeunits(millis=0)
@@ -82,6 +84,11 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                 alt=units.Quantity(alt.step(), units.m),
                 atemp=units.Quantity(temp.step(), units.celsius),
                 grad=units.Quantity(grad.step()),
+                accl=PintPoint3(
+                    x=units.Quantity(accl.step(), "m/s**2"),
+                    y=units.Quantity(accl.step(), "m/s**2"),
+                    z=units.Quantity(accl.step(), "m/s**2"),
+                ),
                 gpsfix=GPSFix.LOCK_2D.value,
             )
         )

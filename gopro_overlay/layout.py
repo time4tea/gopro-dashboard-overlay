@@ -6,7 +6,6 @@ from .dimensions import Dimension
 from .framemeta import FrameMeta
 from .layout_components import moving_map
 from .point import Coordinate
-from .timeseries import Timeseries
 from .units import units
 from .widgets import Scene, Translate, Composite, CachingText, Text
 from .widgets_info import ComparativeEnergy

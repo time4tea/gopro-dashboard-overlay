@@ -13,6 +13,7 @@ from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite, Frame
 from gopro_overlay.widgets_asi import AirspeedIndicator
+from gopro_overlay.widgets_bar import Bar
 from gopro_overlay.widgets_compass import Compass
 from gopro_overlay.widgets_compass_arrow import CompassArrow
 from gopro_overlay.widgets_map import MovingJourneyMap
@@ -152,6 +153,9 @@ def metric_accessor_from(name):
         "dist": lambda e: e.dist,
         "azi": lambda e: e.azi,
         "cog": lambda e: e.cog,
+        "accl.x": lambda e: e.accl.x if e.accl else None,
+        "accl.y": lambda e: e.accl.y if e.accl else None,
+        "accl.z": lambda e: e.accl.z if e.accl else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
     }
@@ -168,6 +172,9 @@ def metric_converter_from(name):
         "kph": lambda u: u.to("KPH"),
         "mps": lambda u: u.to("mps"),
         "knots": lambda u: u.to("knot"),
+
+        "gravity": lambda u: u.to("gravity"),
+        "G": lambda u: u.to("gravity"),
 
         "degreeF": lambda u: u.to('degreeF'),
         "degreeC": lambda u: u.to('degreeC'),
@@ -195,7 +202,10 @@ def formatter_from(element):
         dp = 2
 
     if format_string:
-        return lambda v: format(v, format_string)
+        try:
+            return lambda v: format(v, format_string)
+        except ValueError:
+            raise ValueError(f"Unable to format value with format string {format_string}")
     if dp:
         return lambda v: format(v, f".{dp}f")
 
@@ -336,6 +346,27 @@ def create_compass_arrow(element, entry, timeseries, font, **kwargs):
         text=rgbattr(element, "text", d=(255, 255, 255)),
         outline=rgbattr(element, "outline", d=(0, 0, 0)),
         arrow_outline=rgbattr(element, "arrow_outline", d=(0, 0, 0)),
+    )
+
+
+def create_bar(element, entry, timeseries, font, **kwargs):
+    return Bar(
+        size=Dimension(x=iattrib(element, "width"), y=iattrib(element, "height")),
+        reading=metric_value(
+            entry,
+            accessor=metric_accessor_from(attrib(element, "metric")),
+            converter=metric_converter_from(attrib(element, "units", d=None)),
+            formatter=lambda x: x,
+            default=0
+        ),
+        fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
+        outline=rgbattr(element, "fill", d=(255, 255, 255)),
+        outline_width=iattrib(element, "outline-width", d=3),
+        highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),
+        highlight_colour_positive=rgbattr(element, "h-pos", d=(0, 255, 0)),
+        max_value=iattrib(element, "max", d=20),
+        min_value=iattrib(element, "min", d=-20),
+        cr=iattrib(element, "cr", d=5),
     )
 
 
