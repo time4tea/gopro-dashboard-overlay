@@ -5,6 +5,8 @@ class Bar:
                  outline_width=3,
                  highlight_colour_negative=(255, 0, 0),
                  highlight_colour_positive=(0, 255, 0),
+                 zero=(255, 255, 255),
+                 bar=(255, 255, 255)
                  ):
         self.reading = reading
         self.size = size
@@ -13,6 +15,9 @@ class Bar:
         self.fill = fill
         self.highlight_colour_positive = highlight_colour_positive
         self.highlight_colour_negative = highlight_colour_negative
+        self.zero = zero
+        self.bar = bar
+
         self.line_width = outline_width
         self.min_value = min_value
         self.max_value = max_value
@@ -35,11 +40,11 @@ class Bar:
         )
         draw.line(
             ((self.x_coord(0), 0), (self.x_coord(0), self.size.y)),
-            fill=(255, 255, 255)
+            fill=self.zero
         )
         draw.rectangle(
             ((self.x_coord(current), self.line_width + 1), (self.x_coord(0), self.size.y - (self.line_width + 2))),
-            fill=(255, 255, 255)
+            fill=self.bar
         )
         highlight_colour = self.highlight_colour_positive if current >= 0 else self.highlight_colour_negative
         draw.rectangle(

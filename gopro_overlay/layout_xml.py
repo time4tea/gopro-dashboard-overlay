@@ -386,6 +386,8 @@ def create_bar(element, entry, timeseries, font, **kwargs):
             default=0
         ),
         fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
+        zero=rgbattr(element, "zero", d=(255, 255, 255)),
+        bar=rgbattr(element, "bar", d=(255, 255, 255)),
         outline=rgbattr(element, "outline", d=(255, 255, 255)),
         outline_width=iattrib(element, "outline-width", d=3),
         highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),

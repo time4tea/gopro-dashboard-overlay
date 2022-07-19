@@ -22,16 +22,41 @@ Use `fill` and `outline` to change the fill and outline colours
 
 Specify the colours, as usual, in r,g,b or r,g,b,a
 
-{{ <component type="bar" metric="accl.x" units="m/s^2" fill="255,255,255,128" /> }}
+{{ <component type="bar" metric="accl.y" units="m/s^2" fill="255,255,255,128" /> }}
 
-{{ <component type="bar" metric="accl.x" units="m/s^2" outline="255,0,255" /> }}
+{{ <component type="bar" metric="accl.y" units="m/s^2" outline="255,0,255" /> }}
 
 To get rid of the outline completely, specify an alpha of `0`
 
-{{ <component type="bar" metric="accl.x" units="m/s^2" outline="255,0,255,0" /> }}
+{{ <component type="bar" metric="accl.y" units="m/s^2" outline="255,0,255,0" /> }}
+
+Use `zero` to change the colour of the zero marker
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" zero="255,0,255" /> }}
+
+Use `bar` to change the colour of the bar itself
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" bar="255,0,255" /> }}
+
+Use `h-neg` and `h-pos` as rgba values to control the highlight colours of ends of the bar
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" h-neg="255,0,255" /> }}
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" h-pos="255,0,255" /> }}
+
+## Outline Width
+
+Use `outline-width` to control the width of the outline
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" outline-width="3" /> }}
 
 
-## Drawing
+## Max & Min Values
 
+Use `max` and `min` to control the max and min values that the bar will display
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" max="5" min="-1" /> }}
+
+{{ <component type="bar" metric="accl.y" units="m/s^2" max="10" min="0" /> }}
 
 
