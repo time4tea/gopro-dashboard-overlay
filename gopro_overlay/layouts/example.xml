@@ -1,6 +1,6 @@
 <layout>
     <!--    Some bundled components-->
-    <component type="gradient_chart" x="400" y="980"/>
+    <component type="chart" x="400" y="980"/>
 
     <composite x="260" y="30" name="date_and_time">
         <component type="datetime" x="0" y="0" format="%Y/%m/%d" size="16" align="right"/>

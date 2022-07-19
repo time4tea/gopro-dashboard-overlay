@@ -17,7 +17,7 @@
         <component type="metric" x="0" y="0" metric="speed" units="mph" dp="0" size="160" />
     </composite>
 
-    <component type="gradient_chart" name="gradient_chart" x="400" y="1980"/>
+    <component type="chart" name="gradient_chart" x="400" y="1980"/>
 
     <composite x="220" y="1980" name="gradient">
         <component type="text" x="70" y="0" size="16">SLOPE(%)</component>

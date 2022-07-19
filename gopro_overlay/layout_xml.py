@@ -314,11 +314,12 @@ def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **k
     )
 
 
-def create_chart(*args, **kwargs):
-    return create_gradient_chart(*args, **kwargs)
+def create_gradient_chart(*args, **kwargs):
+    print("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
+    return create_chart(*args, **kwargs)
 
 
-def create_gradient_chart(element, entry, timeseries, font, **kwargs):
+def create_chart(element, entry, timeseries, font, **kwargs):
     accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
     converter = metric_converter_from(attrib(element, "units", d="metres"))
 

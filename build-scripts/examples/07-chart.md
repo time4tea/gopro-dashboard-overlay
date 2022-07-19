@@ -1,19 +1,24 @@
 
 # Chart
 
-Used to be called 'gradient_chart'
-
 Chart draws a chart of some metric, with a configurable window before and after the current point.
 
 The default metric is `alt`, with a default window of `5` minutes (2.5 mins around the current point in each direction)
 
 {{ <component type="chart" name="chart" /> }}
 
+The component used to be called 'gradient_chart', and type `gradient_chart` will still work, but is now deprecated and may be removed in 
+a future version.
+
+
+{{ <component type="gradient_chart" name="chart" /> }}
+
+
 ## Positioning
 
 use `x` and `y` to set the position of the chart
 
-{{ <component type="gradient_chart" name="gradient_chart" x="100" /> }}
+{{ <component type="chart" name="gradient_chart" x="100" /> }}
 
 # Window Size
 
