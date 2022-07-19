@@ -33,7 +33,7 @@ smaller windows have a bit more of a scroll effect, so look nicer.
 
 # Metric & Units
 
-Use any standard metric, with any standard unit. See [04-metrics](04-metrics.md) for more details
+Use any standard metric, with any standard unit. See [04-metrics](../04-metrics) for more details
 
 {{ <component type="chart" metric="speed" units="kph" /> }}
 
