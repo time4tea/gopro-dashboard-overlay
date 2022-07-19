@@ -57,7 +57,7 @@ def test_render_chart_with_no_data():
         ts,
         duration=timeunits(minutes=2),
         samples=256,
-        key=lambda e: e.bob.magnitude
+        key=lambda e: e.bob.magnitude if e.bob else 0
     )
 
     view = window.view(ts.min)
