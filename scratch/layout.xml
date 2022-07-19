@@ -17,4 +17,8 @@
         <component type="metric" x="200" metric="accl.z" size="24" rgb="255,255,255" dp="2"/>
     </translate>
 
+    <translate x="0" y="800">
+        <component type="chart" name="gradient_chart" x="400" y="0" metric="accl.z" units="m/s^2" seconds="30"/>
+    </translate>
+
 </layout>

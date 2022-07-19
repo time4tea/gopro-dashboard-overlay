@@ -41,8 +41,7 @@ def test_render_chart():
         ts,
         duration=timeunits(minutes=2),
         samples=256,
-        key=lambda e: e.alt,
-        fmt=lambda v: v.magnitude
+        key=lambda e: e.alt.magnitude
     )
 
     view = window.view(ts.min)
@@ -58,7 +57,7 @@ def test_render_chart_with_no_data():
         ts,
         duration=timeunits(minutes=2),
         samples=256,
-        key=lambda e: e.bob, fmt=lambda v: v.magnitude
+        key=lambda e: e.bob.magnitude
     )
 
     view = window.view(ts.min)
@@ -75,8 +74,7 @@ def test_render_moving_chart():
         ts,
         duration=timeunits(minutes=2),
         samples=256,
-        key=lambda e: e.alt,
-        fmt=lambda v: v.magnitude,
+        key=lambda e: e.alt.magnitude,
         missing=0
     )
 

@@ -18,13 +18,12 @@ class View:
 
 class Window:
 
-    def __init__(self, ts, duration: Timeunit, samples, key=lambda e: 1, fmt=lambda v: v, missing=None):
+    def __init__(self, ts, duration: Timeunit, samples, key=lambda e: 1, missing=None):
         self.ts = ts
         self.duration = duration
         self.samples = samples
         self.tick = (duration / samples).align(timeunits(millis=100))
         self.key = key
-        self.fmt = fmt
         self.missing = missing
 
         self.last_time = None
@@ -57,7 +56,7 @@ class Window:
                 entry = self.cache.setdefault(current, self.ts.get(current))
                 value = self.key(entry)
                 if value is not None:
-                    data.append(self.fmt(value))
+                    data.append(value)
                 else:
                     data.append(self.missing)
             current += self.tick

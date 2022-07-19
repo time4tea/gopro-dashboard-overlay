@@ -177,6 +177,8 @@ def metric_converter_from(name):
 
         "gravity": lambda u: u.to("gravity"),
         "G": lambda u: u.to("gravity"),
+        "m/s^2": lambda u: u.to("m/s^2"),
+        "m/s²": lambda u: u.to("m/s²"),
 
         "degreeF": lambda u: u.to('degreeF'),
         "degreeC": lambda u: u.to('degreeC'),
@@ -185,6 +187,7 @@ def metric_converter_from(name):
 
         "feet": lambda u: u.to("international_feet"),
         "miles": lambda u: u.to("mile"),
+        "metres": lambda u: u.to("m"),
         "km": lambda u: u.to("km"),
         "nautical_miles": lambda u: u.to("nautical_mile"),
     }
@@ -311,12 +314,27 @@ def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **k
     )
 
 
+def create_chart(*args, **kwargs):
+    return create_gradient_chart(*args, **kwargs)
+
+
 def create_gradient_chart(element, entry, timeseries, font, **kwargs):
-    window = Window(timeseries,
-                    duration=timeunits(minutes=5),
-                    samples=256,
-                    key=lambda e: e.alt,
-                    fmt=lambda v: v.to("meter").magnitude)
+    accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
+    converter = metric_converter_from(attrib(element, "units", d="metres"))
+
+    def value(e):
+        v = accessor(e)
+        if v is not None:
+            v = converter(v)
+            return v.magnitude
+        return 0
+
+    window = Window(
+        timeseries,
+        duration=timeunits(seconds=iattrib(element, "seconds", d=5 * 60)),
+        samples=256,
+        key=value
+    )
 
     return SimpleChart(
         at=at(element),
