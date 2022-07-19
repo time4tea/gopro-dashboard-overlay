@@ -6,14 +6,16 @@ from typing import Callable
 
 from gopro_overlay import layouts
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.layout_components import moving_map, journey_map, gradient_chart, \
-    text, metric, metric_value
+from gopro_overlay.framemeta import Window
+from gopro_overlay.layout_components import moving_map, journey_map, text, metric, metric_value
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 from gopro_overlay.widgets import simple_icon, Translate, Composite, Frame
 from gopro_overlay.widgets_asi import AirspeedIndicator
 from gopro_overlay.widgets_bar import Bar
+from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_compass import Compass
 from gopro_overlay.widgets_compass_arrow import CompassArrow
 from gopro_overlay.widgets_map import MovingJourneyMap
@@ -310,11 +312,17 @@ def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **k
 
 
 def create_gradient_chart(element, entry, timeseries, font, **kwargs):
-    return gradient_chart(
-        at(element),
-        timeseries,
-        entry,
-        font_title=font(iattrib(element, "size_title", d=16))
+    window = Window(timeseries,
+                    duration=timeunits(minutes=5),
+                    samples=256,
+                    key=lambda e: e.alt,
+                    fmt=lambda v: v.to("meter").magnitude)
+
+    return SimpleChart(
+        at=at(element),
+        value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
+        font=font(iattrib(element, "size_title", d=16)),
+        filled=True
     )
 
 

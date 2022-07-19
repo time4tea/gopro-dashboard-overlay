@@ -1,7 +1,4 @@
-from .framemeta import Window
-from .timeunits import timeunits
 from .widgets import Text, CachingText
-from .widgets_chart import SimpleChart
 from .widgets_map import MovingMap, JourneyMap
 
 
@@ -42,14 +39,3 @@ def text(cache=True, **kwargs):
 
 def metric(entry, accessor, formatter, converter=lambda x: x, cache=True, **kwargs):
     return text(cache, value=metric_value(entry, accessor, converter, formatter), **kwargs)
-
-
-def gradient_chart(at, timeseries, entry, font_title):
-    window = Window(timeseries, duration=timeunits(minutes=5), samples=256,
-                    key=lambda e: e.alt, fmt=lambda v: v.to("meter").magnitude)
-    return SimpleChart(
-        at=at,
-        value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
-        font=font_title,
-        filled=True
-    )
