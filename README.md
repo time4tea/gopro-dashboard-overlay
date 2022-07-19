@@ -11,6 +11,7 @@
 
 ![Example Dashboard Image](examples/2022-05-15-example.png)
 ![Example Dashboard Image](examples/2022-06-11-contrib-example.png)
+![Example Dashboard Image](examples/2022-07-19-contrib-example-plane.jpg)
 
 ## Map Styles
 
