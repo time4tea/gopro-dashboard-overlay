@@ -184,6 +184,11 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.49.0 Parsing & Display of Acceleration Information!
+  - Major new functionality to parse and display acceleration data
+  - Use metrics `accl.x` `accl.y` and `accl.z` in any widget or metric text
+  - New component `bar` - see [bar docs](docs/xml/examples/07-bar)
+  - Updated chart can now chart (probably) any metric - see [chart docs](docs/xml/examples/07-chart)
 - 0.48.0 Fix [#48](https://github.com/time4tea/gopro-dashboard-overlay/issues/48) - h/t [@osresearch](https://github.com/osresearch)  
   - allow 'km' units where appropriate
 - 0.47.0 Fix [#47](https://github.com/time4tea/gopro-dashboard-overlay/issues/47) - h/t [@osresearch](https://github.com/osresearch)  
@@ -212,12 +217,6 @@ https://github.com/JuanIrache/gopro-telemetry
   - This has been tested with GOPRO Hero 9 and GOPRO Hero 7 - which use two different timing schemes, and appears to work.
   - This changes the way that GPX metadata is aligned with the track, which should also make it better
   - This might change how points with large DOP are rendered... feedback welcomed about how to do this best
-- 0.39.0 Fix [#29](https://github.com/time4tea/gopro-dashboard-overlay/issues/29)  
-- 0.38.0 Fix [#30](https://github.com/time4tea/gopro-dashboard-overlay/issues/30) thanks @tve 
-- 0.37.0
-  - Added new component "Moving Journey Map", which displays the whole journey on a moving map. See [docs](docs/xml/examples/06-moving-journey-map/README.md)
-    - Possible fix for [feature request](https://github.com/time4tea/gopro-dashboard-overlay/issues/16) 
-
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
