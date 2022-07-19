@@ -17,9 +17,9 @@ for each metric.
 {{ <component type="metric" metric="speed" units="mph" /> }}
 {{ <component type="metric" metric="speed" units="knots" /> }}
 
-The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `km`, `nautical_miles`, `radian`, `gravity`, `G`
+The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `km`, `nautical_miles`, `radian`, `gravity`, `G`, `m/s^2`, `m/s²`
 
-`gravity` and `G` are synonyms for 9.80665 m/s², so will convert acceleration values correct to G's
+`gravity` and `G` are synonyms for 9.80665 m/s², so will convert acceleration values to G's
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
