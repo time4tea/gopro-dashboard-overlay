@@ -2,6 +2,8 @@ import inspect
 import os
 from pathlib import Path
 
+import pytest
+
 from gopro_overlay import ffmpeg
 from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta
 from gopro_overlay.gpmd import GoproMeta
@@ -12,7 +14,7 @@ def load_file(path) -> GoproMeta:
     return GoproMeta.parse(ffmpeg.load_gpmd_from(path))
 
 
-def file_path_of_test_asset(name):
+def file_path_of_test_asset(name, missing_ok=False):
     sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 
     meta_dir = sourcefile.parents[0].joinpath("meta")
@@ -20,7 +22,10 @@ def file_path_of_test_asset(name):
     the_path = os.path.join(meta_dir, name)
 
     if not os.path.exists(the_path):
-        raise IOError(f"Test file {the_path} does not exist")
+        if missing_ok:
+            pytest.xfail(f"Missing file {the_path} and this is OK")
+        else:
+            raise IOError(f"Test file {the_path} does not exist")
 
     return the_path
 
@@ -39,7 +44,7 @@ def test_loading_data_by_frame():
 
 
 def test_loading_accl():
-    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4")
+    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
     stream_info = ffmpeg.find_streams(filepath)
 
@@ -52,7 +57,7 @@ def test_loading_accl():
 
 
 def test_loading_gps_and_accl():
-    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4")
+    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
     stream_info = ffmpeg.find_streams(filepath)
 
