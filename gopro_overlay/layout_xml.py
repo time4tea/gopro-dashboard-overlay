@@ -377,7 +377,7 @@ def create_compass_arrow(element, entry, timeseries, font, **kwargs):
 
 def create_bar(element, entry, timeseries, font, **kwargs):
     return Bar(
-        size=Dimension(x=iattrib(element, "width"), y=iattrib(element, "height")),
+        size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
         reading=metric_value(
             entry,
             accessor=metric_accessor_from(attrib(element, "metric")),
@@ -386,7 +386,7 @@ def create_bar(element, entry, timeseries, font, **kwargs):
             default=0
         ),
         fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
-        outline=rgbattr(element, "fill", d=(255, 255, 255)),
+        outline=rgbattr(element, "outline", d=(255, 255, 255)),
         outline_width=iattrib(element, "outline-width", d=3),
         highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),
         highlight_colour_positive=rgbattr(element, "h-pos", d=(0, 255, 0)),

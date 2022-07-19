@@ -23,11 +23,13 @@ Auto Generated File DO NOT EDIT
 
 [07-air-speed-indicator](07-air-speed-indicator/README.md)
 
+[07-bar](07-bar/README.md)
+
+[07-chart](07-chart/README.md)
+
 [07-compass-arrow](07-compass-arrow/README.md)
 
 [07-compass](07-compass/README.md)
-
-[07-gradient-chart](07-gradient-chart/README.md)
 
 [08-translate](08-translate/README.md)
 

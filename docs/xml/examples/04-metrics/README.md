@@ -47,7 +47,9 @@ for each metric.
 <kbd>![04-metrics-4.png](04-metrics-4.png)</kbd>
 
 
-The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `km`, `nautical_miles`, `radian`
+The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `km`, `nautical_miles`, `radian`, `gravity`, `G`
+
+`gravity` and `G` are synonyms for 9.80665 m/s², so will convert acceleration values correct to G's
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
@@ -149,7 +151,9 @@ The same colour as in the [text](01-simple-text.md) component
 
 The following metrics are supported:
 `hr`, `cadence`, `speed`, `cspeed`, `temp`,
-`gradient`, `alt`, `odo`, `dist`, `azi`, `lat`, `lon`,
+`gradient`, `alt`, `odo`, `dist`, `azi`, `lat`, `lon`, `accl.x`, `accl.y`, `accl.z`
+
+Currently, there is no mechanism to calculate the overall acceleration, this will come in a future version.
 
 | Metric   | Description                                                       | Unit                 |
 |----------|-------------------------------------------------------------------|----------------------|
@@ -166,3 +170,13 @@ The following metrics are supported:
 | cog      | Course over Ground                                                | degree               |
 | lat      | Latitude                                                          | -                    | 
 | lon      | Longitude                                                         | -                    | 
+| accl.x   | Acceleration - X Axis                                             | m/s²                 | 
+| accl.y   | Acceleration - Y Axis                                             | m/s²                 | 
+| accl.z   | Acceleration - Z Axis                                             | m/s²                 | 
+
+# Axes of Acceleration & Rotation
+
+Image (C) GoPro - from https://github.com/gopro/gpmf-parser
+
+![GoPro IMU Orientation](https://github.com/gopro/gpmf-parser/raw/master/docs/readmegfx/CameraIMUOrientationSM.png)
+
