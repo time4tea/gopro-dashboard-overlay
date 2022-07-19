@@ -60,3 +60,26 @@ Use `max` and `min` to control the max and min values that the bar will display
 {{ <component type="bar" metric="accl.y" units="m/s^2" max="10" min="0" /> }}
 
 
+## Example Composite Bar Component
+
+For example to plot acceleration values for all three axes
+
+{{
+    <composite>
+        <translate y="0">
+          <component type="bar" width="400" height="50" metric="accl.x"/>
+          <component type="text" x="10" y="10" size="24" rgb="255,255,255">X Accl</component>
+          <component type="metric" x="200" y="15" metric="accl.x" size="24" rgb="255,255,255" dp="2" align="centre" />
+        </translate>
+        <translate y="50">
+            <component type="bar" width="400" height="50" metric="accl.y" />
+            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Y Accl</component>
+            <component type="metric" x="200" y="15" metric="accl.y" size="24" rgb="255,255,255" dp="2"  align="centre"/>
+        </translate>
+        <translate y="100">
+            <component type="bar" width="400" height="50" metric="accl.z" />
+            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Z Accl</component>
+            <component type="metric" x="200" y="15" metric="accl.z" size="24" rgb="255,255,255" dp="2" align="centre"/>
+        </translate>
+    </composite>
+}}
