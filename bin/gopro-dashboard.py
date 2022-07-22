@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from importlib import metadata
 from pathlib import Path
 
 import progressbar
@@ -83,6 +84,9 @@ if __name__ == "__main__":
     if not os.path.exists(input_file):
         print(f"{input_file}: not found")
         exit(1)
+
+    version = metadata.version("gopro_overlay")
+    print(f"Starting gopro-dashboard version {version}")
 
     stream_info = find_streams(input_file)
     dimensions = stream_info.video_dimension
