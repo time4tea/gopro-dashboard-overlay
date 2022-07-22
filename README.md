@@ -185,6 +185,7 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.50.0 Print installed version at program startup
 - 0.49.0 Parsing & Display of Acceleration Information!
   - Major new functionality to parse and display acceleration data
   - Use metrics `accl.x` `accl.y` and `accl.z` in any widget or metric text
