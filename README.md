@@ -156,7 +156,6 @@ No tests are run in this project with pillow-simd, so output may vary (but their
 ## Known Bugs / Issues
 
 - Only tested on a GoPro Hero 9, that's all I have. Sample files for other devices are welcomed.
-- Aligning overlay with video - not exact! - Start garmin first, and wait for GPS lock before recording
 
 ## Icons
 
