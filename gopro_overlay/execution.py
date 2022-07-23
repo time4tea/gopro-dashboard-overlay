@@ -15,7 +15,6 @@ class InProcessExecution:
 
     def execute(self, cmd):
         try:
-            print(f"Executing '{' '.join(cmd)}'")
             if self.redirect:
                 with open(self.redirect, "w") as std:
                     process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)

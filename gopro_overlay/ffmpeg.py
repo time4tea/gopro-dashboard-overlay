@@ -7,11 +7,10 @@ import subprocess
 from array import array
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Optional
+from typing import Optional, List
 
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.functional import flatten
 
 
@@ -42,11 +41,27 @@ class StreamInfo:
     video_dimension: Dimension
 
 
+class FFMPEGRunner:
+    def run(self, commands):
+        raise IOError("Not implemented")
+
+
+class FFMPEGExecute(FFMPEGRunner):
+
+    def __init__(self, execution):
+        self.execution = execution
+
+    def run(self, commands):
+        print(f"Executing ffmpeg '{' '.join(commands)}'")
+        yield from self.execution.execute(["ffmpeg", *commands])
+
+
 def cut_file(input, output, start, duration):
     streams = find_streams(input)
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if stream is not None]))
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if
+         stream is not None]))
 
     args = ["ffmpeg",
             "-hide_banner",
@@ -71,7 +86,8 @@ def join_files(filepaths, output):
     streams = find_streams(filepaths[0])
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if stream is not None]))
+        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if
+         stream is not None]))
 
     with temporary_file() as commandfile:
         with open(commandfile, "w") as f:
@@ -94,7 +110,6 @@ def join_files(filepaths, output):
 
 
 def find_frame_duration(filepath, data_stream_number, invoke=invoke):
-
     ffprobe_output = str(invoke(
         ["ffprobe",
          "-hide_banner",
@@ -226,15 +241,14 @@ class FFMPEGNull:
 
 class FFMPEGGenerate:
 
-    def __init__(self, output, overlay_size: Dimension, execution=None):
+    def __init__(self, runner, output, overlay_size: Dimension):
+        self.runner = runner
         self.output = output
         self.overlay_size = overlay_size
-        self.execution = execution if execution else InProcessExecution()
 
     @contextlib.contextmanager
     def generate(self):
         cmd = [
-            "ffmpeg",
             "-hide_banner",
             "-y",
             "-loglevel", "info",
@@ -249,7 +263,7 @@ class FFMPEGGenerate:
             self.output
         ]
 
-        yield from self.execution.execute(cmd)
+        yield from self.runner.run(cmd)
 
 
 class FFMPEGOptions:
@@ -266,40 +280,49 @@ class FFMPEGOptions:
         self.output = options
 
 
-class FFMPEGOverlay:
+def ffmpeg_concat_filter(inputs):
+    channels = "".join([f"[{i}:v][{i}:a]" for i, f in enumerate(inputs)])
+    return f"{channels}concat:n={len(inputs)}:v=1:a=1[vv][a]"
 
-    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080,
-                 execution=None):
+
+class FFMPEGOverlayMulti:
+
+    def __init__(self, runner: FFMPEGRunner,
+                 inputs: List[str],
+                 output: str,
+                 overlay_size: Dimension,
+                 options: FFMPEGOptions = None):
+        self.runner = runner
+        self.inputs = inputs
         self.output = output
-        self.input = input
-        self.options = options if options else FFMPEGOptions()
         self.overlay_size = overlay_size
-        self.vsize = vsize
-        self.execution = execution if execution else InProcessExecution()
+        self.options = options if options else FFMPEGOptions()
 
+    # there is only so much further we can get without creating a proper model for this stuff!
+    # if even this works
     @contextlib.contextmanager
     def generate(self):
-        if self.vsize == 1080:
-            filter_extra = ""
+        if len(self.inputs) > 1:
+            f_complex = f"{ffmpeg_concat_filter(self.inputs)};[vv][{len(self.inputs)}:v]overlay"
         else:
-            filter_extra = f",scale=-1:{self.vsize}"
-        cmd = flatten([
-            "ffmpeg",
-            "-y",
-            self.options.general,
-            self.options.input,
-            "-i", self.input,
-            "-f", "rawvideo",
-            "-framerate", "10.0",
-            "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
-            "-pix_fmt", "rgba",
-            "-i", "-",
-            "-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
-            self.options.output,
-            self.output
-        ])
+            f_complex = f"[0:v][1:v]overlay"
 
-        yield from self.execution.execute(cmd)
+        yield from self.runner.run(
+            flatten([
+                "-y",
+                self.options.general,
+                self.options.input,
+                [["-i", i] for i in self.inputs],
+                "-f", "rawvideo",
+                "-framerate", "10.0",
+                "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
+                "-pix_fmt", "rgba",
+                "-i", "-",
+                "-filter_complex", f_complex,
+                self.options.output,
+                self.output,
+            ])
+        )
 
 
 if __name__ == "__main__":

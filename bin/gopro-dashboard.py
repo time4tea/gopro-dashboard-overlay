@@ -11,8 +11,8 @@ from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution, ThreadingExecution
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
-    find_streams, FFMPEGNull
+from gopro_overlay.ffmpeg import FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
+    find_streams, FFMPEGNull, FFMPEGOverlayMulti, FFMPEGExecute
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
@@ -153,35 +153,37 @@ if __name__ == "__main__":
                     renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone)
             )
 
+            redirect = None if args.show_ffmpeg else temp_file_name()
+
+            if args.thread:
+                execution = ThreadingExecution(redirect=redirect)
+            else:
+                execution = InProcessExecution(redirect=redirect)
+
+            runner = FFMPEGExecute(execution)
+
+            print(f"FFMPEG Output is in {redirect}")
+
             if args.generate == "none":
                 ffmpeg = FFMPEGNull()
             elif args.output == "overlay":
                 ffmpeg = FFMPEGGenerate(
                     output=args.output,
-                    overlay_size=dimensions
+                    overlay_size=dimensions,
+                    runner=runner
                 )
             else:
-                redirect = None if args.show_ffmpeg else temp_file_name()
-
-                if args.thread:
-                    execution = ThreadingExecution(redirect=redirect)
-                else:
-                    execution = InProcessExecution(redirect=redirect)
-
-                print(f"FFMPEG Output is in {redirect}")
-
                 if args.profile:
                     ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
                 else:
                     ffmpeg_options = None
 
-                ffmpeg = FFMPEGOverlay(
-                    input=input_file,
+                ffmpeg = FFMPEGOverlayMulti(
+                    inputs=[input_file],
                     output=args.output,
                     options=ffmpeg_options,
-                    vsize=args.output_size,
                     overlay_size=dimensions,
-                    execution=execution
+                    runner=runner
                 )
 
             write_timer = PoorTimer("writing to ffmpeg")

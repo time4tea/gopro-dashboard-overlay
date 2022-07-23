@@ -3,7 +3,7 @@ from pathlib import Path
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGGenerate, FFMPEGOverlay, FFMPEGOptions
+from gopro_overlay.ffmpeg import FFMPEGGenerate, FFMPEGRunner, FFMPEGOverlayMulti
 
 ffprobe_output = (Path(__file__).parent / "test_ffmpeg_ffprobe_output.json").read_text()
 
@@ -55,7 +55,6 @@ def test_finding_frame_duration():
 
 
 def test_parsing_stream_information():
-
     def find_frame(filepath, data_stream, *args):
         assert filepath == "whatever"
         assert data_stream == 3
@@ -94,30 +93,19 @@ class FakePopen:
         })
 
 
-class FakeExecution:
-
-    def __init__(self):
-        self.args = None
-
-    def execute(self, args):
-        self.args = args
-        yield BytesIO()
-
-
 def test_ffmpeg_generate_execute():
-    fake = FakeExecution()
+    fake = FFMPEGFake()
 
     ffmpeg = FFMPEGGenerate(
         output="output",
         overlay_size=Dimension(100, 200),
-        execution=fake
+        runner=fake
     )
 
     with ffmpeg.generate():
         pass
 
-    assert fake.args == [
-        "ffmpeg",  #
+    assert fake.commands == [
         '-hide_banner',
         "-y",  # overwrite targets
         "-loglevel", "info",
@@ -133,57 +121,48 @@ def test_ffmpeg_generate_execute():
     ]
 
 
-def test_ffmpeg_overlay_execute_default():
-    fake = FakeExecution()
+class FFMPEGFake(FFMPEGRunner):
 
-    ffmpeg = FFMPEGOverlay(input="input", output="output", overlay_size=Dimension(3, 4), execution=fake)
+    def __init__(self):
+        self.commands = None
 
-    with ffmpeg.generate():
+    def run(self, commands):
+        self.commands = commands
+        yield BytesIO()
+
+    @property
+    def command_line(self):
+        return self.commands
+
+
+def test_ffmpeg_multi():
+    runner = FFMPEGFake()
+    ff = FFMPEGOverlayMulti(
+        runner=runner,
+        inputs=["fileA", "fileB", "fileC"],
+        output="overlaid",
+        overlay_size=Dimension(5, 10)
+    )
+
+    with ff.generate():
         pass
 
-    assert fake.args == [
-        "ffmpeg",
+    assert runner.command_line == [
         "-y",
-        "-hide_banner",
-        "-loglevel", "info",
-        "-i", "input",  # input 0
+        '-hide_banner',
+        '-loglevel', 'info',
+        "-i", "fileA",
+        "-i", "fileB",
+        "-i", "fileC",
         "-f", "rawvideo",
         "-framerate", "10.0",
-        "-s", "3x4",
+        "-s", "5x10",
         "-pix_fmt", "rgba",
-        "-i", "-",  # input 1
-        "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
-        "-vcodec", "libx264",
-        "-preset", "veryfast",
-        "output"
-    ]
-
-
-def test_ffmpeg_overlay_execute_options():
-    fake = FakeExecution()
-
-    ffmpeg = FFMPEGOverlay(input="input", output="output",
-                           options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
-                           overlay_size=Dimension(3, 4), execution=fake)
-
-    with ffmpeg.generate():
-        pass
-
-    assert fake.args == [
-        "ffmpeg",
-        "-y",
-        "-hide_banner",
-        "-loglevel", "info",
-        "-input-option",  # input option goes before input 0
-        "-i", "input",  # input 0
-        "-f", "rawvideo",
-        "-framerate", "10.0",
-        "-s", "3x4",
-        "-pix_fmt", "rgba",
-        "-i", "-",  # input 1
-        "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
-        "-output-option",  # output option goes before output
-        "output"
+        "-i", "-",
+        "-filter_complex", "[0:v][0:a][1:v][1:a][2:v][2:a]concat:n=3:v=1:a=1[vv][a];[vv][3:v]overlay",
+        '-vcodec', 'libx264',
+        '-preset', 'veryfast',
+        "overlaid"
     ]
 
 
