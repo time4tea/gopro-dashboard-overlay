@@ -159,7 +159,8 @@ def test_ffmpeg_multi():
         "-s", "5x10",
         "-pix_fmt", "rgba",
         "-i", "-",
-        "-filter_complex", "[0:v][0:a][1:v][1:a][2:v][2:a]concat:n=3:v=1:a=1[vv][a];[vv][3:v]overlay",
+        "-filter_complex", "[0:v][0:a][1:v][1:a][2:v][2:a]concat=n=3:v=1:a=1[vv][a];[vv][3:v]overlay",
+        "-map", "[a]",
         '-vcodec', 'libx264',
         '-preset', 'veryfast',
         "overlaid"

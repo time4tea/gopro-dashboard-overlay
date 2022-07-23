@@ -282,7 +282,7 @@ class FFMPEGOptions:
 
 def ffmpeg_concat_filter(inputs):
     channels = "".join([f"[{i}:v][{i}:a]" for i, f in enumerate(inputs)])
-    return f"{channels}concat:n={len(inputs)}:v=1:a=1[vv][a]"
+    return f"{channels}concat=n={len(inputs)}:v=1:a=1[vv][a]"
 
 
 class FFMPEGOverlayMulti:
@@ -303,9 +303,9 @@ class FFMPEGOverlayMulti:
     @contextlib.contextmanager
     def generate(self):
         if len(self.inputs) > 1:
-            f_complex = f"{ffmpeg_concat_filter(self.inputs)};[vv][{len(self.inputs)}:v]overlay"
+            f_complex = ["-filter_complex", f"{ffmpeg_concat_filter(self.inputs)};[vv][{len(self.inputs)}:v]overlay", "-map", "[a]" ]
         else:
-            f_complex = f"[0:v][1:v]overlay"
+            f_complex = ["-filter_complex", f"[0:v][1:v]overlay"]
 
         yield from self.runner.run(
             flatten([
@@ -318,7 +318,7 @@ class FFMPEGOverlayMulti:
                 "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
                 "-pix_fmt", "rgba",
                 "-i", "-",
-                "-filter_complex", f_complex,
+                f_complex,
                 self.options.output,
                 self.output,
             ])
