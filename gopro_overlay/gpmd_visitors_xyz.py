@@ -18,6 +18,8 @@ class ORIN:
             self.convert = lambda xyz: XYZ(x=-xyz.y, y=xyz.x, z=xyz.z)
         elif conversion == "yXZ":
             self.convert = lambda xyz: XYZ(x=xyz.y, y=-xyz.x, z=xyz.z)
+        elif conversion == "zxY":
+            self.convert = lambda xyz: XYZ(x=-xyz.y, y=xyz.z, z=-xyz.x)
         else:
             raise IOError(f"Unhandled ORIN spec: {conversion}")
 
