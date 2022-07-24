@@ -98,6 +98,34 @@ Example:
 }
 ```
 
+## GPU Learnings
+
+### nvidia cuvidCreateDecoder failed
+
+You might see this in the ffmpeg output:
+
+```
+[h264 @ 0x557b56012a00] decoder->cvdl->cuvidCreateDecoder(&decoder->decoder, params) failed -> CUDA_ERROR_INVALID_VALUE: invalid argument
+[h264 @ 0x557b56012a00] Using more than 32 (34) decode surfaces might cause nvdec to fail.
+[h264 @ 0x557b56012a00] Try lowering the amount of threads. Using 16 right now.
+[h264 @ 0x557b56012a00] Failed setup for format cuda: hwaccel initialisation returned error.
+[swscaler @ 0x557b57b570c0] deprecated pixel format used, make sure you did set range correctly
+```
+
+I 'fixed' this with this profile:
+
+```json
+{
+  "nvgpu": {
+    "input": ["-hwaccel", "nvdec", "-threads", "12"],
+    "output": ["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "50000k", "-bf:v", "3", "-profile:v", "high", "-spatial-aq", "true"]
+  }
+}
+```
+
+I don't know the formula for calculating the correct number of threads... this was trial and error.
+
+
 ### Usage
 
 ```
