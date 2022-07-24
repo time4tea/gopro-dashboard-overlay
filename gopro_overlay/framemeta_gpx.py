@@ -1,3 +1,6 @@
+import datetime
+from datetime import timedelta
+
 import gpxpy
 
 from gopro_overlay.entry import Entry
@@ -5,7 +8,7 @@ from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.timeseries import Timeseries
 
 
-def framemeta_to_gpx(fm: FrameMeta):
+def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0)):
     gpx = gpxpy.gpx.GPX()
 
     gpx_track = gpxpy.gpx.GPXTrack()
@@ -14,14 +17,21 @@ def framemeta_to_gpx(fm: FrameMeta):
     gpx_segment = gpxpy.gpx.GPXTrackSegment()
     gpx_track.segments.append(gpx_segment)
 
+    last_dt = datetime.datetime(year=1900, month=1, day=1,tzinfo=datetime.timezone.utc)
+
     for entry in fm.items():
-        gpx_segment.points.append(
-            gpxpy.gpx.GPXTrackPoint(
-                time=entry.dt,
-                latitude=entry.point.lat,
-                longitude=entry.point.lon,
-                elevation=entry.alt.to("m").magnitude)
-        )
+        entry_dt = entry.dt
+
+        if entry_dt > last_dt + step:
+            last_dt = entry_dt
+
+            gpx_segment.points.append(
+                gpxpy.gpx.GPXTrackPoint(
+                    time=entry_dt,
+                    latitude=entry.point.lat,
+                    longitude=entry.point.lon,
+                    elevation=entry.alt.to("m").magnitude)
+            )
 
     return gpx
 

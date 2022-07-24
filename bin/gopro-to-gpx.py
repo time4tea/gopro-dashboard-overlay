@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import sys
 from collections import Counter
 from pathlib import Path
@@ -15,6 +16,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file to GPX")
 
+    parser.add_argument("--every", default=0, type=int, help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
     parser.add_argument("input", help="Input MP4 file")
     parser.add_argument("output", nargs="?", default="-", help="Output GPX file (default stdout)")
 
@@ -28,6 +30,8 @@ if __name__ == "__main__":
 
     counter = Counter()
 
+    print(f"Loading GoPro {args.input}")
+
     stream_info = ffmpeg.find_streams(args.input)
     fm = framemeta_from(
         args.input,
@@ -35,7 +39,9 @@ if __name__ == "__main__":
         metameta=stream_info.meta
     )
 
-    gpx = framemeta_to_gpx(fm)
+    print("Generating GPX")
+
+    gpx = framemeta_to_gpx(fm, step=datetime.timedelta(seconds=args.every))
 
     with smart_open(args.output) as f:
         f.write(gpx.to_xml())
