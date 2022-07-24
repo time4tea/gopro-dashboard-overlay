@@ -184,6 +184,7 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.52.0 Update gopro-to-gpx.py to allow smaller GPX files (see help)
 - 0.51.0 Fix [#52](https://github.com/time4tea/gopro-dashboard-overlay/issues/52) h/t [@danfossi](https://github.com/danfossi)
   - Support for Hero 8 Black ORIN spec zxY
 - 0.50.0 Print installed version at program startup
