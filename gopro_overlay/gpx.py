@@ -3,6 +3,7 @@ import gzip
 
 import gpxpy
 
+from .gpmd import GPSFix
 from .point import Point
 from .timeseries import Timeseries, Entry
 
@@ -70,6 +71,8 @@ def load_timeseries(filepath, units):
             hr=point.hr,
             cad=point.cad,
             atemp=point.atemp,
+            # we should set the gps fix or Journey.accept() will skip the point:
+            gpsfix=GPSFix.LOCK_3D.value,
         )
         for point in gpx
     ]
