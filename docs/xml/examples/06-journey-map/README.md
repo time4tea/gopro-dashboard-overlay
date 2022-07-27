@@ -71,6 +71,18 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 <kbd>![06-journey-map-5.png](06-journey-map-5.png)</kbd>
 
 
+## Fade out
+
+Corners can be faded out using parent frame's `fo` where you can specify how many pixels to use for the fade out.
+
+
+```xml
+<frame width="200" height="200" cr="50" fo="40">
+  <component type="journey_map" size="200"/>
+</frame>
+```
+<kbd>![06-journey-map-6.png](06-journey-map-6.png)</kbd>
+
 
 ## Copyright
 

@@ -128,6 +128,18 @@ It is possible to have multiple moving maps, though
 <kbd>![05-moving-map-10.png](05-moving-map-10.png)</kbd>
 
 
+## Fade out
+
+Corners can be faded out using parent frame's `fo` where you can specify how many pixels to use for the fade out.
+
+
+```xml
+<frame width="200" height="200" cr="50" fo="40">
+  <component type="moving_map" size="200"/>
+</frame>
+```
+<kbd>![05-moving-map-11.png](05-moving-map-11.png)</kbd>
+
 ## Copyright
 
 All maps are © OpenStreetMap contributors

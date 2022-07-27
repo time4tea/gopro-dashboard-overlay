@@ -1,6 +1,7 @@
 import functools
 import importlib
 import os
+import math
 from typing import Callable, Tuple, Any
 
 from PIL import Image, ImageDraw
@@ -243,7 +244,8 @@ class Frame:
                  corner_radius: int = 0,
                  outline: Tuple = None,
                  fill: Tuple = None,
-                 child: Any = EmptyDrawable()) -> None:
+                 child: Any = EmptyDrawable(),
+                 fade_out: int = 0) -> None:
         self.child = child
         self.corner_radius = corner_radius
         self.fill = fill
@@ -251,6 +253,7 @@ class Frame:
         self.opacity = opacity
         self.dimensions = dimensions
         self.mask = None
+        self.fade_out = fade_out
 
     def _maybe_init(self):
         if self.mask is None:
@@ -260,6 +263,27 @@ class Frame:
                 radius=self.corner_radius,
                 fill=int(self.opacity * 255)
             )
+            if self.fade_out > 0:
+                self._init_fadeout()
+
+    def _init_fadeout(self):
+            for y in range(self.dimensions.y):
+                for x in range(self.dimensions.x):
+                    distance_to_center = math.sqrt((x - self.dimensions.x/2) ** 2 + (y - self.dimensions.y/2) ** 2)
+                    radius = min(self.dimensions.x, self.dimensions.y) / 2
+                    distance_from_side = 1 - (distance_to_center / radius)
+                    distance_from_side = min(x, min(y, min(self.dimensions.x - x, self.dimensions.y - y))) / radius
+                    if self.corner_radius == 0:
+                        # no radius defined, we will use distance_from_side
+                        distance_from_corner_radius = distance_from_side
+                    else:
+                        # we can use a more complex formula for getting the distance from corner_radius, but for simplicity we will use this one
+                        # it will lead to more straight lines instead of rounded corners
+                        outer_radius = math.sqrt(self.corner_radius ** 2 + self.corner_radius ** 2) - self.corner_radius
+                        rounder_radius = math.sqrt((self.dimensions.x/2) ** 2 + (self.dimensions.y/2) ** 2) - outer_radius
+                        distance_from_corner_radius = (rounder_radius - distance_to_center) / rounder_radius
+                    fade_out_percents = max(0.01, min(1, self.fade_out / radius))
+                    self.mask.putpixel((x, y), int(min(1, min(distance_from_side, distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
 
     def draw(self, image, draw):
         self._maybe_init()

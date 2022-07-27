@@ -66,3 +66,23 @@ more control over the transparency of the various bits.
 <kbd>![09-frame-4.png](09-frame-4.png)</kbd>
 
 
+
+```xml
+<component type="text" size="64">Background</component>
+<frame width="100" height="100" cr="50" fo="20">
+  <component type="journey_map" size="100"/>
+</frame>
+```
+<kbd>![09-frame-5.png](09-frame-5.png)</kbd>
+
+
+
+```xml
+<component type="text" size="64">Background</component>
+<frame width="200" height="200" cr="10" fo="40" opacity="0.6">
+  <component type="journey_map" size="200"/>
+</frame>
+```
+<kbd>![09-frame-6.png](09-frame-6.png)</kbd>
+
+
