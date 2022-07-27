@@ -180,6 +180,8 @@ class FrameMeta:
             if updates:
                 self.frames[e].update(**updates)
 
+    def meta_duration(self):
+        return self.framelist[-1]
 
 def gps_framemeta(meta, units, metameta=None):
     frame_meta = FrameMeta()

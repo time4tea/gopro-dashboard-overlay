@@ -40,6 +40,8 @@ class StreamInfo:
     video: int
     meta: MetaMeta
     video_dimension: Dimension
+    # in seconds:
+    video_duration: float
 
 
 def cut_file(input, output, start, duration):
@@ -139,6 +141,7 @@ def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duratio
     video = first_and_only("video stream", streams, video_selector)
     video_stream = video["index"]
     video_dimension = Dimension(video["width"], video["height"])
+    video_duration = float(video.get("duration")) if video.get("duration") else None
 
     audio = only_if_present("audio stream", streams, audio_selector)
     audio_stream = None
@@ -159,7 +162,7 @@ def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duratio
     if video_stream is None or meta_meta.stream is None or video_dimension is None:
         raise IOError("Invalid File? The data stream doesn't seem to contain GoPro video & metadata ")
 
-    return StreamInfo(audio=audio_stream, video=video_stream, meta=meta_meta, video_dimension=video_dimension)
+    return StreamInfo(audio=audio_stream, video=video_stream, meta=meta_meta, video_dimension=video_dimension, video_duration=video_duration)
 
 
 def load_gpmd_from(filepath):

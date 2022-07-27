@@ -15,7 +15,7 @@ from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_instal
     find_streams, FFMPEGNull
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta import framemeta_from
+from gopro_overlay.framemeta import FrameMeta, framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro
 from gopro_overlay.geo import CachingRenderer, CompositeKeyFinder, ArgsKeyFinder, EnvKeyFinder, ConfigKeyFinder
 from gopro_overlay.gpx import load_timeseries
@@ -188,8 +188,9 @@ if __name__ == "__main__":
             byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
+            timelapse_correction = gopro_frame_meta.meta_duration().millis() / stream_info.video_duration / 1000 if stream_info.video_duration else 1.0
             # Draw an overlay frame every 0.1 seconds
-            stepper = gopro_frame_meta.stepper(timeunits(seconds=0.1))
+            stepper = gopro_frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
             progress = progressbar.ProgressBar(
                 widgets=[
                     'Render: ',
