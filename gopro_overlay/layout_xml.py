@@ -76,6 +76,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
                     corner_radius=iattrib(element, "cr", d=0),
                     outline=rgbattr(element, "outline", None),
                     fill=rgbattr(element, "bg", d=None),
+                    fade_out=iattrib(element, "fo", d=0),
                     child=Composite(
                         *[do_element(child) for child in element if want_element(child)]
                     )
