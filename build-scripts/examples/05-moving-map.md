@@ -70,6 +70,19 @@ It is possible to have multiple moving maps, though
 <component type="moving_map" x="64" y="64" size="128" corner_radius="64" zoom="7"/>
 }}
 
+## Fade out
+
+Corners can be faded out using parent frame's `fo` where you can specify how many pixels to use for the fade out.
+
+{{
+<frame width="200" height="200" bg="255,255,255">
+
+</frame>
+<frame width="200" height="200" cr="50" fo="40">
+  <component type="moving_map" size="200"/>
+</frame>
+}}
+
 ## Copyright
 
 All maps are © OpenStreetMap contributors

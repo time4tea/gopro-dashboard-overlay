@@ -72,8 +72,10 @@ Corners can be faded out using parent frame's `fo` where you can specify how man
 
 
 ```xml
-<frame width="200" height="200" cr="50" fo="40">
-  <component type="moving_journey_map" size="200"/>
+<frame width="200" height="200" bg="255,255,255">
+    <frame width="200" height="200" cr="50" fo="40">
+      <component type="moving_journey_map" size="200"/>
+    </frame>
 </frame>
 ```
 <kbd>![06-moving-journey-map-6.png](06-moving-journey-map-6.png)</kbd>
