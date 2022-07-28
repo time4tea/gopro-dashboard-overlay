@@ -1,4 +1,5 @@
 import math
+from typing import Tuple
 
 from .gpmd import GPS_FIXED_VALUES
 from .point import Point
@@ -72,7 +73,7 @@ class Journey:
             self.badlon.update(item.point.lon)
 
     @property
-    def bounding_box(self):
+    def bounding_box(self) -> Tuple[Point, Point]:
         lat = self.lat if self.lat else self.badlat
         lon = self.lon if self.lon else self.badlon
 

@@ -7,6 +7,7 @@ import gpxpy
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro
+from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
@@ -96,6 +97,29 @@ def file_path_of_test_asset(name, in_dir="gpx"):
 def test_loading_gpx_file():
     gpx.load(file_path_of_test_asset("test.gpx.gz"), units)
 
+
+def test_converting_gpx_to_timeseries():
+    ts = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
+
+    assert len(ts) == 8597
+
+    first = ts.items()[0]
+
+    assert first.point == Point(lat=51.339589, lon=-2.572136)
+    assert first.alt == units.Quantity(96.0, units.m)
+    assert first.hr == units.Quantity(66, units.bpm)
+    assert first.atemp == units.Quantity(16, units.celsius)
+    assert first.gpsfix == 3
+
+
+def test_bugfix_converting_gpx_to_journey():
+    ts = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
+
+    journey = Journey()
+    ts.process(journey.accept)
+
+    assert journey.bounding_box == (Point(lat=51.184804, lon=-2.804645), Point(lat=51.342323, lon=-2.571981))
+    assert len(journey.locations) == 8597
 
 def test_merge_gpx_with_gopro():
     # the two files should be of the same trip
