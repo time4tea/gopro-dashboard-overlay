@@ -58,9 +58,7 @@ def load_xml(file_or_str, units):
     return [with_unit(p, units) for p in fudge(gpx)]
 
 
-def load_timeseries(filepath, units):
-    gpx = load(filepath, units)
-
+def gpx_to_timeseries(gpx):
     gpx_timeseries = Timeseries()
 
     points = [
@@ -80,3 +78,7 @@ def load_timeseries(filepath, units):
     gpx_timeseries.add(*points)
 
     return gpx_timeseries
+
+
+def load_timeseries(filepath, units):
+    return gpx_to_timeseries(load(filepath, units))
