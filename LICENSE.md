@@ -21,9 +21,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-Icons
+# Icons
 
 Icon files are excluded from this license, and carry their own licenses
 
+# EGM96.dat
+
+Copyright 2006-2009, 2017, 2020 United States Government, as represented by the Administrator of the National Aeronautics and Space Administration. All rights reserved.
+
+The NASA World Wind Java (WWJ) platform is licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
 
