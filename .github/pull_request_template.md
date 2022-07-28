@@ -12,5 +12,5 @@ Fixes #?
 - [ ] Check ["Allow edit from maintainers" option](https://help.github.com/articles/allowing-changes-to-a-pull-request-branch-created-from-a-fork/) in pull request so that additional changes can be pushed by maintainers if required.
 - [ ] Unit tests created/updated (under `tests`) to verify logic, and approval tests for UI Widgets
 - [ ] Update Examples - Under `build-scripts/examples`, and regenerate examples docs if required ( `make doc-examples` ) 
-- [ ] Ensure that tests pass locally.
+- [ ] Ensure that tests pass locally - this can be tricky for approval tests with maps or text though.
 - [ ] Check that pre-release tests work ( `make test-distribution` )
