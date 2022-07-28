@@ -211,6 +211,37 @@ def test_frame_clipping():
     ])
 
 
+@approve_image
+def test_frame_fade_cr_zero():
+    return time_rendering(name="viewport", widgets=[
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 255, 255),
+            child=Frame(
+                dimensions=Dimension(300, 200),
+                fill=(255, 0, 0),
+                fade_out=50,
+            )
+        )
+    ])
+
+@approve_image
+def test_frame_fade_cr_non_zero():
+    return time_rendering(name="viewport", widgets=[
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 255, 255),
+            child=Frame(
+                dimensions=Dimension(300, 200),
+                corner_radius=100,
+                fill=(255, 0, 0),
+                fade_out=50,
+            )
+        )
+    ])
+
+
+
 def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=100):
     timer = PoorTimer(name)
 
