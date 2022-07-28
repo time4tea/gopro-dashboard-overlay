@@ -16,6 +16,8 @@ Some examples might make this clearer.
 The `outline` and `bg` parameters can also accept a "colour-with-alpha" (r,g,b,a) to allow a bit more
 more control over the transparency of the various bits.
 
+Use `fo` to have a nice fade-out effect at the edge of the frame.
+
 
 ```xml
 <component type="text" size="64">Background</component>
@@ -67,20 +69,26 @@ more control over the transparency of the various bits.
 
 
 
+
 ```xml
-<component type="text" size="64">Background</component>
-<frame width="100" height="100" cr="50" fo="20">
-  <component type="journey_map" size="100"/>
+<frame width="600" height="100" bg="255,255,255">
+    <component type="text" size="64">Background</component>
+    <frame width="100" height="100" cr="50" fo="20">
+      <component type="journey_map" size="100"/>
+    </frame>
 </frame>
 ```
 <kbd>![09-frame-5.png](09-frame-5.png)</kbd>
 
 
 
+
 ```xml
-<component type="text" size="64">Background</component>
-<frame width="200" height="200" cr="10" fo="40" opacity="0.6">
-  <component type="journey_map" size="200"/>
+<frame width="200" height="200" bg="255,255,255">
+    <component type="text" size="64">Background</component>
+    <frame width="200" height="200" cr="10" fo="40" opacity="0.6">
+      <component type="journey_map" size="200"/>
+    </frame>
 </frame>
 ```
 <kbd>![09-frame-6.png](09-frame-6.png)</kbd>

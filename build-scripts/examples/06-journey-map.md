@@ -36,6 +36,18 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 
 {{ <component type="journey_map" size="256" corner_radius="128"/> }}
 
+## Fade out
+
+Corners can be faded out using parent frame's `fo` where you can specify how many pixels to use for the fade out.
+
+{{
+<frame width="200" height="200" bg="255,255,255">
+    <frame width="200" height="200" cr="50" fo="40">
+      <component type="journey_map" size="200"/>
+    </frame>
+</frame>
+
+}}
 
 ## Copyright
 

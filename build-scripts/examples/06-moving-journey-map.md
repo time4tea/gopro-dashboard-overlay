@@ -33,3 +33,14 @@ To make the component rounded or transparent, it can be placed in a `frame`
 </translate>
 }}
 
+## Fade out
+
+Corners can be faded out using parent frame's `fo` where you can specify how many pixels to use for the fade out.
+
+{{
+<frame width="200" height="200" bg="255,255,255">
+    <frame width="200" height="200" cr="50" fo="40">
+      <component type="moving_journey_map" size="200"/>
+    </frame>
+</frame>
+}}
