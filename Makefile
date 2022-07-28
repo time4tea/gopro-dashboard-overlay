@@ -67,10 +67,16 @@ ensure-pristine:
 	build-scripts/ensure-working-directory-clean.sh
 
 
-.PHONY: doc
-doc:
+.PHONY: doc-examples
+doc-examples:
 	PYTHONPATH=. $(BIN)/python3 build-scripts/generate-examples.py
+
+.PHONY: doc-map-examples
+doc-map-examples:
 	PYTHONPATH=. $(BIN)/python3 build-scripts/generate-map-examples.py
+
+.PHONY: doc
+doc: doc-examples doc-map-examples
 
 
 .PHONY: publish
