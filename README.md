@@ -1,6 +1,8 @@
 # Overlaying Dashboard onto GoPro MP4 Files
 
-[![Join the chat at https://gitter.im/gopro-dashboard-overlay/community](https://badges.gitter.im/gopro-dashboard-overlay/community.svg)](https://gitter.im/gopro-dashboard-overlay/community)
+![GitHub Discussions](https://img.shields.io/github/discussions/time4tea/gopro-dashboard-overlay?style=for-the-badge)
+![PyPI](https://img.shields.io/pypi/v/gopro-overlay?style=for-the-badge)
+
 
 - Overlaying exciting graphics
 - Convert GoPro movie metadata to GPX or CSV files
