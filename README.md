@@ -3,6 +3,7 @@
 ![GitHub Discussions](https://img.shields.io/github/discussions/time4tea/gopro-dashboard-overlay?style=for-the-badge)
 ![PyPI](https://img.shields.io/pypi/v/gopro-overlay?style=for-the-badge)
 
+Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
 - Overlaying exciting graphics
 - Convert GoPro movie metadata to GPX or CSV files
