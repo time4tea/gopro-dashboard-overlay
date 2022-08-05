@@ -184,6 +184,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.54.0 Fix [#60](https://github.com/time4tea/gopro-dashboard-overlay/issues/60) h/t [@remintz](https://github.com/remintz)
+  - Some (older?) camera's don't have ORIN in ACCL and GYRO streams, so use a default
 - 0.53.0 New feature for a frame - fade out to edge - see [docs](docs/xml/examples/09-frame) - thanks [@ptanov](https://github.com/ptanov)
   - Fix to GPX file loading - also, thanks [@ptanov](https://github.com/ptanov)
 - 0.52.0 Update gopro-to-gpx.py to allow smaller GPX files (see help)
