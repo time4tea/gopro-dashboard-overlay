@@ -215,19 +215,6 @@ https://github.com/JuanIrache/gopro-telemetry
   - now gopro files will sort properly in your file viewer
   - also works around gopro camera drift, clock is always wrong.
   - can rename whole folders of files 
-- 0.44.0 Add [PR#44](https://github.com/time4tea/gopro-dashboard-overlay/pull/34) for extracting GPMF to ndjson. Thanks [@gregbaker](https://github.com/gregbaker)
-- 0.43.0 Support for [Geoapify](https://geoapify.com/) maps, as well as existing [Thunderforest](https://www.thunderforest.com/) and [OSM](https://www.openstreetmap.org/) 
-  - Small improvements in API Key handling. See [map styles docs](docs/maps/README.md)
-- 0.42.0 Experimental threading mode `--thread` which just sends data to ffmpeg on a background thread. 
-  - The result of lots of experimentation on timing, but basically if the GPU is maxed out, that's a limiting factor.
-  - This gets a marginal performance gain of about 0.2frames/s for me. Use `nvtop` to check the "ENC" load on the GPU. 
-  - Demonstrate that on a `null` ffmpeg, we can generate about 60 overlay frames a second, or 6 seconds/second
-- 0.41.0 Allow alpha channel in colours everywhere. This means all text, backgrounds etc can now specify alpha component for colours
-  - See docs for text component for [example](docs/xml/examples/01-simple-text/README.md)
-- 0.40.0 BIG CHANGE - Hopefully align metadata with video *much* better. Please please raise issues if there are problems.
-  - This has been tested with GOPRO Hero 9 and GOPRO Hero 7 - which use two different timing schemes, and appears to work.
-  - This changes the way that GPX metadata is aligned with the track, which should also make it better
-  - This might change how points with large DOP are rendered... feedback welcomed about how to do this best
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
