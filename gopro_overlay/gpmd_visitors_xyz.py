@@ -38,7 +38,7 @@ class XYZStreamVisitor:
         self._temperature = None
         self._type = None
         self._points = None
-        self._orin = None
+        self._orin = ORIN("ZXY")
         self._siun = None
 
     def vi_STMP(self, item):

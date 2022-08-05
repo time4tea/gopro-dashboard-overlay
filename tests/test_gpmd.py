@@ -54,7 +54,12 @@ def test_load_hero6_raw():
 
 
 def test_debugging_visitor_at_least_doesnt_blow_up():
-    meta = load("hero5.raw")
+    meta = load("hero6.raw")
+    meta.accept(DebuggingVisitor())
+
+
+def test_debugging_visitor_for_mp4():
+    _, meta = load_mp4_meta("hero7.mp4")
     meta.accept(DebuggingVisitor())
 
 
@@ -112,7 +117,7 @@ def test_load_hero5_raw_entry():
     assert counter[0] == 18
 
 
-def test_load_hero5_raw_accl():
+def test_load_hero6_raw_accl():
     meta = load("hero6.raw")
     assert len(meta) == 1
 
@@ -125,6 +130,21 @@ def test_load_hero5_raw_accl():
         assert components.points[0] == XYZ(x=9.97846889952153, y=0.05502392344497608, z=3.145933014354067)
 
     meta[0].accept(XYZVisitor("ACCL", on_item=assert_components))
+
+
+def test_load_hero6_raw_accl_complete():
+    # hero6 - no CORI, so old timestamps, no ORIN, so hardcode orientation?
+    meta = load("hero6.raw")
+
+    converter = XYZComponentConverter(
+        on_item=lambda t, i: print(f"{t} = {i}"),
+        units=units,
+        frame_calculator=CorrectionFactorsPacketTimeCalculator(
+            CorrectionFactors(timeunits(millis=0), timeunits(millis=50), 50))
+    )
+    visitor = XYZVisitor("ACCL", on_item=converter.convert)
+
+    meta.accept(visitor)
 
 
 def test_load_hero6_ble_raw():
