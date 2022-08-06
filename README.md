@@ -156,6 +156,10 @@ The frame drawing rate is quite a bit faster, but won't make a huge difference u
 
 No tests are run in this project with pillow-simd, so output may vary (but their tests are good, so I wouldn't expect any huge differences, if any)
 
+## Related Software
+
+- https://github.com/julesgraus/interactiveGoProDashboardTool - An interactive helper to build the command line for the dashboard program
+
 ## Known Bugs / Issues
 
 - Only tested on a GoPro Hero 9, that's all I have. Sample files for other devices are welcomed.
