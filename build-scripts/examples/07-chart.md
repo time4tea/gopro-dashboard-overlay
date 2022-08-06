@@ -24,8 +24,7 @@ use `x` and `y` to set the position of the chart
 
 Set the window size in seconds, defaults to 5*60 = `300`.
 
-The chart is not currently terribly performant, so redrawing frequently ( smaller window )  will slow down rendering, but 
-smaller windows have a bit more of a scroll effect, so look nicer.
+Smaller windows have a bit more of a scroll effect, so look nicer.
 
 {{ <component type="chart" metric="speed" units="kph" seconds="30" /> }}
 {{ <component type="chart" metric="speed" units="kph" seconds="60" /> }}
