@@ -53,7 +53,7 @@ class Window:
             if current < self.ts.min or current > self.ts.max:
                 data.append(self.missing)
             else:
-                entry = self.cache.setdefault(current, self.ts.get(current))
+                entry = self.cache[current] if current in self.cache else self.cache.setdefault(current, self.ts.get(current))
                 value = self.key(entry)
                 if value is not None:
                     data.append(value)
