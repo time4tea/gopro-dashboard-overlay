@@ -43,7 +43,7 @@ def calculate_speeds():
         raw_cog = 0 + raw_azi if raw_azi >= 0 else 360 + raw_azi
         cog = units.Quantity(raw_cog, units.degree)
 
-        speed = dist / time
+        speed = dist / time if time.magnitude > 0 else units.Quantity(0, units.mps)
 
         return {
             "cspeed": speed,
