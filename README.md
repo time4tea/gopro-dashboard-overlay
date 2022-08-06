@@ -191,6 +191,8 @@ https://github.com/progweb/gpx2video
 https://github.com/JuanIrache/gopro-telemetry
 
 ## Latest Changes
+- 0.56.0 Remove possible divide by zero error - only likely in timewarp/timelapse videos - I think
+  - Minor changes to ffmpeg code, should have no visible effect
 - 0.55.0 Huge improvement to View performance - used in chart - now charts with short windows are useable.
 - 0.54.0 Fix [#60](https://github.com/time4tea/gopro-dashboard-overlay/issues/60) h/t [@remintz](https://github.com/remintz)
   - Some (older?) camera's don't have ORIN in ACCL and GYRO streams, so use a default
