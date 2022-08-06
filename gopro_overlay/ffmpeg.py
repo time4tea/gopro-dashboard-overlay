@@ -13,6 +13,7 @@ from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.functional import flatten
+from gopro_overlay.timeunits import Timeunit, timeunits
 
 
 def run(cmd, **kwargs):
@@ -35,18 +36,29 @@ class MetaMeta:
 
 
 @dataclass(frozen=True)
+class VideoMeta:
+    stream: int
+    dimension: Dimension
+    duration: Timeunit
+
+
+@dataclass(frozen=True)
+class AudioMeta:
+    stream: int
+
+
+@dataclass(frozen=True)
 class StreamInfo:
-    audio: Optional[int]
-    video: int
+    audio: Optional[AudioMeta]
+    video: VideoMeta
     meta: MetaMeta
-    video_dimension: Dimension
 
 
 def cut_file(input, output, start, duration):
     streams = find_streams(input)
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if stream is not None]))
+        [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.meta] if it is not None]))
 
     args = ["ffmpeg",
             "-hide_banner",
@@ -71,7 +83,7 @@ def join_files(filepaths, output):
     streams = find_streams(filepaths[0])
 
     maps = list(itertools.chain.from_iterable(
-        [["-map", f"0:{stream}"] for stream in [streams.video, streams.audio, streams.meta.stream] if stream is not None]))
+        [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.meta] if it is not None]))
 
     with temporary_file() as commandfile:
         with open(commandfile, "w") as f:
@@ -94,7 +106,6 @@ def join_files(filepaths, output):
 
 
 def find_frame_duration(filepath, data_stream_number, invoke=invoke):
-
     ffprobe_output = str(invoke(
         ["ffprobe",
          "-hide_banner",
@@ -137,13 +148,17 @@ def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duratio
 
     streams = ffprobe_json["streams"]
     video = first_and_only("video stream", streams, video_selector)
-    video_stream = video["index"]
-    video_dimension = Dimension(video["width"], video["height"])
+
+    video_meta = VideoMeta(
+        stream=int(video["index"]),
+        dimension=Dimension(video["width"], video["height"]),
+        duration=timeunits(seconds=float(video["duration"]))
+    )
 
     audio = only_if_present("audio stream", streams, audio_selector)
-    audio_stream = None
+    audio_meta = None
     if audio:
-        audio_stream = audio["index"]
+        audio_meta = AudioMeta(stream=int(audio["index"]))
 
     meta = first_and_only("metadata stream", streams, data_selector)
 
@@ -156,10 +171,7 @@ def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duratio
         frame_duration=find_frame_duration(filepath, data_stream_number, invoke)
     )
 
-    if video_stream is None or meta_meta.stream is None or video_dimension is None:
-        raise IOError("Invalid File? The data stream doesn't seem to contain GoPro video & metadata ")
-
-    return StreamInfo(audio=audio_stream, video=video_stream, meta=meta_meta, video_dimension=video_dimension)
+    return StreamInfo(audio=audio_meta, video=video_meta, meta=meta_meta)
 
 
 def load_gpmd_from(filepath):

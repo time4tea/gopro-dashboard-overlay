@@ -4,6 +4,7 @@ from pathlib import Path
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGGenerate, FFMPEGOverlay, FFMPEGOptions
+from gopro_overlay.timeunits import timeunits
 
 ffprobe_output = (Path(__file__).parent / "test_ffmpeg_ffprobe_output.json").read_text()
 
@@ -70,9 +71,10 @@ def test_parsing_stream_information():
         find_frame_duration=find_frame
     )
 
-    assert streams.video == 0
-    assert streams.video_dimension == Dimension(1920, 1080)
-    assert streams.audio == 1
+    assert streams.video.stream == 0
+    assert streams.video.dimension == Dimension(1920, 1080)
+    assert streams.video.duration == timeunits(seconds=707.707)
+    assert streams.audio.stream == 1
     assert streams.meta.stream == 3
     assert streams.meta.frame_count == 707
     assert streams.meta.timebase == 1000

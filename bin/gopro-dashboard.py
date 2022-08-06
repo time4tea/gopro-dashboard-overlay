@@ -89,7 +89,7 @@ if __name__ == "__main__":
     print(f"Starting gopro-dashboard version {version}")
 
     stream_info = find_streams(input_file)
-    dimensions = stream_info.video_dimension
+    dimensions = stream_info.video.dimension
     print(f"Input file has size {dimensions}")
 
     with PoorTimer("program").timing():
