@@ -113,6 +113,8 @@ You can cut a section of the gopro file, with metadata.
 Performance isn't really a major goal... Right now it processes video just a bit faster than realtime, so your 10 minute
 video will probably take about 10 minutes to render. This is highly dependent on your CPU though.
 
+For better performance, both the source and target files should be on a fast disk. Copy MP4 files from the SD card to local disk first - it will be much quicker. Use M2 drives if you have them.
+
 The dashboard is updated every 0.1 seconds, regardless of the frame rate of the video, so 10 frames/s in this chart 
 means 1 second of video is processed in 1 second.
 
