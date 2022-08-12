@@ -51,7 +51,8 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
     def decorate(name, level, widget):
         if decorator:
-            name = f"{widget.__class__.__name__} - {name}" if name else widget.__class__.__name__
+            class_name = widget.__class__.__name__
+            name = f"{class_name} - {name}" if name else class_name
 
             return decorator.decorate(name, level, widget)
         else:
