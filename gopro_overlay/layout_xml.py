@@ -49,9 +49,8 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
             return include(name)
         return True
 
-    def decorate(element, level, widget):
+    def decorate(name, level, widget):
         if decorator:
-            name = name_of(element)
             name = f"{widget.__class__.__name__} - {name}" if name else widget.__class__.__name__
 
             return decorator.decorate(name, level, widget)
@@ -69,16 +68,16 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
             method = getattr(sys.modules[__name__], attr)
             return decorate(
-                element=child,
+                name=name_of(child),
                 level=level,
                 widget=method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at, privacy=privacy)
             )
 
         def create_composite(element, level):
             return decorate(
-                element,
-                level,
-                Translate(
+                name=name_of(element),
+                level=level,
+                widget=Translate(
                     at(element),
                     Composite(
                         *[do_element(child, level + 1) for child in element if want_element(child)]
@@ -88,7 +87,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
         def create_frame(element, level):
             return decorate(
-                element=element,
+                name=name_of(element),
                 level=level,
                 widget=Translate(
                     at(element),
@@ -118,7 +117,13 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
             return elements[element.tag](element, level)
 
-        return [do_element(child, 0) for child in root if want_element(child)]
+        return [decorate(
+            name="ROOT",
+            level=0,
+            widget=Composite(
+                *[do_element(child, 1) for child in root if want_element(child)]
+            )
+        )]
 
     return create
 
