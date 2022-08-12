@@ -26,6 +26,7 @@ from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
+from gopro_overlay.widgets_profile import WidgetProfiler
 
 ourdir = Path.home().joinpath(".gopro-graphics")
 
@@ -42,7 +43,7 @@ def accepter_from_args(include, exclude):
     return lambda n: True
 
 
-def create_desired_layout(dimensions, layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone):
+def create_desired_layout(dimensions, layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone, profiler):
     accepter = accepter_from_args(include, exclude)
 
     if layout_xml:
@@ -52,7 +53,7 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
         resource_name = f"default-{dimensions.x}x{dimensions.y}"
         try:
             return layout_from_xml(load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone,
-                                   include=accepter)
+                                   include=accepter, decorator=profiler)
         except FileNotFoundError:
             raise IOError(f"Unable to locate bundled layout resource: {resource_name}. "
                           f"You may need to create a custom layout for this frame size") from None
@@ -60,7 +61,7 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
     elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
     elif layout == "xml":
-        return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter)
+        return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter, decorator=profiler)
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
 
@@ -143,6 +144,11 @@ if __name__ == "__main__":
             if args.overlay_size:
                 dimensions = dimension_from(args.overlay_size)
 
+            profiler = None
+
+            if args.profiler:
+                profiler = WidgetProfiler()
+
             overlay = Overlay(
                 dimensions=dimensions,
                 framemeta=gopro_frame_meta,
@@ -150,7 +156,7 @@ if __name__ == "__main__":
                     layout=args.layout, layout_xml=args.layout_xml,
                     dimensions=dimensions,
                     include=args.include, exclude=args.exclude,
-                    renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone)
+                    renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone, profiler=profiler)
             )
 
             if args.generate == "none":
@@ -218,3 +224,9 @@ if __name__ == "__main__":
             finally:
                 for t in [byte_timer, write_timer, draw_timer]:
                     print(t)
+
+                if profiler:
+                    print("\n\n*** Widget Timings ***")
+                    profiler.print()
+                    print("***\n\n")
+

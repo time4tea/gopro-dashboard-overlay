@@ -2,7 +2,7 @@ import importlib
 import os.path
 import sys
 import xml.etree.ElementTree as ET
-from typing import Callable
+from typing import Callable, Optional
 
 from gopro_overlay import layouts
 from gopro_overlay.dimensions import Dimension
@@ -19,6 +19,7 @@ from gopro_overlay.widgets_chart import SimpleChart
 from gopro_overlay.widgets_compass import Compass
 from gopro_overlay.widgets_compass_arrow import CompassArrow
 from gopro_overlay.widgets_map import MovingJourneyMap
+from gopro_overlay.widgets_profile import WidgetProfiler
 
 
 def load_xml_layout(filename):
@@ -31,7 +32,7 @@ def load_xml_layout(filename):
             return f.read()
 
 
-def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True):
+def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True, decorator: Optional[WidgetProfiler] = None):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -39,16 +40,26 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
     def font_at(size):
         return fonts.setdefault(size, font.font_variant(size=size))
 
+    def name_of(element):
+        return attrib(element, "name", d=None)
+
     def want_element(element):
-        name = attrib(element, "name", d=None)
+        name = name_of(element)
         if name is not None:
             return include(name)
         return True
 
+    def decorate(element, level, widget):
+        if decorator:
+            name = name_of(element)
+            name = f"{widget.__class__.__name__} - {name}" if name else widget.__class__.__name__
+
+            return decorator.decorate(name, level, widget)
+        else:
+            return widget
+
     def create(entry):
-        def create_component(child):
-            if not child.tag == "component":
-                raise ValueError(f"Was expecting 'component' element, not '{child.tag}'")
+        def create_component(child, level):
             component_type = child.attrib["type"].replace("-", "_")
 
             attr = f"create_{component_type}"
@@ -57,33 +68,45 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
                 raise IOError(f"Component of type of '{component_type}' is not recognised, check spelling / examples")
 
             method = getattr(sys.modules[__name__], attr)
-            return method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at, privacy=privacy)
-
-        def create_composite(element):
-            return Translate(
-                at(element),
-                Composite(
-                    *[do_element(child) for child in element if want_element(child)]
-                )
+            return decorate(
+                element=child,
+                level=level,
+                widget=method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at, privacy=privacy)
             )
 
-        def create_frame(element):
-            return Translate(
-                at(element),
-                Frame(
-                    dimensions=Dimension(x=iattrib(element, "width"), y=iattrib(element, "height")),
-                    opacity=fattrib(element, "opacity", d=1.0),
-                    corner_radius=iattrib(element, "cr", d=0),
-                    outline=rgbattr(element, "outline", None),
-                    fill=rgbattr(element, "bg", d=None),
-                    fade_out=iattrib(element, "fo", d=0),
-                    child=Composite(
-                        *[do_element(child) for child in element if want_element(child)]
+        def create_composite(element, level):
+            return decorate(
+                element,
+                level,
+                Translate(
+                    at(element),
+                    Composite(
+                        *[do_element(child, level + 1) for child in element if want_element(child)]
                     )
                 )
             )
 
-        def do_element(element):
+        def create_frame(element, level):
+            return decorate(
+                element=element,
+                level=level,
+                widget=Translate(
+                    at(element),
+                    Frame(
+                        dimensions=Dimension(x=iattrib(element, "width"), y=iattrib(element, "height")),
+                        opacity=fattrib(element, "opacity", d=1.0),
+                        corner_radius=iattrib(element, "cr", d=0),
+                        outline=rgbattr(element, "outline", None),
+                        fill=rgbattr(element, "bg", d=None),
+                        fade_out=iattrib(element, "fo", d=0),
+                        child=Composite(
+                            *[do_element(child, level + 1) for child in element if want_element(child)]
+                        )
+                    )
+                )
+            )
+
+        def do_element(element, level):
             elements = {
                 "composite": create_composite,
                 "translate": create_composite,
@@ -93,9 +116,9 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
             if element.tag not in elements:
                 raise IOError(f"Tag {element.tag} is not recognised. Should be one of '{list(elements.keys())}'")
 
-            return elements[element.tag](element)
+            return elements[element.tag](element, level)
 
-        return [do_element(child) for child in root if want_element(child)]
+        return [do_element(child, 0) for child in root if want_element(child)]
 
     return create
 

@@ -24,6 +24,11 @@ def test_debug_metadata():
     assert do_args("--debug-metadata").debug_metadata is True
 
 
+def test_profiler():
+    assert do_args().profiler is False
+    assert do_args("--profiler").profiler is True
+
+
 def test_overlay_size():
     assert do_args("--overlay-size", "320x256").overlay_size == "320x256"
 

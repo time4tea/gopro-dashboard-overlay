@@ -4,8 +4,9 @@ import time
 
 class PoorTimer:
 
-    def __init__(self, name):
+    def __init__(self, name, indent=0):
         self.name = name
+        self.indent = indent
         self.total = 0
         self.count = 0
 
@@ -17,14 +18,15 @@ class PoorTimer:
         return r
 
     @contextlib.contextmanager
-    def timing(self):
+    def timing(self, doprint=True):
         t = time.time_ns()
         try:
             yield
         finally:
             self.total += (time.time_ns() - t)
             self.count += 1
-            print(self)
+            if doprint:
+                print(self)
 
     @property
     def seconds(self):
@@ -45,5 +47,5 @@ class PoorTimer:
         return 1 / a
 
     def __str__(self):
-        return f"Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, " \
+        return f"{ ' ' * 4 * self.indent }Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, " \
                f"Avg: {self.avg:.5f}, Rate: {self.rate:,.2f})"
