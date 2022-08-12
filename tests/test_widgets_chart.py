@@ -8,6 +8,7 @@ from gopro_overlay import fake
 from gopro_overlay.framemeta import View, Window
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
+from gopro_overlay.widgets import Translate, Composite
 from gopro_overlay.widgets_chart import SimpleChart
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
@@ -41,13 +42,77 @@ def test_render_chart():
         ts,
         duration=timeunits(minutes=2),
         samples=256,
-        key=lambda e: e.alt.magnitude
+        key=lambda e: e.alt.magnitude,
     )
 
     view = window.view(ts.min)
 
     return time_rendering(name="Simple Chart with view", widgets=[
-        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
+        Translate(
+            at=Coordinate(0, 0),
+            widget=Composite(
+                Translate(
+                    at=Coordinate(0, 0),
+                    widget=SimpleChart(
+                        lambda: view,
+                        filled=True,
+                        font=font
+                    )
+                ),
+                Translate(
+                    at=Coordinate(0, 100),
+                    widget=SimpleChart(
+                        lambda: view,
+                        filled=False,
+                        font=font
+                    )
+                ),
+                Translate(
+                    at=Coordinate(0, 200),
+                    widget=SimpleChart(
+                        lambda: view,
+                        filled=True,
+                        font=font,
+                        fill=(0, 255, 0)
+                    )
+                )
+            )
+        ),
+        Translate(
+            at=Coordinate(350, 0),
+            widget=Composite(
+                Translate(
+                    at=Coordinate(0, 0),
+                    widget=SimpleChart(
+                        lambda: view,
+                        filled=True,
+                        font=font,
+                        line=(255, 255, 0)
+                    )
+                ),
+                Translate(
+                    at=Coordinate(0, 100),
+                    widget=SimpleChart(
+                        lambda: view,
+                        filled=True,
+                        font=font,
+                        bg=(0, 0, 0),
+                        alpha=100,
+                    )
+                ),
+                Translate(
+                    at=Coordinate(0, 200),
+                    widget=SimpleChart(
+                        lambda: view,
+                        filled=True,
+                        font=font,
+                        height=100,
+                        fill=(0, 255, 0),
+                        text=(0, 255, 255)
+                    )
+                )
+            )
+        ),
     ])
 
 
@@ -63,7 +128,10 @@ def test_render_chart_with_no_data():
     view = window.view(ts.min)
 
     return time_rendering(name="Simple Chart with no valid data", widgets=[
-        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
+        Translate(
+            at=Coordinate(50, 50),
+            widget=SimpleChart(lambda: view, filled=True, font=font)
+        )
     ])
 
 
@@ -84,5 +152,8 @@ def test_render_moving_chart():
         return window.view(next(stepper))
 
     return time_rendering(name="Moving Chart", repeat=50, widgets=[
-        SimpleChart(Coordinate(50, 50), get_view, filled=True, font=font)
+        Translate(
+            at=Coordinate(50, 50),
+            widget=SimpleChart(get_view, filled=True, font=font)
+        )
     ])

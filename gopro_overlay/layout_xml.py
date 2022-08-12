@@ -46,7 +46,9 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
     def want_element(element):
         name = name_of(element)
         if name is not None:
-            return include(name)
+            b = include(name)
+            print(f"Layout -> Include component '{name}' = {b}")
+            return b
         return True
 
     def decorate(name, level, widget):
@@ -363,15 +365,17 @@ def create_chart(element, entry, timeseries, font, **kwargs):
     window = Window(
         timeseries,
         duration=timeunits(seconds=iattrib(element, "seconds", d=5 * 60)),
-        samples=256,
+        samples=iattrib(element, "samples", d=256),
         key=value
     )
 
-    return SimpleChart(
+    return Translate(
         at=at(element),
-        value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
-        font=font(iattrib(element, "size_title", d=16)),
-        filled=True
+        widget=SimpleChart(
+            value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
+            font=font(iattrib(element, "size_title", d=16)),
+            filled=battrib(element, "filled", d=True),
+        )
     )
 
 

@@ -5,8 +5,18 @@ from gopro_overlay.widgets_map import draw_marker
 
 class SimpleChart:
 
-    def __init__(self, at, value, font=None, filled=False):
-        self.at = at
+    def __init__(
+            self,
+            value,
+            font=None,
+            filled=False,
+            height=64,
+            bg=(0, 0, 0, 170),
+            fill=(91, 113, 146),
+            line=(255, 255, 255),
+            text=(255, 255, 255),
+            alpha=int(255 * 0.7)
+    ):
         self.value = value
         self.filled = filled
         if font:
@@ -14,9 +24,12 @@ class SimpleChart:
         else:
             self.font = None
 
-        self.fill = (91, 113, 146)
-        self.line = (255, 255, 255)
-        self.text = (255, 255, 255)
+        self.height = height
+        self.fill = fill
+        self.bg = bg
+        self.line = line
+        self.text = text
+        self.alpha = alpha
 
         self.view = None
         self.image = None
@@ -29,8 +42,8 @@ class SimpleChart:
         else:
             self.view = view
             data = view.data
-            size = (len(data), 64)
-            self.image = Image.new("RGBA", size, (0, 0, 0, 0))
+            size = (len(data), self.height)
+            self.image = Image.new("RGBA", size, self.bg)
             draw = ImageDraw.Draw(self.image)
 
             max_val = max(filter(None.__ne__, data), default=0)
@@ -69,6 +82,6 @@ class SimpleChart:
             if marker_val:
                 draw_marker(draw, (size[0] / 2, y_pos(marker_val)), 4, fill=(255, 0, 0))
 
-            self.image.putalpha(int(255 * 0.7))
+            self.image.putalpha(self.alpha)
 
-        i.alpha_composite(self.image, self.at.tuple())
+        i.alpha_composite(self.image, (0, 0))
