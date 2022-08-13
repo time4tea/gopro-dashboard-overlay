@@ -31,10 +31,11 @@ setup(
     author_email="james+gopro@time4tea.net",
     license="MIT",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
         "Environment :: Console",
         "Topic :: Multimedia :: Graphics",
         "Topic :: Multimedia :: Video",
