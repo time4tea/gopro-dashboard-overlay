@@ -6,6 +6,7 @@
 Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
 - Overlaying exciting graphics
+- Support multiple resolutions, most GoPro models, normal, timelapse & timewarp modes
 - Convert GoPro movie metadata to GPX or CSV files
 - Cut sections from GoPro movies (including metadata)
 - Join multiple GoPro files together (including metadata)
