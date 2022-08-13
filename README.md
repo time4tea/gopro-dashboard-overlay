@@ -2,6 +2,7 @@
 
 ![GitHub Discussions](https://img.shields.io/github/discussions/time4tea/gopro-dashboard-overlay?style=for-the-badge)
 ![PyPI](https://img.shields.io/pypi/v/gopro-overlay?style=for-the-badge)
+![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2Ftime4tea%2Fgopro-dashboard-overlay)
 
 Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
