@@ -21,12 +21,10 @@ The component used to be called 'gradient_chart', and type `gradient_chart` will
 a future version.
 
 
-
 ```xml
 <component type="gradient_chart" name="chart" />
 ```
 <kbd>![07-chart-1.png](07-chart-1.png)</kbd>
-
 
 
 ## Positioning
@@ -85,4 +83,35 @@ Use any standard metric, with any standard unit. See [04-metrics](../04-metrics)
 
 ## Colours / Sizing
 
-These attributes are not currently configurable.
+Set the height using `height`
+
+
+```xml
+<component type="chart" height="100" />
+```
+<kbd>![07-chart-8.png](07-chart-8.png)</kbd>
+
+
+Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g,b,a".
+
+
+```xml
+<component type="chart" bg="255,255,0" fill="0,255,255" line="255,0,255" text="0,0,255" />
+```
+<kbd>![07-chart-9.png](07-chart-9.png)</kbd>
+
+
+Set alpha/transparency using `alpha`, between 0 and 255.
+
+
+```xml
+<component type="chart" alpha="20" />
+```
+<kbd>![07-chart-10.png](07-chart-10.png)</kbd>
+
+
+```xml
+<component type="chart" alpha="200" />
+```
+<kbd>![07-chart-11.png](07-chart-11.png)</kbd>
+

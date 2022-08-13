@@ -10,9 +10,7 @@ The default metric is `alt`, with a default window of `5` minutes (2.5 mins arou
 The component used to be called 'gradient_chart', and type `gradient_chart` will still work, but is now deprecated and may be removed in 
 a future version.
 
-
 {{ <component type="gradient_chart" name="chart" /> }}
-
 
 ## Positioning
 
@@ -40,4 +38,15 @@ Use any standard metric, with any standard unit. See [04-metrics](../04-metrics)
 
 ## Colours / Sizing
 
-These attributes are not currently configurable.
+Set the height using `height`
+
+{{ <component type="chart" height="100" /> }}
+
+Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g,b,a".
+
+{{ <component type="chart" bg="255,255,0" fill="0,255,255" line="255,0,255" text="0,0,255" /> }}
+
+Set alpha/transparency using `alpha`, between 0 and 255.
+
+{{ <component type="chart" alpha="20" /> }}
+{{ <component type="chart" alpha="200" /> }}
