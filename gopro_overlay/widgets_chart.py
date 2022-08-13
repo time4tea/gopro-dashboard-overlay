@@ -74,9 +74,9 @@ class SimpleChart:
 
             if self.font:
                 draw.text((10, 4), f"{max_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
-                          stroke_fill=(0, 0, 0))
-                draw.text((10, 40), f"{min_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
-                          stroke_fill=(0, 0, 0))
+                          stroke_fill=(0, 0, 0), align="lt")
+                draw.text((10, self.height - 20), f"{min_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
+                          stroke_fill=(0, 0, 0), align="ls")
 
             marker_val = data[int(size[0] / 2)]
             if marker_val:

@@ -5,6 +5,7 @@ from datetime import timedelta
 from PIL import ImageFont
 
 from gopro_overlay import fake
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import View, Window
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
@@ -31,7 +32,10 @@ def test_render_simple_chart():
         itertools.repeat(1, 128)
     )), version=1)
     return time_rendering("Simple Chart", [
-        SimpleChart(Coordinate(50, 50), lambda: view, filled=True, font=font)
+        Translate(
+            at=Coordinate(50, 50),
+            widget=SimpleChart(value=lambda: view, filled=True, font=font)
+        )
     ])
 
 
@@ -47,73 +51,76 @@ def test_render_chart():
 
     view = window.view(ts.min)
 
-    return time_rendering(name="Simple Chart with view", widgets=[
-        Translate(
-            at=Coordinate(0, 0),
-            widget=Composite(
-                Translate(
-                    at=Coordinate(0, 0),
-                    widget=SimpleChart(
-                        lambda: view,
-                        filled=True,
-                        font=font
-                    )
-                ),
-                Translate(
-                    at=Coordinate(0, 100),
-                    widget=SimpleChart(
-                        lambda: view,
-                        filled=False,
-                        font=font
-                    )
-                ),
-                Translate(
-                    at=Coordinate(0, 200),
-                    widget=SimpleChart(
-                        lambda: view,
-                        filled=True,
-                        font=font,
-                        fill=(0, 255, 0)
-                    )
-                )
-            )
-        ),
-        Translate(
-            at=Coordinate(350, 0),
-            widget=Composite(
-                Translate(
-                    at=Coordinate(0, 0),
-                    widget=SimpleChart(
-                        lambda: view,
-                        filled=True,
-                        font=font,
-                        line=(255, 255, 0)
-                    )
-                ),
-                Translate(
-                    at=Coordinate(0, 100),
-                    widget=SimpleChart(
-                        lambda: view,
-                        filled=True,
-                        font=font,
-                        bg=(0, 0, 0),
-                        alpha=100,
-                    )
-                ),
-                Translate(
-                    at=Coordinate(0, 200),
-                    widget=SimpleChart(
-                        lambda: view,
-                        filled=True,
-                        font=font,
-                        height=100,
-                        fill=(0, 255, 0),
-                        text=(0, 255, 255)
+    return time_rendering(
+        name="Simple Chart with view",
+        dimensions=Dimension(x=800, y=400),
+        widgets=[
+            Translate(
+                at=Coordinate(0, 0),
+                widget=Composite(
+                    Translate(
+                        at=Coordinate(0, 0),
+                        widget=SimpleChart(
+                            lambda: view,
+                            filled=True,
+                            font=font
+                        )
+                    ),
+                    Translate(
+                        at=Coordinate(0, 100),
+                        widget=SimpleChart(
+                            lambda: view,
+                            filled=False,
+                            font=font
+                        )
+                    ),
+                    Translate(
+                        at=Coordinate(0, 200),
+                        widget=SimpleChart(
+                            lambda: view,
+                            filled=True,
+                            font=font,
+                            fill=(0, 255, 0)
+                        )
                     )
                 )
-            )
-        ),
-    ])
+            ),
+            Translate(
+                at=Coordinate(350, 0),
+                widget=Composite(
+                    Translate(
+                        at=Coordinate(0, 0),
+                        widget=SimpleChart(
+                            lambda: view,
+                            filled=True,
+                            font=font,
+                            line=(255, 255, 0)
+                        )
+                    ),
+                    Translate(
+                        at=Coordinate(0, 100),
+                        widget=SimpleChart(
+                            lambda: view,
+                            filled=True,
+                            font=font,
+                            bg=(0, 0, 0),
+                            alpha=100,
+                        )
+                    ),
+                    Translate(
+                        at=Coordinate(0, 200),
+                        widget=SimpleChart(
+                            lambda: view,
+                            filled=True,
+                            font=font,
+                            height=100,
+                            fill=(0, 255, 0),
+                            text=(0, 255, 255)
+                        )
+                    )
+                )
+            ),
+        ])
 
 
 @approve_image

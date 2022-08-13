@@ -375,6 +375,12 @@ def create_chart(element, entry, timeseries, font, **kwargs):
             value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
             font=font(iattrib(element, "size_title", d=16)),
             filled=battrib(element, "filled", d=True),
+            height=iattrib(element, "height", d=64),
+            bg=rgbattr(element, "bg", d=(0, 0, 0, 170)),
+            fill=rgbattr(element, "fill", d=(91, 113, 146)),
+            line=rgbattr(element, "line", d=(255, 255, 255)),
+            text=rgbattr(element, "text", d=(255, 255, 255)),
+            alpha=iattrib(element, "alpha", d=179, r=range(0, 256)),
         )
     )
 
