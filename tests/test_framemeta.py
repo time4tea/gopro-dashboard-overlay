@@ -68,6 +68,8 @@ def test_iterates_in_frame_time_order_not_insertion_order():
     assert next(iterator).point.lat == 2.0
     assert next(iterator).point.lat == 3.0
 
+    assert fm.duration() == timeunits(seconds=2)
+
 
 def test_getting_point_before_start_returns_first_item():
     '''sometimes the first metadata item comes after the first frame, so bodge it'''
@@ -83,6 +85,7 @@ def test_getting_point_after_end_returns_last_item():
     fm.add(timeunits(seconds=0), Entry(datetime_of(0), lat=0.0))
     fm.add(timeunits(seconds=1), Entry(datetime_of(0), lat=1.0))
     assert fm.get(timeunits(seconds=2)).lat == 1.0
+    assert fm.duration() == timeunits(seconds=1)
 
 
 def test_interpolating_entries_with_same_date_returns_other():

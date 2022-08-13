@@ -194,8 +194,10 @@ if __name__ == "__main__":
             byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
-            # Draw an overlay frame every 0.1 seconds
-            stepper = gopro_frame_meta.stepper(timeunits(seconds=0.1))
+            # Draw an overlay frame every 0.1 seconds of video
+            timelapse_correction = gopro_frame_meta.duration() / stream_info.video.duration
+            print(f"Timelapse Factor = {timelapse_correction:.3f}")
+            stepper = gopro_frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
             progress = progressbar.ProgressBar(
                 widgets=[
                     'Render: ',

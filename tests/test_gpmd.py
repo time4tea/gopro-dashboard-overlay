@@ -283,7 +283,7 @@ def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[StreamInfo, GoproMe
 def test_loading_time_lapse_file():
     streams, _ = load_mp4_meta("time-lapse.mp4", missing_ok=True)
     assert streams.audio is None
-    assert streams.video == 0
+    assert streams.video.stream == 0
     assert streams.meta.stream == 2
     assert streams.meta.frame_count == 63
     assert streams.meta.frame_duration == 500
