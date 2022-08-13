@@ -157,6 +157,7 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.58.0 Chart component now has configurable colours and size - see [docs/xml/examples/07-chart](docs/xml/examples/07-chart)
 - 0.57.0 Experimental support for non-real-time (timelapse/timewarp) videos
   - Thanks to [@ptanov](https://github.com/ptanov)
 - 0.56.0 Remove possible divide by zero error - only likely in timewarp/timelapse videos - I think
