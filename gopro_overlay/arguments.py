@@ -15,6 +15,8 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
 
     parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
+    parser.add_argument("--video-time-start", choices=["mtime", "atime", "ctime"], help="Do not use GoPro metadata, but use file date (either modification, access or creation/metadata change time) for matching the start of the video and synchronize it with provided gpx file. Useful when video is not recorded with GoPro. Use either --video-time-start or --video-time-end")
+    parser.add_argument("--video-time-end", choices=["mtime", "atime", "ctime"], help="Do not use GoPro metadata, but use file date (either modification, access or creation/metadata change time) for matching the end of the video and synchronize it with provided gpx file. Useful when video is not recorded with GoPro. Use either --video-time-start or --video-time-end")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
     parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")

@@ -124,7 +124,7 @@ def find_frame_duration(filepath, data_stream_number, invoke=invoke):
     return duration
 
 
-def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duration) -> StreamInfo:
+def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duration, skip_meta=False) -> StreamInfo:
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
     ffprobe_json = json.loads(ffprobe_output)
@@ -159,6 +159,9 @@ def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duratio
     audio_meta = None
     if audio:
         audio_meta = AudioMeta(stream=int(audio["index"]))
+
+    if skip_meta:
+        return StreamInfo(audio=audio_meta, video=video_meta, meta=None)
 
     meta = first_and_only("metadata stream", streams, data_selector)
 
@@ -238,14 +241,15 @@ class FFMPEGNull:
 
 class FFMPEGGenerate:
 
-    def __init__(self, output, overlay_size: Dimension, execution=None):
+    def __init__(self, output, overlay_size: Dimension, options: FFMPEGOptions = None, execution=None):
         self.output = output
         self.overlay_size = overlay_size
         self.execution = execution if execution else InProcessExecution()
+        self.options = options if options else FFMPEGOptions()
 
     @contextlib.contextmanager
     def generate(self):
-        cmd = [
+        cmd = flatten([
             "ffmpeg",
             "-hide_banner",
             "-y",
@@ -256,10 +260,9 @@ class FFMPEGGenerate:
             "-pix_fmt", "rgba",
             "-i", "-",
             "-r", "30",
-            "-vcodec", "libx264",
-            "-preset", "veryfast",
+            self.options.output,
             self.output
-        ]
+        ])
 
         yield from self.execution.execute(cmd)
 

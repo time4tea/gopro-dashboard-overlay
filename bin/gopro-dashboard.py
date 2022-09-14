@@ -7,6 +7,7 @@ from pathlib import Path
 import progressbar
 
 from gopro_overlay import timeseries_process, progress_frames
+from gopro_overlay.any_camera_support import emulate_frame_meta, emulate_streams, video_from_gopro_camera
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
@@ -65,7 +66,6 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
 
-
 if __name__ == "__main__":
 
     args = gopro_dashboard_arguments()
@@ -82,14 +82,14 @@ if __name__ == "__main__":
 
     input_file = args.input
 
-    if not os.path.exists(input_file):
+    if not os.path.exists(input_file) and video_from_gopro_camera(args):
         print(f"{input_file}: not found")
         exit(1)
 
     version = metadata.version("gopro_overlay")
     print(f"Starting gopro-dashboard version {version}")
 
-    stream_info = find_streams(input_file)
+    stream_info = find_streams(input_file) if video_from_gopro_camera(args) else emulate_streams(args, units)
     dimensions = stream_info.video.dimension
     print(f"Input file has size {dimensions}")
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                 input_file,
                 metameta=stream_info.meta,
                 units=units
-            )
+            ) if video_from_gopro_camera(args) else emulate_frame_meta(args, stream_info, units)
 
         if len(gopro_frame_meta) < 1:
             raise IOError(
@@ -159,11 +159,17 @@ if __name__ == "__main__":
                     renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone, profiler=profiler)
             )
 
+            if args.profile:
+                ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
+            else:
+                ffmpeg_options = None
+
             if args.generate == "none":
                 ffmpeg = FFMPEGNull()
-            elif args.output == "overlay":
+            elif args.generate == "overlay":
                 ffmpeg = FFMPEGGenerate(
                     output=args.output,
+                    options=ffmpeg_options,
                     overlay_size=dimensions
                 )
             else:
@@ -175,11 +181,6 @@ if __name__ == "__main__":
                     execution = InProcessExecution(redirect=redirect)
 
                 print(f"FFMPEG Output is in {redirect}")
-
-                if args.profile:
-                    ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
-                else:
-                    ffmpeg_options = None
 
                 ffmpeg = FFMPEGOverlay(
                     input=input_file,

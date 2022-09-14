@@ -53,7 +53,66 @@ You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
 ```shell
 venv/bin/gopro-dashboard.py --profile nvgpu ~/layouts/my-layout.xml ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
- 
+
+*Create a movie with alpha channel, using only GPX file, without video from GoPro*
+
+You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
+
+```json
+{
+  "overlay": {
+    "input": [],
+    "output": ["-vcodec", "png"]
+  }
+}
+```
+
+then execute (NOTE: extension is `mov`)
+
+```shell
+venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --generate overlay --overlay-size 1920x1080 - GH020073-dashboard.mov
+```
+if you use `-vcodec rawvideo` file will be really huge
+
+or you can use slower codecs (but smaller file size) `vp9` or`vp8` (even slower) or `hevc_videotoolbox` (available on Mac only):
+
+```json
+{
+  "overlay": {
+    "input": [],
+    "output": ["-vcodec", "vp9", "-pix_fmt", "yuva420p"]
+  },
+  "sloweroverlay": {
+    "input": [],
+    "output": ["-vcodec", "vp8", "-pix_fmt", "yuva420p", "-auto-alt-ref", "0"]
+  }
+}
+```
+
+then execute (NOTE: extension is `webm`)
+
+```shell
+venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --generate overlay --overlay-size 1920x1080 - GH020073-dashboard.webm
+```
+
+*Create a movie from GPX and video not created with GoPro*
+
+Make sure that the time of the file is correct and when aligned to the timezone of your computer matches the data in GPX file (this might not be the case if video is recorded abroad). If it is not correct you can fix it using `touch -d '2022-08-29T11:17:44Z' file.mp4`. To get the correct time you can try with different dates available from `exiftool file.mp4` or `exiftool thumbnail_image_of_the_video.thm` (if thumbnail image exist), from SRT/flight log viewer/CSV from Airdata, etc. But first make sure that you have set the correct date and time of the camera BEFORE recording the video.
+
+```shell
+venv/bin/gopro-dashboard.py --video-time-start atime --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+```
+
+depending on the camera maker and model `atime`, `ctime`, `mtime` should be used for `--video-time-start` or `--video-time-end`, e.g.
+
+```shell
+venv/bin/gopro-dashboard.py --video-time-end ctime --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+```
+
+```shell
+venv/bin/gopro-dashboard.py --video-time-end mtime --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+```
+
 ## Omitting Widgets
 
 If the layout you are using has a widget you don't want, you can use `--include <name> <name>.. ` or `--exclude <name> <name>...`
@@ -129,13 +188,13 @@ I don't know the formula for calculating the correct number of threads... this w
 ### Usage
 
 ```
-usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--privacy PRIVACY]
+usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--video-time-start {mtime,atime,ctime}] [--video-time-end {mtime,atime,ctime}] [--privacy PRIVACY]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas,geo-osm-carto,geo-osm-bright,geo-osm-bright-grey,geo-osm-bright-smooth,geo-klokantech-basic,geo-osm-liberty,geo-maptiler-3d,geo-toner,geo-toner-grey,geo-positron,geo-positron-blue,geo-positron-red,geo-dark-matter,geo-dark-matter-brown,geo-dark-matter-dark-grey,geo-dark-matter-dark-purple,geo-dark-matter-purple-roads,geo-dark-matter-yellow-roads}]
                           [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}]
                           [--layout-xml LAYOUT_XML] [--exclude EXCLUDE [EXCLUDE ...]]
                           [--include INCLUDE [INCLUDE ...]] [--generate {default,overlay,none}]
                           [--show-ffmpeg] [--debug-metadata] [--overlay-size OVERLAY_SIZE]
-                          [--output-size OUTPUT_SIZE] [--profile PROFILE] [--thread]
+                          [--output-size OUTPUT_SIZE] [--profile PROFILE] [--profiler] [--thread]
                           input output
 
 Overlay gadgets on to GoPro MP4
@@ -148,6 +207,12 @@ optional arguments:
   -h, --help            show this help message and exit
   --font FONT           Selects a font (default: Roboto-Medium.ttf)
   --gpx GPX             Use GPX file for location / alt / hr / cadence / temp (default: None)
+  --video-time-start {mtime,atime,ctime}
+                        Do not use GoPro metadata, but use file date (either modification, access or creation/metadata change time) for matching the start of the video and synchronize it with provided
+                        gpx file. Useful when video is not recorded with GoPro. Use either --video-time-start or --video-time-end (default: None)
+  --video-time-end {mtime,atime,ctime}
+                        Do not use GoPro metadata, but use file date (either modification, access or creation/metadata change time) for matching the end of the video and synchronize it with provided gpx
+                        file. Useful when video is not recorded with GoPro. Use either --video-time-start or --video-time-end (default: None)
   --privacy PRIVACY     Set privacy zone (lat,lon,km) (default: None)
   --map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas,geo-osm-carto,geo-osm-bright,geo-osm-bright-grey,geo-osm-bright-smooth,geo-klokantech-basic,geo-osm-liberty,geo-maptiler-3d,geo-toner,geo-toner-grey,geo-positron,geo-positron-blue,geo-positron-red,geo-dark-matter,geo-dark-matter-brown,geo-dark-matter-dark-grey,geo-dark-matter-dark-purple,geo-dark-matter-purple-roads,geo-dark-matter-yellow-roads}
                         Style of map to render (default: osm)
@@ -171,8 +236,8 @@ optional arguments:
                         bundled overlay sizes (1920x1080, 3840x2160) (default: None)
   --output-size OUTPUT_SIZE
                         Vertical size of output movie (default: 1080)
-  --profile PROFILE     (EXPERIMENTAL) Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-
-                        profiles.json (default: None)
+  --profile PROFILE     Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json (default: None)
+  --profiler            Do some basic profiling of the widgets to find ones that may be slow (default: False)
   --thread              (VERY EXPERIMENTAL MAY CRASH) Use an intermediate buffer before ffmpeg as possible
                         performance enhancement (default: False)
 ```
