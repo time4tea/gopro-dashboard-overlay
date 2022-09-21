@@ -6,7 +6,7 @@ import gpxpy
 
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg import MetaMeta
-from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro
+from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Entry
@@ -121,6 +121,7 @@ def test_bugfix_converting_gpx_to_journey():
     assert journey.bounding_box == (Point(lat=51.184804, lon=-2.804645), Point(lat=51.342323, lon=-2.571981))
     assert len(journey.locations) == 8597
 
+
 def test_merge_gpx_with_gopro():
     # the two files should be of the same trip
     gpx_timeseries = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
@@ -133,3 +134,13 @@ def test_merge_gpx_with_gopro():
     assert gpx_timeseries.max > gopro_framemeta.get(gopro_framemeta.max).dt
 
     merge_gpx_with_gopro(gpx_timeseries, gopro_framemeta)
+
+
+def test_converting_gpx_to_timeseries_to_framemeta():
+    gpx_timeseries = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
+
+    gpx_framemeta = timeseries_to_framemeta(gpx_timeseries, units)
+
+    assert len(gpx_framemeta) == len(gpx_timeseries)
+
+    print(gpx_framemeta)

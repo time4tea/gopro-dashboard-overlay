@@ -68,14 +68,14 @@ def calculate_odo():
 
 
 def calculate_gradient():
-    # have to move a bit (0.10m) to calculate decent gradient
+    # have to move a bit to calculate decent gradient
     # this is called for frames ~2 sec apart.
     def accept(a, b, c):
         if a.alt and b.alt:
             gain = b.alt - a.alt
             if a.odo and b.odo:
                 dist = b.odo - a.odo
-                if dist and dist.magnitude > 0.10:
+                if dist and dist.magnitude > 1.0:
                     return {"grad": (gain / dist) * 100.0}
 
     return accept

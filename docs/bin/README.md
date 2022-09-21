@@ -70,7 +70,7 @@ You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
 then execute (NOTE: extension is `mov`)
 
 ```shell
-venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --generate overlay --overlay-size 1920x1080 - GH020073-dashboard.mov
+venv/bin/gopro-dashboard.py --gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.mov
 ```
 if you use `-vcodec rawvideo` file will be really huge
 
@@ -92,25 +92,30 @@ or you can use slower codecs (but smaller file size) `vp9` or`vp8` (even slower)
 then execute (NOTE: extension is `webm`)
 
 ```shell
-venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --generate overlay --overlay-size 1920x1080 - GH020073-dashboard.webm
+venv/bin/gopro-dashboard.py --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.webm
 ```
 
 *Create a movie from GPX and video not created with GoPro*
 
-Make sure that the time of the file is correct and when aligned to the timezone of your computer matches the data in GPX file (this might not be the case if video is recorded abroad). If it is not correct you can fix it using `touch -d '2022-08-29T11:17:44Z' file.mp4`. To get the correct time you can try with different dates available from `exiftool file.mp4` or `exiftool thumbnail_image_of_the_video.thm` (if thumbnail image exist), from SRT/flight log viewer/CSV from Airdata, etc. But first make sure that you have set the correct date and time of the camera BEFORE recording the video.
+Make sure that the time of the file is correct and when aligned to the timezone of your computer matches the data in GPX file 
+(this might not be the case if video is recorded abroad). 
+If it is not correct you can fix it using `touch -d '2022-08-29T11:17:44Z' file.mp4`. 
+To get the correct time you can try with different dates available from `exiftool file.mp4` or `exiftool thumbnail_image_of_the_video.thm` 
+(if thumbnail image exist), from SRT/flight log viewer/CSV from Airdata, etc. 
+But first make sure that you have set the correct date and time of the camera BEFORE recording the video.
 
 ```shell
-venv/bin/gopro-dashboard.py --video-time-start atime --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+venv/bin/gopro-dashboard.py --video-time-start atime --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
 
-depending on the camera maker and model `atime`, `ctime`, `mtime` should be used for `--video-time-start` or `--video-time-end`, e.g.
+Depending on the camera maker and model `file-accessed`, `file-created`, `file-modified` should be used for `--video-time-start` or `--video-time-end`, e.g.
 
 ```shell
-venv/bin/gopro-dashboard.py --video-time-end ctime --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+venv/bin/gopro-dashboard.py --video-time-end file-created --use-gpx-only  --gpx ~/Downloads/Morning_Ride.gpx ~/recording/flight.MP4 GH020073-dashboard.MP4
 ```
 
 ```shell
-venv/bin/gopro-dashboard.py --video-time-end mtime --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+venv/bin/gopro-dashboard.py --video-time-end file-modified --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx ~/recording/sail.MP4 GH020073-dashboard.MP4
 ```
 
 ## Omitting Widgets

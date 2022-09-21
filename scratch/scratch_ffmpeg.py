@@ -3,7 +3,7 @@ import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate
+from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay
 
 if __name__ == "__main__":
 
@@ -11,9 +11,9 @@ if __name__ == "__main__":
 
     dimension = Dimension(1920, 1080)
     if overlay:
-        generator = FFMPEGOverlay(input="/data/richja/gopro/GH010064.MP4", output="output.mp4", overlay_size=dimension)
+        generator = FFMPEGOverlayVideo(input="/data/richja/gopro/GH010064.MP4", output="output.mp4", overlay_size=dimension)
     else:
-        generator = FFMPEGGenerate(output="output.mp4", overlay_size=dimension)
+        generator = FFMPEGOverlay(output="output.mp4", overlay_size=dimension)
 
     with generator.generate() as writer:
 

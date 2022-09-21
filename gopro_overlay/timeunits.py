@@ -57,6 +57,10 @@ class Timeunit:
     def timedelta(self):
         return datetime.timedelta(microseconds=self.us)
 
+    @staticmethod
+    def from_timedelta(td):
+        return timeunits(seconds=td.total_seconds())
+
 
 multipliers = {
     "micros": 1,

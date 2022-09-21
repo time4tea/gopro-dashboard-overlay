@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import contextlib
+import datetime
 import itertools
 import json
+import os
 import subprocess
 from array import array
 from dataclasses import dataclass
@@ -28,6 +30,14 @@ def invoke(cmd, **kwargs):
 
 
 @dataclass(frozen=True)
+class FileMeta:
+    length: int
+    mtime: datetime.datetime
+    ctime: datetime.datetime
+    atime: datetime.datetime
+
+
+@dataclass(frozen=True)
 class MetaMeta:
     stream: int
     frame_count: int
@@ -49,9 +59,10 @@ class AudioMeta:
 
 @dataclass(frozen=True)
 class StreamInfo:
+    file: FileMeta
     audio: Optional[AudioMeta]
     video: VideoMeta
-    meta: MetaMeta
+    meta: Optional[MetaMeta]
 
 
 def cut_file(input, output, start, duration):
@@ -124,7 +135,7 @@ def find_frame_duration(filepath, data_stream_number, invoke=invoke):
     return duration
 
 
-def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duration, skip_meta=False) -> StreamInfo:
+def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duration, stat=os.stat) -> StreamInfo:
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
     ffprobe_json = json.loads(ffprobe_output)
@@ -160,21 +171,37 @@ def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duratio
     if audio:
         audio_meta = AudioMeta(stream=int(audio["index"]))
 
-    if skip_meta:
-        return StreamInfo(audio=audio_meta, video=video_meta, meta=None)
+    meta = only_if_present("metadata stream", streams, data_selector)
 
-    meta = first_and_only("metadata stream", streams, data_selector)
+    if meta:
+        data_stream_number = int(meta["index"])
 
-    data_stream_number = int(meta["index"])
+        meta_meta = MetaMeta(
+            stream=data_stream_number,
+            frame_count=int(meta["nb_frames"]),
+            timebase=int(meta["time_base"].split("/")[1]),
+            frame_duration=find_frame_duration(filepath, data_stream_number, invoke)
+        )
+    else:
+        meta_meta = None
 
-    meta_meta = MetaMeta(
-        stream=data_stream_number,
-        frame_count=int(meta["nb_frames"]),
-        timebase=int(meta["time_base"].split("/")[1]),
-        frame_duration=find_frame_duration(filepath, data_stream_number, invoke)
+    return StreamInfo(
+        file=file_meta(filepath, stat=stat),
+        audio=audio_meta,
+        video=video_meta,
+        meta=meta_meta
     )
 
-    return StreamInfo(audio=audio_meta, video=video_meta, meta=meta_meta)
+
+def file_meta(filepath: str, stat=os.stat) -> FileMeta:
+    sr = stat(filepath)
+
+    return FileMeta(
+        length=sr.st_size,
+        ctime=datetime.datetime.fromtimestamp(sr.st_ctime, tz=datetime.timezone.utc),
+        atime=datetime.datetime.fromtimestamp(sr.st_atime, tz=datetime.timezone.utc),
+        mtime=datetime.datetime.fromtimestamp(sr.st_mtime, tz=datetime.timezone.utc)
+    )
 
 
 def load_gpmd_from(filepath):
@@ -239,7 +266,7 @@ class FFMPEGNull:
         yield DiscardingBytesIO()
 
 
-class FFMPEGGenerate:
+class FFMPEGOverlay:
 
     def __init__(self, output, overlay_size: Dimension, options: FFMPEGOptions = None, execution=None):
         self.output = output
@@ -253,7 +280,7 @@ class FFMPEGGenerate:
             "ffmpeg",
             "-hide_banner",
             "-y",
-            "-loglevel", "info",
+            self.options.general,
             "-f", "rawvideo",
             "-framerate", "10.0",
             "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
@@ -281,10 +308,9 @@ class FFMPEGOptions:
         self.output = options
 
 
-class FFMPEGOverlay:
+class FFMPEGOverlayVideo:
 
-    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080,
-                 execution=None):
+    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, execution=None):
         self.output = output
         self.input = input
         self.options = options if options else FFMPEGOptions()

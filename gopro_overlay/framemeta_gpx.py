@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import dataclass
 from datetime import timedelta
 
 import gpxpy
@@ -6,6 +7,7 @@ import gpxpy
 from gopro_overlay.entry import Entry
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.timeseries import Timeseries
+from gopro_overlay.timeunits import Timeunit
 
 
 def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0)):
@@ -17,7 +19,7 @@ def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0)):
     gpx_segment = gpxpy.gpx.GPXTrackSegment()
     gpx_track.segments.append(gpx_segment)
 
-    last_dt = datetime.datetime(year=1900, month=1, day=1,tzinfo=datetime.timezone.utc)
+    last_dt = datetime.datetime(year=1900, month=1, day=1, tzinfo=datetime.timezone.utc)
 
     for entry in fm.items():
         entry_dt = entry.dt
@@ -57,3 +59,39 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta)
             pass
 
     gopro_framemeta.process(processor)
+
+
+def timeseries_to_framemeta(gpx_timeseries, units, start_date: datetime.datetime = None, duration: Timeunit = None) -> FrameMeta:
+    fake_frame_meta = FrameMeta()
+
+    if start_date is None:
+        start_date = gpx_timeseries.min
+
+    if duration is None:
+        end_date = datetime.datetime.max.astimezone(datetime.timezone.utc)
+    else:
+        end_date = start_date + duration.timedelta()
+
+    for index, entry in enumerate(gpx_timeseries.items()):
+        point_datetime = entry.dt
+
+        if point_datetime < start_date:
+            continue
+        if point_datetime > end_date:
+            break
+
+        offset = Timeunit.from_timedelta(point_datetime - start_date)
+
+        fake_frame_meta.add(
+            offset,
+            Entry(
+                dt=point_datetime,
+                timestamp=units.Quantity(offset.millis(), units.number),
+                dop=units.Quantity(10, units.number),
+                packet=units.Quantity(index, units.number),
+                packet_index=units.Quantity(0, units.number),
+                **entry.items
+            )
+        )
+
+    return fake_frame_meta

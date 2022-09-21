@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 
-import os
 from importlib import metadata
 from pathlib import Path
 
 import progressbar
 
-from gopro_overlay import timeseries_process, progress_frames
-from gopro_overlay.any_camera_support import emulate_frame_meta, emulate_streams, video_from_gopro_camera
+from gopro_overlay import timeseries_process, progress_frames, gpx
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution, ThreadingExecution
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGGenerate, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
+from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams, FFMPEGNull
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
-from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro
+from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.geo import CachingRenderer, CompositeKeyFinder, ArgsKeyFinder, EnvKeyFinder, ConfigKeyFinder
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Overlay, speed_awareness_layout
@@ -66,6 +64,7 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
 
+
 if __name__ == "__main__":
 
     args = gopro_dashboard_arguments()
@@ -80,46 +79,78 @@ if __name__ == "__main__":
 
     font = load_font(args.font)
 
-    input_file = args.input
-
-    if not os.path.exists(input_file) and video_from_gopro_camera(args):
-        print(f"{input_file}: not found")
-        exit(1)
+    # need in this scope for now
+    input_file = None
+    generate = args.generate
 
     version = metadata.version("gopro_overlay")
     print(f"Starting gopro-dashboard version {version}")
 
-    stream_info = find_streams(input_file) if video_from_gopro_camera(args) else emulate_streams(args, units)
-    dimensions = stream_info.video.dimension
-    print(f"Input file has size {dimensions}")
-
     with PoorTimer("program").timing():
 
         with PoorTimer("loading timeseries").timing():
-            gopro_frame_meta = framemeta_from(
-                input_file,
-                metameta=stream_info.meta,
-                units=units
-            ) if video_from_gopro_camera(args) else emulate_frame_meta(args, stream_info, units)
 
-        if len(gopro_frame_meta) < 1:
-            raise IOError(
-                f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
+            if args.use_gpx_only:
 
-        print(f"GoPro Timeseries has {len(gopro_frame_meta)} data points")
+                start_date = None
+                duration = None
 
-        if args.gpx:
-            gpx_timeseries = load_timeseries(args.gpx, units)
-            print(f"GPX Timeseries has {len(gpx_timeseries)} data points.. merging...")
-            merge_gpx_with_gopro(gpx_timeseries, gopro_frame_meta)
+                if args.input:
+                    input_file = args.input
+                    stream_info = find_streams(input_file)
+                    dimensions = stream_info.video.dimension
 
+                    duration = stream_info.video.duration
+
+                    fns = {
+                        "file-created": lambda f: f.ctime,
+                        "file-modified": lambda f: f.mtime,
+                        "file-accessed": lambda f: f.atime
+                    }
+
+                    if args.video_time_start:
+                        start_date = fns[args.video_time_start](stream_info.file)
+
+                    if args.video_time_end:
+                        start_date = fns[args.video_time_end](stream_info.file) - duration.timedelta()
+                else:
+                    generate = "overlay"
+
+                frame_meta = timeseries_to_framemeta(gpx.load_timeseries(args.gpx, units), units, start_date=start_date, duration=duration)
+                video_duration = frame_meta.duration()
+                packets_per_second = 1
+            else:
+                input_file = args.input
+                stream_info = find_streams(input_file)
+
+                if not stream_info.meta:
+                    raise IOError(f"Unable to locate metadata stream in '{input_file}' - is it a GoPro file")
+
+                dimensions = stream_info.video.dimension
+                video_duration = stream_info.video.duration
+                packets_per_second = 18
+                frame_meta = framemeta_from(input_file, metameta=stream_info.meta, units=units)
+
+                if args.gpx:
+                    gpx_timeseries = load_timeseries(args.gpx, units)
+                    print(f"GPX Timeseries has {len(gpx_timeseries)} data points.. merging...")
+                    merge_gpx_with_gopro(gpx_timeseries, frame_meta)
+
+            if args.overlay_size:
+                dimensions = dimension_from(args.overlay_size)
+
+        if len(frame_meta) < 1:
+            raise IOError(f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
+
+        print(f"Generating overlay at {dimensions}")
+        print(f"Timeseries has {len(frame_meta)} data points")
         print("Processing....")
+
         with PoorTimer("processing").timing():
-            gopro_frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
-            gopro_frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
-            gopro_frame_meta.process(timeseries_process.calculate_odo())
-            gopro_frame_meta.process_deltas(timeseries_process.calculate_gradient(),
-                                            skip=18 * 3)  # hack approx 18 frames/sec * 3 secs
+            frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
+            frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3)
+            frame_meta.process(timeseries_process.calculate_odo())
+            frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3)  # hack
 
         ourdir.mkdir(exist_ok=True)
 
@@ -141,64 +172,42 @@ if __name__ == "__main__":
 
         with CachingRenderer(style=args.map_style, api_key_finder=api_key_finder).open() as renderer:
 
-            if args.overlay_size:
-                dimensions = dimension_from(args.overlay_size)
-
-            profiler = None
-
             if args.profiler:
                 profiler = WidgetProfiler()
-
-            overlay = Overlay(
-                dimensions=dimensions,
-                framemeta=gopro_frame_meta,
-                create_widgets=create_desired_layout(
-                    layout=args.layout, layout_xml=args.layout_xml,
-                    dimensions=dimensions,
-                    include=args.include, exclude=args.exclude,
-                    renderer=renderer, timeseries=gopro_frame_meta, font=font, privacy_zone=privacy_zone, profiler=profiler)
-            )
+            else:
+                profiler = None
 
             if args.profile:
                 ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
             else:
                 ffmpeg_options = None
 
-            if args.generate == "none":
-                ffmpeg = FFMPEGNull()
-            elif args.generate == "overlay":
-                ffmpeg = FFMPEGGenerate(
-                    output=args.output,
-                    options=ffmpeg_options,
-                    overlay_size=dimensions
-                )
+            if args.show_ffmpeg:
+                redirect = None
             else:
-                redirect = None if args.show_ffmpeg else temp_file_name()
-
-                if args.thread:
-                    execution = ThreadingExecution(redirect=redirect)
-                else:
-                    execution = InProcessExecution(redirect=redirect)
-
+                redirect = temp_file_name()
                 print(f"FFMPEG Output is in {redirect}")
 
-                ffmpeg = FFMPEGOverlay(
-                    input=input_file,
-                    output=args.output,
-                    options=ffmpeg_options,
-                    vsize=args.output_size,
-                    overlay_size=dimensions,
-                    execution=execution
-                )
+            if args.thread:
+                execution = ThreadingExecution(redirect=redirect)
+            else:
+                execution = InProcessExecution(redirect=redirect)
+
+            if generate == "none":
+                ffmpeg = FFMPEGNull()
+            elif generate == "overlay":
+                ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
+            else:
+                ffmpeg = FFMPEGOverlayVideo(input=input_file, output=args.output, options=ffmpeg_options, vsize=args.output_size, overlay_size=dimensions, execution=execution)
 
             write_timer = PoorTimer("writing to ffmpeg")
             byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
             # Draw an overlay frame every 0.1 seconds of video
-            timelapse_correction = gopro_frame_meta.duration() / stream_info.video.duration
+            timelapse_correction = frame_meta.duration() / video_duration
             print(f"Timelapse Factor = {timelapse_correction:.3f}")
-            stepper = gopro_frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
+            stepper = frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
             progress = progressbar.ProgressBar(
                 widgets=[
                     'Render: ',
@@ -209,6 +218,16 @@ if __name__ == "__main__":
                 ],
                 poll_interval=2.0,
                 max_value=len(stepper)
+            )
+
+            overlay = Overlay(
+                dimensions=dimensions,
+                framemeta=frame_meta,
+                create_widgets=create_desired_layout(
+                    layout=args.layout, layout_xml=args.layout_xml,
+                    dimensions=dimensions,
+                    include=args.include, exclude=args.exclude,
+                    renderer=renderer, timeseries=frame_meta, font=font, privacy_zone=privacy_zone, profiler=profiler)
             )
 
             try:
@@ -232,4 +251,3 @@ if __name__ == "__main__":
                     print("\n\n*** Widget Timings ***")
                     profiler.print()
                     print("***\n\n")
-

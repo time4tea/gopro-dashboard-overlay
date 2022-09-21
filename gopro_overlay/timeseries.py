@@ -84,3 +84,7 @@ class Timeseries:
             updates = processor(self.entries[e])
             if updates:
                 self.entries[e].update(**updates)
+
+
+
+

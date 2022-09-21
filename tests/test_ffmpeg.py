@@ -1,9 +1,10 @@
 from io import BytesIO
+from os import stat_result
 from pathlib import Path
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGGenerate, FFMPEGOverlay, FFMPEGOptions
+from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGOverlayVideo, FFMPEGOptions
 from gopro_overlay.timeunits import timeunits
 
 ffprobe_output = (Path(__file__).parent / "test_ffmpeg_ffprobe_output.json").read_text()
@@ -56,11 +57,13 @@ def test_finding_frame_duration():
 
 
 def test_parsing_stream_information():
-
     def find_frame(filepath, data_stream, *args):
         assert filepath == "whatever"
         assert data_stream == 3
         return 1001
+
+    def stat(file):
+        return stat_result([000, 1234, 123, 1, 1000, 1000, 9876, 10, 20, 30])
 
     streams = ffmpeg.find_streams(
         "whatever",
@@ -68,7 +71,8 @@ def test_parsing_stream_information():
             expected=["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", "whatever"],
             stdout=ffprobe_output
         ),
-        find_frame_duration=find_frame
+        find_frame_duration=find_frame,
+        stat=stat
     )
 
     assert streams.video.stream == 0
@@ -79,6 +83,8 @@ def test_parsing_stream_information():
     assert streams.meta.frame_count == 707
     assert streams.meta.timebase == 1000
     assert streams.meta.frame_duration == 1001
+
+    assert streams.file.length == 9876
 
 
 class FakePopen:
@@ -109,7 +115,7 @@ class FakeExecution:
 def test_ffmpeg_generate_execute():
     fake = FakeExecution()
 
-    ffmpeg = FFMPEGGenerate(
+    ffmpeg = FFMPEGOverlay(
         output="output",
         overlay_size=Dimension(100, 200),
         execution=fake
@@ -122,6 +128,7 @@ def test_ffmpeg_generate_execute():
         "ffmpeg",  #
         '-hide_banner',
         "-y",  # overwrite targets
+        '-hide_banner',
         "-loglevel", "info",
         "-f", "rawvideo",  # input format 'raw'
         "-framerate", "10.0",  # input framerate
@@ -138,7 +145,7 @@ def test_ffmpeg_generate_execute():
 def test_ffmpeg_overlay_execute_default():
     fake = FakeExecution()
 
-    ffmpeg = FFMPEGOverlay(input="input", output="output", overlay_size=Dimension(3, 4), execution=fake)
+    ffmpeg = FFMPEGOverlayVideo(input="input", output="output", overlay_size=Dimension(3, 4), execution=fake)
 
     with ffmpeg.generate():
         pass
@@ -164,9 +171,9 @@ def test_ffmpeg_overlay_execute_default():
 def test_ffmpeg_overlay_execute_options():
     fake = FakeExecution()
 
-    ffmpeg = FFMPEGOverlay(input="input", output="output",
-                           options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
-                           overlay_size=Dimension(3, 4), execution=fake)
+    ffmpeg = FFMPEGOverlayVideo(input="input", output="output",
+                                options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
+                                overlay_size=Dimension(3, 4), execution=fake)
 
     with ffmpeg.generate():
         pass
