@@ -54,69 +54,6 @@ You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
 venv/bin/gopro-dashboard.py --profile nvgpu ~/layouts/my-layout.xml ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
 
-*Create a movie with alpha channel, using only GPX file, without video from GoPro*
-
-You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
-
-```json
-{
-  "overlay": {
-    "input": [],
-    "output": ["-vcodec", "png"]
-  }
-}
-```
-
-then execute (NOTE: extension is `mov`)
-
-```shell
-venv/bin/gopro-dashboard.py --gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.mov
-```
-if you use `-vcodec rawvideo` file will be really huge
-
-or you can use slower codecs (but smaller file size) `vp9` or`vp8` (even slower) or `hevc_videotoolbox` (available on Mac only):
-
-```json
-{
-  "overlay": {
-    "input": [],
-    "output": ["-vcodec", "vp9", "-pix_fmt", "yuva420p"]
-  },
-  "sloweroverlay": {
-    "input": [],
-    "output": ["-vcodec", "vp8", "-pix_fmt", "yuva420p", "-auto-alt-ref", "0"]
-  }
-}
-```
-
-then execute (NOTE: extension is `webm`)
-
-```shell
-venv/bin/gopro-dashboard.py --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.webm
-```
-
-*Create a movie from GPX and video not created with GoPro*
-
-Make sure that the time of the file is correct and when aligned to the timezone of your computer matches the data in GPX file 
-(this might not be the case if video is recorded abroad). 
-If it is not correct you can fix it using `touch -d '2022-08-29T11:17:44Z' file.mp4`. 
-To get the correct time you can try with different dates available from `exiftool file.mp4` or `exiftool thumbnail_image_of_the_video.thm` 
-(if thumbnail image exist), from SRT/flight log viewer/CSV from Airdata, etc. 
-But first make sure that you have set the correct date and time of the camera BEFORE recording the video.
-
-```shell
-venv/bin/gopro-dashboard.py --video-time-start file-accessed --use-gpx-only --gpx ~/Downloads/Morning_Drive.gpx ~/recording/drive.MP4 GH020073-dashboard.MP4
-```
-
-Depending on the camera maker and model `file-accessed`, `file-created`, `file-modified` should be used for `--video-time-start` or `--video-time-end`, e.g.
-
-```shell
-venv/bin/gopro-dashboard.py --video-time-end file-created --use-gpx-only  --gpx ~/Downloads/Morning_Ride.gpx ~/recording/flight.MP4 GH020073-dashboard.MP4
-```
-
-```shell
-venv/bin/gopro-dashboard.py --video-time-end file-modified --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx ~/recording/sail.MP4 GH020073-dashboard.MP4
-```
 
 ## Omitting Widgets
 
@@ -161,6 +98,83 @@ Example:
   }
 }
 ```
+
+## Creating Videos using only GPX File
+
+### Create a movie with alpha channel, using only GPX file, without any video at all
+
+This is when you want to use external software to do the final video - combining the "dashboard" video and some other video using Lightworks
+or whatever 
+
+You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
+
+```json
+{
+  "overlay": {
+    "input": [],
+    "output": ["-vcodec", "png"]
+  }
+}
+```
+
+then execute (NOTE: extension is `mov`)
+
+```shell
+venv/bin/gopro-dashboard.py --gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.mov
+```
+if you use `-vcodec rawvideo` file will be really huge
+
+or you can use slower codecs (but smaller file size) `vp9` or`vp8` (even slower) or `hevc_videotoolbox` (available on Mac only):
+
+```json
+{
+  "overlay": {
+    "input": [],
+    "output": ["-vcodec", "vp9", "-pix_fmt", "yuva420p"]
+  },
+  "sloweroverlay": {
+    "input": [],
+    "output": ["-vcodec", "vp8", "-pix_fmt", "yuva420p", "-auto-alt-ref", "0"]
+  }
+}
+```
+
+then execute (NOTE: extension is `webm`)
+
+```shell
+venv/bin/gopro-dashboard.py --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.webm
+```
+
+### Create a movie from GPX and video not created with GoPro
+
+This is currently quite hard to align things properly!
+
+#### Ensure file time matches GPX times
+
+Make sure that the time of the file is correct and when aligned to the timezone of your computer matches the data in GPX file 
+(this might not be the case if video is recorded abroad). 
+
+If it is not correct you can fix it using `touch -d '2022-08-29T11:17:44Z' file.mp4`. 
+
+To get the correct time you can try with different dates available from `exiftool file.mp4` or `exiftool thumbnail_image_of_the_video.thm` 
+(if thumbnail image exist), from SRT/flight log viewer/CSV from Airdata, etc. 
+
+But first make sure that you have set the correct date and time of the camera BEFORE recording the video.
+
+```shell
+venv/bin/gopro-dashboard.py --video-time-start file-accessed --use-gpx-only --gpx ~/Downloads/Morning_Drive.gpx ~/recording/drive.MP4 GH020073-dashboard.MP4
+```
+
+Depending on the camera maker and model `file-accessed`, `file-created`, `file-modified` should be used for `--video-time-start` or `--video-time-end`, e.g.
+
+```shell
+venv/bin/gopro-dashboard.py --video-time-end file-created --use-gpx-only  --gpx ~/Downloads/Morning_Ride.gpx ~/recording/flight.MP4 GH020073-dashboard.MP4
+```
+
+```shell
+venv/bin/gopro-dashboard.py --video-time-end file-modified --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx ~/recording/sail.MP4 GH020073-dashboard.MP4
+```
+
 
 ## GPU Learnings
 
