@@ -13,13 +13,13 @@ from gopro_overlay.timeseries import Entry
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 from .widgets.widgets import simple_icon, Translate, Composite, Frame
-from .widgets.widgets_asi import AirspeedIndicator
-from .widgets.widgets_bar import Bar
-from .widgets.widgets_chart import SimpleChart
-from .widgets.widgets_compass import Compass
-from .widgets.widgets_compass_arrow import CompassArrow
-from .widgets.widgets_map import MovingJourneyMap
-from .widgets.widgets_profile import WidgetProfiler
+from .widgets.asi import AirspeedIndicator
+from .widgets.bar import Bar
+from .widgets.chart import SimpleChart
+from .widgets.compass import Compass
+from .widgets.compass_arrow import CompassArrow
+from .widgets.map import MovingJourneyMap
+from .widgets.profile import WidgetProfiler
 
 
 def load_xml_layout(filename):

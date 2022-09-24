@@ -7,8 +7,9 @@ from .framemeta import FrameMeta
 from .layout_components import moving_map
 from .point import Coordinate
 from .units import units
-from .widgets.widgets import Scene, Translate, Composite, CachingText, Text
-from gopro_overlay.widgets.widgets_info import ComparativeEnergy
+from .widgets.widgets import Scene, Translate, Composite
+from .widgets.text import CachingText, Text
+from gopro_overlay.widgets.info import ComparativeEnergy
 
 
 def gps_info(at, entry, font):

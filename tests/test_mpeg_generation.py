@@ -3,7 +3,8 @@ from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGOverlay
 from gopro_overlay.font import load_font
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.widgets import Scene, CachingText
+from gopro_overlay.widgets.widgets import Scene
+from gopro_overlay.widgets.text import CachingText
 
 font = load_font("Roboto-Medium.ttf")
 

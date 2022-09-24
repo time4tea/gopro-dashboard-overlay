@@ -25,7 +25,7 @@ from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets.widgets_profile import WidgetProfiler
+from gopro_overlay.widgets.profile import WidgetProfiler
 
 ourdir = Path.home().joinpath(".gopro-graphics")
 

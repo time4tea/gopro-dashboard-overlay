@@ -7,7 +7,7 @@ from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.widgets import Translate
-from gopro_overlay.widgets.widgets_asi import AirspeedIndicator
+from gopro_overlay.widgets.asi import AirspeedIndicator
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 

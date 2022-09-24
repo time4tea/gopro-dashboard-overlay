@@ -15,7 +15,7 @@ from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.widgets import Translate, Frame
-from gopro_overlay.widgets.widgets_map import MovingJourneyMap, view_window
+from gopro_overlay.widgets.map import MovingJourneyMap, view_window
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 from tests.testenvironment import is_make

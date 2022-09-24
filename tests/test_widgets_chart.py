@@ -10,7 +10,7 @@ from gopro_overlay.framemeta import View, Window
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.widgets.widgets import Translate, Composite
-from gopro_overlay.widgets.widgets_chart import SimpleChart
+from gopro_overlay.widgets.chart import SimpleChart
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
