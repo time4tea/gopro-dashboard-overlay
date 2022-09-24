@@ -27,8 +27,8 @@ def gopro_dashboard_arguments(args=None):
     only = parser.add_argument_group("GPX Only", "Creating Movies from GPX File only")
 
     only.add_argument("--use-gpx-only", action="store_true", help="Use only the GPX file - no GoPro location data")
-    only.add_argument("--video-time-start", choices=["file-created", "file-modified", "file-accessed"], help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be removed")
-    only.add_argument("--video-time-end", choices=["file-created", "file-modified", "file-accessed"], help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be removed")
+    only.add_argument("--video-time-start", choices=["file-created", "file-modified", "file-accessed"], help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed")
+    only.add_argument("--video-time-end", choices=["file-created", "file-modified", "file-accessed"], help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed")
 
     maps = parser.add_argument_group("Mapping", "Display of Maps")
 
