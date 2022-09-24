@@ -10,8 +10,8 @@ from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, Frame
-from gopro_overlay.widgets_info import ComparativeEnergy
+from gopro_overlay.widgets.widgets import simple_icon, Text, Scene, CachingText, Composite, Translate, Frame
+from gopro_overlay.widgets.widgets_info import ComparativeEnergy
 from tests.approval import approve_image
 from tests.testenvironment import is_make
 

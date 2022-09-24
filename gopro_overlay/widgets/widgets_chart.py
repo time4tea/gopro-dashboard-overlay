@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw
 
-from gopro_overlay.widgets_map import draw_marker
+from gopro_overlay.widgets.widgets_map import draw_marker
 
 
 class SimpleChart:

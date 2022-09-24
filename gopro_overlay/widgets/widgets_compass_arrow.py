@@ -2,7 +2,7 @@ import functools
 
 from PIL import Image, ImageDraw
 
-from gopro_overlay.widgets_compass import Compass
+from gopro_overlay.widgets.widgets_compass import Compass
 
 
 class CompassArrow:

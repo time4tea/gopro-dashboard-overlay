@@ -1,5 +1,5 @@
-from .widgets import Text, CachingText
-from .widgets_map import MovingMap, JourneyMap
+from .widgets.widgets import Text, CachingText
+from .widgets.widgets_map import MovingMap, JourneyMap
 
 
 def journey_map(at, entry, **kwargs):

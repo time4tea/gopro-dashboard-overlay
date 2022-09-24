@@ -44,6 +44,7 @@ setup(
         "gopro_overlay",
         "gopro_overlay.icons",
         "gopro_overlay.layouts",
+        "gopro_overlay.widgets",
     ],
     install_requires=requires,
     tests_require=test_requirements,

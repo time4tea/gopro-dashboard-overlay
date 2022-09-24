@@ -6,10 +6,10 @@ from typing import Callable, Tuple, Any
 
 from PIL import Image, ImageDraw
 
-from . import icons
-from .dimensions import Dimension
-from .functional import compose
-from .point import Coordinate
+from gopro_overlay import icons
+from gopro_overlay.dimensions import Dimension
+from gopro_overlay.functional import compose
+from gopro_overlay.point import Coordinate
 
 anchors = {
     "left": "la",

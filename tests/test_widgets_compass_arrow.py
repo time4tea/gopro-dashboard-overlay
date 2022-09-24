@@ -6,8 +6,8 @@ from PIL import ImageFont
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets import Composite, Translate
-from gopro_overlay.widgets_compass_arrow import CompassArrow
+from gopro_overlay.widgets.widgets import Composite, Translate
+from gopro_overlay.widgets.widgets_compass_arrow import CompassArrow
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 

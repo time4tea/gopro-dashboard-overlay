@@ -3,8 +3,8 @@ import math
 import geotiler
 from PIL import ImageDraw, Image
 
-from .journey import Journey
-from .privacy import NoPrivacyZone
+from gopro_overlay.journey import Journey
+from gopro_overlay.privacy import NoPrivacyZone
 
 
 class PerceptibleMovementCheck:
