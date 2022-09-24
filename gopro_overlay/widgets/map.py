@@ -216,7 +216,7 @@ class MovingJourneyMap:
             zoom=self.zoom
         )
 
-        # add self.size / 2 to eash side of the map, so adding self.size overall
+        # add self.size / 2 to each side of the map, so adding self.size overall
         map.size = (map.size[0] + self.size), (map.size[1] + self.size)
 
         print(f"{self.__class__.__name__} Rendering backing map ({map.size}) (can be slow)", end="")
