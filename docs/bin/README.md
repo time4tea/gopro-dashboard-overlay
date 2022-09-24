@@ -105,7 +105,7 @@ To get the correct time you can try with different dates available from `exiftoo
 But first make sure that you have set the correct date and time of the camera BEFORE recording the video.
 
 ```shell
-venv/bin/gopro-dashboard.py --video-time-start atime --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+venv/bin/gopro-dashboard.py --video-time-start file-accessed --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
 
 Depending on the camera maker and model `file-accessed`, `file-created`, `file-modified` should be used for `--video-time-start` or `--video-time-end`, e.g.
