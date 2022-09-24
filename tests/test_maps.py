@@ -8,10 +8,12 @@ from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import gps_framemeta
 from gopro_overlay.geo import CachingRenderer
+from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
 from gopro_overlay.point import Coordinate
 from gopro_overlay.privacy import NoPrivacyZone
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.widgets import Translate, Frame
@@ -36,7 +38,7 @@ def a_real_journey(name, dimension, f_scene):
     with open("meta/gopro-meta.gpmd", "rb") as f:
         data = f.read()
 
-    framemeta = gps_framemeta(meta=data, units=units)
+    framemeta = gps_framemeta(meta=GoproMeta.parse(data), units=units)
 
     overlay = Overlay(
         dimensions=dimension,
@@ -44,7 +46,7 @@ def a_real_journey(name, dimension, f_scene):
         create_widgets=f_scene
     )
 
-    stepper = framemeta.stepper(timedelta(seconds=0.1))
+    stepper = framemeta.stepper(timeunits(seconds=0.1))
 
     timer = PoorTimer(name)
 

@@ -185,7 +185,7 @@ class FrameMeta:
         return self.framelist[-1]
 
 
-def gps_framemeta(meta, units, metameta=None):
+def gps_framemeta(meta: GoproMeta, units, metameta=None):
     frame_meta = FrameMeta()
 
     meta.accept(
