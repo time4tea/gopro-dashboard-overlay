@@ -1,6 +1,7 @@
 import pathlib
 
 from setuptools import setup
+from setuptools.command.build_ext import build_ext
 from setuptools.extension import Extension
 
 HERE = pathlib.Path(__file__).parent
@@ -20,6 +21,16 @@ requires = [
 test_requirements = [
     "pytest"
 ]
+
+
+class GoProOverlayBuildExt(build_ext):
+    def build_extensions(self):
+        print("I am here!")
+        self.compiler.include_dirs = ["/usr/include/freetype2"] + self.compiler.include_dirs
+        for extension in self.extensions:
+            extension.libraries += [ "freetype" ]
+            print(extension.libraries)
+        build_ext.build_extensions(self)
 
 setup(
     name="gopro-overlay",
@@ -67,5 +78,6 @@ setup(
     project_urls={
         'Source': 'https://github.com/time4tea/gopro-dashboard-overlay',
     },
-    ext_modules=[Extension("gopro_overlay._freetype", ["c/font.c"])],
+    cmdclass={"build_ext": GoProOverlayBuildExt},
+    ext_modules=[Extension("gopro_overlay._freetype", ["c/freetype.c"])],
 )

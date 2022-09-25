@@ -99,7 +99,9 @@ bump-major:
 
 .PHONY: inplace
 inplace:
-	$(BIN)/python3 -m pip install -e .
+	rm -rf build
+	rm -f gopro_overlay/*.so
+	$(BIN)/python3 -m pip   install --global-option build --global-option --debug --editable .
 
 .PHONY: help
 help:
