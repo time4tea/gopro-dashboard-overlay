@@ -97,6 +97,9 @@ bump-major:
 	$(BIN)/pip install bumpversion
 	$(BIN)/bumpversion major
 
+.PHONY: inplace
+inplace:
+	$(BIN)/python3 -m pip install -e .
 
 .PHONY: help
 help:

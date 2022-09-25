@@ -1,6 +1,7 @@
 import pathlib
 
 from setuptools import setup
+from setuptools.extension import Extension
 
 HERE = pathlib.Path(__file__).parent
 
@@ -66,4 +67,5 @@ setup(
     project_urls={
         'Source': 'https://github.com/time4tea/gopro-dashboard-overlay',
     },
+    ext_modules=[Extension("gopro_overlay._freetype", ["c/font.c"])],
 )
