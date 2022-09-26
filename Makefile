@@ -103,6 +103,16 @@ inplace:
 	rm -f gopro_overlay/*.so
 	$(BIN)/python3 -m pip   install --global-option build --global-option --debug --editable .
 
+
+.PHONY: watch
+watch:
+	$(MAKE) inplace || true
+	while true; \
+	do \
+		inotifywait -q -r -e modify,create,delete .; \
+		$(MAKE) inplace || true; \
+	done
+
 .PHONY: help
 help:
 	PYTHONPATH=. $(BIN)/python bin/gopro-contrib-data-extract.py --help
