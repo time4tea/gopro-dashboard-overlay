@@ -20,7 +20,7 @@ static  char cap_library[] = "library";
 static  char cap_manager[] = "manager";
 
 /* Start FT_Library <-> Capsule */
-static FT_Library* FT_Library_FromCapsule( PyObject* capsule) {
+static FT_Library* FT_Library_FromCapsule(PyObject* capsule) {
     return (FT_Library*) PyCapsule_GetPointer(capsule, cap_library);
 }
 
@@ -30,13 +30,13 @@ static void PyCapsule_FreeLibrary(PyObject* capsule) {
     }
 }
 
-static PyObject* PyCapsule_FromLibrary( FT_Library* library ) {
+static PyObject* PyCapsule_FromLibrary(FT_Library* library ) {
     return PyCapsule_New(library, cap_library, PyCapsule_FreeLibrary);
 }
 /* Start FT_Library <-> Capsule */
 
 /* Start FTC_Manager <-> Capsule */
-static FTC_Manager* FTC_Manager_FromCapsule( PyObject* capsule) {
+static FTC_Manager* FTC_Manager_FromCapsule(PyObject* capsule) {
     return (FTC_Manager*) PyCapsule_GetPointer(capsule, cap_manager);
 }
 
@@ -46,8 +46,8 @@ static void PyCapsule_Free_FTC_Manager(PyObject* capsule) {
     }
 }
 
-static PyObject* PyCapsule_From_FTC_Manager( FTC_Manager* library ) {
-    return PyCapsule_New(library, cap_manager, PyCapsule_Free_FTC_Manager);
+static PyObject* PyCapsule_From_FTC_Manager(FTC_Manager* manager ) {
+    return PyCapsule_New(manager, cap_manager, PyCapsule_Free_FTC_Manager);
 }
 /* Start FTC_Manager <-> Capsule */
 
@@ -79,6 +79,9 @@ static PyObject* method_freetype_done(PyObject* self, PyObject* args) {
     }
 
     FT_Library* library = FT_Library_FromCapsule(Clibrary);
+
+    printf("Freeing FreeType %p\n", library);
+
     FT_Done_FreeType(*library);
     Py_INCREF(Py_None);
     return Py_None;
@@ -101,25 +104,54 @@ static PyObject* method_freetype_version(PyObject* self, PyObject* args) {
     return PyUnicode_FromFormat("%d.%d.%d", major, minor, patch);;
 }
 
-static int face_requester( FTC_FaceID face_id, FT_Library library, FT_Pointer req_data, FT_Face* face) {
-    return 0;
+static int face_requester(FTC_FaceID face_id, FT_Library library, FT_Pointer req_data, FT_Face* face) {
+
+
+    PyObject* args = Py_BuildValue("(l)", face_id);
+    PyObject* result = PyObject_CallObject( (PyObject*) req_data, args);
+    Py_DECREF(args);
+
+    if ( result == NULL ) {
+        // error
+        printf("Error calling python\n");
+    }
+
+    PyObject* pathObject = PyUnicode_AsUTF8String(result);
+    char* path = PyBytes_AsString(pathObject);
+    Py_DECREF(pathObject);
+
+    printf("Path is %s\n", path);
+
+    return FT_New_Face(library, path , 0, face);
 }
 
 static PyObject* method_manager_new(PyObject* self, PyObject* args) {
 
     PyObject* Clibrary;
+    PyObject* id_to_path;
 
-    if (!PyArg_ParseTuple(args, "O", &Clibrary)) {
+    if (!PyArg_ParseTuple(args, "OO", &Clibrary, &id_to_path)) {
+        return NULL;
+    }
+
+    if (!PyCallable_Check(id_to_path)) {
+        PyErr_SetString(PyExc_TypeError, "parameter must be callable");
         return NULL;
     }
 
     FT_Library* library = FT_Library_FromCapsule(Clibrary);
 
-    FT_Pointer req_data = NULL;
-
     void* manager = calloc(1, sizeof(FTC_Manager));
 
-    if ( FTC_Manager_New(*library, 0, 0, 0L, face_requester, req_data, manager) != 0 ) {
+    if ( manager == 0 ) {
+        PyErr_NoMemory();
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    Py_INCREF(id_to_path);
+
+    if ( FTC_Manager_New(*library, 0, 0, 0L, face_requester, (FT_Pointer) id_to_path, manager) != 0 ) {
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -135,9 +167,58 @@ static PyObject* method_manager_done(PyObject* self, PyObject* args) {
     }
 
     FTC_Manager* manager = FTC_Manager_FromCapsule(Cmanager);
+
+    printf("Freeing Cache Manager %p\n", manager);
     FTC_Manager_Done(*manager);
 
-    return NULL;
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static void dbg_ft_face(FT_Face face) {
+
+    printf("FT_Face\n");
+    printf("\tNum Faces: %lu\n", face->num_faces);
+    printf("\tFace Index: %lu\n", face->face_index);
+    printf("\tFace Flags: %lu\n", face->face_flags);
+    printf("\tStyle Flags: %lu\n", face->style_flags);
+    printf("\tNum Glyphs: %lu\n", face->num_glyphs);
+    printf("\tFamily Name: %s\n", face->family_name);
+    printf("\tStyle Name: %s\n", face->style_name);
+    printf("\tFixed Sizes: %d\n", face->num_fixed_sizes);
+    printf("\tNum Charmaps: %d\n", face->num_charmaps);
+}
+
+static PyObject* method_manager_ft_get_face(PyObject* self, PyObject* argsOiII) {
+    PyObject* Cmanager;
+    FT_UInt width, height;
+    long int faceId;
+
+    if (!PyArg_ParseTuple(argsOiII, "OlII", &Cmanager, &faceId, &width, &height)) {
+        return NULL;
+    }
+
+    FTC_ScalerRec scaler_rec = {
+        .face_id = (FTC_FaceID) faceId,
+        .width = width,
+        .height = height,
+        .pixel = 1,
+        .x_res = 0,
+        .y_res = 0,
+    };
+
+    FT_SizeRec *size_rec;
+
+    FTC_Manager* manager = FTC_Manager_FromCapsule(Cmanager);
+
+    if ( FTC_Manager_LookupSize(*manager, &scaler_rec, &size_rec) != 0 ) {
+        return NULL;
+    }
+
+    dbg_ft_face(size_rec->face);
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 static PyMethodDef methods[] = {
@@ -146,6 +227,8 @@ static PyMethodDef methods[] = {
     {"freetype_version", method_freetype_version, METH_VARARGS, "Version"},
     {"cache_manager_new", method_manager_new, METH_VARARGS, "New Cache Manager"},
     {"cache_manager_done", method_manager_done, METH_VARARGS, "Del Cache Manager"},
+    {"cache_manager_get_face", method_manager_ft_get_face, METH_VARARGS, "Manager Get Face"},
+
     {NULL, NULL, 0, NULL}
 };
 

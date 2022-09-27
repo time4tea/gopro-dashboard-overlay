@@ -29,7 +29,7 @@ class GoProOverlayBuildExt(build_ext):
         self.compiler.include_dirs = ["/usr/include/freetype2"] + self.compiler.include_dirs
         for extension in self.extensions:
             extension.libraries += [ "freetype" ]
-            extension.extra_compile_args += [ "-Wall", "-Werror" ]
+            extension.extra_compile_args += [ "-ggdb", "-Wall", "-Werror" ]
             print(extension.libraries)
 
         build_ext.build_extensions(self)
