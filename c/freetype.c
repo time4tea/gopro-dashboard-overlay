@@ -19,52 +19,58 @@
 static  char cap_library[] = "FT_library";
 static  char cap_manager[] = "FTC_manager";
 static  char cap_size[] = "FT_size";
+static  char cap_imagecache[] = "FTC_ImageCache";
+static  char cap_bitcache[] = "FTC_SBitCache";
 
 /* Start FT_Library <-> Capsule */
-static FT_Library FT_Library_FromCapsule(PyObject* capsule) {
+static FT_Library MAYBE_UNUSED FT_Library_FromCapsule(PyObject* capsule) {
     return (FT_Library) PyCapsule_GetPointer(capsule, cap_library);
 }
 
-static PyObject* PyCapsule_FromLibrary(FT_Library library ) {
+static PyObject* MAYBE_UNUSED PyCapsule_FromLibrary(FT_Library library ) {
     return PyCapsule_New(library, cap_library, NULL);
 }
 /* End FT_Library <-> Capsule */
 
 /* Start FTC_Manager <-> Capsule */
-static FTC_Manager FTC_Manager_FromCapsule(PyObject* capsule) {
+static FTC_Manager MAYBE_UNUSED FTC_Manager_FromCapsule(PyObject* capsule) {
     return (FTC_Manager) PyCapsule_GetPointer(capsule, cap_manager);
 }
 
-static PyObject* PyCapsule_From_FTC_Manager(FTC_Manager manager ) {
+static PyObject* MAYBE_UNUSED PyCapsule_From_FTC_Manager(FTC_Manager manager ) {
     return PyCapsule_New(manager, cap_manager, NULL);
 }
 /* End FTC_Manager <-> Capsule */
 
 /* Start FT_SizeRec <-> Capsule */
-static FT_Size FT_Size_FromCapsule(PyObject* capsule) {
+static FT_Size MAYBE_UNUSED FT_Size_FromCapsule(PyObject* capsule) {
     return (FT_Size) PyCapsule_GetPointer(capsule, cap_size);
 }
 
-static PyObject* PyCapsule_From_FT_Size(FT_Size size ) {
+static PyObject* MAYBE_UNUSED PyCapsule_From_FT_Size(FT_Size size ) {
     return PyCapsule_New(size, cap_size, NULL);
 }
 /* End FT_SizeRec <-> Capsule */
 
 /* Start FTC_ImageCache <-> Capsule */
-/*static FTC_ImageCache* FTC_ImageCache_FromCapsule(PyObject* capsule) {
-    return (FTC_ImageCache*) PyCapsule_GetPointer(capsule, cap_imagecache);
+static FTC_ImageCache MAYBE_UNUSED FTC_ImageCache_FromCapsule(PyObject* capsule) {
+    return (FTC_ImageCache) PyCapsule_GetPointer(capsule, cap_imagecache);
 }
 
-static void PyCapsule_Free_FTC_ImageCache(PyObject* capsule) {
-    if ( PyCapsule_IsValid(capsule, cap_imagecache)) {
-        free(FTC_ImageCache_FromCapsule(capsule));
-    }
+static PyObject* MAYBE_UNUSED PyCapsule_From_FTC_ImageCache(FTC_ImageCache imagecache ) {
+    return PyCapsule_New(imagecache, cap_imagecache, NULL);
 }
-
-static PyObject* PyCapsule_From_FTC_ImageCache(FTC_ImageCache* imagecache ) {
-    return PyCapsule_New(manager, cap_imagecache, PyCapsule_Free_FTC_ImageCache);
-}*/
 /* End FTC_ImageCache <-> Capsule */
+
+/* Start FTC_SBitCache <-> Capsule */
+static FTC_SBitCache MAYBE_UNUSED FTC_SBitCache_FromCapsule(PyObject* capsule) {
+    return (FTC_SBitCache) PyCapsule_GetPointer(capsule, cap_bitcache);
+}
+
+static PyObject* MAYBE_UNUSED PyCapsule_From_FTC_SBitCache(FTC_SBitCache bitcache ) {
+    return PyCapsule_New(bitcache, cap_bitcache, NULL);
+}
+/* End FTC_SBitCache <-> Capsule */
 
 
 static PyObject* method_freetype_init(PyObject* self, PyObject* args) {
@@ -167,7 +173,6 @@ static PyObject* method_manager_done(PyObject* self, PyObject* args) {
     return Py_None;
 }
 
-/*
 static PyObject* method_imagecache_new(PyObject* self, PyObject* args) {
 
     PyObject* Cmanager;
@@ -176,23 +181,38 @@ static PyObject* method_imagecache_new(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    FTC_Manager* manager = FTC_Manager_FromCapsule(Cmanager);
+    FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
 
-    void* imagecache = calloc(1, sizeof(FTC_ImageCache));
+    FTC_ImageCache imagecache;
 
-    if ( imagecache == 0 ) {
-        PyErr_NoMemory();
+    if ( FTC_ImageCache_New(manager, &imagecache) != 0 ) {
         Py_INCREF(Py_None);
         return Py_None;
     }
 
-    if ( FTC_ImageCache_new(*manager, imagecache) != 0 ) {
+    return PyCapsule_From_FTC_ImageCache(imagecache);
+}
+
+static PyObject* method_bitcache_new(PyObject* self, PyObject* args) {
+
+    PyObject* Cmanager;
+
+    if (!PyArg_ParseTuple(args, "O", &Cmanager)) {
+        return NULL;
+    }
+
+    FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
+
+    FTC_SBitCache bitcache;
+
+    if ( FTC_SBitCache_New(manager, &bitcache) != 0 ) {
         Py_INCREF(Py_None);
         return Py_None;
     }
 
-    return PyCapsule_From_FTC_Manager(manager);
-}*/
+    return PyCapsule_From_FTC_SBitCache(bitcache);
+}
+
 
 
 static void dbg_ft_face(FT_Face face) {
@@ -239,26 +259,49 @@ static PyObject* method_manager_ft_get_face(PyObject* self, PyObject* argsOlII) 
     return PyCapsule_From_FT_Size(size);
 }
 
-static PyObject* method_render_string(PyObject* self, PyObject* argsOO) {
+static PyObject* method_render_string(PyObject* self, PyObject* argsOliiO) {
 
-    PyObject* Csize;
+    PyObject* Cbitcache;
+    PyObject* Cmanager;
     PyObject* string;
+    FT_UInt width, height;
+    long int faceId;
 
-    if (!PyArg_ParseTuple(argsOO, "OO", &Csize, &string)) {
+    if (!PyArg_ParseTuple(argsOliiO, "OOliiO", &Cmanager, &Cbitcache, &faceId, &width, &height, &string)) {
         return NULL;
     }
 
-    FT_Size size = FT_Size_FromCapsule(Csize);
+    FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
+    FTC_SBitCache bitcache = FTC_SBitCache_FromCapsule(Cbitcache);
 
     Py_ssize_t length = PyUnicode_GET_LENGTH(string);
 
-    Py_UCS4 current_char;
+    FT_Face face;
+    FTC_Manager_LookupFace(manager, (FTC_FaceID) faceId, &face);
 
-    printf("x_ppem = %u\n", size->metrics.x_ppem);
+    FTC_ScalerRec scaler_rec = {
+        .face_id = (FTC_FaceID) faceId,
+        .width = width,
+        .height = height,
+        .pixel = 1,
+        .x_res = 0,
+        .y_res = 0,
+    };
+
+    Py_UCS4 current_char;
+    FT_UInt char_index;
+    FTC_Node node; // pass this in so glyph is cached, and we'll never Unref it - so its there forever
+    FTC_SBit sbit;
+    FT_ULong load_flags = FT_LOAD_DEFAULT;
 
     for (int i = 0 ; i < length; i++ ) {
         current_char = PyUnicode_READ_CHAR(string, i);
-        printf("%d %d\n", i, current_char);
+        char_index = FT_Get_Char_Index(face, current_char);
+
+        if ( FTC_SBitCache_LookupScaler(bitcache, &scaler_rec, load_flags, char_index, &sbit, &node) != 0) {
+            PyErr_SetString(PyExc_TypeError, "unable to lookup a glyph");
+            return NULL;
+        }
     }
 
     Py_INCREF(Py_None);
@@ -273,9 +316,8 @@ static PyMethodDef methods[] = {
     {"cache_manager_new", method_manager_new, METH_VARARGS, "New Cache Manager"},
     {"cache_manager_done", method_manager_done, METH_VARARGS, "Del Cache Manager"},
     {"cache_manager_get_face", method_manager_ft_get_face, METH_VARARGS, "Manager Get Face"},
-//    {"image_cache_new", method_imagecache_new, METH_VARARGS, "New Image Cache"},
-//    {"image_cache_done", method_imagecache_done, METH_VARARGS, "Del Image Cache"},
-    
+    {"image_cache_new", method_imagecache_new, METH_VARARGS, "New Image Cache"},
+    {"bit_cache_new", method_bitcache_new, METH_VARARGS, "New SBit Cache"},
     {"render_render_string", method_render_string, METH_VARARGS, "Render String"},
 
     {NULL, NULL, 0, NULL}
@@ -284,7 +326,7 @@ static PyMethodDef methods[] = {
 static struct PyModuleDef module = {
     PyModuleDef_HEAD_INIT,
     "_freetype",
-    "Somecrap",
+    "dunno",
     -1,
     methods
 };
