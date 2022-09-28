@@ -259,15 +259,16 @@ static PyObject* method_manager_ft_get_face(PyObject* self, PyObject* argsOlII) 
     return PyCapsule_From_FT_Size(size);
 }
 
-static PyObject* method_render_string(PyObject* self, PyObject* argsOliiO) {
+static PyObject* method_render_string(PyObject* self, PyObject* args) {
 
     PyObject* Cbitcache;
     PyObject* Cmanager;
     PyObject* string;
+    PyObject* cb;
     FT_UInt width, height;
     long int faceId;
 
-    if (!PyArg_ParseTuple(argsOliiO, "OOliiO", &Cmanager, &Cbitcache, &faceId, &width, &height, &string)) {
+    if (!PyArg_ParseTuple(args, "OOliiOO", &Cmanager, &Cbitcache, &faceId, &width, &height, &string, &cb)) {
         return NULL;
     }
 
@@ -301,6 +302,21 @@ static PyObject* method_render_string(PyObject* self, PyObject* argsOliiO) {
         if ( FTC_SBitCache_LookupScaler(bitcache, &scaler_rec, load_flags, char_index, &sbit, &node) != 0) {
             PyErr_SetString(PyExc_TypeError, "unable to lookup a glyph");
             return NULL;
+        }
+
+        PyObject* args = Py_BuildValue(
+                                        "(iiiiiiiiiO)",
+                                        sbit->width, sbit->height, sbit->left, sbit->top,
+                                        sbit->format, sbit->max_grays,
+                                        sbit->pitch,
+                                        sbit->xadvance, sbit->yadvance,
+                                        PyMemoryView_FromMemory( (char*) sbit->buffer, sbit->pitch * sbit->height, PyBUF_READ)
+                                        );
+        PyObject* result = PyObject_CallObject( cb, args);
+        Py_DECREF(args);
+
+        if (result == NULL) {
+                return NULL;
         }
     }
 

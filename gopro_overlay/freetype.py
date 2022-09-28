@@ -1,3 +1,6 @@
+import timeit
+from typing import Callable
+
 import _freetype
 
 
@@ -41,8 +44,8 @@ class FreeTypeCacheManager:
         print(f"Returning {path}")
         return path
 
-    def render(self, font_id: FreeTypeFontId, string: str, width: int = 0, height: int = 0):
-        _freetype.render_render_string(self.ptr, self.bitcacheptr, font_id.id, width, height, string)
+    def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
+        _freetype.render_render_string(self.ptr, self.bitcacheptr, font_id.id, width, height, string, cb)
 
     def register_font(self, path) -> FreeTypeFontId:
         if path in self.known:
@@ -53,7 +56,6 @@ class FreeTypeCacheManager:
             self.known[id] = path
 
         return FreeTypeFontId(id)
-
 
     def __enter__(self):
         if self.ptr is None:
@@ -89,10 +91,9 @@ class FreeType:
 
 if __name__ == "__main__":
 
-    import timeit
-
     time_unit = None
     units = {"nsec": 1e-9, "usec": 1e-6, "msec": 1e-3, "sec": 1.0}
+
 
     def format_time(dt):
         unit = time_unit
@@ -109,15 +110,38 @@ if __name__ == "__main__":
         return "%.*g %s" % (3, dt / scale, unit)
 
 
+    from PIL import Image, ImageDraw
+
+    image = Image.new("RGBA", (800, 100), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+
+
+    class WidthCalc:
+
+        def __init__(self):
+            self.x = 0
+
+        def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+            for j in range(0, height):
+                for i in range(0, width):
+                    v = mv[(j * pitch) + i]
+                    image.putpixel((self.x + i, j), (v, v, v))
+            self.x += xadvance
+
+
+    renderable = "Date: 2022-09-26 Time: 14:35:26.1"
+
     with FreeType() as ft:
         print(ft.version())
 
         with ft.create_cache() as cache:
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
-            cache.render(id, "This is a string", height=20)
+            cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            time_count = 20000
-            time_take = timeit.timeit(lambda: cache.render(id, "This is a string", height=20), number=time_count)
-            print(time_take)
+            # time_count = 1000
+            # time_take = timeit.timeit(lambda: cache.render(id, renderable, height=40, cb=WidthCalc().font_callback), number=time_count)
+            # print(time_take)
+            # print(format_time(time_take / time_count))
 
-            print(format_time(time_take / time_count))
+
+    image.show()
