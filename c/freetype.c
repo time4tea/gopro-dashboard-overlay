@@ -259,6 +259,100 @@ static PyObject* method_manager_ft_get_face(PyObject* self, PyObject* argsOlII) 
     return PyCapsule_From_FT_Size(size);
 }
 
+
+//#define PIXEL(x) ((((x) + 32) & -64) >> 6)
+#define PIXEL(x) (x >> 16)
+
+static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
+
+    PyObject* Cimagecache;
+    PyObject* Clibrary;
+    PyObject* Cmanager;
+    FT_UInt width, height;
+    long int faceId;
+    PyObject* string;
+    PyObject* cb;
+
+    int stroke_width = 2;
+
+    if (!PyArg_ParseTuple(args, "OOOlIIOO", &Clibrary, &Cmanager, &Cimagecache, &faceId, &width, &height, &string, &cb)) {
+        return NULL;
+    }
+
+    FTC_ScalerRec scaler_rec = {
+        .face_id = (FTC_FaceID) faceId,
+        .width = width,
+        .height = height,
+        .pixel = 1,
+        .x_res = 0,
+        .y_res = 0,
+    };
+
+    FT_Library library = FT_Library_FromCapsule(Clibrary);
+    FT_Face face;
+    FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
+    FTC_Manager_LookupFace(manager, (FTC_FaceID) faceId, &face);
+    FTC_ImageCache imagecache = FTC_ImageCache_FromCapsule(Cimagecache);
+
+    FT_Stroker stroker;
+
+    FT_Error error = FT_Stroker_New(library, &stroker);
+    if (error) {
+        return NULL;
+    }
+
+    FT_Stroker_Set( stroker, (FT_Fixed)stroke_width * 64, FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0);
+
+    FT_Glyph glyph;
+    Py_UCS4 current_char;
+    FT_UInt char_index;
+
+    Py_ssize_t length = PyUnicode_GET_LENGTH(string);
+    for (int i = 0 ; i < length; i++ ) {
+        current_char = PyUnicode_READ_CHAR(string, i);
+        char_index = FT_Get_Char_Index(face, current_char);
+
+        if (FTC_ImageCache_LookupScaler(
+            imagecache,
+            &scaler_rec,
+            FT_LOAD_NO_BITMAP,
+            char_index,
+            &glyph,
+            NULL
+        )) {
+            return NULL;
+        }
+
+        FT_Glyph_Stroke(&glyph, stroker, 1);
+        FT_Vector origin = {0, 0};
+        FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, &origin, 1);
+
+        FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+
+        PyObject* args = Py_BuildValue(
+                                        "(iiiiiiiiiO)",
+                                        bitmap_glyph->bitmap.width, bitmap_glyph->bitmap.rows,
+                                        bitmap_glyph->left, bitmap_glyph->top,
+                                        0, bitmap_glyph->bitmap.num_grays,
+                                        bitmap_glyph->bitmap.pitch,
+                                        PIXEL(glyph->advance.x), PIXEL(glyph->advance.y),
+                                        PyMemoryView_FromMemory( (char*) bitmap_glyph->bitmap.buffer, bitmap_glyph->bitmap.pitch * bitmap_glyph->bitmap.rows, PyBUF_READ)
+                                       );
+
+        PyObject* result = PyObject_CallObject( cb, args);
+        Py_DECREF(args);
+
+        if (result == NULL) {
+                return NULL;
+        }
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 static PyObject* method_render_string(PyObject* self, PyObject* args) {
 
     PyObject* Cbitcache;
@@ -274,8 +368,6 @@ static PyObject* method_render_string(PyObject* self, PyObject* args) {
 
     FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
     FTC_SBitCache bitcache = FTC_SBitCache_FromCapsule(Cbitcache);
-
-    Py_ssize_t length = PyUnicode_GET_LENGTH(string);
 
     FT_Face face;
     FTC_Manager_LookupFace(manager, (FTC_FaceID) faceId, &face);
@@ -295,6 +387,7 @@ static PyObject* method_render_string(PyObject* self, PyObject* args) {
     FTC_SBit sbit;
     FT_ULong load_flags = FT_LOAD_DEFAULT;
 
+    Py_ssize_t length = PyUnicode_GET_LENGTH(string);
     for (int i = 0 ; i < length; i++ ) {
         current_char = PyUnicode_READ_CHAR(string, i);
         char_index = FT_Get_Char_Index(face, current_char);
@@ -335,6 +428,7 @@ static PyMethodDef methods[] = {
     {"image_cache_new", method_imagecache_new, METH_VARARGS, "New Image Cache"},
     {"bit_cache_new", method_bitcache_new, METH_VARARGS, "New SBit Cache"},
     {"render_render_string", method_render_string, METH_VARARGS, "Render String"},
+    {"render_render_string_stroker", method_render_string_stroker, METH_VARARGS, "Render String with Stroker"},
 
     {NULL, NULL, 0, NULL}
 };

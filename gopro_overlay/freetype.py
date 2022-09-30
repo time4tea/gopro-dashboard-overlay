@@ -34,7 +34,9 @@ class FreeTypeCacheManager:
 
     def __init__(self, library):
         # ptr = FTC_Manager
+        self.library = library
         self.ptr = _freetype.cache_manager_new(library.ptr, self._id_to_path)
+        self.imagecache = FreeTypeImageCache(_freetype.image_cache_new(self.ptr))
         self.bitcacheptr = _freetype.bit_cache_new(self.ptr)
         self.known = {}
         self.counter = 0
@@ -46,6 +48,9 @@ class FreeTypeCacheManager:
 
     def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
         _freetype.render_render_string(self.ptr, self.bitcacheptr, font_id.id, width, height, string, cb)
+
+    def render_stroker(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
+        _freetype.render_render_string_stroker(self.library.ptr, self.ptr, self.imagecache.ptr, font_id.id, width, height, string, cb)
 
     def register_font(self, path) -> FreeTypeFontId:
         if path in self.known:
@@ -122,11 +127,20 @@ if __name__ == "__main__":
             self.x = 0
 
         def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+
+            baseline = 50
+
             for j in range(0, height):
                 for i in range(0, width):
                     v = mv[(j * pitch) + i]
-                    image.putpixel((self.x + i, j), (v, v, v))
+                    image.putpixel((self.x + i, baseline - top + j), (v, v, v))
             self.x += xadvance
+
+
+    class DumpMetrics:
+
+        def font_callback(self, *args):
+            print(*args)
 
 
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
@@ -136,7 +150,9 @@ if __name__ == "__main__":
 
         with ft.create_cache() as cache:
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
-            cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
+            # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
+
+            cache.render_stroker(id, renderable, height=40, cb=WidthCalc().font_callback)
 
             # time_count = 1000
             # time_take = timeit.timeit(lambda: cache.render(id, renderable, height=40, cb=WidthCalc().font_callback), number=time_count)
