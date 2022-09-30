@@ -51,7 +51,7 @@ class FreeTypeCacheManager:
         )
 
     def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_render_string(self.ptr, self.caches.cmapcache, self.caches.bitcache, font_id.id, width, height, string, cb)
+        _freetype.render_render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, cb)
 
     def render_stroker(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
         _freetype.render_render_string_stroker(self.library.ptr, self.caches.cmapcache, self.caches.imagecache, font_id.id, width, height, string, cb)
@@ -131,7 +131,8 @@ if __name__ == "__main__":
             for j in range(0, height):
                 for i in range(0, width):
                     v = mv[(j * pitch) + i]
-                    image.putpixel((self.x + i, baseline - top + j), (v, v, v))
+                    if v > 0:
+                        draw.point((self.x + i, baseline - top + j), (v, v, v))
             self.x += xadvance
 
 
@@ -157,7 +158,7 @@ if __name__ == "__main__":
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
             # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            thing = lambda: cache.render_stroker(id, renderable, height=40, cb=WidthCalc().font_callback)
+            thing = lambda: cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
             thing()
 
