@@ -158,6 +158,7 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.60.0 Possible fix for error using --gpx-only in timezones that are ahead of UTC
 - 0.59.0 EXPERIMENTAL support for creating dashboards without a GoPro file! - Just uses GPX. use `--gpx-only` - See examples in [docs/bin](docs/bin)
   - Huge thanks to [@ptanov](https://github.com/ptanov) for code and others for suggestions!
 - 0.58.0 Chart component now has configurable colours and size - see [docs/xml/examples/07-chart](docs/xml/examples/07-chart)
