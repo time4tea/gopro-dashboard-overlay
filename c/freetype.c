@@ -72,6 +72,16 @@ static PyObject* MAYBE_UNUSED PyCapsule_From_FTC_SBitCache(FTC_SBitCache bitcach
 }
 /* End FTC_SBitCache <-> Capsule */
 
+/* Start FTC_CMapCache <-> Capsule */
+static FTC_CMapCache MAYBE_UNUSED FTC_CMapCache_FromCapsule(PyObject* capsule) {
+    return (FTC_CMapCache) PyCapsule_GetPointer(capsule, cap_bitcache);
+}
+
+static PyObject* MAYBE_UNUSED PyCapsule_From_FTC_CMapCache(FTC_CMapCache bitcache ) {
+    return PyCapsule_New(bitcache, cap_bitcache, NULL);
+}
+/* End FTC_CMapCache <-> Capsule */
+
 
 static PyObject* method_freetype_init(PyObject* self, PyObject* args) {
 
@@ -173,6 +183,25 @@ static PyObject* method_manager_done(PyObject* self, PyObject* args) {
     return Py_None;
 }
 
+static PyObject* method_cmapcache_new(PyObject* self, PyObject* args) {
+    PyObject* Cmanager;
+
+    if (!PyArg_ParseTuple(args, "O", &Cmanager)) {
+        return NULL;
+    }
+
+    FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
+
+    FTC_CMapCache cmapcache;
+
+    if ( FTC_CMapCache_New(manager, &cmapcache) != 0 ) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    return PyCapsule_From_FTC_CMapCache(cmapcache);
+}
+
 static PyObject* method_imagecache_new(PyObject* self, PyObject* args) {
 
     PyObject* Cmanager;
@@ -267,7 +296,7 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
 
     PyObject* Cimagecache;
     PyObject* Clibrary;
-    PyObject* Cmanager;
+    PyObject* Ccmapcache;
     FT_UInt width, height;
     long int faceId;
     PyObject* string;
@@ -275,7 +304,7 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
 
     int stroke_width = 2;
 
-    if (!PyArg_ParseTuple(args, "OOOlIIOO", &Clibrary, &Cmanager, &Cimagecache, &faceId, &width, &height, &string, &cb)) {
+    if (!PyArg_ParseTuple(args, "OOOlIIOO", &Clibrary, &Ccmapcache, &Cimagecache, &faceId, &width, &height, &string, &cb)) {
         return NULL;
     }
 
@@ -289,10 +318,8 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
     };
 
     FT_Library library = FT_Library_FromCapsule(Clibrary);
-    FT_Face face;
-    FTC_Manager manager = FTC_Manager_FromCapsule(Cmanager);
-    FTC_Manager_LookupFace(manager, (FTC_FaceID) faceId, &face);
     FTC_ImageCache imagecache = FTC_ImageCache_FromCapsule(Cimagecache);
+    FTC_CMapCache cmapcache = FTC_CMapCache_FromCapsule(Ccmapcache);
 
     FT_Stroker stroker;
 
@@ -310,7 +337,7 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
     Py_ssize_t length = PyUnicode_GET_LENGTH(string);
     for (int i = 0 ; i < length; i++ ) {
         current_char = PyUnicode_READ_CHAR(string, i);
-        char_index = FT_Get_Char_Index(face, current_char);
+        char_index = FTC_CMapCache_Lookup( cmapcache, (FTC_FaceID) faceId, -1, current_char);
 
         if (FTC_ImageCache_LookupScaler(
             imagecache,
@@ -428,6 +455,7 @@ static PyMethodDef methods[] = {
     {"cache_manager_get_face", method_manager_ft_get_face, METH_VARARGS, "Manager Get Face"},
     {"image_cache_new", method_imagecache_new, METH_VARARGS, "New Image Cache"},
     {"bit_cache_new", method_bitcache_new, METH_VARARGS, "New SBit Cache"},
+    {"cmap_cache_new", method_cmapcache_new, METH_VARARGS, "New CMap Cache"},
     {"render_render_string", method_render_string, METH_VARARGS, "Render String"},
     {"render_render_string_stroker", method_render_string_stroker, METH_VARARGS, "Render String with Stroker"},
 

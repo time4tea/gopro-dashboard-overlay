@@ -1,58 +1,24 @@
 import timeit
-from typing import Callable
+from dataclasses import dataclass
+from typing import Callable, Any
 
 import _freetype
-
-
-class FreeTypeImageCache:
-
-    def __init__(self, ptr):
-        # ptr = FTC_ImageCache
-        self.ptr = ptr
-
-
-class FreeTypeFontSize:
-
-    def __init__(self, ptr, imagecache: FreeTypeImageCache):
-        # ptr = FT_SizeRec
-        self.ptr = ptr
-        self.imagecache = imagecache
-
-    def render(self, string: str):
-        _freetype.render_render_string(self.ptr, self.imagecache.ptr, string)
-
-    def __str__(self) -> str:
-        return f"SizeRec: {self.ptr}"
-
 
 class FreeTypeFontId:
     def __init__(self, id):
         self.id = id
 
 
-class FreeTypeCacheManager:
+class FontRegistry:
 
-    def __init__(self, library):
-        # ptr = FTC_Manager
-        self.library = library
-        self.ptr = _freetype.cache_manager_new(library.ptr, self._id_to_path)
-        self.imagecache = FreeTypeImageCache(_freetype.image_cache_new(self.ptr))
-        self.bitcacheptr = _freetype.bit_cache_new(self.ptr)
+    def __init__(self) -> None:
         self.known = {}
         self.counter = 0
 
-    def _id_to_path(self, id):
-        path = self.known[id]
-        print(f"Returning {path}")
-        return path
+    def path(self, id):
+        return self.known[id]
 
-    def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_render_string(self.ptr, self.bitcacheptr, font_id.id, width, height, string, cb)
-
-    def render_stroker(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_render_string_stroker(self.library.ptr, self.ptr, self.imagecache.ptr, font_id.id, width, height, string, cb)
-
-    def register_font(self, path) -> FreeTypeFontId:
+    def register(self, path) -> FreeTypeFontId:
         if path in self.known:
             id = self.known[path]
         else:
@@ -61,6 +27,36 @@ class FreeTypeCacheManager:
             self.known[id] = path
 
         return FreeTypeFontId(id)
+
+
+@dataclass(frozen=True)
+class Caches:
+    imagecache: Any
+    bitcache: Any
+    cmapcache: Any
+
+
+class FreeTypeCacheManager:
+
+    def __init__(self, library):
+        # ptr = FTC_Manager
+        self.registry = FontRegistry()
+        self.library = library
+        self.ptr = _freetype.cache_manager_new(library.ptr, self.registry.path)
+        self.caches = Caches(
+            imagecache=_freetype.image_cache_new(self.ptr),
+            bitcache=_freetype.bit_cache_new(self.ptr),
+            cmapcache=_freetype.cmap_cache_new(self.ptr)
+        )
+
+    def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
+        _freetype.render_render_string(self.ptr, self.caches.cmapcache, self.caches.bitcache, font_id.id, width, height, string, cb)
+
+    def render_stroker(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
+        _freetype.render_render_string_stroker(self.library.ptr, self.caches.cmapcache, self.caches.imagecache, font_id.id, width, height, string, cb)
+
+    def register_font(self, path) -> FreeTypeFontId:
+        return self.registry.register(path)
 
     def __enter__(self):
         if self.ptr is None:
@@ -90,6 +86,7 @@ class FreeType:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        print("done with library")
         _freetype.freetype_done(self.ptr)
         self.ptr = None
 
@@ -143,7 +140,14 @@ if __name__ == "__main__":
             print(*args)
 
 
+    class Noop:
+        def font_callback(self, *args):
+            pass
+
+
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
+
+    rendered = True
 
     with FreeType() as ft:
         print(ft.version())
@@ -152,12 +156,14 @@ if __name__ == "__main__":
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
             # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            cache.render_stroker(id, renderable, height=40, cb=WidthCalc().font_callback)
+            thing = lambda: cache.render_stroker(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            # time_count = 1000
-            # time_take = timeit.timeit(lambda: cache.render(id, renderable, height=40, cb=WidthCalc().font_callback), number=time_count)
-            # print(time_take)
-            # print(format_time(time_take / time_count))
+            thing()
 
+            time_count = 10
+            time_take = timeit.timeit(thing, number=time_count)
+            print(time_take)
+            print(format_time(time_take / time_count))
 
-    image.show()
+    if rendered:
+        image.show()
