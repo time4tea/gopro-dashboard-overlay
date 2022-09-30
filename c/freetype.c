@@ -341,11 +341,12 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
 
         PyObject* result = PyObject_CallObject( cb, args);
         Py_DECREF(args);
-
         if (result == NULL) {
                 return NULL;
         }
     }
+
+    FT_Stroker_Done(stroker);
 
     Py_INCREF(Py_None);
     return Py_None;
