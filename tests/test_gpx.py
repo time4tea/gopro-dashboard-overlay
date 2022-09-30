@@ -143,4 +143,3 @@ def test_converting_gpx_to_timeseries_to_framemeta():
 
     assert len(gpx_framemeta) == len(gpx_timeseries)
 
-    print(gpx_framemeta)

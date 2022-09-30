@@ -1,5 +1,4 @@
 import datetime
-from dataclasses import dataclass
 from datetime import timedelta
 
 import gpxpy
@@ -61,14 +60,14 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta)
     gopro_framemeta.process(processor)
 
 
-def timeseries_to_framemeta(gpx_timeseries, units, start_date: datetime.datetime = None, duration: Timeunit = None) -> FrameMeta:
+def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datetime.datetime = None, duration: Timeunit = None) -> FrameMeta:
     fake_frame_meta = FrameMeta()
 
     if start_date is None:
         start_date = gpx_timeseries.min
 
     if duration is None:
-        end_date = datetime.datetime.max.astimezone(datetime.timezone.utc)
+        end_date = gpx_timeseries.max
     else:
         end_date = start_date + duration.timedelta()
 
