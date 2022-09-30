@@ -4,6 +4,7 @@ from typing import Callable, Any
 
 import _freetype
 
+
 class FreeTypeFontId:
     def __init__(self, id):
         self.id = id
