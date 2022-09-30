@@ -119,7 +119,7 @@ if __name__ == "__main__":
     draw = ImageDraw.Draw(image)
 
 
-    class WidthCalc:
+    class DrawChars:
 
         def __init__(self):
             self.x = 0
@@ -158,7 +158,7 @@ if __name__ == "__main__":
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
             # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            thing = lambda: cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
+            thing = lambda: cache.render(id, renderable, height=40, cb=DrawChars().font_callback)
 
             thing()
 
