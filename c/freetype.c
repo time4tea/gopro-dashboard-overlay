@@ -16,6 +16,80 @@
 
 #define MAYBE_UNUSED __attribute__ ((unused))
 
+/* Copied from Pillow */
+#define IMAGING_MODE_LENGTH \
+    6 + 1 /* Band names ("1", "L", "P", "RGB", "RGBA", "CMYK", "YCbCr", "BGR;xy") */
+
+#if SIZEOF_SHORT == 2
+#define INT16 short
+#elif SIZEOF_INT == 2
+#define INT16 int
+#else
+#define INT16 short /* most things works just fine anyway... */
+#endif
+
+#define UINT8 unsigned char
+
+#if SIZEOF_SHORT == 4
+#define INT32 short
+#elif SIZEOF_INT == 4
+#define INT32 int
+#elif SIZEOF_LONG == 4
+#define INT32 long
+#else
+#error Cannot find required 32-bit integer type
+#endif
+
+struct ImagingPaletteInstance {
+    /* Format */
+    char mode[IMAGING_MODE_LENGTH]; /* Band names */
+
+    /* Data */
+    int size;
+    UINT8 palette[1024]; /* Palette data (same format as image data) */
+
+    INT16 *cache;   /* Palette cache (used for predefined palettes) */
+    int keep_cache; /* This palette will be reused; keep cache */
+};
+
+typedef struct ImagingPaletteInstance *ImagingPalette;
+typedef struct ImagingMemoryInstance *Imaging;
+
+typedef struct {
+    char *ptr;
+    int size;
+} ImagingMemoryBlock;
+
+struct ImagingMemoryInstance {
+    /* Format */
+    char mode[IMAGING_MODE_LENGTH]; /* Band names ("1", "L", "P", "RGB", "RGBA", "CMYK",
+                                       "YCbCr", "BGR;xy") */
+    int type;                       /* Data type (IMAGING_TYPE_*) */
+    int depth;                      /* Depth (ignored in this version) */
+    int bands;                      /* Number of bands (1, 2, 3, or 4) */
+    int xsize;                      /* Image dimension. */
+    int ysize;
+
+    /* Colour palette (for "P" images only) */
+    ImagingPalette palette;
+
+    /* Data pointers */
+    UINT8 **image8;  /* Set for 8-bit images (pixelsize=1). */
+    INT32 **image32; /* Set for 32-bit images (pixelsize=4). */
+
+    /* Internals */
+    char **image;               /* Actual raster data. */
+    char *block;                /* Set if data is allocated in a single block. */
+    ImagingMemoryBlock *blocks; /* Memory blocks for pixel storage */
+
+    int pixelsize; /* Size of a pixel, in bytes (1, 2 or 4) */
+    int linesize;  /* Size of a line, in bytes (xsize * pixelsize) */
+
+    /* Virtual methods */
+    void (*destroy)(Imaging im);
+};
+
+
 static  char cap_library[] = "FT_library";
 static  char cap_manager[] = "FTC_manager";
 static  char cap_size[] = "FT_size";
@@ -292,6 +366,48 @@ static PyObject* method_manager_ft_get_face(PyObject* self, PyObject* argsOlII) 
 //#define PIXEL(x) ((((x) + 32) & -64) >> 6)
 #define PIXEL(x) (x >> 16)
 
+static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
+
+    Py_ssize_t dest_image_id;
+    int dest_x, dest_y;
+    int src_width, src_height, src_pitch;
+    PyObject* src_mv;
+
+    if (!PyArg_ParseTuple(args, "niiOiii", &dest_image_id, &dest_x, &dest_y, &src_mv, &src_width, &src_height, &src_pitch)) {
+        return NULL;
+    }
+
+    Py_buffer* buffer = PyMemoryView_GET_BUFFER(src_mv);
+
+    unsigned char* source = (unsigned char*) buffer->buf;
+
+    Imaging im = (Imaging) dest_image_id;
+
+    if ( ! (im->mode[0] == 'R' && im->mode[1] == 'G' && im->mode[2] == 'B' && im->mode[3] == 'A') ) {
+        // image mode is not RGBA, bail
+        PyErr_SetString(PyExc_TypeError, "Image mode must be RGBA");
+        return NULL;
+    }
+
+    for (int y = 0; y < src_height; y++ ) {
+        unsigned char* target = (unsigned char *)im->image[dest_y + y] + dest_x * 4;
+        for ( int x = 0 ; x < src_width; x++ ) {
+            unsigned char v = source[x];
+            if (target[x * 4 + 3] < v) {
+                target[x * 4 + 0] = 255;
+                target[x * 4 + 1] = 255;
+                target[x * 4 + 2] = 255;
+                target[x * 4 + 3] = v;
+            }
+        }
+        source += src_pitch;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
 
     PyObject* Cimagecache;
@@ -356,6 +472,11 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
 
         FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 
+        if ( bitmap_glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY) {
+            PyErr_SetString(PyExc_TypeError, "Only Greyscale Pixel Format Supported");
+            return NULL;
+        }
+
         PyObject* args = Py_BuildValue(
                                         "(iiiiiiiiiO)",
                                         bitmap_glyph->bitmap.width, bitmap_glyph->bitmap.rows,
@@ -374,7 +495,7 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
     }
 
     FT_Stroker_Done(stroker);
-
+    FT_Done_Glyph(glyph);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -458,6 +579,7 @@ static PyMethodDef methods[] = {
     {"cmap_cache_new", method_cmapcache_new, METH_VARARGS, "New CMap Cache"},
     {"render_render_string", method_render_string, METH_VARARGS, "Render String"},
     {"render_render_string_stroker", method_render_string_stroker, METH_VARARGS, "Render String with Stroker"},
+    {"blit_glyph", method_blit_glyph, METH_VARARGS, "Blit Glyph Bitmap into image"},
 
     {NULL, NULL, 0, NULL}
 };

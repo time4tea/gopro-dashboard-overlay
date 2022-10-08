@@ -119,6 +119,20 @@ if __name__ == "__main__":
     draw = ImageDraw.Draw(image)
 
 
+    class BlitChars:
+
+        def __init__(self):
+            self.x = 0
+
+        def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+            baseline = 50
+            _freetype.blit_glyph(image.im.id, self.x, baseline - top, mv, width, height, pitch)
+            self.x += xadvance
+
+        def reset(self):
+            self.x = 0
+
+
     class DrawChars:
 
         def __init__(self):
@@ -128,24 +142,38 @@ if __name__ == "__main__":
 
             baseline = 50
 
+            points = {}
+
+            _freetype.blit_glyph(image.im.id, self.x, 0, mv, width, height, pitch)
+
             for j in range(0, height):
                 for i in range(0, width):
                     v = mv[(j * pitch) + i]
                     if v > 0:
-                        draw.point((self.x + i, baseline - top + j), (v, v, v))
+                        points.setdefault(v, []).append((self.x + i, baseline - top + j))
+
+            for v, p in points.items():
+                draw.point(p, (v, v, v))
+
             self.x += xadvance
 
+        def reset(self):
+            self.x = 0
 
     class DumpMetrics:
 
         def font_callback(self, *args):
             print(*args)
 
+        def reset(self):
+            pass
 
     class Noop:
         def font_callback(self, *args):
             pass
 
+        def reset(self):
+            pass
 
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
 
@@ -158,11 +186,15 @@ if __name__ == "__main__":
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
             # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            thing = lambda: cache.render(id, renderable, height=40, cb=DrawChars().font_callback)
+            d = BlitChars()
+
+            def thing():
+                cache.render(id, renderable, height=40, cb=d.font_callback)
+                d.reset()
 
             thing()
 
-            time_count = 10
+            time_count = 100
             time_take = timeit.timeit(thing, number=time_count)
             print(time_take)
             print(format_time(time_take / time_count))
