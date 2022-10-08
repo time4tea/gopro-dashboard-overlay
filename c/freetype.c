@@ -372,8 +372,9 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
     int dest_x, dest_y;
     int src_width, src_height, src_pitch;
     PyObject* src_mv;
+    unsigned char ink_r, ink_g, ink_b;
 
-    if (!PyArg_ParseTuple(args, "niiOiii", &dest_image_id, &dest_x, &dest_y, &src_mv, &src_width, &src_height, &src_pitch)) {
+    if (!PyArg_ParseTuple(args, "(bbb)niiOiii", &ink_r, &ink_g, &ink_b, &dest_image_id, &dest_x, &dest_y, &src_mv, &src_width, &src_height, &src_pitch)) {
         return NULL;
     }
 
@@ -383,8 +384,8 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
 
     Imaging im = (Imaging) dest_image_id;
 
+    // Ensure target image mode is RGBA
     if ( ! (im->mode[0] == 'R' && im->mode[1] == 'G' && im->mode[2] == 'B' && im->mode[3] == 'A') ) {
-        // image mode is not RGBA, bail
         PyErr_SetString(PyExc_TypeError, "Image mode must be RGBA");
         return NULL;
     }
@@ -394,9 +395,9 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
         for ( int x = 0 ; x < src_width; x++ ) {
             unsigned char v = source[x];
             if (target[x * 4 + 3] < v) {
-                target[x * 4 + 0] = 255;
-                target[x * 4 + 1] = 255;
-                target[x * 4 + 2] = 255;
+                target[x * 4 + 0] = ink_r;
+                target[x * 4 + 1] = ink_g;
+                target[x * 4 + 2] = ink_b;
                 target[x * 4 + 3] = v;
             }
         }

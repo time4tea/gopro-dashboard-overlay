@@ -96,14 +96,15 @@ class FreeType:
 
 class BlitChars:
 
-    def __init__(self, image, x, y):
+    def __init__(self, image, ink, x, y):
         self.image = image
+        self.ink = ink
         self.x = x
         self.baseline = y
 
     def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
-        print(f"{width}x{height} {left} {top} {max_grays} {pitch} {xadvance} {yadvance}")
-        _freetype.blit_glyph(self.image.im.id, self.x, self.baseline - top, mv, width, height, pitch)
+        # print(f"{self.ink} {width}x{height} {left} {top} {max_grays} {pitch} {xadvance} {yadvance}")
+        _freetype.blit_glyph(self.ink, self.image.im.id, self.x, self.baseline - top, mv, width, height, pitch)
         self.x += xadvance
 
     def reset(self):
@@ -182,21 +183,23 @@ if __name__ == "__main__":
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
 
     rendered = True
-    timing = False
+    timing = True
 
     pillow_font = font.load_font("Roboto-Medium.ttf", 40)
 
+
     def pillow_thing():
         draw.text(
-                    (0, 50),
-                    renderable,
-                    anchor="la",
-                    direction="ltr",
-                    font=pillow_font,
-                    fill=(255,255,255),
-                    stroke_width=2,
-                    stroke_fill=(0, 0, 0)
-                )
+            (0, 50),
+            renderable,
+            anchor="la",
+            direction="ltr",
+            font=pillow_font,
+            fill=(255, 255, 255),
+            stroke_width=2,
+            stroke_fill=(0, 0, 0)
+        )
+
 
     pillow_thing()
 
@@ -205,14 +208,10 @@ if __name__ == "__main__":
 
         with ft.create_cache() as cache:
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
-            # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
-
-            d = BlitChars(image, 0, 50)
 
             def thing():
-                cache.render_stroker(id, renderable, height=40, cb=d.font_callback)
-                d.reset()
-
+                cache.render_stroker(id, renderable, height=40, cb=BlitChars(image, (0, 0, 0), 0, 50).font_callback)
+                cache.render(id, renderable, height=40, cb=BlitChars(image, (255, 255, 255), 0, 50).font_callback)
 
             thing()
 
