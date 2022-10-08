@@ -17,6 +17,18 @@
 #define MAYBE_UNUSED __attribute__ ((unused))
 
 /* Copied from Pillow */
+#define SHIFTFORDIV255(a) ((((a) >> 8) + a) >> 8)
+
+/* like (a * b + 127) / 255), but much faster on most platforms */
+#define MULDIV255(a, b, tmp) (tmp = (a) * (b) + 128, SHIFTFORDIV255(tmp))
+
+#define DIV255(a, tmp) (tmp = (a) + 128, SHIFTFORDIV255(tmp))
+
+#define BLEND(mask, in1, in2, tmp1) DIV255(in1 *(255 - mask) + in2 * mask, tmp1)
+
+#define PREBLEND(mask, in1, in2, tmp1) (MULDIV255(in1, (255 - mask), tmp1) + in2)
+
+
 #define IMAGING_MODE_LENGTH \
     6 + 1 /* Band names ("1", "L", "P", "RGB", "RGBA", "CMYK", "YCbCr", "BGR;xy") */
 
@@ -372,9 +384,8 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
     int dest_x, dest_y;
     int src_width, src_height, src_pitch;
     PyObject* src_mv;
-    unsigned char ink_r, ink_g, ink_b;
 
-    if (!PyArg_ParseTuple(args, "(bbb)niiOiii", &ink_r, &ink_g, &ink_b, &dest_image_id, &dest_x, &dest_y, &src_mv, &src_width, &src_height, &src_pitch)) {
+    if (!PyArg_ParseTuple(args, "niiOiii", &dest_image_id, &dest_x, &dest_y, &src_mv, &src_width, &src_height, &src_pitch)) {
         return NULL;
     }
 
@@ -384,9 +395,8 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
 
     Imaging im = (Imaging) dest_image_id;
 
-    // Ensure target image mode is RGBA
-    if ( ! (im->mode[0] == 'R' && im->mode[1] == 'G' && im->mode[2] == 'B' && im->mode[3] == 'A') ) {
-        PyErr_SetString(PyExc_TypeError, "Image mode must be RGBA");
+    if ( im->mode[0] != 'L') {
+        PyErr_SetString(PyExc_TypeError, "Only Image mode L supported");
         return NULL;
     }
 
@@ -395,21 +405,162 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
         if (target_y < 0 || target_y >= im->ysize) {
             continue;
         }
-        unsigned char* target = (unsigned char *)im->image[target_y] + dest_x * 4;
+        unsigned char* target = (unsigned char *)im->image8[target_y] + dest_x;
         for ( int x = 0 ; x < src_width; x++ ) {
             int target_x = dest_x + x;
             if ( target_x < 0 || target_x >= im->xsize ) {
                 continue;
             }
             unsigned char v = source[x];
-            if (target[x * 4 + 3] < v) {
-                target[x * 4 + 0] = ink_r;
-                target[x * 4 + 1] = ink_g;
-                target[x * 4 + 2] = ink_b;
-                target[x * 4 + 3] = v;
+            if (target[x] < v) {
+                target[x] = v;
             }
         }
         source += src_pitch;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static inline void
+fill_mask_L(
+    Imaging imOut,
+    const UINT8 *ink,
+    Imaging imMask,
+    int dx,
+    int dy,
+    int sx,
+    int sy,
+    int xsize,
+    int ysize,
+    int pixelsize) {
+    /* fill with mode "L" matte */
+
+    int x, y, i;
+    unsigned int tmp1;
+
+    if (imOut->image8) {
+        printf("Image8 output case\n");
+        for (y = 0; y < ysize; y++) {
+            UINT8 *out = imOut->image8[y + dy] + dx;
+            if (strncmp(imOut->mode, "I;16", 4) == 0) {
+                out += dx;
+            }
+            UINT8 *mask = imMask->image8[y + sy] + sx;
+            for (x = 0; x < xsize; x++) {
+                *out = BLEND(*mask, *out, ink[0], tmp1);
+                if (strncmp(imOut->mode, "I;16", 4) == 0) {
+                    out++;
+                    *out = BLEND(*mask, *out, ink[0], tmp1);
+                }
+                out++, mask++;
+            }
+        }
+
+    } else {
+
+        int special_mode = (strcmp(imOut->mode, "RGBa") == 0 || strcmp(imOut->mode, "RGBA") == 0 || strcmp(imOut->mode, "La") == 0 || strcmp(imOut->mode, "LA") == 0 || strcmp(imOut->mode, "PA") == 0);
+
+        for (y = 0; y < ysize; y++) {
+            UINT8 *out = (UINT8 *)imOut->image[y + dy] + dx * pixelsize;
+            UINT8 *mask = (UINT8 *)imMask->image[y + sy] + sx;
+            for (x = 0; x < xsize; x++) {
+                for (i = 0; i < pixelsize; i++) {
+                    UINT8 channel_mask = *mask;
+                    if ( special_mode && i != 3 && channel_mask != 0) {
+                        channel_mask = 255 - (255 - channel_mask) * (1 - (255 - out[3]) / 255);
+                    }
+                    out[i] = BLEND(channel_mask, out[i], ink[i], tmp1);
+                }
+                out += pixelsize;
+                mask++;
+            }
+        }
+    }
+}
+
+int
+JRImagingFill2(
+    Imaging imOut,
+    const void *ink,
+    Imaging imMask,
+    int dx0,
+    int dy0,
+    int dx1,
+    int dy1) {
+    int xsize, ysize;
+    int pixelsize;
+    int sx0, sy0;
+
+    if (!imOut || !ink) {
+        PyErr_SetString(PyExc_TypeError, "No Image out or ink");
+        return -1;
+    }
+
+    pixelsize = imOut->pixelsize;
+
+    xsize = dx1 - dx0;
+    ysize = dy1 - dy0;
+
+    if (imMask && (xsize != imMask->xsize || ysize != imMask->ysize)) {
+        PyErr_SetString(PyExc_TypeError, "sizes");
+        return -1;
+    }
+
+    /* Determine which region to fill */
+    sx0 = sy0 = 0;
+    if (dx0 < 0) {
+        xsize += dx0, sx0 = -dx0, dx0 = 0;
+    }
+    if (dx0 + xsize > imOut->xsize) {
+        xsize = imOut->xsize - dx0;
+    }
+    if (dy0 < 0) {
+        ysize += dy0, sy0 = -dy0, dy0 = 0;
+    }
+    if (dy0 + ysize > imOut->ysize) {
+        ysize = imOut->ysize - dy0;
+    }
+
+    if (xsize <= 0 || ysize <= 0) {
+        printf("xsize = %d, ysize = %d\n", xsize, ysize);
+        PyErr_SetString(PyExc_TypeError, "negatives");
+        return 0;
+    }
+
+    if (strcmp(imMask->mode, "L") == 0) {
+        fill_mask_L(imOut, ink, imMask, dx0, dy0, sx0, sy0, xsize, ysize, pixelsize);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Bad transparency mask");
+        return -1;
+    }
+
+    return 0;
+}
+
+int JRImagingDrawBitmap(Imaging im, int x0, int y0, Imaging bitmap, const void *ink) {
+    return JRImagingFill2( im, ink, bitmap, x0, y0, x0 + bitmap->xsize, y0 + bitmap->ysize);
+}
+
+static PyObject* _draw_bitmap(PyObject* self, PyObject* args) {
+
+    Py_ssize_t source_image_id;
+    Py_ssize_t dest_image_id;
+    int x,y;
+
+    int ink;
+    if (!PyArg_ParseTuple(args, "(ii)nni", &x, &y, &source_image_id, &dest_image_id, &ink)) {
+        return NULL;
+    }
+
+    Imaging source_image = (Imaging) source_image_id;
+    Imaging dest_image = (Imaging) dest_image_id;
+
+    int n = JRImagingDrawBitmap( dest_image, x, y, source_image, &ink);
+
+    if (n < 0) {
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -426,10 +577,9 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
     long int faceId;
     PyObject* string;
     PyObject* cb;
+    int stroke_width;
 
-    int stroke_width = 2;
-
-    if (!PyArg_ParseTuple(args, "OOOlIIOO", &Clibrary, &Ccmapcache, &Cimagecache, &faceId, &width, &height, &string, &cb)) {
+    if (!PyArg_ParseTuple(args, "OOOlIIOiO", &Clibrary, &Ccmapcache, &Cimagecache, &faceId, &width, &height, &string, &stroke_width, &cb)) {
         return NULL;
     }
 
@@ -588,7 +738,7 @@ static PyMethodDef methods[] = {
     {"render_string", method_render_string, METH_VARARGS, "Render String"},
     {"render_string_stroker", method_render_string_stroker, METH_VARARGS, "Render String with Stroker"},
     {"blit_glyph", method_blit_glyph, METH_VARARGS, "Blit Glyph Bitmap into image"},
-
+    {"draw_bitmap", _draw_bitmap, METH_VARARGS, "Copy of draw bitmap"},
     {NULL, NULL, 0, NULL}
 };
 

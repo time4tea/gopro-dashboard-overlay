@@ -1,8 +1,9 @@
 import timeit
 from dataclasses import dataclass
-from typing import Callable, Any
+from typing import Any, Tuple
 
 import _freetype
+from PIL.Image import Image
 
 from gopro_overlay import font
 
@@ -39,6 +40,12 @@ class Caches:
     cmapcache: Any
 
 
+@dataclass(frozen=True)
+class BBox:
+    x: int
+    y: int
+
+
 class FreeTypeCacheManager:
 
     def __init__(self, library):
@@ -52,11 +59,36 @@ class FreeTypeCacheManager:
             cmapcache=_freetype.cmap_cache_new(self.ptr)
         )
 
-    def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, cb)
+    def calculate_size(self, font_id: FreeTypeFontId, string: str, width: int = 0, height: int = 0) -> BBox:
+        size_calc = CalculateSize()
+        _freetype.render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, size_calc.font_callback)
+        return BBox(x=size_calc.x, y=size_calc.y)
 
-    def render_stroker(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_string_stroker(self.library.ptr, self.caches.cmapcache, self.caches.imagecache, font_id.id, width, height, string, cb)
+    def _render_mask(self, dest, size, x, y, fill, f):
+        temporary = Image.new("L", (size.x, size.y), 0)
+        f(temporary)
+        ink, _ = draw._getink(fill)
+        _freetype.draw_bitmap((x, y), temporary.im.id, dest.im.id, ink)
+
+    def render(self, font_id: FreeTypeFontId, image: Image, string: str, width: int = 0, height: int = 0, x: int = 0, y: int = 0, fill: Tuple = (255, 255, 255)):
+        bounding_box = self.calculate_size(font_id, string, width, height)
+
+        self._render_mask(
+            image,
+            bounding_box, x, y, fill,
+            f=lambda t: _freetype.render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, BlitChars(t, 0, bounding_box.y).font_callback)
+        )
+
+    def render_stroker(self, font_id: FreeTypeFontId, string: str, width: int = 0, height: int = 0, x: int = 0, y: int = 0, fill: Tuple = (255, 255, 255)):
+        bounding_box = self.calculate_size(font_id, string, width, height)
+
+        stroke_width = 2
+
+        self._render_mask(
+            image,
+            BBox(x=bounding_box.x + (2 * stroke_width), y=bounding_box.y + (2 * stroke_width)), x, y, fill,
+            f=lambda t: _freetype.render_string_stroker(self.library.ptr, self.caches.cmapcache, self.caches.imagecache, font_id.id, width, height, string, stroke_width, BlitChars(t, 0, bounding_box.y + stroke_width).font_callback)
+        )
 
     def register_font(self, path) -> FreeTypeFontId:
         return self.registry.register(path)
@@ -94,21 +126,27 @@ class FreeType:
         self.ptr = None
 
 
+class CalculateSize:
+
+    def __init__(self):
+        self.y = 0
+        self.x = 0
+
+    def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+        self.x += xadvance
+        self.y = max(self.y, height)
+
+
 class BlitChars:
 
-    def __init__(self, image, ink, x, y):
+    def __init__(self, image, x, y):
         self.image = image
-        self.ink = ink
         self.x = x
         self.baseline = y
 
     def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
-        # print(f"{self.ink} {width}x{height} {left} {top} {max_grays} {pitch} {xadvance} {yadvance}")
-        _freetype.blit_glyph(self.ink, self.image.im.id, self.x, self.baseline - top, mv, width, height, pitch)
+        _freetype.blit_glyph(self.image.im.id, self.x, self.baseline - top, mv, width, height, pitch)
         self.x += xadvance
-
-    def reset(self):
-        self.x = 0
 
 
 class DrawChars:
@@ -133,32 +171,21 @@ class DrawChars:
 
         self.x += xadvance
 
-    def reset(self):
-        self.x = 0
-
 
 class DumpMetrics:
 
     def font_callback(self, *args):
         print(*args)
 
-    def reset(self):
-        pass
-
 
 class Noop:
     def font_callback(self, *args):
         pass
 
-    def reset(self):
-        pass
 
-
-if __name__ == "__main__":
-
+def print_timing(loops, thing):
     time_unit = None
     units = {"nsec": 1e-9, "usec": 1e-6, "msec": 1e-3, "sec": 1.0}
-
 
     def format_time(dt):
         unit = time_unit
@@ -174,10 +201,16 @@ if __name__ == "__main__":
 
         return "%.*g %s" % (3, dt / scale, unit)
 
+    time_taken = timeit.timeit(thing, number=loops)
+    print(f"  {format_time(time_taken)}")
+    print(f"  {format_time(time_taken / loops)}")
+
+
+if __name__ == "__main__":
 
     from PIL import Image, ImageDraw
 
-    image = Image.new("RGBA", (800, 100), (0, 0, 0, 0))
+    image = Image.new("RGBA", (800, 200), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
 
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
@@ -185,12 +218,14 @@ if __name__ == "__main__":
     rendered = True
     timing = True
 
-    pillow_font = font.load_font("Roboto-Medium.ttf", 40)
+    font_size = 50
+
+    pillow_font = font.load_font("Roboto-Medium.ttf", font_size)
 
 
     def pillow_thing():
         draw.text(
-            (0, 50),
+            (0, 150),
             renderable,
             anchor="la",
             direction="ltr",
@@ -201,6 +236,19 @@ if __name__ == "__main__":
         )
 
 
+    def new_image_pillow():
+        temporary = Image.new("L", (400, 200), 0)
+        draw = ImageDraw.Draw(image)
+        ink, _ = draw._getink((0, 0, 0))
+        draw.draw.draw_bitmap((2, 2), temporary.im, ink)
+
+
+    def new_image_james():
+        temporary = Image.new("L", (400, 200), 0)
+        ink, _ = draw._getink((0, 0, 0))
+        _freetype.draw_bitmap((2, 2), temporary.im.id, image.im.id, ink)
+
+
     pillow_thing()
 
     with FreeType() as ft:
@@ -209,23 +257,24 @@ if __name__ == "__main__":
         with ft.create_cache() as cache:
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
 
+
             def thing():
-                cache.render_stroker(id, renderable, height=40, cb=BlitChars(image, (0, 0, 0), 0, 50).font_callback)
-                cache.render(id, renderable, height=40, cb=BlitChars(image, (255, 255, 255), 0, 50).font_callback)
+                cache.render_stroker(id, renderable, height=font_size, x=10, y=50, fill=(0, 0, 0))
+                cache.render(id, string=renderable, image=image, height=font_size, x=12, y=52, fill=(255, 255, 255))
+
 
             thing()
 
             if timing:
+                loops = 100
+                # print("New Image Pillow")
+                # print_timing(100, new_image_pillow)
+                # print("New Image james")
+                # print_timing(100, new_image_james)
                 print("Cache")
-                time_count = 100
-                time_take = timeit.timeit(thing, number=time_count)
-                print(f"  {time_take}")
-                print(f"  {format_time(time_take / time_count)}")
-
+                print_timing(loops, thing)
                 print("Pillow")
-                time_take = timeit.timeit(pillow_thing, number=time_count)
-                print(f"  {time_take}")
-                print(f"  {format_time(time_take / time_count)}")
+                print_timing(loops, pillow_thing)
 
     if rendered:
         image.show()

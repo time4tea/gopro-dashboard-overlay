@@ -12,7 +12,7 @@ requires = [
     "geotiler==0.14.5",
     "gpxpy==1.4.2",
     "geographiclib",
-    "pillow==8.3.2",
+    "pillow==8.4.0",
     "pint==0.17",
     "progressbar2==3.53.3",
     "requests==2.27.1",
@@ -29,7 +29,7 @@ class GoProOverlayBuildExt(build_ext):
         self.compiler.include_dirs = ["/usr/include/freetype2"] + self.compiler.include_dirs
         for extension in self.extensions:
             extension.libraries += [ "freetype" ]
-            extension.extra_compile_args += [ "-ggdb", "-Wall", "-Werror" ]
+            extension.extra_compile_args += [ "-ggdb", "-Wall", "-Werror", "-O2" ]
             print(extension.libraries)
 
         build_ext.build_extensions(self)
