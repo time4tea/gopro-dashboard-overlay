@@ -144,8 +144,6 @@ if __name__ == "__main__":
 
             points = {}
 
-            _freetype.blit_glyph(image.im.id, self.x, 0, mv, width, height, pitch)
-
             for j in range(0, height):
                 for i in range(0, width):
                     v = mv[(j * pitch) + i]
