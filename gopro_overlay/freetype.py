@@ -4,6 +4,8 @@ from typing import Callable, Any
 
 import _freetype
 
+from gopro_overlay import font
+
 
 class FreeTypeFontId:
     def __init__(self, id):
@@ -92,6 +94,64 @@ class FreeType:
         self.ptr = None
 
 
+class BlitChars:
+
+    def __init__(self, image, x, y):
+        self.image = image
+        self.x = x
+        self.baseline = y
+
+    def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+        _freetype.blit_glyph(self.image.im.id, self.x, self.baseline - top, mv, width, height, pitch)
+        self.x += xadvance
+
+    def reset(self):
+        self.x = 0
+
+
+class DrawChars:
+
+    def __init__(self, image, x, y):
+        self.image = image
+        self.x = x
+        self.baseline = y
+
+    def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+
+        points = {}
+
+        for j in range(0, height):
+            for i in range(0, width):
+                v = mv[(j * pitch) + i]
+                if v > 0:
+                    points.setdefault(v, []).append((self.x + i, self.baseline - top + j))
+
+        for v, p in points.items():
+            draw.point(p, (v, v, v))
+
+        self.x += xadvance
+
+    def reset(self):
+        self.x = 0
+
+
+class DumpMetrics:
+
+    def font_callback(self, *args):
+        print(*args)
+
+    def reset(self):
+        pass
+
+
+class Noop:
+    def font_callback(self, *args):
+        pass
+
+    def reset(self):
+        pass
+
+
 if __name__ == "__main__":
 
     time_unit = None
@@ -118,64 +178,25 @@ if __name__ == "__main__":
     image = Image.new("RGBA", (800, 100), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
 
-
-    class BlitChars:
-
-        def __init__(self):
-            self.x = 0
-
-        def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
-            baseline = 50
-            _freetype.blit_glyph(image.im.id, self.x, baseline - top, mv, width, height, pitch)
-            self.x += xadvance
-
-        def reset(self):
-            self.x = 0
-
-
-    class DrawChars:
-
-        def __init__(self):
-            self.x = 0
-
-        def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
-
-            baseline = 50
-
-            points = {}
-
-            for j in range(0, height):
-                for i in range(0, width):
-                    v = mv[(j * pitch) + i]
-                    if v > 0:
-                        points.setdefault(v, []).append((self.x + i, baseline - top + j))
-
-            for v, p in points.items():
-                draw.point(p, (v, v, v))
-
-            self.x += xadvance
-
-        def reset(self):
-            self.x = 0
-
-    class DumpMetrics:
-
-        def font_callback(self, *args):
-            print(*args)
-
-        def reset(self):
-            pass
-
-    class Noop:
-        def font_callback(self, *args):
-            pass
-
-        def reset(self):
-            pass
-
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
 
     rendered = True
+
+    pillow_font = font.load_font("Roboto-Medium.ttf", 40)
+
+    def pillow_thing():
+        draw.text(
+                    (0, 50),
+                    renderable,
+                    anchor="la",
+                    direction="ltr",
+                    font=pillow_font,
+                    fill=(255,255,255),
+                    stroke_width=2,
+                    stroke_fill=(0, 0, 0)
+                )
+
+    pillow_thing()
 
     with FreeType() as ft:
         print(ft.version())
@@ -184,18 +205,25 @@ if __name__ == "__main__":
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
             # cache.render(id, renderable, height=40, cb=WidthCalc().font_callback)
 
-            d = BlitChars()
+            d = BlitChars(image, 0, 50)
 
             def thing():
                 cache.render(id, renderable, height=40, cb=d.font_callback)
                 d.reset()
 
+
             thing()
 
+            print("Cache")
             time_count = 100
             time_take = timeit.timeit(thing, number=time_count)
-            print(time_take)
-            print(format_time(time_take / time_count))
+            print(f"  {time_take}")
+            print(f"  {format_time(time_take / time_count)}")
+
+            print("Pillow")
+            time_take = timeit.timeit(pillow_thing, number=time_count)
+            print(f"  {time_take}")
+            print(f"  {format_time(time_take / time_count)}")
 
     if rendered:
         image.show()
