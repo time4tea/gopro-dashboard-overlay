@@ -495,7 +495,6 @@ static PyObject* method_render_string_stroker(PyObject* self, PyObject* args) {
     }
 
     FT_Stroker_Done(stroker);
-    FT_Done_Glyph(glyph);
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -577,8 +576,8 @@ static PyMethodDef methods[] = {
     {"image_cache_new", method_imagecache_new, METH_VARARGS, "New Image Cache"},
     {"bit_cache_new", method_bitcache_new, METH_VARARGS, "New SBit Cache"},
     {"cmap_cache_new", method_cmapcache_new, METH_VARARGS, "New CMap Cache"},
-    {"render_render_string", method_render_string, METH_VARARGS, "Render String"},
-    {"render_render_string_stroker", method_render_string_stroker, METH_VARARGS, "Render String with Stroker"},
+    {"render_string", method_render_string, METH_VARARGS, "Render String"},
+    {"render_string_stroker", method_render_string_stroker, METH_VARARGS, "Render String with Stroker"},
     {"blit_glyph", method_blit_glyph, METH_VARARGS, "Blit Glyph Bitmap into image"},
 
     {NULL, NULL, 0, NULL}

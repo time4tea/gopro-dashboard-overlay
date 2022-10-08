@@ -53,10 +53,10 @@ class FreeTypeCacheManager:
         )
 
     def render(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, cb)
+        _freetype.render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, cb)
 
     def render_stroker(self, font_id: FreeTypeFontId, string: str, cb: Callable, width: int = 0, height: int = 0):
-        _freetype.render_render_string_stroker(self.library.ptr, self.caches.cmapcache, self.caches.imagecache, font_id.id, width, height, string, cb)
+        _freetype.render_string_stroker(self.library.ptr, self.caches.cmapcache, self.caches.imagecache, font_id.id, width, height, string, cb)
 
     def register_font(self, path) -> FreeTypeFontId:
         return self.registry.register(path)
@@ -102,6 +102,7 @@ class BlitChars:
         self.baseline = y
 
     def font_callback(self, width, height, left, top, format, max_grays, pitch, xadvance, yadvance, mv):
+        print(f"{width}x{height} {left} {top} {max_grays} {pitch} {xadvance} {yadvance}")
         _freetype.blit_glyph(self.image.im.id, self.x, self.baseline - top, mv, width, height, pitch)
         self.x += xadvance
 
@@ -181,6 +182,7 @@ if __name__ == "__main__":
     renderable = "Date: 2022-09-26 Time: 14:35:26.1"
 
     rendered = True
+    timing = False
 
     pillow_font = font.load_font("Roboto-Medium.ttf", 40)
 
@@ -208,22 +210,23 @@ if __name__ == "__main__":
             d = BlitChars(image, 0, 50)
 
             def thing():
-                cache.render(id, renderable, height=40, cb=d.font_callback)
+                cache.render_stroker(id, renderable, height=40, cb=d.font_callback)
                 d.reset()
 
 
             thing()
 
-            print("Cache")
-            time_count = 100
-            time_take = timeit.timeit(thing, number=time_count)
-            print(f"  {time_take}")
-            print(f"  {format_time(time_take / time_count)}")
+            if timing:
+                print("Cache")
+                time_count = 100
+                time_take = timeit.timeit(thing, number=time_count)
+                print(f"  {time_take}")
+                print(f"  {format_time(time_take / time_count)}")
 
-            print("Pillow")
-            time_take = timeit.timeit(pillow_thing, number=time_count)
-            print(f"  {time_take}")
-            print(f"  {format_time(time_take / time_count)}")
+                print("Pillow")
+                time_take = timeit.timeit(pillow_thing, number=time_count)
+                print(f"  {time_take}")
+                print(f"  {format_time(time_take / time_count)}")
 
     if rendered:
         image.show()
