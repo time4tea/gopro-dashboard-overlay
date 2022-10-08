@@ -223,7 +223,7 @@ if __name__ == "__main__":
     pillow_font = font.load_font("Roboto-Medium.ttf", font_size)
 
 
-    def pillow_thing():
+    def pillow_stroked():
         draw.text(
             (0, 150),
             renderable,
@@ -233,6 +233,16 @@ if __name__ == "__main__":
             fill=(255, 255, 255),
             stroke_width=2,
             stroke_fill=(0, 0, 0)
+        )
+
+    def pillow_plain():
+        draw.text(
+            (0, 75),
+            renderable,
+            anchor="la",
+            direction="ltr",
+            font=pillow_font,
+            fill=(255, 0, 0),
         )
 
 
@@ -249,7 +259,8 @@ if __name__ == "__main__":
         _freetype.draw_bitmap((2, 2), temporary.im.id, image.im.id, ink)
 
 
-    pillow_thing()
+    pillow_stroked()
+    pillow_plain()
 
     with FreeType() as ft:
         print(ft.version())
@@ -258,23 +269,30 @@ if __name__ == "__main__":
             id = cache.register_font("/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Medium.ttf")
 
 
-            def thing():
+            def cached_stroked():
                 cache.render_stroker(id, renderable, height=font_size, x=10, y=50, fill=(0, 0, 0))
                 cache.render(id, string=renderable, image=image, height=font_size, x=12, y=52, fill=(255, 255, 255))
 
+            def cached_plain():
+                cache.render(id, string=renderable, image=image, height=font_size, x=12, y=0, fill=(255, 0, 0))
 
-            thing()
+            cached_stroked()
+            cached_plain()
 
             if timing:
                 loops = 100
-                # print("New Image Pillow")
-                # print_timing(100, new_image_pillow)
-                # print("New Image james")
-                # print_timing(100, new_image_james)
-                print("Cache")
-                print_timing(loops, thing)
-                print("Pillow")
-                print_timing(loops, pillow_thing)
+                print("New Image Pillow")
+                print_timing(100, new_image_pillow)
+                print("New Image james")
+                print_timing(100, new_image_james)
+                print("Cache - Stroked")
+                print_timing(loops, cached_stroked)
+                print("Cache - Plain")
+                print_timing(loops, cached_plain)
+                print("Pillow - Stroked")
+                print_timing(loops, pillow_stroked)
+                print("Pillow - Plain")
+                print_timing(loops, pillow_stroked)
 
     if rendered:
         image.show()
