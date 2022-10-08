@@ -79,7 +79,7 @@ class FreeTypeCacheManager:
             f=lambda t: _freetype.render_string(self.ptr, self.caches.bitcache, font_id.id, width, height, string, BlitChars(t, 0, bounding_box.y).font_callback)
         )
 
-    def render_stroker(self, font_id: FreeTypeFontId, string: str, width: int = 0, height: int = 0, x: int = 0, y: int = 0, fill: Tuple = (255, 255, 255)):
+    def render_stroker(self, font_id: FreeTypeFontId, image: Image, string: str, width: int = 0, height: int = 0, x: int = 0, y: int = 0, fill: Tuple = (255, 255, 255)):
         bounding_box = self.calculate_size(font_id, string, width, height)
 
         stroke_width = 2
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
 
             def cached_stroked():
-                cache.render_stroker(id, renderable, height=font_size, x=10, y=50, fill=(0, 0, 0))
+                cache.render_stroker(id, string=renderable, image=image, height=font_size, x=10, y=50, fill=(0, 0, 0))
                 cache.render(id, string=renderable, image=image, height=font_size, x=12, y=52, fill=(255, 255, 255))
 
             def cached_plain():
