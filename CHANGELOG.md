@@ -2,6 +2,29 @@
 # Changelog
 
 Newest changes are always in [README.md](README.md)
+- 0.51.0 Fix [#52](https://github.com/time4tea/gopro-dashboard-overlay/issues/52) h/t [@danfossi](https://github.com/danfossi)
+  - Support for Hero 8 Black ORIN spec zxY
+- 0.50.0 Print installed version at program startup
+- 0.49.0 Parsing & Display of Acceleration Information!
+  - Major new functionality to parse and display acceleration data
+  - Use metrics `accl.x` `accl.y` and `accl.z` in any widget or metric text
+  - New component `bar` - see [bar docs](docs/xml/examples/07-bar)
+  - Updated chart can now chart (probably) any metric - see [chart docs](docs/xml/examples/07-chart)
+- 0.48.0 Fix [#48](https://github.com/time4tea/gopro-dashboard-overlay/issues/48) - h/t [@osresearch](https://github.com/osresearch)  
+  - allow 'km' units where appropriate
+- 0.47.0 Fix [#47](https://github.com/time4tea/gopro-dashboard-overlay/issues/47) - h/t [@osresearch](https://github.com/osresearch)  
+  - using --layout-xml abc on the command line now implies --layout xml
+  - Fix [#31](https://github.com/time4tea/gopro-dashboard-overlay/issues/31) h/t [@tve](https://github.com/tve)
+  - When alt isn't available, don't blow up trying to calculate gradient
+- 0.46.0 New component `compass-arrow` - see layout docs [examples](docs/xml/examples/README.md)
+  - progress on support of time-lapse and time-warp files, but they don't work properly yet
+  - built-in layout for 2.7k files
+- 0.45.0 New Program `gopro-rename.py` - turn idiosyncratically named gopro files GX0100123.MP4 into 20220405-123416-london-england.MP4 using either provided description,
+  - or looks up the location from the GPS, and makes file name from that.
+  - uses the GPS timestamp to determine the time of the file. 
+  - now gopro files will sort properly in your file viewer
+  - also works around gopro camera drift, clock is always wrong.
+  - can rename whole folders of files 
 - 0.44.0 Add [PR#44](https://github.com/time4tea/gopro-dashboard-overlay/pull/34) for extracting GPMF to ndjson. Thanks [@gregbaker](https://github.com/gregbaker)
 - 0.43.0 Support for [Geoapify](https://geoapify.com/) maps, as well as existing [Thunderforest](https://www.thunderforest.com/) and [OSM](https://www.openstreetmap.org/) 
   - Small improvements in API Key handling. See [map styles docs](docs/maps/README.md)
