@@ -67,7 +67,7 @@ class FreeTypeCacheManager:
     def _render_mask(self, dest, size, x, y, fill, f):
         temporary = Image.new("L", (size.x, size.y), 0)
         f(temporary)
-        ink, _ = draw._getink(fill)
+        ink, _ = ImageDraw.Draw(image)._getink(fill)
         _freetype.draw_bitmap((x, y), temporary.im.id, dest.im.id, ink)
 
     def render(self, font_id: FreeTypeFontId, image: Image, string: str, width: int = 0, height: int = 0, x: int = 0, y: int = 0, fill: Tuple = (255, 255, 255)):
