@@ -10,7 +10,7 @@ requires = [
     "geotiler==0.14.5",
     "gpxpy==1.4.2",
     "geographiclib",
-    "pillow==8.3.2",
+    "pillow==9.2.0",
     "pint==0.17",
     "progressbar2==3.53.3",
     "requests==2.27.1",
