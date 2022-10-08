@@ -391,8 +391,16 @@ static PyObject* method_blit_glyph(PyObject* self, PyObject* args) {
     }
 
     for (int y = 0; y < src_height; y++ ) {
-        unsigned char* target = (unsigned char *)im->image[dest_y + y] + dest_x * 4;
+        int target_y = dest_y + y;
+        if (target_y < 0 || target_y >= im->ysize) {
+            continue;
+        }
+        unsigned char* target = (unsigned char *)im->image[target_y] + dest_x * 4;
         for ( int x = 0 ; x < src_width; x++ ) {
+            int target_x = dest_x + x;
+            if ( target_x < 0 || target_x >= im->xsize ) {
+                continue;
+            }
             unsigned char v = source[x];
             if (target[x * 4 + 3] < v) {
                 target[x * 4 + 0] = ink_r;
