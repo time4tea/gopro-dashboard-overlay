@@ -1,4 +1,4 @@
-# Overlaying Dashboard onto GoPro MP4 Files
+# Create video overlays from GoPro Videos or any GPX file
 
 ![GitHub Discussions](https://img.shields.io/github/discussions/time4tea/gopro-dashboard-overlay?style=for-the-badge)
 ![PyPI](https://img.shields.io/pypi/v/gopro-overlay?style=for-the-badge)
