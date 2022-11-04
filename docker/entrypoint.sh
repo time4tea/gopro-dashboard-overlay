@@ -32,6 +32,7 @@ else
       gid=$(ls -ldn . | awk '{print $4}')
 
       if [ $uid -ne 0 ]
+      then
         addgroup -g "$gid" dash
         adduser -D -u "$uid" -G dash dash
         chown dash:dash /home/dash
