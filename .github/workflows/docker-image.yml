@@ -16,7 +16,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: time4tea/gopro-dashboard-overlay
+          images: overlaydash/gopro-dashboard-overlay
           tags: |
             type=pep440,pattern={{version}}
 
