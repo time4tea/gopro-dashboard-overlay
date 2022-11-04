@@ -33,4 +33,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-             GOPRO_OVERLAY_VERSION=${{ steps.meta.outputs.labels."org.opencontainers.image.version" }}
+             GOPRO_OVERLAY_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
