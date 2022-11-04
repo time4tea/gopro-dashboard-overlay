@@ -32,5 +32,5 @@ jobs:
           context: docker
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args:
-            - GOPRO_OVERLAY_VERSION=${{ steps.meta.outputs.labels."org.opencontainers.image.version" }}
+          build-args: |
+             GOPRO_OVERLAY_VERSION=${{ steps.meta.outputs.labels."org.opencontainers.image.version" }}
