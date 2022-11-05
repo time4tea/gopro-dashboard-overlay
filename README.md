@@ -68,7 +68,7 @@ python -m venv venv
 venv/bin/pip install gopro-overlay
 ```
 
-- The Roboto font needs to be installed on your system. You could install it with one of the following commands maybe.
+The Roboto font needs to be installed on your system. You could install it with one of the following commands maybe.
 
 ```bash
 pacman -S ttf-roboto
