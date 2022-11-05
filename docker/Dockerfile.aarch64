@@ -1,0 +1,35 @@
+# 3.16.2/linux/arm64/v8
+FROM alpine:3.16.2
+
+ARG GOPRO_OVERLAY_VERSION
+
+MAINTAINER gopro-overlay@time4tea.net
+ENV PATH=$PATH:/usr/bin
+
+RUN apk update && apk add bash linux-headers python3 python3-dev py3-pip curl unzip font-noto ffmpeg sudo
+
+RUN apk add fribidi-dev harfbuzz-utils harfbuzz-dev meson git \
+    tiff-dev jpeg-dev openjpeg-dev musl-dev zlib-dev freetype-dev lcms2-dev gcc \
+    libwebp-dev tcl-dev tk-dev harfbuzz-dev fribidi-dev libimagequant-dev \
+    libxcb-dev libpng-dev
+
+RUN curl "https://fonts.google.com/download?family=Roboto" -o /tmp/Roboto.zip && \
+    mkdir -p /usr/share/fonts/Roboto && unzip -d /usr/share/fonts/Roboto /tmp/Roboto.zip && fc-cache -fv
+
+RUN apk add clang
+
+# V0.9.0
+RUN git clone "https://github.com/HOST-Oman/libraqm.git" && \
+    cd libraqm && git checkout c0ee4fd7b2b && meson build && ninja -C build && ninja -C build install
+
+WORKDIR /
+RUN python3 -mvenv venv
+RUN /venv/bin/python3 -m pip install --upgrade pip
+RUN /venv/bin/pip install gopro-overlay==${GOPRO_OVERLAY_VERSION}
+
+VOLUME /work
+WORKDIR /work
+
+COPY entrypoint.sh /
+
+ENTRYPOINT [ "/entrypoint.sh" ]
