@@ -47,7 +47,15 @@ for each metric.
 <kbd>![04-metrics-4.png](04-metrics-4.png)</kbd>
 
 
-The following units are supported: `mph`, `kph`, `mps`, `knots`, `degreeF`, `degreeC`, `feet`, `miles`, `km`, `nautical_miles`, `radian`, `gravity`, `G`, `m/s^2`, `m/s²`
+The following units are supported: 
+
+| Dimension    | Units                                                                               |
+|--------------|-------------------------------------------------------------------------------------|
+| Speed        | mph, kph, mps (metres-per-second), fps (feet-per-second), knots, knot,              |
+| Temperature  | degreeF, degreeC, degreeK                                                           |
+| Distance     | mile, miles, m, metres, km, nmi (nautical mile), foot, yard, hand, angstrom, parsec |
+| Acceleration | gravity, G, m/s^2, m/s²                                                             |
+| Power        | W, kW, watt, hp (UK horsepower)                                                     |
 
 `gravity` and `G` are synonyms for 9.80665 m/s², so will convert acceleration values to G's
 
@@ -159,6 +167,7 @@ Currently, there is no mechanism to calculate the overall acceleration, this wil
 |----------|-------------------------------------------------------------------|----------------------|
 | hr       | Heart Rate                                                        | beats / minute       |
 | cadence  | Cadence                                                           | revolutions / minute |
+| power    | Power                                                             | watts                |
 | speed    | Speed (as reported by device if available, or fallback to cspeed) | metres / second      |
 | cspeed   | Computed Speed  (derived from location delta)                     | metres / second      |
 | temp     | Ambient Temperature                                               | degrees C            |
