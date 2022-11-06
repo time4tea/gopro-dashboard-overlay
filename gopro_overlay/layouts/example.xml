@@ -78,6 +78,9 @@
     <component type="metric" x="850" y="750" metric="odo" units="miles" dp="2" size="32" rgb="255,255,0"/>
     <component type="metric" x="950" y="750" metric="odo" units="km" dp="2" size="32" rgb="255,255,0"/>
 
+    <component type="metric" x="1050" y="750" metric="power" units="W" dp="2" size="32" rgb="255,255,0"/>
+    <component type="metric" x="1050" y="800" metric="power" units="kW" dp="2" size="32" rgb="255,255,0"/>
+
     <composite name="metrics" x="250" y="300">
         <component type="metric" x="0" y="0" metric="alt" dp="1" size="32"/>
         <component type="metric" x="0" y="50" metric="alt" units="feet" dp="1" size="32"/>

@@ -81,6 +81,35 @@ def test_bugfix_20_gpsbabel_converted():
     assert entries[0].atemp.magnitude == 20
 
 
+def test_feature_70_power_converted():
+    xml = """<gpx 
+    xmlns="http://www.topografix.com/GPX/1/1" 
+    xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" 
+    version="1.1">
+  <trk>
+    <trkseg>
+         <trkpt lat="55.2359580" lon="10.4869030">
+        <ele>78.8</ele>
+        <time>2022-07-09T07:09:31Z</time>
+        <extensions>
+         <power>103</power>
+         <gpxtpx:TrackPointExtension>
+          <gpxtpx:atemp>21</gpxtpx:atemp>
+          <gpxtpx:hr>113</gpxtpx:hr>
+          <gpxtpx:cad>96</gpxtpx:cad>
+         </gpxtpx:TrackPointExtension>
+        </extensions>
+   </trkpt>
+    </trkseg>
+  </trk>
+</gpx>"""
+
+    entries = list(gpx.load_xml(xml, units))
+
+    assert len(entries) == 1
+    assert entries[0].power == units.Quantity(103, units.W)
+
+
 def file_path_of_test_asset(name, in_dir="gpx"):
     sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 

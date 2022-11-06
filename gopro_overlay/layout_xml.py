@@ -203,30 +203,30 @@ def metric_converter_from(name):
     if name is None:
         return lambda x: x
     converters = {
+        # speed
         "mph": lambda u: u.to("MPH"),
         "kph": lambda u: u.to("KPH"),
-        "mps": lambda u: u.to("mps"),
         "knots": lambda u: u.to("knot"),
 
-        "gravity": lambda u: u.to("gravity"),
+        #accel
         "G": lambda u: u.to("gravity"),
-        "m/s^2": lambda u: u.to("m/s^2"),
-        "m/s²": lambda u: u.to("m/s²"),
 
-        "degreeF": lambda u: u.to('degreeF'),
-        "degreeC": lambda u: u.to('degreeC'),
-
-        "radian": lambda u: u.to("radian"),
-
+        # alt / dist
         "feet": lambda u: u.to("international_feet"),
         "miles": lambda u: u.to("mile"),
         "metres": lambda u: u.to("m"),
-        "km": lambda u: u.to("km"),
         "nautical_miles": lambda u: u.to("nautical_mile"),
     }
     if name in converters:
         return converters[name]
-    raise IOError(f"The conversion '{name}' is not supported. Use one of: {list(converters.keys())}")
+
+    # Try to see if specified unit is recognised by pint... if so allow it - this only means its a valid
+    # unit, but actual metric might be different... if unconvertible it will blow up later...
+    try:
+        units.Quantity(1, units=name)
+        return lambda u: u.to(name)
+    except Exception as e:
+        raise IOError(f"The conversion '{name}' is not supported.")
 
 
 def formatter_from(element):
