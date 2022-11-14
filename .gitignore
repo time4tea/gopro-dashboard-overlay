@@ -1,12 +1,13 @@
 venv/
 venv-pypy/
-
+build/
 .idea/
 
 render/*
 dist/
 *.egg-info/
 
+*.so
 
 *.gpx
 *.MP4
