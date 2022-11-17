@@ -12,9 +12,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Rename a series of GoPro files by date. Does nothing (so its safe) by default.")
 
     parser.add_argument("file", nargs="+", help="The files to rename, or directory/ies containing files")
+    parser.add_argument("-t", "--touch", action="store_true", help="change the modification time of the file")
+    parser.add_argument("-to", "--touch-only", action="store_true", help="change the modification time of the file only - don't rename")
     parser.add_argument("--desc", help="a descriptive name to add to the filename - the filename will be yyyymmdd-hhmmss-{desc}.MP4")
     parser.add_argument("--geo", action="store_true", help="[EXPERIMENTAL] Use Geocode.xyz to add description for you (city-state) - see https://geocode.xyz/pricing for terms")
-    parser.add_argument("--yes", action="store_true", help="Rename the files, don't just print what would be done")
+    parser.add_argument("-y", "--yes", action="store_true", help="Rename the files, don't just print what would be done")
     parser.add_argument("--dirs", action="store_true", help="Allow directory")
 
     args = parser.parse_args()
@@ -31,6 +33,9 @@ if __name__ == "__main__":
     potentials = functional.flatten([filenaming.gopro_files_in(path) for path in args.file])
     potentials = filter(None, potentials)
     file_list = sorted(potentials)
+
+    should_touch = args.touch or args.touch_only
+    should_rename = not args.touch_only
 
     for file in file_list:
         meta = GoproMeta.parse(ffmpeg.load_gpmd_from(file))
@@ -63,7 +68,15 @@ if __name__ == "__main__":
 
         new_file = file.with_name(new_name)
 
-        print(f"Rename {file} to {new_file}")
+        if should_rename:
+            print(f"Rename {file} to {new_file}")
+        if should_touch:
+            print(f"Update time to {gps_datetime}")
 
         if args.yes:
-            file.rename(new_file)
+            if should_touch:
+                epoch_seconds = int(gps_datetime.strftime("%s"))
+                os.utime(file, times=(epoch_seconds, epoch_seconds))
+
+            if should_rename:
+                file.rename(new_file)
