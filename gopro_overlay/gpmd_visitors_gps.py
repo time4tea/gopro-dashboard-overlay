@@ -14,6 +14,11 @@ class GPS5EntryConverter:
         self._frame_calculator = calculator
 
     def convert(self, counter, components):
+
+        # Turns out GPS5 can contain no points. Possibly accompanied with EMPT packet?
+        if len(components.points) == 0:
+            return
+
         sample_time_calculator = self._frame_calculator.next_packet(
             components.timestamp,
             self._total_samples,
