@@ -182,6 +182,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.66.0 Fix #78 - Crash when GPS5 packets have zero entries.
+  - Add accelerometer entries to csv output 
 - 0.65.0 Parse "power" from GPX files. Thanks to [@kfhdk](https://github.com/kfhdk)
   - See [docs/xml/examples/07-metrics](docs/xml/examples/04-metrics) for examples of how to use
   - Also example layout in layouts/power-1920x1080.xml
