@@ -55,7 +55,7 @@ if __name__ == "__main__":
                                 fieldnames=["packet", "packet_index", "gps_fix", "date", "lat", "lon", "dop", "alt",
                                             "speed",
                                             "dist", "time", "azi", "odo",
-                                            "grad"])
+                                            "grad", "accl_x", "accl_y", "accl_z"])
         writer.writeheader()
         for entry in ts.items():
             writer.writerow({
@@ -73,4 +73,7 @@ if __name__ == "__main__":
                 "time": printable_unit(entry.time),
                 "azi": printable_unit(entry.azi),
                 "odo": printable_unit(entry.odo),
+                "accl_x": printable_unit(entry.accl.x) if entry.accl else None,
+                "accl_y": printable_unit(entry.accl.y) if entry.accl else None,
+                "accl_z": printable_unit(entry.accl.z) if entry.accl else None
             })
