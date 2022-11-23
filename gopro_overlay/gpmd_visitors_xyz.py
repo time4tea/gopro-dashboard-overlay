@@ -1,12 +1,10 @@
-import collections
+import dataclasses
 import datetime
+from typing import List
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import XYZ
 from gopro_overlay.point import PintPoint3
-
-XYZComponents = collections.namedtuple("XYZComponents",
-                                       ["timestamp", "samples_total", "scale", "orin", "siun", "temp", "points"])
 
 
 class ORIN:
@@ -25,6 +23,17 @@ class ORIN:
 
     def apply(self, xyz):
         return self.convert(xyz)
+
+
+@dataclasses.dataclass(frozen=True)
+class XYZComponents:
+    timestamp: int
+    samples_total: int
+    scale: int
+    orin: ORIN
+    siun: str
+    temp: int
+    points: List[XYZ]
 
 
 # noinspection PyPep8Naming
