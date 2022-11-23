@@ -106,27 +106,6 @@ class GPS5StreamVisitor:
         ))
 
 
-# noinspection PyPep8Naming
-class GPSVisitor:
-
-    def __init__(self, converter):
-        self._converter = converter
-        self._counter = 0
-
-    def vic_DEVC(self, item, contents):
-        return self
-
-    def vic_STRM(self, item, contents):
-        if "GPS5" in contents:
-            return GPS5StreamVisitor(
-                on_end=lambda c: self._converter(self._counter, c)
-            )
-
-    def v_end(self):
-        self._counter += 1
-        pass
-
-
 # have seen stuff like this: lock acquired, DOP reduced, but still location way wrong.
 # 121,17,NO,2022-05-05 10:22:55.276481+00:00,43.7064837,31.3332034,99.99
 # 122,0,LOCK_2D,2022-05-05 10:22:55.335000+00:00,43.7063872,31.333535,3.16
@@ -179,4 +158,25 @@ class DetermineFirstLockedGPSUVisitor:
         return self._point
 
     def v_end(self):
+        pass
+
+
+# noinspection PyPep8Naming
+class GPSVisitor:
+
+    def __init__(self, converter):
+        self._converter = converter
+        self._counter = 0
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def vic_STRM(self, item, contents):
+        if "GPS5" in contents:
+            return GPS5StreamVisitor(
+                on_end=lambda c: self._converter(self._counter, c)
+            )
+
+    def v_end(self):
+        self._counter += 1
         pass
