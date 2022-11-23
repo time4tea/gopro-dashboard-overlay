@@ -6,8 +6,10 @@ from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
 from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor
+from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.timeunits import Timeunit, timeunits
+from gopro_overlay.timing import PoorTimer
 
 
 class View:
@@ -207,7 +209,7 @@ def accl_framemeta(meta, units, metameta=None):
     meta.accept(
         XYZVisitor(
             "ACCL",
-            XYZComponentConverter(
+            on_item=XYZComponentConverter(
                 frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "ACCL"),
                 units=units,
                 on_item=lambda t, x: framemeta.add(t, x)
@@ -221,21 +223,54 @@ def accl_framemeta(meta, units, metameta=None):
     return framemeta
 
 
+def grav_framemeta(meta, units, metameta=None):
+    framemeta = FrameMeta()
+
+    meta.accept(
+        GRAVisitor(
+            on_item=GRAVComponentConverter(
+                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "GRAV"),
+                units=units,
+                on_item=lambda t, x: framemeta.add(t, x)
+            ).convert
+        )
+    )
+
+    return framemeta
+
+
 def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMeta], dict]):
-    for item in gps.items():
-        frame_time = item.timestamp
-        interpolated = other.get(timeunits(millis=frame_time.magnitude))
-        item.update(**update(interpolated))
+    if other:
+        for item in gps.items():
+            frame_time = item.timestamp
+            interpolated = other.get(timeunits(millis=frame_time.magnitude))
+            item.update(**update(interpolated))
 
 
 def parse_gopro(gpmd_from, units, metameta: MetaMeta):
-    gopro_meta = GoproMeta.parse(gpmd_from)
-    gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta)
-    accl_frame_meta = accl_framemeta(gopro_meta, units, metameta=metameta)
 
-    merge_frame_meta(gps_frame_meta, accl_frame_meta, lambda a: {"accl": a.accl})
+    with PoorTimer("parsing").timing():
+        with PoorTimer("GPMD", 1).timing():
+            gopro_meta = GoproMeta.parse(gpmd_from)
 
-    return gps_frame_meta
+        with PoorTimer("extract GPS", 1).timing():
+            gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta)
+
+        with PoorTimer("extract ACCL", 1).timing():
+            merge_frame_meta(
+                gps_frame_meta,
+                accl_framemeta(gopro_meta, units, metameta=metameta),
+                lambda a: {"accl": a.accl}
+            )
+
+        with PoorTimer("extract GRAV", 1).timing():
+            merge_frame_meta(
+                gps_frame_meta,
+                grav_framemeta(gopro_meta, units, metameta=metameta),
+                lambda a: {"grav": a.grav}
+            )
+
+        return gps_frame_meta
 
 
 def framemeta_from(filepath, units, metameta: MetaMeta):

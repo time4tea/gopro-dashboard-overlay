@@ -48,6 +48,7 @@ def test_iterating_empty():
     fm = FrameMeta()
     assert len(fm.items()) == 0
     assert len(fm) == 0
+    assert not bool(fm)
 
 
 def test_size():
@@ -55,6 +56,7 @@ def test_size():
     fm.add(timeunits(seconds=0), Entry(datetime_of(1), a=1))
     fm.add(timeunits(seconds=1), Entry(datetime_of(2), a=1))
     assert len(fm) == 2
+    assert bool(fm)
 
 
 def test_iterates_in_frame_time_order_not_insertion_order():

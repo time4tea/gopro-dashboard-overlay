@@ -82,6 +82,10 @@ class CalculateCorrectionFactorsVisitor:
     def v_end(self):
         pass
 
+    def found(self) -> bool:
+        """indicate if we found any of the requested packet. might be one that's not present in this stream"""
+        return self.count > 0
+
     # no idea how this works, but the numbers that come out of it are the same numbers as in GPMF_utils.c
     def factors(self):
         meanY = self.meanY / self.count

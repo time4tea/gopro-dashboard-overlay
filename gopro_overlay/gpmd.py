@@ -12,7 +12,7 @@ GPMDStruct = struct.Struct('>4sBBH')
 
 GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
 XYZ = collections.namedtuple('XYZ', "x y z")
-VECTOR = collections.namedtuple("VECTOR", "x y z")
+VECTOR = collections.namedtuple("VECTOR", "a b c")
 QUATERNION = collections.namedtuple("QUATERNION", "w x y z")
 
 

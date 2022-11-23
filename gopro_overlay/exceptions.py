@@ -1,0 +1,2 @@
+class Defect(Exception):
+    pass

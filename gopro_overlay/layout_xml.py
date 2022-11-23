@@ -191,6 +191,9 @@ def metric_accessor_from(name):
         "accl.x": lambda e: e.accl.x if e.accl else None,
         "accl.y": lambda e: e.accl.y if e.accl else None,
         "accl.z": lambda e: e.accl.z if e.accl else None,
+        "grav.x": lambda e: e.grav.x if e.grav else None,
+        "grav.y": lambda e: e.grav.y if e.grav else None,
+        "grav.z": lambda e: e.grav.z if e.grav else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
     }

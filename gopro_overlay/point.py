@@ -109,6 +109,13 @@ class PintPoint3(Point3):
     def length(self) -> float:
         return units.Quantity(math.sqrt(self.sum_squares().magnitude), self.x.units)
 
+    def magnitude(self) -> Point3:
+        return Point3(
+            x=self.x.magnitude,
+            y=self.y.magnitude,
+            z=self.z.magnitude
+        )
+
     def __str__(self):
         return f"Pint" + super().__str__()
 

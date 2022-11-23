@@ -263,7 +263,7 @@ def test_load_gravity_meta():
 
     def process_gravities(gravs):
         for g in gravs:
-            print(f"{g}  = {Point3(g.x, g.y, g.z).length()}")
+            print(f"{g}  = {Point3(g.a, g.b, g.c).length()}")
 
     meta.accept(GRAVisitor(process_gravities))
 
@@ -312,7 +312,7 @@ def test_loading_time_warp_file():
     assert factors.frames_s == pytest.approx(29.970030, 0.0000001)
 
 
-def test_estimation_of_timestamps():
+def test_estimation_of_timestamps_gps5():
     ''' use GetGPMFSampleRate on the same file to get the values to assert... '''
 
     stream_info, meta = load_mp4_meta("hero7.mp4")
@@ -331,6 +331,20 @@ def test_estimation_of_timestamps():
     assert factors.first_frame == timeunits(seconds=-0.0241305)
     assert factors.last_frame == timeunits(seconds=12.002847)
     assert factors.frames_s == pytest.approx(18.209063, 0.0000001)
+
+
+def test_estimation_of_timestamps_grav():
+    ''' use GetGPMFSampleRate on the same file to get the values to assert... '''
+
+    stream_info, meta = load_mp4_meta("time-warp.mp4")
+
+    assert stream_info.meta.frame_duration == 1001
+
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GRAV", stream_info.meta))
+
+    factors = visitor.factors()
+
+    print(factors)
 
 
 def test_correction_factors_calculator():

@@ -63,7 +63,8 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
     alt = Random1D(1000, rng=rng)
     temp = Random1D(27, rng=rng)
 
-    accl = Random1D(5, -10)
+    accl = Random1D(5, -10, rng=rng)
+    grav = Random1D(0, -1, rng=rng)
 
     fm = FrameMeta()
     current_dt = datetime.datetime.fromtimestamp(start_timestamp, tz=datetime.timezone.utc)
@@ -88,6 +89,11 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                     x=units.Quantity(accl.step(), "m/s**2"),
                     y=units.Quantity(accl.step(), "m/s**2"),
                     z=units.Quantity(accl.step(), "m/s**2"),
+                ),
+                grav=PintPoint3(
+                    x=units.Quantity(grav.step()),
+                    y=units.Quantity(grav.step()),
+                    z=units.Quantity(grav.step()),
                 ),
                 gpsfix=GPSFix.LOCK_2D.value,
             )

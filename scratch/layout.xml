@@ -21,4 +21,25 @@
         <component type="chart" name="chart" x="400" y="0" metric="accl.z" units="m/s^2" seconds="30"/>
     </translate>
 
+
+    <translate x="300">
+        <translate y="0">
+          <component type="bar" width="400" height="50" metric="grav.x"/>
+          <component type="text" x="10" y="10" size="24" rgb="255,255,255">X Grav</component>
+          <component type="metric" x="200" y="15" metric="grav.x" size="24" rgb="255,255,255" dp="2" align="centre" />
+        </translate>
+        <translate y="50">
+            <component type="bar" width="400" height="50" metric="grav.y" />
+            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Y Grav</component>
+            <component type="metric" x="200" y="15" metric="grav.y" size="24" rgb="255,255,255" dp="2"  align="centre"/>
+        </translate>
+        <translate y="100">
+            <component type="bar" width="400" height="50" metric="grav.z" />
+            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Z Grav</component>
+            <component type="metric" x="200" y="15" metric="grav.z" size="24" rgb="255,255,255" dp="2" align="centre"/>
+        </translate>
+    </translate>
+
+
+
 </layout>

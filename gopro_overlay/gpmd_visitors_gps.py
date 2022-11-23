@@ -1,5 +1,6 @@
-import collections
+import dataclasses
 import datetime
+from typing import List, Optional
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5
@@ -47,11 +48,16 @@ class GPS5EntryConverter:
             )
         self._total_samples += len(components.points)
 
-    # noinspection PyPep8Naming
 
-
-GPS5Components = collections.namedtuple("GPS5Components",
-                                        ["samples", "timestamp", "basetime", "fix", "dop", "scale", "points"])
+@dataclasses.dataclass(frozen=True)
+class GPS5Components:
+    samples: int
+    timestamp: int
+    basetime: datetime.datetime
+    fix: int
+    dop: float
+    scale: int
+    points: List[GPS5]
 
 
 # noinspection PyPep8Naming
@@ -59,13 +65,13 @@ class GPS5StreamVisitor:
 
     def __init__(self, on_end):
         self._on_end = on_end
-        self._samples = None
-        self._basetime = None
-        self._fix = None
-        self._scale = None
-        self._points = None
-        self._timestamp = None
-        self._dop = None
+        self._samples: Optional[int] = None
+        self._basetime: Optional[datetime.datetime] = None
+        self._fix: Optional[int] = None
+        self._scale: Optional[int] = None
+        self._points: Optional[List[GPS5]] = None
+        self._timestamp: Optional[int] = None
+        self._dop: Optional[float] = None
 
     def vi_STMP(self, item):
         self._timestamp = interpret_item(item)

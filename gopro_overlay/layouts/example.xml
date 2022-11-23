@@ -95,6 +95,10 @@
     <component type="metric" x="1000" y="50" metric="accl.y" units="G" dp="2" size="32" rgb="255,0,255"/>
     <component type="metric" x="1050" y="50" metric="accl.z" units="G" dp="2" size="32" rgb="255,0,255"/>
 
+    <component type="metric" x="950" y="150" metric="grav.x" dp="2" size="32" rgb="255,255,0"/>
+    <component type="metric" x="1000" y="150" metric="grav.y" dp="2" size="32" rgb="255,255,0"/>
+    <component type="metric" x="1050" y="150" metric="grav.z" dp="2" size="32" rgb="255,255,0"/>
+
     <!-- Bar / Acceleration -->
     <translate x="50" y="550">
         <component type="bar" width="400" height="50" metric="accl.x" outline="0,0,0,0" fill="255,0,255"/>
