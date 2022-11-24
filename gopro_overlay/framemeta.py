@@ -5,6 +5,7 @@ from gopro_overlay import timeseries_process
 from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
+from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter
 from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor
 from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
@@ -239,6 +240,22 @@ def grav_framemeta(meta, units, metameta=None):
     return framemeta
 
 
+def cori_framemeta(meta, units, metameta=None):
+    framemeta = FrameMeta()
+
+    meta.accept(
+        CORIVisitor(
+            on_item=CORIComponentConverter(
+                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "CORI"),
+                units=units,
+                on_item=lambda t, x: framemeta.add(t, x)
+            ).convert
+        )
+    )
+
+    return framemeta
+
+
 def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMeta], dict]):
     if other:
         for item in gps.items():
@@ -248,7 +265,6 @@ def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMe
 
 
 def parse_gopro(gpmd_from, units, metameta: MetaMeta):
-
     with PoorTimer("parsing").timing():
         with PoorTimer("GPMD", 1).timing():
             gopro_meta = GoproMeta.parse(gpmd_from)

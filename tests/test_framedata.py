@@ -5,9 +5,8 @@ from pathlib import Path
 import pytest
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta
+from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta, cori_framemeta
 from gopro_overlay.gpmd import GoproMeta
-from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
 from gopro_overlay.units import units
 
 
@@ -43,6 +42,7 @@ def test_loading_data_by_frame():
         units=units
     )
 
+
 def test_loading_accl():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
@@ -68,6 +68,20 @@ def test_loading_grav():
     assert item.grav.y.magnitude == pytest.approx(-0.189, 0.01)
     assert item.grav.z.magnitude == pytest.approx(-0.98, 0.01)
     assert item.grav.length().magnitude == pytest.approx(1.0, 0.0001)
+
+
+def test_loading_cori():
+    filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
+    meta = load_file(filepath)
+    stream_info = ffmpeg.find_streams(filepath)
+
+    framemeta = cori_framemeta(meta, units, stream_info.meta)
+
+    item = framemeta.items()[0]
+    assert item.cori.w == pytest.approx(1, abs=0.001)
+    assert item.cori.v.x == pytest.approx(0.000, abs=0.001)
+    assert item.cori.v.y == pytest.approx(0.002, abs=0.001)
+    assert item.cori.v.z == pytest.approx(0.005, abs=0.001)
 
 
 def test_loading_gps_and_accl():

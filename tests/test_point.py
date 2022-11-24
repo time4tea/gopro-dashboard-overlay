@@ -61,6 +61,17 @@ def test_quaternion_to_axis_angle():
     assert aa[0] == pytest.approx(0.03, abs=0.002)
 
 
+def test_quaternion_to_euler_angle():
+    q = Quaternion(w=-0.877,
+                   v=Point3(x=0.001, y=0.455, z=-0.152))
+
+    ea = q.euler()
+
+    assert ea.pitch == pytest.approx(-0.924, abs=0.001)
+    assert ea.roll == pytest.approx(-0.235, abs=0.001)
+    assert ea.yaw == pytest.approx(0.460, abs=0.001)
+
+
 def test_rotate_point_by_quaternion_identity():
     point = Point3(0, 0, 0)
     identity = Quaternion.identity()
@@ -85,7 +96,6 @@ def test_rotate_point_by_quaternion():
 
 
 def test_pint_point():
-
     p = PintPoint3(
         x=units.Quantity(3, units.m),
         y=units.Quantity(3, units.m),

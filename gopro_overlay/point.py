@@ -1,3 +1,4 @@
+import dataclasses
 import math
 from typing import Tuple
 
@@ -120,6 +121,13 @@ class PintPoint3(Point3):
         return f"Pint" + super().__str__()
 
 
+@dataclasses.dataclass(frozen=True)
+class EulerRadians:
+    roll: float
+    pitch: float
+    yaw: float
+
+
 class Quaternion:
     '''
     quaternion implementation based on: https://danceswithcode.net/engineeringnotes/quaternions/quaternions.html
@@ -179,3 +187,24 @@ class Quaternion:
 
     def rotate(self, point: Point3) -> Point3:
         return (self.invert() * (Quaternion(0, point) * self)).v
+
+    # https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    def euler(self) -> EulerRadians:
+        sinr_cosp = 2 * (self.w * self.v.x + self.v.y * self.v.z)
+        cosr_cosp = 1 - 2 * (self.v.x * self.v.x + self.v.y * self.v.y)
+
+        roll = math.atan2(sinr_cosp, cosr_cosp)
+
+        sinp = 2 * (self.w * self.v.y - self.v.z * self.v.x)
+
+        if math.fabs(sinp) >= 1:
+            pitch = math.copysign(math.pi / 2, sinp)
+        else:
+            pitch = math.asin(sinp)
+
+        siny_cosp = 2 * (self.w * self.v.z + self.v.x * self.v.y)
+        cosy_cosp = 1 - 2 * (self.v.y * self.v.y + self.v.z * self.v.z)
+
+        yaw = math.atan2(siny_cosp, cosy_cosp)
+
+        return EulerRadians(roll=roll, pitch=pitch, yaw=yaw)
