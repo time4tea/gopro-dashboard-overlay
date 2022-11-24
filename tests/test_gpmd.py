@@ -336,7 +336,7 @@ def test_estimation_of_timestamps_gps5():
 def test_estimation_of_timestamps_grav():
     ''' use GetGPMFSampleRate on the same file to get the values to assert... '''
 
-    stream_info, meta = load_mp4_meta("time-warp.mp4")
+    stream_info, meta = load_mp4_meta("time-warp.mp4", missing_ok=True)
 
     assert stream_info.meta.frame_duration == 1001
 
