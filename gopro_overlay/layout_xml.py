@@ -194,6 +194,9 @@ def metric_accessor_from(name):
         "grav.x": lambda e: e.grav.x if e.grav else None,
         "grav.y": lambda e: e.grav.y if e.grav else None,
         "grav.z": lambda e: e.grav.z if e.grav else None,
+        "ori.pitch": lambda e: e.ori.pitch if e.ori else None,
+        "ori.roll": lambda e: e.ori.roll if e.ori else None,
+        "ori.yaw": lambda e: e.ori.yaw if e.ori else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
     }

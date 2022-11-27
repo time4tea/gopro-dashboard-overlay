@@ -67,8 +67,8 @@ def test_quaternion_to_euler_angle():
 
     ea = q.euler()
 
-    assert ea.pitch == pytest.approx(-0.924, abs=0.001)
-    assert ea.roll == pytest.approx(-0.235, abs=0.001)
+    assert ea.roll == pytest.approx(-0.924, abs=0.001)
+    assert ea.pitch == pytest.approx(-0.235, abs=0.001)
     assert ea.yaw == pytest.approx(0.460, abs=0.001)
 
 

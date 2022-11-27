@@ -24,22 +24,38 @@
 
     <translate x="300">
         <translate y="0">
-          <component type="bar" width="400" height="50" metric="grav.x"/>
+          <component type="bar" width="400" height="50" min="-1" max="1" metric="grav.x"/>
           <component type="text" x="10" y="10" size="24" rgb="255,255,255">X Grav</component>
           <component type="metric" x="200" y="15" metric="grav.x" size="24" rgb="255,255,255" dp="2" align="centre" />
         </translate>
         <translate y="50">
-            <component type="bar" width="400" height="50" metric="grav.y" />
+            <component type="bar" width="400" height="50" min="-1" max="1" metric="grav.y" />
             <component type="text" x="10" y="10" size="24" rgb="255,255,255">Y Grav</component>
             <component type="metric" x="200" y="15" metric="grav.y" size="24" rgb="255,255,255" dp="2"  align="centre"/>
         </translate>
         <translate y="100">
-            <component type="bar" width="400" height="50" metric="grav.z" />
+            <component type="bar" width="400" height="50" min="-1" max="1" metric="grav.z" />
             <component type="text" x="10" y="10" size="24" rgb="255,255,255">Z Grav</component>
             <component type="metric" x="200" y="15" metric="grav.z" size="24" rgb="255,255,255" dp="2" align="centre"/>
         </translate>
     </translate>
 
 
-
+    <translate x="900">
+        <translate y="0">
+          <component type="bar" width="400" height="50" min="-180" max="180" metric="ori.pitch" units="degrees" />
+          <component type="text" x="10" y="10" size="24" rgb="255,255,255">Pitch</component>
+          <component type="metric" x="200" y="15" metric="ori.pitch" units="degrees" size="24" rgb="255,255,255" dp="2" align="centre" />
+        </translate>
+        <translate y="50">
+            <component type="bar" width="400" height="50" min="-180" max="180" metric="ori.roll" />
+            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Roll</component>
+            <component type="metric" x="200" y="15" metric="ori.roll" units="degrees" size="24" rgb="255,255,255" dp="2"  align="centre"/>
+        </translate>
+        <translate y="100">
+            <component type="bar" width="400" height="50" min="-180" max="180" metric="ori.yaw" units="degrees"/>
+            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Yaw</component>
+            <component type="metric" x="200" y="15" metric="ori.yaw" units="degrees" size="24" rgb="255,255,255" dp="2" align="centre"/>
+        </translate>
+    </translate>
 </layout>

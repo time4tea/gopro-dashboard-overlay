@@ -6,7 +6,7 @@ from pint import Quantity
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import QUATERNION
-from gopro_overlay.point import Quaternion, Point3
+from gopro_overlay.point import Quaternion, Point3, EulerRadians
 
 
 @dataclasses.dataclass(frozen=True)
@@ -21,6 +21,15 @@ class Orientation:
     roll: Quantity
     pitch: Quantity
     yaw: Quantity
+
+
+def euler_to_orientation(e: EulerRadians, units) -> Orientation:
+    radians = units.radians
+    return Orientation(
+        roll=units.Quantity(e.roll, radians),
+        pitch=units.Quantity(e.pitch, radians),
+        yaw=units.Quantity(e.yaw, radians)
+    )
 
 
 class CORIComponentConverter:
@@ -42,16 +51,14 @@ class CORIComponentConverter:
             len(components.orientations)
         )
 
-        unit = self._units.number
-
-        for index, orientation in enumerate(components.orientations):
+        for index, cori in enumerate(components.orientations):
             sample_frame_timestamp, _ = sample_time_calculator(index)
 
             point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000)
 
-            cori = Quaternion(
-                w=orientation.w,
-                v=Point3(x=orientation.x, y=orientation.y, z=orientation.z)
+            quat = Quaternion(
+                w=cori.w,
+                v=Point3(x=cori.x, y=cori.y, z=cori.z)
             )
 
             self._on_item(
@@ -61,7 +68,11 @@ class CORIComponentConverter:
                     timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
                     packet=self._units.Quantity(counter, self._units.number),
                     packet_index=self._units.Quantity(index, self._units.number),
-                    cori=cori,
+                    cori=quat,
+                    ori=euler_to_orientation(
+                        e=quat.euler(),
+                        units=self._units
+                    ),
                 )
             )
         self._total_samples += len(components.orientations)

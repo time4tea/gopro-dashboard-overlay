@@ -2,6 +2,7 @@ import bisect
 from typing import Callable
 
 from gopro_overlay import timeseries_process
+from gopro_overlay.entry import Entry
 from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
@@ -90,6 +91,9 @@ class Stepper:
             running += self._step
 
 
+max_distance = timeunits(seconds=2)
+
+
 class FrameMeta:
     def __init__(self):
         self.modified = False
@@ -150,18 +154,15 @@ class FrameMeta:
         later_idx = bisect.bisect_left(self.framelist, frame_time)
         earlier_idx = later_idx - 1
 
-        later_time = self.framelist[later_idx]
         earlier_time = self.framelist[earlier_idx]
-
-        later_item = self.frames[later_time]
         earlier_item = self.frames[earlier_time]
 
-        pts_delta = later_time - earlier_time
-        gps_delta = timeunits(seconds=(later_item.dt - earlier_item.dt).total_seconds())
-        delta = (gps_delta * ((frame_time - earlier_time) / pts_delta))
-        wanted_date = delta.timedelta() + earlier_item.dt
+        delta = frame_time - earlier_time
 
-        return earlier_item.interpolate(other=later_item, dt=wanted_date)
+        if delta > max_distance:
+            return Entry(dt=earlier_item.dt + delta.timedelta())
+
+        return earlier_item
 
     def items(self):
         self.check_modified()
@@ -260,8 +261,8 @@ def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMe
     if other:
         for item in gps.items():
             frame_time = item.timestamp
-            interpolated = other.get(timeunits(millis=frame_time.magnitude))
-            item.update(**update(interpolated))
+            closest_previous = other.get(timeunits(millis=frame_time.magnitude))
+            item.update(**update(closest_previous))
 
 
 def parse_gopro(gpmd_from, units, metameta: MetaMeta):
@@ -284,6 +285,13 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta):
                 gps_frame_meta,
                 grav_framemeta(gopro_meta, units, metameta=metameta),
                 lambda a: {"grav": a.grav}
+            )
+
+        with PoorTimer("extract CORI",1).timing():
+            merge_frame_meta(
+                gps_frame_meta,
+                cori_framemeta(gopro_meta, units, metameta=metameta),
+                lambda a: {"cori": a.cori, "ori": a.ori }
             )
 
         return gps_frame_meta

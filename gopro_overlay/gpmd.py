@@ -13,7 +13,8 @@ GPMDStruct = struct.Struct('>4sBBH')
 GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
 XYZ = collections.namedtuple('XYZ', "x y z")
 VECTOR = collections.namedtuple("VECTOR", "a b c")
-QUATERNION = collections.namedtuple("QUATERNION", "w x y z")
+# https://github.com/gopro/gpmf-parser/issues/100 says it is w x z y
+QUATERNION = collections.namedtuple("QUATERNION", "w x z y")
 
 
 class GPSFix(Enum):

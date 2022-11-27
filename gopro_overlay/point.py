@@ -207,4 +207,4 @@ class Quaternion:
 
         yaw = math.atan2(siny_cosp, cosy_cosp)
 
-        return EulerRadians(roll=roll, pitch=pitch, yaw=yaw)
+        return EulerRadians(roll=pitch, pitch=roll, yaw=yaw)
