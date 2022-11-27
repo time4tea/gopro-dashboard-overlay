@@ -17,6 +17,8 @@ Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-over
 ![Example Dashboard Image](examples/2022-05-15-example.png)
 ![Example Dashboard Image](examples/2022-06-11-contrib-example.png)
 ![Example Dashboard Image](examples/2022-07-19-contrib-example-plane.jpg)
+
+An Example of 'overlay only' mode, which generates movies from GPX files
 ![Example Dashboard Image](examples/2022-11-24-gpx-only-overlay.png)
 
 ## Map Styles
@@ -100,6 +102,11 @@ For full instructions on all command lines see [docs/bin](docs/bin)
 ```shell
 venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,-0.40000,0.50 ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
+
+## Writeups
+
+There's a great writeup of how to use the software to make an overlay from a GPX file at https://blog.cubieserver.de/2022/creating-gpx-overlay-videos-on-linux/
+(Nov 2022)
 
 ### Format of the Dashboard Configuration file
 
