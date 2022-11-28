@@ -48,3 +48,15 @@ The frame drawing rate is quite a bit faster, but won't make a huge difference u
 
 No tests are run in this project with pillow-simd, so output may vary (but their tests are good, so I wouldn't expect any huge differences, if any)
 
+### Things to look at
+
+![Flamegraph](examples/perfetto-capture.png)
+
+A few thoughts - timing dominated by:
+ - Creating a new image on each frame
+ - Font rendering
+ - Encoding
+ - Writing to ffmpeg
+
+Perhaps can somehow move encoding and writing of frame to ffmpeg to another thread/process so can start rendering next frame while that is happening? (e.g. Double Buffer)
+need to think about python GIL - so perhaps shared memory? 
