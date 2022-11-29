@@ -14,14 +14,14 @@ def load_file(path) -> GoproMeta:
     return GoproMeta.parse(ffmpeg.load_gpmd_from(path))
 
 
-def file_path_of_test_asset(name, missing_ok=False):
+def file_path_of_test_asset(name, missing_ok=False) -> Path:
     sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 
     meta_dir = sourcefile.parents[0].joinpath("meta")
 
-    the_path = os.path.join(meta_dir, name)
+    the_path = Path(meta_dir) / name
 
-    if not os.path.exists(the_path):
+    if not the_path.exists():
         if missing_ok:
             pytest.xfail(f"Missing file {the_path} and this is OK")
         else:
@@ -80,8 +80,8 @@ def test_loading_cori():
     item = framemeta.items()[0]
     assert item.cori.w == pytest.approx(1, abs=0.001)
     assert item.cori.v.x == pytest.approx(0.000, abs=0.001)
-    assert item.cori.v.y == pytest.approx(0.002, abs=0.001)
-    assert item.cori.v.z == pytest.approx(0.005, abs=0.001)
+    assert item.cori.v.y == pytest.approx(0.005, abs=0.001)
+    assert item.cori.v.z == pytest.approx(0.002, abs=0.001)
 
 
 def test_loading_gps_and_accl():

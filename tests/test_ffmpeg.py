@@ -116,7 +116,7 @@ def test_ffmpeg_generate_execute():
     fake = FakeExecution()
 
     ffmpeg = FFMPEGOverlay(
-        output="output",
+        output=Path("output"),
         overlay_size=Dimension(100, 200),
         execution=fake
     )
@@ -145,7 +145,7 @@ def test_ffmpeg_generate_execute():
 def test_ffmpeg_overlay_execute_default():
     fake = FakeExecution()
 
-    ffmpeg = FFMPEGOverlayVideo(input="input", output="output", overlay_size=Dimension(3, 4), execution=fake)
+    ffmpeg = FFMPEGOverlayVideo(input=Path("input"), output=Path("output"), overlay_size=Dimension(3, 4), execution=fake)
 
     with ffmpeg.generate():
         pass

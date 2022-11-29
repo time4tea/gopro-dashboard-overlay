@@ -2,9 +2,10 @@
 
 import argparse
 import datetime
+import pathlib
 import sys
-from collections import Counter
 from pathlib import Path
+from typing import Optional
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.common import smart_open
@@ -17,24 +18,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file to GPX")
 
     parser.add_argument("--every", default=0, type=int, help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
-    parser.add_argument("input", help="Input MP4 file")
-    parser.add_argument("output", nargs="?", default="-", help="Output GPX file (default stdout)")
+    parser.add_argument("input", type=pathlib.Path, help="Input MP4 file")
+    parser.add_argument("output", type=pathlib.Path, nargs="?", default="-", help="Output GPX file (default stdout)")
 
     args = parser.parse_args()
 
-    input = args.input
+    source = args.input
 
-    if not Path(input).exists():
-        print(f"{input}: No such file or directory", file=sys.stderr)
+    if not source.exists():
+        print(f"{source}: No such file or directory", file=sys.stderr)
         exit(1)
 
-    counter = Counter()
+    print(f"Loading GoPro {source}")
 
-    print(f"Loading GoPro {args.input}")
-
-    stream_info = ffmpeg.find_streams(args.input)
+    stream_info = ffmpeg.find_streams(source)
     fm = framemeta_from(
-        args.input,
+        source,
         units=units,
         metameta=stream_info.meta
     )
@@ -43,7 +42,7 @@ if __name__ == "__main__":
 
     gpx = framemeta_to_gpx(fm, step=datetime.timedelta(seconds=args.every))
 
-    with smart_open(args.output) as f:
-        f.write(gpx.to_xml())
+    dest: Optional[Path] = args.output
 
-    print(counter, file=sys.stdout)
+    with smart_open(dest) as f:
+        f.write(gpx.to_xml())

@@ -1,4 +1,5 @@
 import bisect
+from pathlib import Path
 from typing import Callable
 
 from gopro_overlay import timeseries_process
@@ -297,7 +298,7 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta):
         return gps_frame_meta
 
 
-def framemeta_from(filepath, units, metameta: MetaMeta):
+def framemeta_from(filepath:Path, units, metameta: MetaMeta):
     gpmd_from = load_gpmd_from(filepath)
     return parse_gopro(gpmd_from, units, metameta)
 

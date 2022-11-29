@@ -2,12 +2,14 @@ import contextlib
 import os
 import sys
 import tempfile
+from pathlib import Path
+from typing import Optional
 
 
 @contextlib.contextmanager
-def smart_open(filename=None):
-    if filename and filename != '-':
-        fh = open(filename, 'w')
+def smart_open(filepath: Optional[Path] = None):
+    if filepath and filepath.name != '-':
+        fh = filepath.open("w")
     else:
         fh = sys.stdout
 

@@ -2,8 +2,10 @@
 
 import argparse
 import csv
+import pathlib
 import sys
 from pathlib import Path
+from typing import Optional
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.common import smart_open
@@ -17,24 +19,24 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file / GPX File to CSV")
 
-    parser.add_argument("input", help="Input file")
-    parser.add_argument("output", nargs="?", default="-", help="Output CSV file (default stdout)")
+    parser.add_argument("input", type=pathlib.Path, help="Input file")
+    parser.add_argument("output", type=pathlib.Path, nargs="?", default="-", help="Output CSV file (default stdout)")
 
     parser.add_argument("--gpx", action="store_true", help="Input is a gpx file")
 
     args = parser.parse_args()
 
-    input = args.input
+    source = args.input
 
-    if not Path(input).exists():
-        print(f"{input}: No such file or directory", file=sys.stderr)
+    if not source.exists():
+        print(f"{source}: No such file or directory", file=sys.stderr)
         exit(1)
 
     if args.gpx:
-        ts = load_timeseries(args.input, units)
+        ts = load_timeseries(source, units)
     else:
-        stream_info = find_streams(args.input)
-        ts = framemeta_from(args.input,
+        stream_info = find_streams(source)
+        ts = framemeta_from(source,
                             units=units,
                             metameta=stream_info.meta
                             )
@@ -50,7 +52,9 @@ if __name__ == "__main__":
         return v.magnitude
 
 
-    with smart_open(args.output) as f:
+    dest: Optional[Path] = args.output
+
+    with smart_open(dest) as f:
         writer = csv.DictWriter(f=f,
                                 fieldnames=["packet", "packet_index", "gps_fix", "date", "lat", "lon", "dop", "alt",
                                             "speed",

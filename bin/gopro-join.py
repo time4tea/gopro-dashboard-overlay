@@ -2,6 +2,7 @@
 
 import argparse
 import os.path
+import pathlib
 
 from gopro_overlay.ffmpeg import join_files
 from gopro_overlay.filenaming import GoProFile
@@ -9,16 +10,18 @@ from gopro_overlay.filenaming import GoProFile
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Concatenate sequence of GoPro Files")
 
-    parser.add_argument("input", help="A single MP4 file from the sequence")
-    parser.add_argument("output", help="Output MP4 file")
+    parser.add_argument("input", type=pathlib.Path, help="A single MP4 file from the sequence")
+    parser.add_argument("output", type=pathlib.Path, help="Output MP4 file")
 
     args = parser.parse_args()
 
-    if not os.path.exists(args.input):
-        raise IOError(f"File not found {args.input}")
+    source: pathlib.Path = args.input
 
-    directory = os.path.realpath(os.path.dirname(args.input))
-    filename = os.path.basename(args.input)
+    if not source.exists():
+        raise IOError(f"File not found {source}")
+
+    directory = source.parent.absolute()
+    filename = source.name
 
     file = GoProFile(filename)
 

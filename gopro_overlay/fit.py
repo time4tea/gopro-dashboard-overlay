@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import fitdecode
 
 from gopro_overlay.entry import Entry
@@ -27,7 +29,7 @@ interpret = {
 }
 
 
-def load_timeseries(filepath: str, units):
+def load_timeseries(filepath: Path, units):
     ts = Timeseries()
 
     with fitdecode.FitReader(filepath) as ff:

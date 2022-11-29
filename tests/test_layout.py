@@ -1,5 +1,6 @@
 import random
 from datetime import timedelta
+from pathlib import Path
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
@@ -27,7 +28,7 @@ font = load_font("Roboto-Medium.ttf")
 def test_render_default_layout():
     # Avg: 0.01550, Rate: 64.53
 
-    xmldoc = load_xml_layout("default-1920x1080")
+    xmldoc = load_xml_layout(Path("default-1920x1080"))
 
     with renderer.open() as map_renderer:
         return time_layout("default", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
@@ -35,7 +36,7 @@ def test_render_default_layout():
 
 @approve_image
 def test_render_default_layout_27k():
-    xmldoc = load_xml_layout("default-2704x1520")
+    xmldoc = load_xml_layout(Path("default-2704x1520"))
 
     with renderer.open() as map_renderer:
         return time_layout(
@@ -47,7 +48,7 @@ def test_render_default_layout_27k():
 
 @approve_image
 def test_render_default_layout_4k():
-    xmldoc = load_xml_layout("default-3840x2160")
+    xmldoc = load_xml_layout(Path("default-3840x2160"))
 
     with renderer.open() as map_renderer:
         return time_layout(
@@ -66,7 +67,7 @@ def test_render_speed_layout():
 @approve_image
 def test_render_example_layout():
     # Avg: 0.04147, Rate: 24.12
-    xmldoc = load_xml_layout("example")
+    xmldoc = load_xml_layout(Path("example"))
 
     with renderer.open() as map_renderer:
         return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))

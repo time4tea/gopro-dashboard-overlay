@@ -1,5 +1,6 @@
 import collections
 import gzip
+from pathlib import Path
 
 import gpxpy
 
@@ -45,12 +46,12 @@ def with_unit(gpx, units):
     )
 
 
-def load(filepath, units):
-    if filepath.endswith(".gz"):
+def load(filepath: Path, units):
+    if filepath.suffix == ".gz":
         with gzip.open(filepath, 'rb') as gpx_file:
             return load_xml(gpx_file, units)
     else:
-        with open(filepath, 'r') as gpx_file:
+        with filepath.open('r') as gpx_file:
             return load_xml(gpx_file, units)
 
 
@@ -83,5 +84,5 @@ def gpx_to_timeseries(gpx):
     return gpx_timeseries
 
 
-def load_timeseries(filepath, units):
+def load_timeseries(filepath: Path, units):
     return gpx_to_timeseries(load(filepath, units))

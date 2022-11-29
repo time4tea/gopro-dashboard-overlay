@@ -1,4 +1,5 @@
 import argparse
+import pathlib
 import sys
 
 from gopro_overlay import geo
@@ -10,11 +11,11 @@ def gopro_dashboard_arguments(args=None):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument("input", nargs="?", help="Input MP4 file - Optional with --use-gpx-only")
-    parser.add_argument("output", help="Output Video File - MP4/MOV/WEBM all supported, see Profiles documentation")
+    parser.add_argument("input", type=pathlib.Path, nargs="?", help="Input MP4 file - Optional with --use-gpx-only")
+    parser.add_argument("output", type=pathlib.Path, help="Output Video File - MP4/MOV/WEBM all supported, see Profiles documentation")
 
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
-    parser.add_argument("--gpx", "--fit", help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
+    parser.add_argument("--gpx", "--fit", type=pathlib.Path, help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
     parser.add_argument("--generate", choices=["default", "overlay", "none"], default="default", help="Type of output to generate")
@@ -40,7 +41,7 @@ def gopro_dashboard_arguments(args=None):
     layout.add_argument("--layout", choices=["default", "speed-awareness", "xml"], default="default",
                         help="Choose graphics layout")
 
-    layout.add_argument("--layout-xml", help="Use XML File for layout")
+    layout.add_argument("--layout-xml", type=pathlib.Path, help="Use XML File for layout")
 
     layout.add_argument("--exclude", nargs="+", help="exclude named component (will include all others")
     layout.add_argument("--include", nargs="+", help="include named component (will exclude all others)")

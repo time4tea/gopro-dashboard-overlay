@@ -2,7 +2,9 @@
 
 import argparse
 import os.path
+import pathlib
 import re
+from typing import List
 
 from gopro_overlay import functional, filenaming, ffmpeg, geocode
 from gopro_overlay.gpmd import GoproMeta
@@ -11,7 +13,7 @@ from gopro_overlay.gpmd_visitors_gps import DetermineFirstLockedGPSUVisitor
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Rename a series of GoPro files by date. Does nothing (so its safe) by default.")
 
-    parser.add_argument("file", nargs="+", help="The files to rename, or directory/ies containing files")
+    parser.add_argument("file", type=pathlib.Path, nargs="+", help="The files to rename, or directory/ies containing files")
     parser.add_argument("-t", "--touch", action="store_true", help="change the modification time of the file")
     parser.add_argument("-to", "--touch-only", action="store_true", help="change the modification time of the file only - don't rename")
     parser.add_argument("--desc", help="a descriptive name to add to the filename - the filename will be yyyymmdd-hhmmss-{desc}.MP4")
@@ -24,13 +26,15 @@ if __name__ == "__main__":
     if not args.yes:
         print("*** DRY RUN - NOT ACTUALLY DOING ANYTHING ***")
 
-    for path in args.file:
-        if not os.path.exists(path):
+    inputs: List[pathlib.Path] = args.file
+
+    for path in inputs:
+        if not path.exists():
             raise IOError(f"File not found {path}")
-        if os.path.isdir(path) and not args.dirs:
+        if path.is_dir() and not args.dirs:
             raise IOError(f"{path} is a directory, please use --dirs")
 
-    potentials = functional.flatten([filenaming.gopro_files_in(path) for path in args.file])
+    potentials = functional.flatten([filenaming.gopro_files_in(path) for path in inputs])
     potentials = filter(None, potentials)
     file_list = sorted(potentials)
 

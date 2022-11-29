@@ -1,7 +1,7 @@
 import importlib
-import os.path
 import sys
 import xml.etree.ElementTree as ET
+from pathlib import Path
 from typing import Callable, Optional
 
 from gopro_overlay import layouts
@@ -12,7 +12,6 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
-from .widgets.widgets import simple_icon, Translate, Composite, Frame
 from .widgets.asi import AirspeedIndicator
 from .widgets.bar import Bar
 from .widgets.chart import SimpleChart
@@ -20,14 +19,15 @@ from .widgets.compass import Compass
 from .widgets.compass_arrow import CompassArrow
 from .widgets.map import MovingJourneyMap
 from .widgets.profile import WidgetProfiler
+from .widgets.widgets import simple_icon, Translate, Composite, Frame
 
 
-def load_xml_layout(filename):
-    if os.path.exists(filename):
-        with open(filename) as f:
+def load_xml_layout(filepath: Path):
+    if filepath.exists():
+        with filepath.open() as f:
             return f.read()
 
-    with importlib.resources.path(layouts, f"{filename}.xml") as fn:
+    with importlib.resources.path(layouts, f"{filepath.name}.xml") as fn:
         with open(fn) as f:
             return f.read()
 
@@ -216,7 +216,7 @@ def metric_converter_from(name):
         "kph": lambda u: u.to("KPH"),
         "knots": lambda u: u.to("knot"),
 
-        #accel
+        # accel
         "G": lambda u: u.to("gravity"),
 
         # alt / dist

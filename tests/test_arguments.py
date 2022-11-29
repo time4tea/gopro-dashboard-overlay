@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 
 import pytest
@@ -8,7 +9,7 @@ from gopro_overlay.arguments import gopro_dashboard_arguments
 def test_only_output():
     args = do_args(input=None)
     assert args.input is None
-    assert args.output == "output"
+    assert args.output == Path("output")
 
 
 def test_neither_input_nor_output():
@@ -21,15 +22,15 @@ def test_neither_input_nor_output():
 def test_gpx_only_synonyms():
     args = do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something")
     assert args.use_gpx_only
-    assert args.gpx == "bob"
+    assert args.gpx == Path("bob")
 
     args = do_args("--use-fit-only", "--fit", "bob", "--overlay-size", "10x10", input="something")
     assert args.use_gpx_only
-    assert args.gpx == "bob"
+    assert args.gpx == Path("bob")
 
 
 def test_input_with_gpx_only():
-    assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something").input == "something"
+    assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something").input == Path("something")
     assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input=None).input is None
 
 
@@ -66,8 +67,8 @@ def test_gpx_required_with_gpx_only():
 
 
 def test_input_output():
-    assert do_args(input="input").input == "input"
-    assert do_args(output="output").output == "output"
+    assert do_args(input="input").input == Path("input")
+    assert do_args(output="output").output == Path("output")
 
 
 def test_overlay_only():

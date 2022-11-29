@@ -9,6 +9,7 @@ import subprocess
 from array import array
 from dataclasses import dataclass
 from io import BytesIO
+from pathlib import Path
 from typing import Optional
 
 from gopro_overlay.common import temporary_file
@@ -135,7 +136,7 @@ def find_frame_duration(filepath, data_stream_number, invoke=invoke):
     return duration
 
 
-def find_streams(filepath, invoke=invoke, find_frame_duration=find_frame_duration, stat=os.stat) -> StreamInfo:
+def find_streams(filepath: Path, invoke=invoke, find_frame_duration=find_frame_duration, stat=os.stat) -> StreamInfo:
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
     ffprobe_json = json.loads(ffprobe_output)
@@ -204,7 +205,7 @@ def file_meta(filepath: str, stat=os.stat) -> FileMeta:
     )
 
 
-def load_gpmd_from(filepath):
+def load_gpmd_from(filepath: Path):
     track = find_streams(filepath).meta.stream
     if track:
         cmd = ["ffmpeg", "-hide_banner", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f',
@@ -268,7 +269,7 @@ class FFMPEGNull:
 
 class FFMPEGOverlay:
 
-    def __init__(self, output, overlay_size: Dimension, options: FFMPEGOptions = None, execution=None):
+    def __init__(self, output: Path, overlay_size: Dimension, options: FFMPEGOptions = None, execution=None):
         self.output = output
         self.overlay_size = overlay_size
         self.execution = execution if execution else InProcessExecution()
@@ -288,7 +289,7 @@ class FFMPEGOverlay:
             "-i", "-",
             "-r", "30",
             self.options.output,
-            self.output
+            str(self.output)
         ])
 
         yield from self.execution.execute(cmd)
@@ -310,7 +311,7 @@ class FFMPEGOptions:
 
 class FFMPEGOverlayVideo:
 
-    def __init__(self, input, output, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, execution=None):
+    def __init__(self, input: Path, output: Path, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, execution=None):
         self.output = output
         self.input = input
         self.options = options if options else FFMPEGOptions()
@@ -329,7 +330,7 @@ class FFMPEGOverlayVideo:
             "-y",
             self.options.general,
             self.options.input,
-            "-i", self.input,
+            "-i", str(self.input),
             "-f", "rawvideo",
             "-framerate", "10.0",
             "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
@@ -337,7 +338,7 @@ class FFMPEGOverlayVideo:
             "-i", "-",
             "-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
             self.options.output,
-            self.output
+            str(self.output)
         ])
 
         yield from self.execution.execute(cmd)

@@ -110,14 +110,14 @@ def test_feature_70_power_converted():
     assert entries[0].power == units.Quantity(103, units.W)
 
 
-def file_path_of_test_asset(name, in_dir="gpx"):
+def file_path_of_test_asset(name, in_dir="gpx") -> Path:
     sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 
     meta_dir = sourcefile.parents[0].joinpath(in_dir)
 
-    the_path = os.path.join(meta_dir, name)
+    the_path = Path(meta_dir) / name
 
-    if not os.path.exists(the_path):
+    if not the_path.exists():
         raise IOError(f"Test file {the_path} does not exist")
 
     return the_path

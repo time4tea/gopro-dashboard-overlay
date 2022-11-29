@@ -42,14 +42,14 @@ def accepter_from_args(include, exclude):
     return lambda n: True
 
 
-def create_desired_layout(dimensions, layout, layout_xml, include, exclude, renderer, timeseries, font, privacy_zone, profiler):
+def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude, renderer, timeseries, font, privacy_zone, profiler):
     accepter = accepter_from_args(include, exclude)
 
     if layout_xml:
         layout = "xml"
 
     if layout == "default":
-        resource_name = f"default-{dimensions.x}x{dimensions.y}"
+        resource_name = Path(f"default-{dimensions.x}x{dimensions.y}")
         try:
             return layout_from_xml(load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone,
                                    include=accepter, decorator=profiler)
@@ -65,13 +65,13 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
         raise ValueError(f"Unsupported layout {args.layout}")
 
 
-def load_external(file, units) -> Timeseries:
-    if file.endswith(".gpx"):
-        return gpx.load_timeseries(file, units)
-    elif file.endswith(".fit"):
-        return fit.load_timeseries(file, units)
+def load_external(filepath: Path, units) -> Timeseries:
+    if filepath.suffix == ".gpx":
+        return gpx.load_timeseries(filepath, units)
+    elif filepath.suffix == ".fit":
+        return fit.load_timeseries(filepath, units)
     else:
-        raise IOError(f"Don't recognise filetype from {file} - support .gpx and .fit")
+        raise IOError(f"Don't recognise filetype from {filepath} - support .gpx and .fit")
 
 
 if __name__ == "__main__":
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     font = load_font(args.font)
 
     # need in this scope for now
-    input_file = None
+    inputpath = None
     generate = args.generate
 
     version = metadata.version("gopro_overlay")
@@ -105,8 +105,8 @@ if __name__ == "__main__":
                 duration = None
 
                 if args.input:
-                    input_file = args.input
-                    stream_info = find_streams(input_file)
+                    inputpath = args.input
+                    stream_info = find_streams(inputpath)
                     dimensions = stream_info.video.dimension
 
                     duration = stream_info.video.duration
@@ -125,23 +125,25 @@ if __name__ == "__main__":
                 else:
                     generate = "overlay"
 
-                frame_meta = timeseries_to_framemeta(load_external(args.gpx, units), units, start_date=start_date, duration=duration)
+                external_file: Path = args.gpx
+                frame_meta = timeseries_to_framemeta(load_external(external_file, units), units, start_date=start_date, duration=duration)
                 video_duration = frame_meta.duration()
                 packets_per_second = 1
             else:
-                input_file = args.input
-                stream_info = find_streams(input_file)
+                inputpath: Path = args.input
+                stream_info = find_streams(inputpath)
 
                 if not stream_info.meta:
-                    raise IOError(f"Unable to locate metadata stream in '{input_file}' - is it a GoPro file")
+                    raise IOError(f"Unable to locate metadata stream in '{inputpath}' - is it a GoPro file")
 
                 dimensions = stream_info.video.dimension
                 video_duration = stream_info.video.duration
                 packets_per_second = 18
-                frame_meta = framemeta_from(input_file, metameta=stream_info.meta, units=units)
+                frame_meta = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
 
                 if args.gpx:
-                    gpx_timeseries = load_external(args.gpx, units)
+                    external_file: Path = args.gpx
+                    gpx_timeseries = load_external(external_file, units)
                     print(f"GPX/FIT Timeseries has {len(gpx_timeseries)} data points.. merging...")
                     merge_gpx_with_gopro(gpx_timeseries, frame_meta)
 
@@ -149,7 +151,7 @@ if __name__ == "__main__":
                 dimensions = dimension_from(args.overlay_size)
 
         if len(frame_meta) < 1:
-            raise IOError(f"Unable to load GoPro metadata from {input_file}. Use --debug-metadata to see more information")
+            raise IOError(f"Unable to load GoPro metadata from {inputpath}. Use --debug-metadata to see more information")
 
         print(f"Generating overlay at {dimensions}")
         print(f"Timeseries has {len(frame_meta)} data points")
@@ -207,7 +209,7 @@ if __name__ == "__main__":
             elif generate == "overlay":
                 ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
             else:
-                ffmpeg = FFMPEGOverlayVideo(input=input_file, output=args.output, options=ffmpeg_options, vsize=args.output_size, overlay_size=dimensions, execution=execution)
+                ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options, vsize=args.output_size, overlay_size=dimensions, execution=execution)
 
             write_timer = PoorTimer("writing to ffmpeg")
             byte_timer = PoorTimer("image to bytes")

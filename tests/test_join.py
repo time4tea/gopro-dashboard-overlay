@@ -8,7 +8,7 @@ from gopro_overlay.filenaming import GoProFile, Encoding
 
 
 def test_gopro_file_naming_avc():
-    f = GoProFile("GH010072.MP4")
+    f = GoProFile(Path("GH010072.MP4"))
     assert f.name == "GH010072.MP4"
     assert f.letter == "H"
     assert f.encoding == Encoding.AVC
@@ -17,7 +17,7 @@ def test_gopro_file_naming_avc():
 
 
 def test_gopro_file_naming_hevc():
-    f = GoProFile("GX971029.MP4")
+    f = GoProFile(Path("GX971029.MP4"))
     assert f.name == "GX971029.MP4"
     assert f.letter == "X"
     assert f.encoding == Encoding.HEVC
@@ -32,8 +32,8 @@ files = [
 
 
 def test_finding_files_belonging_to():
-    f = GoProFile("GH010072.MP4")
-    found = f.related_files("/some/dir", listdir=lambda d: files)
+    f = GoProFile(Path("GH010072.MP4"))
+    found = f.related_files(Path("/some/dir"), listdir=lambda d: files)
 
     assert len(found) == 4
     assert found[0].name == "GH010072.MP4"
@@ -57,7 +57,7 @@ def test_real_directory():
             (Path(td) / f).write_text("content")
 
         with working_directory("/tmp"):
-            gpf = GoProFile("GH020072.MP4")
+            gpf = GoProFile(Path("GH020072.MP4"))
             related = gpf.related_files(td)
             names = [r.name for r in related]
             assert names == ['GH010072.MP4', 'GH020072.MP4', 'GH030072.MP4', 'GH040072.MP4']
@@ -69,7 +69,7 @@ def test_real_directory_current_dir():
             (Path(td) / f).write_text("content")
 
         with working_directory(td):
-            gpf = GoProFile("GH020072.MP4")
+            gpf = GoProFile(Path("GH020072.MP4"))
             related = gpf.related_files(".")
             names = [r.name for r in related]
             assert names == ['GH010072.MP4', 'GH020072.MP4', 'GH030072.MP4', 'GH040072.MP4']
