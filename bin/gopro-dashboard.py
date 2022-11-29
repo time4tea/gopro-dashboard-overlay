@@ -2,6 +2,7 @@
 
 from importlib import metadata
 from pathlib import Path
+from typing import Optional
 
 import progressbar
 
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     font = load_font(args.font)
 
     # need in this scope for now
-    inputpath = None
+    inputpath: Optional[Path] = None
     generate = args.generate
 
     version = metadata.version("gopro_overlay")
@@ -130,7 +131,7 @@ if __name__ == "__main__":
                 video_duration = frame_meta.duration()
                 packets_per_second = 1
             else:
-                inputpath: Path = args.input
+                inputpath = args.input
                 stream_info = find_streams(inputpath)
 
                 if not stream_info.meta:
