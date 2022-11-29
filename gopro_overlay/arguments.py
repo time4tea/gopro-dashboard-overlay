@@ -14,7 +14,7 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("output", help="Output Video File - MP4/MOV/WEBM all supported, see Profiles documentation")
 
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
-    parser.add_argument("--gpx", help="Use GPX file for location / alt / hr / cadence / temp")
+    parser.add_argument("--gpx", "--fit", help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
     parser.add_argument("--generate", choices=["default", "overlay", "none"], default="default", help="Type of output to generate")
@@ -26,7 +26,7 @@ def gopro_dashboard_arguments(args=None):
 
     only = parser.add_argument_group("GPX Only", "Creating Movies from GPX File only")
 
-    only.add_argument("--use-gpx-only", action="store_true", help="Use only the GPX file - no GoPro location data")
+    only.add_argument("--use-gpx-only", "--use-fit-only", action="store_true", help="Use only the GPX/FIT file - no GoPro location data")
     only.add_argument("--video-time-start", choices=["file-created", "file-modified", "file-accessed"], help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed")
     only.add_argument("--video-time-end", choices=["file-created", "file-modified", "file-accessed"], help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed")
 

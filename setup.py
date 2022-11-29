@@ -14,6 +14,7 @@ requires = [
     "pint==0.17",
     "progressbar2==3.53.3",
     "requests==2.27.1",
+    "fitdecode==0.10.0",
 ]
 
 test_requirements = [

@@ -18,6 +18,16 @@ def test_neither_input_nor_output():
         assert args.output == "output"
 
 
+def test_gpx_only_synonyms():
+    args = do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something")
+    assert args.use_gpx_only
+    assert args.gpx == "bob"
+
+    args = do_args("--use-fit-only", "--fit", "bob", "--overlay-size", "10x10", input="something")
+    assert args.use_gpx_only
+    assert args.gpx == "bob"
+
+
 def test_input_with_gpx_only():
     assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something").input == "something"
     assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input=None).input is None

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import progressbar
 
-from gopro_overlay import timeseries_process, progress_frames, gpx
+from gopro_overlay import timeseries_process, progress_frames, gpx, fit
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
@@ -17,11 +17,11 @@ from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.geo import CachingRenderer, CompositeKeyFinder, ArgsKeyFinder, EnvKeyFinder, ConfigKeyFinder
-from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
+from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
@@ -63,6 +63,15 @@ def create_desired_layout(dimensions, layout, layout_xml, include, exclude, rend
         return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter, decorator=profiler)
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
+
+
+def load_external(file, units) -> Timeseries:
+    if file.endswith(".gpx"):
+        return gpx.load_timeseries(file, units)
+    elif file.endswith(".fit"):
+        return fit.load_timeseries(file, units)
+    else:
+        raise IOError(f"Don't recognise filetype from {file} - support .gpx and .fit")
 
 
 if __name__ == "__main__":
@@ -116,7 +125,7 @@ if __name__ == "__main__":
                 else:
                     generate = "overlay"
 
-                frame_meta = timeseries_to_framemeta(gpx.load_timeseries(args.gpx, units), units, start_date=start_date, duration=duration)
+                frame_meta = timeseries_to_framemeta(load_external(args.gpx, units), units, start_date=start_date, duration=duration)
                 video_duration = frame_meta.duration()
                 packets_per_second = 1
             else:
@@ -132,8 +141,8 @@ if __name__ == "__main__":
                 frame_meta = framemeta_from(input_file, metameta=stream_info.meta, units=units)
 
                 if args.gpx:
-                    gpx_timeseries = load_timeseries(args.gpx, units)
-                    print(f"GPX Timeseries has {len(gpx_timeseries)} data points.. merging...")
+                    gpx_timeseries = load_external(args.gpx, units)
+                    print(f"GPX/FIT Timeseries has {len(gpx_timeseries)} data points.. merging...")
                     merge_gpx_with_gopro(gpx_timeseries, frame_meta)
 
             if args.overlay_size:

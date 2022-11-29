@@ -3,7 +3,7 @@ import datetime
 from gopro_overlay.entry import Entry
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries
-from gopro_overlay.timeseries_process import process_ses, calculate_speeds, calculate_gradient
+from gopro_overlay.timeseries_process import process_ses, calculate_speeds, calculate_gradient, calculate_odo
 from gopro_overlay.units import units
 
 
@@ -69,7 +69,7 @@ def test_process_gradient():
         b=Entry(datetime_of(0), alt=metres(6), odo=metres(26)),
         c=None
     )
-    assert r["grad"].magnitude == 6.25
+    assert r["cgrad"].magnitude == 6.25
 
 
 def test_process_gradient_missing_alt():
@@ -79,3 +79,16 @@ def test_process_gradient_missing_alt():
         b=Entry(datetime_of(0), alt=metres(6), odo=metres(26)),
         c=None
     ) is None
+
+
+def test_process_odo():
+    processor = calculate_odo()
+    r = processor(
+        e=Entry(datetime_of(0), alt=metres(5), dist=metres(10)),
+    )
+    assert r["codo"].magnitude == 10
+    r = processor(
+        e=Entry(datetime_of(0), alt=metres(5), dist=metres(15)),
+    )
+    assert r["codo"].magnitude == 25
+

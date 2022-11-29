@@ -62,7 +62,7 @@ def calculate_odo():
     def accept(e):
         if e.dist is not None:
             total[0] += e.dist
-        return {"odo": total[0]}
+        return {"codo": total[0]}
 
     return accept
 
@@ -76,6 +76,6 @@ def calculate_gradient():
             if a.odo and b.odo:
                 dist = b.odo - a.odo
                 if dist and dist.magnitude > 1.0:
-                    return {"grad": (gain / dist) * 100.0}
+                    return {"cgrad": (gain / dist) * 100.0}
 
     return accept
