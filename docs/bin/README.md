@@ -207,58 +207,76 @@ I don't know the formula for calculating the correct number of threads... this w
 ### Usage
 
 ```
-usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--video-time-start {mtime,atime,ctime}] [--video-time-end {mtime,atime,ctime}] [--privacy PRIVACY]
+usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--privacy PRIVACY] [--generate {default,overlay,none}]
+                          [--overlay-size OVERLAY_SIZE] [--output-size OUTPUT_SIZE] [--profile PROFILE] [--use-gpx-only]
+                          [--video-time-start {file-created,file-modified,file-accessed}]
+                          [--video-time-end {file-created,file-modified,file-accessed}]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas,geo-osm-carto,geo-osm-bright,geo-osm-bright-grey,geo-osm-bright-smooth,geo-klokantech-basic,geo-osm-liberty,geo-maptiler-3d,geo-toner,geo-toner-grey,geo-positron,geo-positron-blue,geo-positron-red,geo-dark-matter,geo-dark-matter-brown,geo-dark-matter-dark-grey,geo-dark-matter-dark-purple,geo-dark-matter-purple-roads,geo-dark-matter-yellow-roads}]
-                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}]
-                          [--layout-xml LAYOUT_XML] [--exclude EXCLUDE [EXCLUDE ...]]
-                          [--include INCLUDE [INCLUDE ...]] [--generate {default,overlay,none}]
-                          [--show-ffmpeg] [--debug-metadata] [--overlay-size OVERLAY_SIZE]
-                          [--output-size OUTPUT_SIZE] [--profile PROFILE] [--profiler] [--thread]
-                          input output
+                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}] [--layout-xml LAYOUT_XML]
+                          [--exclude EXCLUDE [EXCLUDE ...]] [--include INCLUDE [INCLUDE ...]] [--show-ffmpeg] [--debug-metadata]
+                          [--profiler] [--thread]
+                          [input] output
 
 Overlay gadgets on to GoPro MP4
 
 positional arguments:
-  input                 Input MP4 file
-  output                Output MP4 file
+  input                 Input MP4 file - Optional with --use-gpx-only (default: None)
+  output                Output Video File - MP4/MOV/WEBM all supported, see Profiles documentation
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --font FONT           Selects a font (default: Roboto-Medium.ttf)
-  --gpx GPX             Use GPX file for location / alt / hr / cadence / temp (default: None)
-  --video-time-start {mtime,atime,ctime}
-                        Do not use GoPro metadata, but use file date (either modification, access or creation/metadata change time) for matching the start of the video and synchronize it with provided
-                        gpx file. Useful when video is not recorded with GoPro. Use either --video-time-start or --video-time-end (default: None)
-  --video-time-end {mtime,atime,ctime}
-                        Do not use GoPro metadata, but use file date (either modification, access or creation/metadata change time) for matching the end of the video and synchronize it with provided gpx
-                        file. Useful when video is not recorded with GoPro. Use either --video-time-start or --video-time-end (default: None)
+  --gpx GPX, --fit GPX  Use GPX/FIT file for location / alt / hr / cadence / temp ... (default: None)
   --privacy PRIVACY     Set privacy zone (lat,lon,km) (default: None)
+  --generate {default,overlay,none}
+                        Type of output to generate (default: default)
+  --overlay-size OVERLAY_SIZE
+                        <XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled overlay sizes
+                        (1920x1080, 3840x2160), Required if --use-gpx-only (default: None)
+  --output-size OUTPUT_SIZE
+                        Vertical size of output movie (default: 1080)
+  --profile PROFILE     Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json (default: None)
+
+GPX Only:
+  Creating Movies from GPX File only
+
+  --use-gpx-only, --use-fit-only
+                        Use only the GPX/FIT file - no GoPro location data (default: False)
+  --video-time-start {file-created,file-modified,file-accessed}
+                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be
+                        changed/removed (default: None)
+  --video-time-end {file-created,file-modified,file-accessed}
+                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be
+                        changed/removed (default: None)
+
+Mapping:
+  Display of Maps
+
   --map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas,geo-osm-carto,geo-osm-bright,geo-osm-bright-grey,geo-osm-bright-smooth,geo-klokantech-basic,geo-osm-liberty,geo-maptiler-3d,geo-toner,geo-toner-grey,geo-positron,geo-positron-blue,geo-positron-red,geo-dark-matter,geo-dark-matter-brown,geo-dark-matter-dark-grey,geo-dark-matter-dark-purple,geo-dark-matter-purple-roads,geo-dark-matter-yellow-roads}
                         Style of map to render (default: osm)
   --map-api-key MAP_API_KEY
                         API Key for map provider, if required (default OSM doesn't need one) (default: None)
+
+Layout:
+  Controlling layout
+
   --layout {default,speed-awareness,xml}
                         Choose graphics layout (default: default)
   --layout-xml LAYOUT_XML
-                        Use XML File for layout [experimental! - file format likely to change!] (default:
-                        None)
+                        Use XML File for layout (default: None)
   --exclude EXCLUDE [EXCLUDE ...]
                         exclude named component (will include all others (default: None)
   --include INCLUDE [INCLUDE ...]
                         include named component (will exclude all others) (default: None)
-  --generate {default,overlay,none}
-                        Type of output to generate (default: default)
+
+Debugging:
+  Controlling debugging outputs
+
   --show-ffmpeg         Show FFMPEG output (not usually useful) (default: False)
   --debug-metadata      Show detailed information when parsing GoPro Metadata (default: False)
-  --overlay-size OVERLAY_SIZE
-                        <XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported
-                        bundled overlay sizes (1920x1080, 3840x2160) (default: None)
-  --output-size OUTPUT_SIZE
-                        Vertical size of output movie (default: 1080)
-  --profile PROFILE     Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json (default: None)
   --profiler            Do some basic profiling of the widgets to find ones that may be slow (default: False)
-  --thread              (VERY EXPERIMENTAL MAY CRASH) Use an intermediate buffer before ffmpeg as possible
-                        performance enhancement (default: False)
+  --thread              (VERY EXPERIMENTAL MAY CRASH) Use an intermediate buffer before ffmpeg as possible performance enhancement
+                        (default: False)
 ```
 
 # gopro-extract.py
