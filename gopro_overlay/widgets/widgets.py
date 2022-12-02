@@ -194,8 +194,8 @@ class Frame:
                         outer_radius = math.sqrt(self.corner_radius ** 2 + self.corner_radius ** 2) - self.corner_radius
                         rounder_radius = math.sqrt((self.dimensions.x/2) ** 2 + (self.dimensions.y/2) ** 2) - outer_radius
                         distance_from_corner_radius = (rounder_radius - distance_to_center) / rounder_radius
-                    fade_out_percents = max(0.01, min(1, self.fade_out / radius))
-                    self.mask.putpixel((x, y), int(min(1, min(distance_from_side, distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
+                    fade_out_percents = max(0.01, min(1.0, self.fade_out / radius))
+                    self.mask.putpixel((x, y), int(min(1.0, min(distance_from_side, distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
 
     def draw(self, image, draw):
         self._maybe_init()
