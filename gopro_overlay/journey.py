@@ -1,8 +1,8 @@
 import math
-from typing import Tuple
+from typing import List
 
 from .gpmd import GPS_FIXED_VALUES
-from .point import Point
+from .point import Point, Coordinate
 
 
 class MinMax:
@@ -54,10 +54,23 @@ class Extents:
 MIN_BOX_SIZE = 0.0001
 
 
+class BoundingBox:
+
+    def __init__(self, min: Point, max: Point):
+        self.min = min
+        self.max = max
+
+    def __eq__(self, other):
+        return type(other) == type(self) and other.min == self.min and other.max == self.max
+
+    def size(self) -> Coordinate:
+        return Coordinate(x=self.max.lat - self.min.lat, y=self.max.lon - self.min.lon)
+
+
 class Journey:
 
     def __init__(self):
-        self.locations = []
+        self.locations: List[Point] = []
         self.lat = MinMax("lat")
         self.lon = MinMax("lon")
         self.badlat = MinMax("badlat")
@@ -73,11 +86,11 @@ class Journey:
             self.badlon.update(item.point.lon)
 
     @property
-    def bounding_box(self) -> Tuple[Point, Point]:
+    def bounding_box(self) -> BoundingBox:
         lat = self.lat if self.lat else self.badlat
         lon = self.lon if self.lon else self.badlon
 
         if math.dist([lat.min, lon.min], [lat.max, lon.max]) < MIN_BOX_SIZE:
-            return Point(lat.min, lon.min), Point(lat.min + MIN_BOX_SIZE, lon.min + MIN_BOX_SIZE)
+            return BoundingBox(Point(lat.min, lon.min), Point(lat.min + MIN_BOX_SIZE, lon.min + MIN_BOX_SIZE))
 
-        return Point(lat.min, lon.min), Point(lat.max, lon.max)
+        return BoundingBox(Point(lat.min, lon.min), Point(lat.max, lon.max))
