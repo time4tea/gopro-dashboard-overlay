@@ -28,10 +28,6 @@ class Circuit:
         self.dimensions = dimensions
         self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, dimensions.x, dimensions.y)
 
-        self.pat = cairo.LinearGradient(0.0, 0.0, 0.0, 1.0)
-        self.pat.add_color_stop_rgba(1, 0.7, 0, 0, 0.5)  # First stop, 50% opacity
-        self.pat.add_color_stop_rgba(0, 0.9, 0.7, 0.2, 1)  # Last stop, 100% opacity
-
         self.drawn = False
 
     def draw(self, image: Image, draw: ImageDraw):
@@ -40,9 +36,8 @@ class Circuit:
             self.framemeta.process(journey.accept)
 
             bbox = journey.bounding_box
-            size = bbox.size()
+            size = bbox.size() * 1.1
 
-            print(size)
             ctx = cairo.Context(self.surface)
             ctx.scale(self.dimensions.x, self.dimensions.y)
 

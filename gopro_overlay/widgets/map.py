@@ -89,7 +89,7 @@ class JourneyMap:
             self.timeseries.process(journey.accept)
 
             bbox = journey.bounding_box
-            self.map = geotiler.Map(extent=(bbox[0].lon, bbox[0].lat, bbox[1].lon, bbox[1].lat),
+            self.map = geotiler.Map(extent=(bbox.min.lon, bbox.min.lat, bbox.max.lon, bbox.max.lat),
                                     size=(self.size, self.size))
 
             if self.map.zoom > 18:
@@ -206,12 +206,12 @@ class MovingJourneyMap:
         journey = Journey()
         self.timeseries.process(journey.accept)
 
-        bbox_min, bbox_max = journey.bounding_box
+        bbox = journey.bounding_box
 
         map = geotiler.Map(
             extent=(
-                bbox_min.lon, bbox_min.lat,
-                bbox_max.lon, bbox_max.lat
+                bbox.min.lon, bbox.min.lat,
+                bbox.max.lon, bbox.max.lat
             ),
             zoom=self.zoom
         )

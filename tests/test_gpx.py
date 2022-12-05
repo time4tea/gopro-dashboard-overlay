@@ -7,7 +7,7 @@ import gpxpy
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
-from gopro_overlay.journey import Journey
+from gopro_overlay.journey import Journey, BoundingBox
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
@@ -147,7 +147,7 @@ def test_bugfix_converting_gpx_to_journey():
     journey = Journey()
     ts.process(journey.accept)
 
-    assert journey.bounding_box == (Point(lat=51.184804, lon=-2.804645), Point(lat=51.342323, lon=-2.571981))
+    assert journey.bounding_box == BoundingBox(Point(lat=51.184804, lon=-2.804645), Point(lat=51.342323, lon=-2.571981))
     assert len(journey.locations) == 8597
 
 

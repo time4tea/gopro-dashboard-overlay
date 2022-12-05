@@ -26,5 +26,5 @@ if __name__ == "__main__":
         timeseries.process(journey.accept)
         bbox = journey.bounding_box
 
-        print(f"{bbox[0].lon},{bbox[0].lat},{bbox[1].lon},{bbox[1].lat}")
+        print(f"{bbox.min.lon},{bbox.min.lat},{bbox.max.lon},{bbox.max.lat}")
         print(bbox)

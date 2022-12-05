@@ -21,6 +21,13 @@
         <component type="chart" name="chart" x="400" y="0" metric="accl.z" units="m/s^2" seconds="30"/>
     </translate>
 
+    <translate x="600">
+        <component type="moving_map" name="moving_map" x="0" y="100" size="384" zoom="17" corner_radius="35" />
+        <component type="journey_map" name="journey_map" x="0" y="500" size="384" corner_radius="35"/>
+        <translate x="400" y="500">
+            <component type="moving_journey_map" name="yoving_journey_map" size="384" corner_radius="35"/>
+        </translate>
+    </translate>
 
     <translate x="300">
         <translate y="0">
