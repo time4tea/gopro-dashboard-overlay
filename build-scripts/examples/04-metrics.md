@@ -75,8 +75,9 @@ The same alignment as in the [text](01-simple-text.md) component
 The same colour as in the [text](01-simple-text.md) component
 
 {{ <component type="metric" metric="speed" rgb="255,255,0" /> }}
-
 {{ <component type="metric" metric="speed" rgb="255,255,0,128" /> }}
+{{ <component type="metric" metric="speed" rgb="255,0,0" outline="255,255,255" size="48" /> }}
+{{ <component type="metric" metric="speed" rgb="255,0,0" outline="255,255,255" outline_width="5" size="48"  /> }}
 
 ## Supported Metrics
 

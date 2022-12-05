@@ -74,11 +74,39 @@ Use any standard metric, with any standard unit. See [04-metrics](../04-metrics)
 <kbd>![07-chart-6.png](07-chart-6.png)</kbd>
 
 
-
 ```xml
 <component type="chart" metric="accl.x" units="m/s^2" />
 ```
 <kbd>![07-chart-7.png](07-chart-7.png)</kbd>
+
+
+# Max and Min Values
+
+By default the chart will draw the max and min values in the window. This can be disabled with `values`
+
+
+```xml
+<component type="chart" metric="speed" units="kph" />
+```
+<kbd>![07-chart-8.png](07-chart-8.png)</kbd>
+
+
+```xml
+<component type="chart" metric="speed" units="kph" values="false" />
+```
+<kbd>![07-chart-9.png](07-chart-9.png)</kbd>
+
+
+The current value could be overlaid with a `metric` somewhere over the chart if that was wanted
+
+
+```xml
+<component type="chart" name="chart" metric="speed" units="mph" fill="177,26,22" values="false"/>
+            <translate x="230" y="40">
+                <component type="metric" metric="speed" units="mph" dp="1"/>
+            </translate>
+```
+<kbd>![07-chart-10.png](07-chart-10.png)</kbd>
 
 
 ## Colours / Sizing
@@ -89,7 +117,7 @@ Set the height using `height`
 ```xml
 <component type="chart" height="100" />
 ```
-<kbd>![07-chart-8.png](07-chart-8.png)</kbd>
+<kbd>![07-chart-11.png](07-chart-11.png)</kbd>
 
 
 Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g,b,a".
@@ -98,7 +126,7 @@ Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g
 ```xml
 <component type="chart" bg="255,255,0" fill="0,255,255" line="255,0,255" text="0,0,255" />
 ```
-<kbd>![07-chart-9.png](07-chart-9.png)</kbd>
+<kbd>![07-chart-12.png](07-chart-12.png)</kbd>
 
 
 Set alpha/transparency using `alpha`, between 0 and 255.
@@ -107,11 +135,11 @@ Set alpha/transparency using `alpha`, between 0 and 255.
 ```xml
 <component type="chart" alpha="20" />
 ```
-<kbd>![07-chart-10.png](07-chart-10.png)</kbd>
+<kbd>![07-chart-13.png](07-chart-13.png)</kbd>
 
 
 ```xml
 <component type="chart" alpha="200" />
 ```
-<kbd>![07-chart-11.png](07-chart-11.png)</kbd>
+<kbd>![07-chart-14.png](07-chart-14.png)</kbd>
 

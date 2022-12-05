@@ -1,6 +1,6 @@
 from typing import Callable
 
-from PIL import ImageFont
+from PIL import ImageFont, Image
 
 from .dimensions import Dimension
 from .framemeta import FrameMeta
@@ -101,6 +101,6 @@ class Overlay:
     def entry(self):
         return self._entry
 
-    def draw(self, pts):
+    def draw(self, pts) -> Image:
         self._entry = self.framemeta.get(pts)
         return self.scene.draw()

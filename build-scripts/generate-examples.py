@@ -32,6 +32,7 @@ dimensions_by_file = {
     "06-journey-map.md": Dimension(256, 256),
     "06-moving-journey-map.md": Dimension(384, 384),
     "07-air-speed-indicator.md": Dimension(256, 256),
+    "07-chart.md": Dimension(256, 128),
     "08-translate.md": Dimension(256, 256),
     "09-frame.md": Dimension(256, 256),
 }
@@ -108,7 +109,7 @@ if __name__ == "__main__":
                 )
 
                 overlay = Overlay(dimensions_for(filepath), framemeta=timeseries, create_widgets=layout)
-                image = overlay.draw(timeseries.min + (timeseries.max - timeseries.min))
+                image = overlay.draw(timeseries.min + ((timeseries.max - timeseries.min) / 2))
 
                 os.makedirs(example_dest, exist_ok=True)
 

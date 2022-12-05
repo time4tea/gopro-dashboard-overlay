@@ -1,0 +1,11 @@
+<layout>
+    <translate x="1400" y="20">
+        <component type="circuit_map" size="500" fill_width="8" outline="0,0,0" outline_width="5"/>
+    </translate>
+
+    <translate x="1400" y="510">
+        <frame width="500" height="500" opacity="0.6" cr="30" outline="0,0,0">
+            <component type="moving_journey_map" size="500" fill="255,0,0,128" zoom="18"/>
+        </frame>
+    </translate>
+</layout>

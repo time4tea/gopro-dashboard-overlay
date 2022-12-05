@@ -17,7 +17,7 @@ from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
-from gopro_overlay.geo import CachingRenderer, CompositeKeyFinder, ArgsKeyFinder, EnvKeyFinder, ConfigKeyFinder
+from gopro_overlay.geo import CachingRenderer, CompositeKeyFinder, ArgsKeyFinder, EnvKeyFinder, ConfigKeyFinder, api_key_finder
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
@@ -176,13 +176,9 @@ if __name__ == "__main__":
         else:
             privacy_zone = NoPrivacyZone()
 
-        api_key_finder = CompositeKeyFinder(
-            ArgsKeyFinder(args),
-            EnvKeyFinder(),
-            ConfigKeyFinder()
-        )
+        key_finder = api_key_finder(args)
 
-        with CachingRenderer(style=args.map_style, api_key_finder=api_key_finder).open() as renderer:
+        with CachingRenderer(style=args.map_style, api_key_finder=key_finder).open() as renderer:
 
             if args.profiler:
                 profiler = WidgetProfiler()

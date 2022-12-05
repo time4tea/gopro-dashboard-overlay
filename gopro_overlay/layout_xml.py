@@ -120,13 +120,17 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
             return elements[element.tag](element, level)
 
-        return [decorate(
-            name="ROOT",
-            level=0,
-            widget=Composite(
-                *[do_element(child, 1) for child in root if want_element(child)]
-            )
-        )]
+        try:
+            return [decorate(
+                name="ROOT",
+                level=0,
+                widget=Composite(
+                    *[do_element(child, 1) for child in root if want_element(child)]
+                )
+            )]
+        except ValueError as e:
+            raise IOError(e)
+
 
     return create
 
@@ -266,7 +270,9 @@ def create_metric(element, entry, font, **kwargs):
         converter=metric_converter_from(attrib(element, "units", d=None)),
         align=attrib(element, "align", d="left"),
         cache=battrib(element, "cache", d=True),
-        fill=rgbattr(element, "rgb", d=(255, 255, 255))
+        fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+        stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+        stroke_width=iattrib(element, "outline_width", d=2),
     )
 
 
@@ -314,7 +320,9 @@ def create_text(element, font, **kwargs):
         font=font(iattrib(element, "size", d=16)),
         align=attrib(element, "align", d="left"),
         direction=attrib(element, "direction", d="ltr"),
-        fill=rgbattr(element, "rgb", d=(255, 255, 255))
+        fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+        stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+        stroke_width=iattrib(element, "outline_width", d=2),
     )
 
 
@@ -390,11 +398,16 @@ def create_chart(element, entry, timeseries, font, **kwargs):
         key=value
     )
 
+    title = font(iattrib(element, "size_title", d=16))
+    values = battrib(element, "values", d=True)
+    if not values:
+        title = None
+
     return Translate(
         at=at(element),
         widget=SimpleChart(
             value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
-            font=font(iattrib(element, "size_title", d=16)),
+            font=title,
             filled=battrib(element, "filled", d=True),
             height=iattrib(element, "height", d=64),
             bg=rgbattr(element, "bg", d=(0, 0, 0, 170)),

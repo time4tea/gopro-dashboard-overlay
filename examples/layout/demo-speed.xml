@@ -1,0 +1,38 @@
+<layout>
+    <translate x="16">
+        <translate y="100">
+            <frame width="170" height="64" cr="30" opacity="0.6">
+                <translate x="15">
+                    <component type="icon" file="gauge.png" invert="true"/>
+                    <translate x="80" y="4">
+                        <component type="metric" metric="speed" units="kph" dp="0" size="48" rgb="255,0,0" outline="255,255,255" outline_width="5"/>
+                    </translate>
+                </translate>
+            </frame>
+        </translate>
+
+        <translate y="200">
+            <component type="text" size="16">kph</component>
+            <component type="metric" metric="speed" units="kph" dp="0" size="200"/>
+        </translate>
+
+        <translate y="800">
+            <component type="text" size="16">mph</component>
+            <component type="metric" metric="speed" units="mph" dp="0" size="200"/>
+        </translate>
+
+        <translate y="450">
+            <component type="chart" name="chart" metric="speed" units="mph" fill="177,26,22" values="false"/>
+            <translate x="230" y="40">
+                <component type="metric" metric="speed" units="mph" dp="1"/>
+            </translate>
+        </translate>
+
+        <translate y="550">
+            <component type="asi" metric="speed" units="mph" vs0="0" vs="0" vfe="0" vno="40" vne="50" rotate="180"/>
+            <translate x="100" y="210">
+                <component type="text" size="32">MPH</component>
+            </translate>
+        </translate>
+    </translate>
+</layout>

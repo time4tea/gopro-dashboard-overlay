@@ -174,6 +174,14 @@ class SingleKeyFinder:
         return self.key
 
 
+def api_key_finder(args):
+    return CompositeKeyFinder(
+        ArgsKeyFinder(args),
+        EnvKeyFinder(),
+        ConfigKeyFinder()
+    )
+
+
 class CachingRenderer:
 
     def __init__(self, style="osm", api_key_finder=None):

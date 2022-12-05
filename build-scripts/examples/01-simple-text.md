@@ -17,6 +17,11 @@ Use `rgb` to control the colour of the text
 
 {{ <component type="text" rgb="255,255,0">Simple Text</component> }}
 
+Use `outline` and `outline_width` to control the colour and width of the outline
+
+{{ <component type="text" rgb="255,255,0" outline="255,255,255" size="48" >Simple Text</component> }}
+{{ <component type="text" rgb="255,255,0" outline_width="5" size="48" >Simple Text</component> }}
+
 ## Transparency
 
 `rgb` can also accept an 'alpha' value, from 0 (completely transparent) to 255 (completely opaque)

@@ -33,8 +33,23 @@ Smaller windows have a bit more of a scroll effect, so look nicer.
 Use any standard metric, with any standard unit. See [04-metrics](../04-metrics) for more details
 
 {{ <component type="chart" metric="speed" units="kph" /> }}
-
 {{ <component type="chart" metric="accl.x" units="m/s^2" /> }}
+
+# Max and Min Values
+
+By default the chart will draw the max and min values in the window. This can be disabled with `values`
+
+{{ <component type="chart" metric="speed" units="kph" /> }}
+{{ <component type="chart" metric="speed" units="kph" values="false" /> }}
+
+The current value could be overlaid with a `metric` somewhere over the chart if that was wanted
+
+{{
+            <component type="chart" name="chart" metric="speed" units="mph" fill="177,26,22" values="false"/>
+            <translate x="230" y="40">
+                <component type="metric" metric="speed" units="mph" dp="1"/>
+            </translate>
+}}
 
 ## Colours / Sizing
 
