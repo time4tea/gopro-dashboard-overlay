@@ -212,19 +212,6 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
 - 0.62.0 Bump version only - no changes
 - 0.61.0 Update to Pillow version - should make the program run faster due to improvements in font rendering performance
 - 0.60.0 Possible fix for error using --gpx-only in timezones that are ahead of UTC
-- 0.59.0 EXPERIMENTAL support for creating dashboards without a GoPro file! - Just uses GPX. use `--gpx-only` - See examples in [docs/bin](docs/bin)
-  - Huge thanks to [@ptanov](https://github.com/ptanov) for code and others for suggestions!
-- 0.58.0 Chart component now has configurable colours and size - see [docs/xml/examples/07-chart](docs/xml/examples/07-chart)
-- 0.57.0 Experimental support for non-real-time (timelapse/timewarp) videos
-  - Thanks to [@ptanov](https://github.com/ptanov)
-- 0.56.0 Remove possible divide by zero error - only likely in timewarp/timelapse videos - I think
-  - Minor changes to ffmpeg code, should have no visible effect
-- 0.55.0 Huge improvement to View performance - used in chart - now charts with short windows are useable.
-- 0.54.0 Fix [#60](https://github.com/time4tea/gopro-dashboard-overlay/issues/60) h/t [@remintz](https://github.com/remintz)
-  - Some (older?) camera's don't have ORIN in ACCL and GYRO streams, so use a default
-- 0.53.0 New feature for a frame - fade out to edge - see [docs](docs/xml/examples/09-frame) - thanks [@ptanov](https://github.com/ptanov)
-  - Fix to GPX file loading - also, thanks [@ptanov](https://github.com/ptanov)
-- 0.52.0 Update gopro-to-gpx.py to allow smaller GPX files (see help)
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
