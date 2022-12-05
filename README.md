@@ -190,6 +190,12 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.69.0 
+  - New Program:- gopro-layout.py
+    - This should help if you want to create your own layouts. Just point this to a layout file, and it will render a frame each time the layout file changes, so you can see your changes "live"
+    - Some layout examples are now in [examples/layout](examples/layout)
+    - Minor tweaks to `text`, `metric` and `chart` to control outline width and colour
+  - New widget type `circuit_map` shows a simple plot of the path, but no map graphics. See docs. 
 - 0.68.0 EXPERIMENTAL support for FIT files - Use just like a GPX file, either supplementing the GoPro or by itself.
   - Not expecting any major issues, with FIT support, but I don't have a huge number of test files.
 - 0.67.0 EXPERIMENTAL support for parsing camera orientation. This means it's now possible to show pitch/roll/yaw.
