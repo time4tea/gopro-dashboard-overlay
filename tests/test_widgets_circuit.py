@@ -11,6 +11,8 @@ from gopro_overlay.exceptions import Defect
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point
+from gopro_overlay.privacy import NoPrivacyZone
+from gopro_overlay.widgets.map import Circuit
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
@@ -20,7 +22,7 @@ rng.seed(12345)
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 
-class Circuit:
+class CairoCircuit:
 
     def __init__(self, dimensions: Dimension, framemeta: FrameMeta, location: Callable[[], Point]):
         self.framemeta = framemeta
@@ -87,42 +89,9 @@ def test_circuit():
             Circuit(
                 dimensions=Dimension(500, 500),
                 framemeta=ts,
+                privacy_zone=NoPrivacyZone(),
                 location=lambda: ts.get(ts.min).point,
             )
         ],
-        repeat=1
+        repeat=100
     )
-
-
-def test_cairo():
-    dimensions = Dimension(500, 500)
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, dimensions.x, dimensions.y)
-    ctx = cairo.Context(surface)
-    ctx.scale(dimensions.x, dimensions.y)
-
-    print(ctx)
-
-    ctx.move_to(0.9523809523809523, 0.4642857142857143)
-    ctx.line_to(0.9047619047619048, 0.5)
-    ctx.line_to(0.9523809523809523, 0.5357142857142857)
-    ctx.line_to(0.9523809523809523, 0.5)
-    ctx.line_to(0.9047619047619048, 0.5357142857142857)
-    ctx.line_to(0.8571428571428571, 0.5714285714285714)
-    ctx.line_to(0.8571428571428571, 0.5357142857142857)
-    ctx.line_to(0.8095238095238095, 0.5714285714285714)
-    ctx.line_to(0.7619047619047619, 0.6071428571428571)
-    ctx.line_to(0.7619047619047619, 0.5714285714285714)
-    ctx.line_to(0.7142857142857143, 0.5357142857142857)
-    ctx.line_to(0.7142857142857143, 0.5357142857142857)
-    ctx.line_to(0.7619047619047619, 0.5)
-    ctx.line_to(0.7619047619047619, 0.5)
-    ctx.line_to(0.8095238095238095, 0.5357142857142857)
-    ctx.line_to(0.8571428571428571, 0.5714285714285714)
-    ctx.line_to(0.9047619047619048, 0.5714285714285714)
-    ctx.line_to(0.9047619047619048, 0.5357142857142857)
-
-    ctx.set_source_rgb(0.3, 0.2, 0.5)  # Solid color
-    ctx.set_line_width(0.01)
-    ctx.stroke()
-
-    to_pillow(surface).show()

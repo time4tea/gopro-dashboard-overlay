@@ -25,5 +25,9 @@ Icons
 
 Icon files are excluded from this license, and carry their own licenses
 
+rdp.py - Implementation of Ramer–Douglas–Peucker
+
+MIT License - Copyright (c) 2019 Sean Bleier
+
 
 

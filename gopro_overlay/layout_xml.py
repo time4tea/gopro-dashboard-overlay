@@ -17,7 +17,7 @@ from .widgets.bar import Bar
 from .widgets.chart import SimpleChart
 from .widgets.compass import Compass
 from .widgets.compass_arrow import CompassArrow
-from .widgets.map import MovingJourneyMap
+from .widgets.map import MovingJourneyMap, Circuit
 from .widgets.profile import WidgetProfiler
 from .widgets.widgets import simple_icon, Translate, Composite, Frame
 
@@ -354,6 +354,18 @@ def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **k
         zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
     )
 
+def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
+    size = iattrib(element, "size", d=256)
+    return Circuit(
+        location=lambda: entry().point,
+        privacy_zone=privacy,
+        framemeta=timeseries,
+        dimensions=Dimension(size, size),
+        fill=rgbattr(element, "fill", d=(255, 0, 0)),
+        outline=rgbattr(element, "outline", d=(255, 255, 255)),
+        fill_width=iattrib(element, "fill_width", d=4),
+        outline_width=iattrib(element, "outline_width", d=0)
+    )
 
 def create_gradient_chart(*args, **kwargs):
     print("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")

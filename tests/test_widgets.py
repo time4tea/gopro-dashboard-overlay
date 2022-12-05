@@ -10,9 +10,10 @@ from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets.widgets import simple_icon, Scene, Composite, Translate, Frame
-from gopro_overlay.widgets.text import CachingText, Text
 from gopro_overlay.widgets.info import ComparativeEnergy
+from gopro_overlay.widgets.map import OutLine
+from gopro_overlay.widgets.text import CachingText, Text
+from gopro_overlay.widgets.widgets import simple_icon, Scene, Composite, Translate, Frame
 from tests.approval import approve_image
 from tests.testenvironment import is_make
 
@@ -226,6 +227,7 @@ def test_frame_fade_cr_zero():
         )
     ])
 
+
 @approve_image
 def test_frame_fade_cr_non_zero():
     return time_rendering(name="viewport", widgets=[
@@ -241,6 +243,38 @@ def test_frame_fade_cr_non_zero():
         )
     ])
 
+
+
+class OutlineWidget:
+
+    def __init__(self, outline, points):
+        self.points = points
+        self.outline = outline
+
+    def draw(self, image, draw):
+        self.outline.draw(draw, self.points)
+
+
+@approve_image
+def test_out_line():
+    points = [
+        (0, 0), (100, 100),
+        (100, 100), (200, 0),
+        (200, 0), (300, 100),
+    ]
+    return time_rendering(name="viewport", widgets=[
+        OutlineWidget(
+            outline=OutLine(fill=(255, 0, 0), fill_width=10, outline=None, outline_width=0),
+            points=points
+        ),
+        Translate(
+            Coordinate(0, 100),
+            OutlineWidget(
+                outline=OutLine(fill=(255, 0, 0), fill_width=10, outline=(255,255,255), outline_width=2),
+                points=points
+            )
+        )
+    ])
 
 
 def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=100):

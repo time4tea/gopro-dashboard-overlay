@@ -1,10 +1,15 @@
 import math
+from typing import Callable
 
 import geotiler
 from PIL import ImageDraw, Image
 
+from gopro_overlay.dimensions import Dimension
+from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
+from gopro_overlay.point import Point
 from gopro_overlay.privacy import NoPrivacyZone
+from gopro_overlay.rdp import rdp
 
 
 class PerceptibleMovementCheck:
@@ -250,3 +255,68 @@ class MovingJourneyMap:
 
             image.alpha_composite(self.cached_map_image, (0, 0), source=(lr[0], tb[0], lr[1], tb[1]))
             draw_marker(draw, (int(self.size / 2), int(self.size / 2)), 6)
+
+
+class OutLine:
+    def __init__(self, fill, fill_width, outline, outline_width):
+        self.outline_width = outline_width
+        self.outline = outline
+        self.fill_width = fill_width
+        self.fill = fill
+
+    def draw(self, draw, points):
+        if self.outline_width > 0:
+            draw.line(points, fill=self.outline, width=self.fill_width)
+
+        draw.line(points, fill=self.fill, width=self.fill_width - self.outline_width)
+
+
+class Circuit:
+    def __init__(self, dimensions: Dimension, framemeta: FrameMeta, location: Callable[[], Point],
+                 privacy_zone=NoPrivacyZone(),
+                 fill=(255, 0, 0), fill_width=4, outline=(255, 255, 255), outline_width=2):
+        self.framemeta = framemeta
+        self.location = location
+        self.dimensions = dimensions
+        self.privacy_zone = privacy_zone
+
+        self.outline = OutLine(fill=fill, fill_width=fill_width, outline=outline, outline_width=outline_width)
+
+        self.image = None
+        self.bbox = None
+        self.size = None
+
+    def scale(self, point):
+        x = int((((point.lat - self.bbox.min.lat) / self.size.x) * self.dimensions.x) + self.dimensions.x / 20)
+        y = int((((point.lon - self.bbox.min.lon) / self.size.y) * self.dimensions.y) + self.dimensions.y / 20)
+        return x, y
+
+    def draw(self, image: Image, draw: ImageDraw):
+        if self.image is None:
+            journey = Journey()
+            self.framemeta.process(journey.accept)
+
+            self.bbox = journey.bounding_box
+            self.size = self.bbox.size() * 1.1
+
+            self.image = Image.new("RGBA", self.dimensions.tuple(), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(self.image)
+
+            points = [self.scale(p) for p in journey.locations if not self.privacy_zone.encloses(p)]
+
+            print(f"Initial = {len(points)}")
+
+            points = rdp(points, 1)
+
+            print(f"Reduced = {len(points)}")
+
+            self.outline.draw(draw, points)
+
+        location = self.location()
+        frame = self.image.copy()
+        draw = ImageDraw.Draw(frame)
+
+        if not self.privacy_zone.encloses(location):
+            draw_marker(draw, self.scale(location), 6)
+
+        image.alpha_composite(frame, (0, 0))

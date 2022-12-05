@@ -6,6 +6,8 @@ class Dimension:
     x: int
     y: int
 
+    def tuple(self):
+        return self.x,self.y
 
 def dimension_from(s):
     components = list(map(int, s.split("x")))
