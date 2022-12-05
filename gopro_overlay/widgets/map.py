@@ -304,13 +304,7 @@ class Circuit:
 
             points = [self.scale(p) for p in journey.locations if not self.privacy_zone.encloses(p)]
 
-            print(f"Initial = {len(points)}")
-
-            points = rdp(points, 1)
-
-            print(f"Reduced = {len(points)}")
-
-            self.outline.draw(draw, points)
+            self.outline.draw(draw, rdp(points, 1))
 
         location = self.location()
         frame = self.image.copy()
