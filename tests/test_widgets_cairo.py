@@ -148,7 +148,6 @@ class Arc:
         self.start = start
         self.length = length
 
-
     def draw(self, context: cairo.Context):
         to = self.start + self.length
         angle = self.ellipse * to - self.start
