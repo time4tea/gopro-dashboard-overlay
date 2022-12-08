@@ -1,3 +1,4 @@
+import contextlib
 import dataclasses
 import math
 from typing import Callable
@@ -115,17 +116,49 @@ class EllipseParameters:
     def get(self, angle) -> Coordinate:
         return Coordinate(x=self.get_x(angle), y=self.get_y(angle))
 
+    def get_point(self, angle):
+        return self.centre + self.get_relative_point(angle)
+
+    def get_relative_point(self, angle) -> Coordinate:
+        if tiny(self.major_curve):
+            beta = angle + self.angle
+            cos_gamma = abs(math.cos(math.pi / 2.0 + self.angle - beta))
+            if tiny(cos_gamma):
+                raise ValueError("infinite coordinate")
+            return Coordinate(
+                x=self.minor_radius * math.cos(beta) / cos_gamma,
+                y=self.minor_radius * math.sin(beta) / cos_gamma
+            )
+        else:
+            cos_angle = math.cos(angle)
+            sin_angle = math.sin(angle)
+            cos_ellipse = math.cos(self.angle)
+            sin_ellipse = math.sin(self.angle)
+            return Coordinate(
+                x=cos_angle * cos_ellipse / self.major_curve - sin_angle * sin_ellipse * self.minor_radius,
+                y=cos_angle * sin_ellipse / self.major_curve + sin_angle * cos_ellipse * self.minor_radius
+            )
+
 
 def tiny(f: float) -> bool:
     return abs(f) < 0.000001
 
 
+@contextlib.contextmanager
+def saved(context: cairo.Context):
+    context.save()
+    try:
+        yield
+    finally:
+        context.restore()
+
+
 @dataclasses.dataclass(frozen=True)
 class Colour:
-    r: int
-    g: int
-    b: int
-    a: int = 255
+    r: float
+    g: float
+    b: float
+    a: float = 1.0
 
     def tuple(self):
         return self.r, self.g, self.b, self.a
@@ -135,11 +168,11 @@ class Colour:
 
     @staticmethod
     def BLACK():
-        return Colour(0, 0, 0)
+        return Colour(0.0, 0.0, 0.0)
 
     @staticmethod
     def WHITE():
-        return Colour(255, 255, 255)
+        return Colour(1.0, 1.0, 1.0)
 
 
 class Arc:
@@ -166,8 +199,7 @@ class Arc:
             context.line_to(*self.ellipse.get(self.start).tuple())
             context.line_to(*self.ellipse.get(to).tuple())
         else:
-            context.save()
-            try:
+            with saved(context):
                 context.translate(*self.ellipse.centre.tuple())
                 context.rotate(self.ellipse.angle)
                 context.scale(1.0 / self.ellipse.major_curve, self.ellipse.minor_radius)
@@ -175,8 +207,63 @@ class Arc:
                     context.arc(0.0, 0.0, 1.0, self.start, to)
                 else:
                     context.arc_negative(0.0, 0.0, 1.0, self.start, to)
-            finally:
-                context.restore()
+
+
+@dataclasses.dataclass(frozen=True)
+class TickParameters:
+    step: float
+    first: int
+    skipped: int
+
+
+@dataclasses.dataclass(frozen=True)
+class LineParameters:
+    width: float
+    colour: Colour = Colour.WHITE()
+    cap: cairo.LineCap = cairo.LINE_CAP_BUTT
+
+    def apply_to(self, context: cairo.Context):
+        context.set_source_rgb(*self.colour.cairo())
+        context.set_line_cap(self.cap)
+        context.set_line_width(self.width)
+
+
+class EllipticScale:
+
+    def __init__(self, inner: EllipseParameters, outer: EllipseParameters,
+                 tick: TickParameters, line: LineParameters, length: float):
+        self.inner = inner
+        self.outer = outer
+        self.tick = tick
+        self.line = line
+        self.start = 0.0
+        self.length = length + tick.step * 0.05
+
+    def draw(self, context: cairo.Context):
+        with saved(context):
+            context.new_path()
+
+            self.line.apply_to(context)
+
+            thick = self.tick.first
+
+            for i in range(0, 1000):
+                value = self.tick.step * i
+                if value == self.length:
+                    break
+
+                if value == self.tick.skipped:
+                    thick = 1
+                else:
+                    thick += 1
+
+                    point_from = self.inner.get_point(self.inner * (self.start + value))
+                    point_to = self.outer.get_point(self.outer * (self.start + value))
+
+                    context.move_to(*point_from.tuple())
+                    context.line_to(*point_to.tuple())
+
+            context.stroke()
 
 
 class EllipticBackground:
@@ -191,6 +278,55 @@ class EllipticBackground:
 
         context.set_source_rgb(*self.colour.cairo())
         context.fill()
+
+
+cos45 = math.sqrt(2.0) * 0.5
+
+
+class Cap:
+    def __init__(self, centre: Coordinate, radius: float, cfrom: Colour, cto: Colour):
+        self.centre = centre
+        self.radius = radius
+        self.cfrom = cfrom
+        self.cto = cto
+
+        self.pattern = None
+        self.mask = None
+
+    def init(self):
+        pattern = cairo.LinearGradient(-cos45, -cos45, cos45, cos45)
+        pattern.add_color_stop_rgb(0.0, *self.cfrom.cairo())
+        pattern.add_color_stop_rgb(1.0, *self.cto.cairo())
+
+        mask = cairo.RadialGradient(
+            0.0, 0.0, 0.0,
+            0.0, 0.0, 1.0
+        )
+        mask.add_color_stop_rgba(0.0, 0.0, 0.0, 0.0, 1.0)
+        mask.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 1.0)
+        mask.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 1.0)
+
+        self.pattern = pattern
+        self.mask = mask
+
+    def draw(self, context: cairo.Context):
+        if self.pattern is None:
+            self.init()
+
+        x1, y1, x2, y2 = context.path_extents()
+        r = 0.5 * (x2 - x1)
+
+        matrix = context.get_matrix()
+        matrix.xx = r
+        matrix.x0 = matrix.x0 + 0.5 * (x1 + x2)
+        matrix.yy = r
+        matrix.y0 = matrix.y0 + 0.5 + (y1 + y2)
+
+        context.set_matrix(matrix)
+        context.set_source(self.pattern)
+        context.mask(self.mask)
+
+        context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
 
 
 def to_pillow(surface: cairo.ImageSurface) -> Image:
@@ -239,4 +375,34 @@ def test_ellipse():
             ])
         ],
         repeat=100
+    )
+
+
+@approve_image
+def test_ellipse():
+    return time_rendering(
+        widgets=[
+            CairoWidget(size=Dimension(500, 500), widgets=[
+                Cap(centre=Coordinate(0.0, 0.0), radius=1.0, cfrom=Colour.BLACK(), cto=Colour.WHITE())
+            ])
+        ], repeat=1
+    )
+
+
+@approve_image
+def test_scale():
+    return time_rendering(
+        widgets=[
+            CairoWidget(size=Dimension(500, 500), widgets=[
+                EllipticScale(
+                    inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
+                    outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.25, angle=0.0),
+                    tick=TickParameters(step=math.pi / 12, first=1, skipped=2),
+                    length=2 * math.pi,
+                    line=LineParameters(
+                        width=0.01,
+                    )
+                )
+            ])
+        ], repeat=1
     )
