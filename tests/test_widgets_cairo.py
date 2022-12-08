@@ -11,6 +11,7 @@ from gopro_overlay.exceptions import Defect
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point, Coordinate
+from gopro_overlay.widgets.widgets import Translate
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
@@ -249,7 +250,7 @@ class EllipticScale:
 
             for i in range(0, 1000):
                 value = self.tick.step * i
-                if value == self.length:
+                if value >= self.length:
                     break
 
                 if value == self.tick.skipped:
@@ -304,7 +305,7 @@ class Cap:
         )
         mask.add_color_stop_rgba(0.0, 0.0, 0.0, 0.0, 1.0)
         mask.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 1.0)
-        mask.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 1.0)
+        mask.add_color_stop_rgba(1.01, 0.0, 0.0, 0.0, 1.0)
 
         self.pattern = pattern
         self.mask = mask
@@ -312,6 +313,8 @@ class Cap:
     def draw(self, context: cairo.Context):
         if self.pattern is None:
             self.init()
+
+        context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
 
         x1, y1, x2, y2 = context.path_extents()
         r = 0.5 * (x2 - x1)
@@ -325,8 +328,6 @@ class Cap:
         context.set_matrix(matrix)
         context.set_source(self.pattern)
         context.mask(self.mask)
-
-        context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
 
 
 def to_pillow(surface: cairo.ImageSurface) -> Image:
@@ -379,12 +380,19 @@ def test_ellipse():
 
 
 @approve_image
-def test_ellipse():
+def test_cap():
     return time_rendering(
         widgets=[
-            CairoWidget(size=Dimension(500, 500), widgets=[
-                Cap(centre=Coordinate(0.0, 0.0), radius=1.0, cfrom=Colour.BLACK(), cto=Colour.WHITE())
-            ])
+            Translate(
+                at=Coordinate(x=50, y=50),
+                widget=CairoWidget(size=Dimension(200, 200), widgets=[
+                    Cap(
+                        centre=Coordinate(0.0, 0.0),
+                        radius=1.0,
+                        cfrom=Colour(1.0,1.0,1.0),
+                        cto=Colour(0.5,0.5,0.5)
+                    )
+                ]))
         ], repeat=1
     )
 
@@ -397,12 +405,22 @@ def test_scale():
                 EllipticScale(
                     inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
                     outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-                    tick=TickParameters(step=math.pi / 12, first=1, skipped=2),
+                    tick=TickParameters(step=math.pi / 12, first=1, skipped=1000),
                     length=2 * math.pi,
                     line=LineParameters(
-                        width=0.01,
+                        width=6.0 / 400.0,
                     )
-                )
+                ),
+                EllipticScale(
+                    inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+                    outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
+                    tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
+                    length=2 * math.pi,
+                    line=LineParameters(
+                        width=1.0 / 400.0,
+                        colour=Colour.BLACK()
+                    )
+                ),
             ])
         ], repeat=1
     )
