@@ -395,8 +395,8 @@ def test_scale():
         widgets=[
             CairoWidget(size=Dimension(500, 500), widgets=[
                 EllipticScale(
-                    inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
-                    outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.25, angle=0.0),
+                    inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+                    outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
                     tick=TickParameters(step=math.pi / 12, first=1, skipped=2),
                     length=2 * math.pi,
                     line=LineParameters(
