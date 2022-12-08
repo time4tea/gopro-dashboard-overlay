@@ -167,13 +167,10 @@ class Colour:
     def cairo(self):
         return self.r, self.g, self.b
 
-    @staticmethod
-    def BLACK():
-        return Colour(0.0, 0.0, 0.0)
 
-    @staticmethod
-    def WHITE():
-        return Colour(1.0, 1.0, 1.0)
+BLACK = Colour(0.0, 0.0, 0.0)
+WHITE = Colour(1.0, 1.0, 1.0)
+RED = Colour(1.0, 0.0, 0.0)
 
 
 class Arc:
@@ -220,7 +217,7 @@ class TickParameters:
 @dataclasses.dataclass(frozen=True)
 class LineParameters:
     width: float
-    colour: Colour = Colour.WHITE()
+    colour: Colour = WHITE
     cap: cairo.LineCap = cairo.LINE_CAP_BUTT
 
     def apply_to(self, context: cairo.Context):
@@ -270,7 +267,7 @@ class EllipticScale:
 class EllipticBackground:
     def __init__(self,
                  arc: Arc,
-                 colour: Colour = Colour.BLACK):
+                 colour: Colour = BLACK):
         self.arc = arc
         self.colour = colour
 
@@ -330,6 +327,89 @@ class Cap:
         context.mask(self.mask)
 
 
+@dataclasses.dataclass(frozen=True)
+class NeedleParameter:
+    width: float
+    length: float
+    cap: cairo.LineCap = cairo.LINE_CAP_BUTT
+
+    @property
+    def radius(self):
+        return self.width / 2.0
+
+
+class Needle:
+
+    def __init__(self, centre: Coordinate, start: float, length: float, tip: NeedleParameter, rear: NeedleParameter, colour: Colour):
+        self.centre = centre
+        self.colour = colour
+        self.rear = rear
+        self.tip = tip
+        self.length = length
+        self.start = start
+        self.value = lambda: 0.0
+
+    def draw(self, context: cairo.Context):
+        with saved(context):
+            context.new_path()
+            context.translate(*self.centre.tuple())
+            context.rotate(self.start + self.value() * self.length)
+
+            tip = self.tip
+            rear = self.rear
+
+            if tip.cap == cairo.LINE_CAP_BUTT:
+                context.move_to(tip.length, -tip.radius)
+                context.line_to(tip.length, tip.radius)
+            elif tip.cap == cairo.LINE_CAP_ROUND:
+
+                angle = math.atan2(
+                    tip.radius - rear.radius,
+                    tip.length + rear.length
+                )
+                cos_angle = math.cos(angle)
+                sin_angle = math.sin(angle)
+
+                context.move_to(tip.length + tip.radius * sin_angle, -tip.radius * cos_angle)
+                context.arc(tip.length, 0.0, tip.radius, angle - math.pi / 2.0, math.pi / 2.0 - angle)
+                context.line_to(tip.length + tip.radius * sin_angle, tip.radius * cos_angle)
+
+            elif tip.cap == cairo.LINE_CAP_SQUARE:
+                context.move_to(tip.length, -tip.radius)
+                context.line_to(tip.length + tip.radius * math.sqrt(2.0), 0.0)
+                context.line_to(tip.length, tip.radius)
+            else:
+                raise ValueError("Unsupported needle tip type")
+
+            if rear.cap == cairo.LINE_CAP_BUTT:
+                context.line_to(-rear.length, rear.radius)
+                context.line_to(-rear.length, -rear.radius)
+            elif tip.cap == cairo.LINE_CAP_ROUND:
+                angle = math.atan2(
+                    rear.radius - tip.radius,
+                    tip.length + rear.length
+                )
+                cos_angle = math.cos(angle)
+                sin_angle = math.sin(angle)
+
+                context.line_to(-rear.length - rear.radius * sin_angle, rear.radius * cos_angle)
+                context.arc(-rear.length, 0.0, rear.radius, math.pi / 2.0 - angle, angle - math.pi / 2.0)
+                context.line_to(-rear.length - rear.radius * sin_angle, -rear.radius * cos_angle)
+
+            elif tip.cap == cairo.LINE_CAP_SQUARE:
+                context.line_to(-rear.length, rear.radius)
+                context.line_to(-rear.length - rear.radius * math.sqrt(2.0), 0.0)
+                context.line_to(-rear.length, -rear.radius)
+            else:
+                raise ValueError("Unsupported needle rear type")
+
+            context.close_path()
+            context.set_source_rgb(*self.colour.cairo())
+
+
+            context.fill()
+
+
 def to_pillow(surface: cairo.ImageSurface) -> Image:
     size = (surface.get_width(), surface.get_height())
     stride = surface.get_stride()
@@ -371,7 +451,7 @@ def test_ellipse():
                         ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
                         start=0.0, length=math.pi
                     ),
-                    colour=Colour.BLACK()
+                    colour=BLACK
                 )
             ])
         ],
@@ -389,8 +469,8 @@ def test_cap():
                     Cap(
                         centre=Coordinate(0.0, 0.0),
                         radius=1.0,
-                        cfrom=Colour(1.0,1.0,1.0),
-                        cto=Colour(0.5,0.5,0.5)
+                        cfrom=Colour(1.0, 1.0, 1.0),
+                        cto=Colour(0.5, 0.5, 0.5)
                     )
                 ]))
         ], repeat=1
@@ -418,9 +498,29 @@ def test_scale():
                     length=2 * math.pi,
                     line=LineParameters(
                         width=1.0 / 400.0,
-                        colour=Colour.BLACK()
+                        colour=BLACK
                     )
                 ),
             ])
         ], repeat=1
+    )
+
+
+@approve_image
+def test_needle():
+    return time_rendering(
+        dimensions=Dimension(500, 500),
+        widgets=[
+            CairoWidget(size=Dimension(500, 500), widgets=[
+                Needle(
+                    centre=Coordinate(0.5, 0.5),
+                    start=math.radians(36),
+                    length=math.radians(254),
+                    tip=NeedleParameter(width=0.0175, length=0.46),
+                    rear=NeedleParameter(width=0.03, length=0.135),
+                    colour=RED
+                )
+            ])
+        ],
+        repeat=1
     )
