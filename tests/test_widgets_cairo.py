@@ -861,32 +861,33 @@ class GaugeRound254:
 
         step = length / sectors
 
+        center = Coordinate(x=0.5, y=0.5)
         background = EllipticBackground(Arc(
-            EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
+            EllipseParameters(center, major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
         ))
 
         pin = Cap(
-            centre=Coordinate(x=0.0, y=0.0), radius=0.12, cfrom=WHITE, cto=Colour(0.5, 0.5, 0.5)
+            centre=center, radius=0.12, cfrom=WHITE, cto=Colour(0.5, 0.5, 0.5)
         )
 
         major_ticks = EllipticScale(
-            inner=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.43, minor_radius=0.43, angle=length),
-            outer=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
+            inner=EllipseParameters(center, major_curve=1.0 / 0.43, minor_radius=0.43, angle=length),
+            outer=EllipseParameters(center, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
             tick=TickParameters(step, 0, 0),
             line=LineParameters(6.0 / 4000),
             length=length
         )
 
         minor_ticks = EllipticScale(
-            inner=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.46, minor_radius=0.46, angle=length),
-            outer=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
+            inner=EllipseParameters(center, major_curve=1.0 / 0.46, minor_radius=0.46, angle=length),
+            outer=EllipseParameters(center, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
             tick=TickParameters(step / 2.0, 0, 2),
             line=LineParameters(1.0 / 4000),
             length=length
         )
 
         needle = Needle(
-            centre=Coordinate(x=0.0, y=0.0),
+            centre=center,
             value=value,
             start=start,
             length=length,
