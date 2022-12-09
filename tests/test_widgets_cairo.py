@@ -1,8 +1,9 @@
+import colorsys
 import contextlib
 import dataclasses
 import math
 from enum import Enum, auto
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import cairo
 from PIL import Image, ImageDraw
@@ -129,19 +130,19 @@ class EllipseParameters:
 
     def get_relative_point(self, angle) -> Coordinate:
         if tiny(self.major_curve):
-            beta = angle + self.angle
-            cos_gamma = abs(math.cos(math.pi / 2.0 + self.angle - beta))
-            if tiny(cos_gamma):
-                raise ValueError("infinite coordinate")
+            beta, cos_gamma = self.cos_gamma(angle)
+
             return Coordinate(
                 x=self.minor_radius * math.cos(beta) / cos_gamma,
                 y=self.minor_radius * math.sin(beta) / cos_gamma
             )
+
         else:
             cos_angle = math.cos(angle)
             sin_angle = math.sin(angle)
             cos_ellipse = math.cos(self.angle)
             sin_ellipse = math.sin(self.angle)
+
             return Coordinate(
                 x=cos_angle * cos_ellipse / self.major_curve - sin_angle * sin_ellipse * self.minor_radius,
                 y=cos_angle * sin_ellipse / self.major_curve + sin_angle * cos_ellipse * self.minor_radius
@@ -162,17 +163,45 @@ def saved(context: cairo.Context):
 
 
 @dataclasses.dataclass(frozen=True)
+class HLSColour:
+    h: float
+    l: float
+    s: float
+    a: float
+
+    def lighten(self, by: float) -> 'HLSColour':
+        return HLSColour(self.h, math.min(self.l + by, 1.0), self.s, self.a)
+
+    def darken(self, by: float) -> 'HLSColour':
+        return HLSColour(self.h, math.max(self.l - by), self.s, self.a)
+
+    def rgb(self) -> 'Colour':
+        r, g, b = colorsys.hls_to_rgb(self.h, self.l, self.s)
+        return Colour(r, g, b, self.a)
+
+
+@dataclasses.dataclass(frozen=True)
 class Colour:
     r: float
     g: float
     b: float
     a: float = 1.0
 
-    def rgba(self):
+    def rgba(self) -> Tuple[float, float, float, float]:
         return self.r, self.g, self.b, self.a
 
-    def rgb(self):
+    def rgb(self) -> Tuple[float, float, float]:
         return self.r, self.g, self.b
+
+    def hls(self) -> HLSColour:
+        h, l, s = colorsys.rgb_to_hls(self.r, self.g, self.b)
+        return HLSColour(h, l, s, self.a)
+
+    def darken(self, by: float) -> 'Colour':
+        return self.hls().darken(by).rgb()
+
+    def lighten(self, by: float) -> 'Colour':
+        return self.hls().lighten(by).rgb()
 
 
 BLACK = Colour(0.0, 0.0, 0.0)
@@ -288,8 +317,170 @@ class EllipticBackground:
 cos45 = math.sqrt(2.0) * 0.5
 
 
-class Cap:
+@dataclasses.dataclass(frozen=True)
+class Box:
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+
+def abox(x1, y1, x2, y2):
+    return Box(x1, y1, x2, y2)
+
+
+class ShadowMode(Enum):
+    ShadowNone = auto()
+    ShadowIn = auto()
+    ShadowOut = auto()
+    ShadowEtchedIn = auto()
+    ShadowEtchedOut = auto()
+
+
+class DrawingAction(Enum):
+    Region = auto()
+    Line = auto()
+    Contents = auto()
+
+
+darkenBy = 1.0 / 3
+lightenBy = 1.0 / 3
+
+
+class AbstractBordered:
+    def __init__(self):
+        self.border_width = 0.1
+        self.border_depth = 1.0
+        self.border_shadow = ShadowMode.ShadowNone
+        self.colour = RED
+
+    def set_contents_path(self, context: cairo.Context):
+        pass
+
+    def draw_contents(self, context: cairo.Context):
+        pass
+
+    def draw(self, context: cairo.Context):
+
+        if self.border_width > 0:
+            shadow_depth = self.border_depth
+        else:
+            shadow_depth = 0.0
+
+        with saved(context):
+            context.new_path()
+            self.set_contents_path(context)
+            context.close_path()
+
+            box = abox(*context.path_extents())
+
+            extent = abs(box.x2 - box.x1)
+
+            box_centre = Coordinate(
+                x=(box.x2 + box.x1) * 0.5,
+                y=(box.y2 + box.y1) * 0.5
+            )
+
+            def _draw(shift: float, bound: float, width: float, action: DrawingAction = DrawingAction.Line):
+                F = (bound - width) / extent
+                S = shift * shadow_depth * 0.5
+
+                FX = F
+                FY = F
+
+                context.new_path()
+                context.scale(FX, FY)
+                context.translate(
+                    box_centre.x * (1.0 / FX - 1.0) + S * cos45 / FX,
+                    box_centre.y * (1.0 / FY - 1.0) + S * cos45 / FY
+                )
+                context.append_path(path)
+                context.set_line_width(width / F)
+
+                if action == DrawingAction.Line:
+                    context.stroke()
+                elif action == DrawingAction.Region:
+                    context.fill()
+                elif action == DrawingAction.Contents:
+                    self.draw_contents(context)
+
+            inner_size = extent
+            outer_size = extent + 2.0 * self.border_width
+
+            if self.border_shadow == ShadowMode.ShadowNone:
+                middle_size = outer_size
+            elif self.border_shadow == ShadowMode.ShadowIn:
+                outer_size = outer_size + 2.0 * shadow_depth
+                middle_size = outer_size
+            elif self.border_shadow == ShadowMode.ShadowOut:
+                outer_size = outer_size + shadow_depth
+                middle_size = outer_size - 2.0 * shadow_depth
+            elif self.border_shadow in [ShadowMode.ShadowEtchedIn, ShadowMode.ShadowEtchedOut]:
+                outer_size = outer_size + 2.0 * shadow_depth
+                middle_size = outer_size - 2.0 * shadow_depth
+
+            def set_normal():
+                context.set_source_rgba(*self.colour.rgba())
+
+            def set_light():
+                context.set_source_rgba(*self.colour.lighten(lightenBy).rgba())
+
+            def set_dark():
+                context.set_source_rgba(*self.colour.darken(darkenBy).rgba())
+
+            if inner_size > 0:
+                path = context.copy_path()
+
+                if self.border_shadow == ShadowMode.ShadowNone:
+                    if self.border_width > 0.0:
+                        set_normal()
+                        _draw(0.0, middle_size, 0.0)
+                elif self.border_shadow == ShadowMode.ShadowIn:
+                    if self.border_width > 0.0:
+                        set_normal()
+                        _draw(0.0, middle_size, 0.0)
+                    set_dark()
+                    _draw(-1.0, inner_size + shadow_depth, shadow_depth)
+                    set_light()
+                    _draw(1.0, inner_size + shadow_depth, shadow_depth)
+                elif self.border_shadow == ShadowMode.ShadowOut:
+                    set_light()
+                    _draw(-1.0, outer_size - shadow_depth, shadow_depth)
+                    set_dark()
+                    _draw(1.0, outer_size - shadow_depth, shadow_depth)
+                    if self.border_width > 0.0:
+                        set_normal()
+                        _draw(0.0, middle_size, 0.0)
+                elif self.border_shadow == ShadowMode.ShadowEtchedIn:
+                    set_dark()
+                    _draw(-1.0, outer_size - shadow_depth, shadow_depth)
+                    set_light()
+                    _draw(1.0, outer_size - shadow_depth, shadow_depth)
+                    if self.border_width > 0.0:
+                        set_normal()
+                        _draw(0.0, middle_size, 0.0)
+                    set_light()
+                    _draw(-1.0, inner_size + shadow_depth, shadow_depth)
+                    set_dark()
+                    _draw(1.0, inner_size + shadow_depth, shadow_depth)
+                elif self.border_shadow == ShadowMode.ShadowEtchedOut:
+                    set_light()
+                    _draw(-1.0, outer_size - shadow_depth, shadow_depth)
+                    set_dark()
+                    _draw(1.0, outer_size - shadow_depth, shadow_depth)
+                    if self.border_width > 0.0:
+                        set_normal()
+                        _draw(0.0, middle_size, 0.0)
+                    set_dark()
+                    _draw(-1.0, inner_size + shadow_depth, shadow_depth)
+                    set_light()
+                    _draw(1.0, inner_size + shadow_depth, shadow_depth)
+                _draw(0.0, inner_size, 0.0, DrawingAction.Contents)
+
+
+class Cap(AbstractBordered):
     def __init__(self, centre: Coordinate, radius: float, cfrom: Colour, cto: Colour):
+        super().__init__()
         self.centre = centre
         self.radius = radius
         self.cfrom = cfrom
@@ -314,11 +505,12 @@ class Cap:
         self.pattern = pattern
         self.mask = mask
 
-    def draw(self, context: cairo.Context):
+    def set_contents_path(self, context: cairo.Context):
+        context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
+
+    def draw_contents(self, context: cairo.Context):
         if self.pattern is None:
             self.init()
-
-        context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
 
         x1, y1, x2, y2 = context.path_extents()
         r = 0.5 * (x2 - x1)
@@ -591,11 +783,11 @@ def test_cap():
     return cairo_widget_test(widgets=[
         Cap(
             centre=Coordinate(0.0, 0.0),
-            radius=1.0,
+            radius=0.2,
             cfrom=Colour(1.0, 1.0, 1.0),
             cto=Colour(0.5, 0.5, 0.5)
         )
-    ])
+    ], repeat=1)
 
 
 @approve_image
@@ -640,16 +832,79 @@ def test_needle():
 
 @approve_image
 def test_annotation():
+    sectors = 17
+    step = math.radians(254) / sectors
+
     return cairo_widget_test(widgets=[
         EllipticAnnotation(
             centre=Coordinate(x=0.5, y=0.5),
-            ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+            ellipse=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.41, minor_radius=0.41, angle=math.tau),
             tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
             colour=BLACK,
             face=ToyFontFace("arial"),
             mode=AnnotationMode.MovedInside,
             texts=[str(x) for x in range(0, 180, 10)],
-            start=0.0,
-            length=math.tau
+            start=0.0 + step,
+            length=math.tau - step
         ),
+    ], repeat=1)
+
+
+class GaugeRound254:
+
+    def __init__(self):
+        value = lambda: 0.23
+
+        sectors = 17
+        length = math.radians(254)
+        start = math.radians(-36)
+
+        step = length / sectors
+
+        background = EllipticBackground(Arc(
+            EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
+        ))
+
+        pin = Cap(
+            centre=Coordinate(x=0.0, y=0.0), radius=0.12, cfrom=WHITE, cto=Colour(0.5, 0.5, 0.5)
+        )
+
+        major_ticks = EllipticScale(
+            inner=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.43, minor_radius=0.43, angle=length),
+            outer=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
+            tick=TickParameters(step, 0, 0),
+            line=LineParameters(6.0 / 4000),
+            length=length
+        )
+
+        minor_ticks = EllipticScale(
+            inner=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.46, minor_radius=0.46, angle=length),
+            outer=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
+            tick=TickParameters(step / 2.0, 0, 2),
+            line=LineParameters(1.0 / 4000),
+            length=length
+        )
+
+        needle = Needle(
+            centre=Coordinate(x=0.0, y=0.0),
+            value=value,
+            start=start,
+            length=length,
+            tip=NeedleParameter(width=0.0175, length=0.46),
+            rear=NeedleParameter(width=0.03, length=0.135),
+            colour=RED
+        )
+
+        self.widgets = [
+            background, major_ticks, minor_ticks, needle
+        ]
+
+    def draw(self, context: cairo.Context):
+        [w.draw(context) for w in self.widgets]
+
+
+@approve_image
+def test_gauge_round_254():
+    return cairo_widget_test(widgets=[
+        GaugeRound254()
     ], repeat=1)
