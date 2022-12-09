@@ -67,9 +67,10 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
 
 
 def load_external(filepath: Path, units) -> Timeseries:
-    if filepath.suffix == ".gpx":
+    suffix = filepath.suffix.lower()
+    if suffix == ".gpx":
         return gpx.load_timeseries(filepath, units)
-    elif filepath.suffix == ".fit":
+    elif suffix == ".fit":
         return fit.load_timeseries(filepath, units)
     else:
         raise IOError(f"Don't recognise filetype from {filepath} - support .gpx and .fit")
