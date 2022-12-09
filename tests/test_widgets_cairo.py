@@ -49,11 +49,11 @@ class CairoCircuit:
 
             line_width = 0.01
 
-            ctx.set_source_rgb(0.3, 0.2, 0.5)  # Solid color
+            ctx.set_source_rgba(*Colour(0.3, 0.2, 0.5).rgba())
             ctx.set_line_width(line_width)
             ctx.stroke_preserve()
 
-            ctx.set_source_rgb(1, 1, 1)  # Solid color
+            ctx.set_source_rgba(*WHITE.rgba())
             ctx.set_line_width(line_width / 4)
             ctx.stroke()
 
@@ -168,10 +168,10 @@ class Colour:
     b: float
     a: float = 1.0
 
-    def tuple(self):
+    def rgba(self):
         return self.r, self.g, self.b, self.a
 
-    def cairo(self):
+    def rgb(self):
         return self.r, self.g, self.b
 
 
@@ -228,7 +228,7 @@ class LineParameters:
     cap: cairo.LineCap = cairo.LINE_CAP_BUTT
 
     def apply_to(self, context: cairo.Context):
-        context.set_source_rgb(*self.colour.cairo())
+        context.set_source_rgba(*self.colour.rgba())
         context.set_line_cap(self.cap)
         context.set_line_width(self.width)
 
@@ -281,7 +281,7 @@ class EllipticBackground:
     def draw(self, context: cairo.Context):
         self.arc.draw(context)
 
-        context.set_source_rgb(*self.colour.cairo())
+        context.set_source_rgba(*self.colour.rgba())
         context.fill()
 
 
@@ -300,16 +300,16 @@ class Cap:
 
     def init(self):
         pattern = cairo.LinearGradient(-cos45, -cos45, cos45, cos45)
-        pattern.add_color_stop_rgb(0.0, *self.cfrom.cairo())
-        pattern.add_color_stop_rgb(1.0, *self.cto.cairo())
+        pattern.add_color_stop_rgba(0.0, *self.cfrom.rgba())
+        pattern.add_color_stop_rgba(1.0, *self.cto.rgba())
 
         mask = cairo.RadialGradient(
             0.0, 0.0, 0.0,
             0.0, 0.0, 1.0
         )
-        mask.add_color_stop_rgba(0.0, 0.0, 0.0, 0.0, 1.0)
-        mask.add_color_stop_rgba(1.0, 0.0, 0.0, 0.0, 1.0)
-        mask.add_color_stop_rgba(1.01, 0.0, 0.0, 0.0, 1.0)
+        mask.add_color_stop_rgba(0.0, *BLACK.rgba())
+        mask.add_color_stop_rgba(1.0, *BLACK.rgba())
+        mask.add_color_stop_rgba(1.01, *BLACK.rgba())
 
         self.pattern = pattern
         self.mask = mask
@@ -411,7 +411,7 @@ class Needle:
                 raise ValueError("Unsupported needle rear type")
 
             context.close_path()
-            context.set_source_rgb(*self.colour.cairo())
+            context.set_source_rgba(*self.colour.rgba())
 
 
             context.fill()
