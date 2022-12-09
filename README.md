@@ -190,7 +190,7 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
-- 0.70.0 Using GPX/FIT files - file extension is now case insensitive [#83] - h/t [@j0ker-npw](https://github.com/j0ker-npw) 
+- 0.70.0 Using GPX/FIT files - file extension is now case insensitive - #83 - h/t [@j0ker-npw](https://github.com/j0ker-npw) 
 - 0.69.0 
   - New Program:- gopro-layout.py
     - This should help if you want to create your own layouts. Just point this to a layout file, and it will render a frame each time the layout file changes, so you can see your changes "live"
