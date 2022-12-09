@@ -11,7 +11,6 @@ from gopro_overlay.exceptions import Defect
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point, Coordinate
-from gopro_overlay.widgets.widgets import Translate
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
@@ -347,14 +346,18 @@ class NeedleParameter:
 
 class Needle:
 
-    def __init__(self, centre: Coordinate, start: float, length: float, tip: NeedleParameter, rear: NeedleParameter, colour: Colour):
+    def __init__(self, centre: Coordinate,
+                 value: Callable[[], float],
+                 start: float, length: float,
+                 tip: NeedleParameter, rear: NeedleParameter,
+                 colour: Colour):
         self.centre = centre
         self.colour = colour
         self.rear = rear
         self.tip = tip
         self.length = length
         self.start = start
-        self.value = lambda: 0.0
+        self.value = value
 
     def draw(self, context: cairo.Context):
         with saved(context):
@@ -413,7 +416,6 @@ class Needle:
             context.close_path()
             context.set_source_rgba(*self.colour.rgba())
 
-
             context.fill()
 
 
@@ -446,88 +448,77 @@ class CairoWidget:
         image.alpha_composite(to_pillow(surface), (0, 0))
 
 
-@approve_image
-def test_ellipse():
+def cairo_widget_test(widgets, repeat=100):
     return time_rendering(
         name="test_gauge",
         dimensions=Dimension(500, 500),
         widgets=[
-            CairoWidget(size=Dimension(500, 500), widgets=[
-                EllipticBackground(
-                    arc=Arc(
-                        ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
-                        start=0.0, length=math.pi
-                    ),
-                    colour=BLACK
-                )
-            ])
+            CairoWidget(size=Dimension(500, 500), widgets=widgets)
         ],
-        repeat=100
+        repeat=repeat
     )
+
+
+@approve_image
+def test_ellipse():
+    return cairo_widget_test(widgets=[
+        EllipticBackground(
+            arc=Arc(
+                ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
+                start=0.0, length=math.pi
+            ),
+            colour=BLACK
+        )
+    ])
 
 
 @approve_image
 def test_cap():
-    return time_rendering(
-        widgets=[
-            Translate(
-                at=Coordinate(x=50, y=50),
-                widget=CairoWidget(size=Dimension(200, 200), widgets=[
-                    Cap(
-                        centre=Coordinate(0.0, 0.0),
-                        radius=1.0,
-                        cfrom=Colour(1.0, 1.0, 1.0),
-                        cto=Colour(0.5, 0.5, 0.5)
-                    )
-                ]))
-        ], repeat=1
-    )
+    return cairo_widget_test(widgets=[
+        Cap(
+            centre=Coordinate(0.0, 0.0),
+            radius=1.0,
+            cfrom=Colour(1.0, 1.0, 1.0),
+            cto=Colour(0.5, 0.5, 0.5)
+        )
+    ])
 
 
 @approve_image
 def test_scale():
-    return time_rendering(
-        widgets=[
-            CairoWidget(size=Dimension(500, 500), widgets=[
-                EllipticScale(
-                    inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
-                    outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-                    tick=TickParameters(step=math.pi / 12, first=1, skipped=1000),
-                    length=2 * math.pi,
-                    line=LineParameters(
-                        width=6.0 / 400.0,
-                    )
-                ),
-                EllipticScale(
-                    inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
-                    outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-                    tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
-                    length=2 * math.pi,
-                    line=LineParameters(
-                        width=1.0 / 400.0,
-                        colour=BLACK
-                    )
-                ),
-            ])
-        ], repeat=1
-    )
+    return cairo_widget_test(widgets=[
+        EllipticScale(
+            inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+            outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
+            tick=TickParameters(step=math.pi / 12, first=1, skipped=1000),
+            length=2 * math.pi,
+            line=LineParameters(
+                width=6.0 / 400.0,
+            )
+        ),
+        EllipticScale(
+            inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+            outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
+            tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
+            length=2 * math.pi,
+            line=LineParameters(
+                width=1.0 / 400.0,
+                colour=BLACK
+            )
+        ),
+    ])
 
 
 @approve_image
 def test_needle():
-    return time_rendering(
-        dimensions=Dimension(500, 500),
-        widgets=[
-            CairoWidget(size=Dimension(500, 500), widgets=[
-                Needle(
-                    centre=Coordinate(0.5, 0.5),
-                    start=math.radians(36),
-                    length=math.radians(254),
-                    tip=NeedleParameter(width=0.0175, length=0.46),
-                    rear=NeedleParameter(width=0.03, length=0.135),
-                    colour=RED
-                )
-            ])
-        ],
-        repeat=1
-    )
+    return cairo_widget_test(widgets=[
+        Needle(
+            value=lambda: 0.0,
+            centre=Coordinate(0.5, 0.5),
+            start=math.radians(36),
+            length=math.radians(254),
+            tip=NeedleParameter(width=0.0175, length=0.46),
+            rear=NeedleParameter(width=0.03, length=0.135),
+            colour=RED
+        )
+    ])
