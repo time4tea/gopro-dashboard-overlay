@@ -194,7 +194,7 @@ def find_streams(filepath: Path, invoke=invoke, find_frame_duration=find_frame_d
     )
 
 
-def file_meta(filepath: str, stat=os.stat) -> FileMeta:
+def file_meta(filepath: Path, stat=os.stat) -> FileMeta:
     sr = stat(filepath)
 
     return FileMeta(
