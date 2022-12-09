@@ -1,7 +1,8 @@
 import contextlib
 import dataclasses
 import math
-from typing import Callable
+from enum import Enum, auto
+from typing import Callable, List
 
 import cairo
 from PIL import Image, ImageDraw
@@ -419,6 +420,119 @@ class Needle:
             context.fill()
 
 
+class AnnotationMode(Enum):
+    MovedInside = auto()
+    MovedOutside = auto()
+    MovedCentred = auto()
+    Rotated = auto()
+    Skewed = auto()
+
+
+class FontFace:
+
+    def text_extents(self, context: cairo.Context, text: str) -> cairo.TextExtents:
+        raise NotImplementedError()
+
+    def show(self, context: cairo.Context, text: str):
+        raise NotImplementedError()
+
+
+class PangoFontFace(FontFace):
+    pass
+
+
+class ToyFontFace(FontFace):
+
+    def __init__(self, family: str, slant: cairo.FontSlant = cairo.FONT_SLANT_NORMAL, weight: cairo.FontWeight = cairo.FONT_WEIGHT_NORMAL):
+        self.face = cairo.ToyFontFace(family, slant, weight)
+
+    def text_extents(self, context: cairo.Context, text: str) -> cairo.TextExtents:
+        context.set_font_face(self.face)
+        return context.text_extents(text)
+
+    def show(self, context: cairo.Context, text: str):
+        context.set_font_face(self.face)
+        context.show_text(text)
+
+
+class EllipticAnnotation:
+
+    def __init__(self, centre: Coordinate,
+                 ellipse: EllipseParameters,
+                 tick: TickParameters,
+                 colour: Colour,
+                 face: FontFace,
+                 mode: AnnotationMode,
+                 texts: List[str],
+                 start: float,
+                 length: float):
+        self.mode = mode
+        self.texts = texts
+        self.face = face
+        self.colour = colour
+        self.centre = centre
+        self.tick = tick
+        self.ellipse = ellipse
+        self.start = start
+        self.original_length = length
+        self.length = length + tick.step * 0.05
+        self.height = 0.05  # hack
+        self.stretch = 0.8
+
+    def draw(self, context: cairo.Context):
+
+        context.set_source_rgba(*self.colour.rgba())
+        thick = self.tick.first
+
+        for i in range(0, 1_000_000):
+            angle = self.tick.step * i
+            if angle > self.length:
+                break
+            if self.original_length < 0.0:
+                angle = -angle
+            if thick == self.tick.skipped:
+                thick = 1
+            else:
+                thick += 1
+                angle = self.start + angle
+                point = self.ellipse.get_point(self.ellipse * angle)
+
+                if i >= len(self.texts):
+                    break
+
+                text = self.texts[i]
+                extents = self.face.text_extents(context, text)
+
+                with saved(context):
+                    if extents.height > 0.0:
+                        gain = self.height / extents.height
+
+                        context.translate(*point.tuple())
+
+                        if self.mode == AnnotationMode.MovedInside:
+                            context.translate(
+                                (-extents.width * 0.5 * gain * math.cos(angle)),
+                                (-extents.height * 0.5 * gain * math.sin(angle))
+                            )
+                        elif self.mode == AnnotationMode.MovedOutside:
+                            raise NotImplementedError("Moved Outside")
+                        elif self.mode == AnnotationMode.MovedCentred:
+                            # nothing to do
+                            pass
+                        elif self.mode == AnnotationMode.Rotated:
+                            raise NotImplementedError("Rotated")
+                        elif self.mode == AnnotationMode.Skewed:
+                            raise NotImplementedError("Skewed")
+
+                        context.scale(gain * self.stretch, gain)
+                        context.move_to(
+                            -(extents.x_bearing + extents.width) * 0.5,
+                            -(extents.y_bearing + extents.height) * 0.5
+                        )
+
+                        self.face.show(context, text)
+
+
 def to_pillow(surface: cairo.ImageSurface) -> Image:
     size = (surface.get_width(), surface.get_height())
     stride = surface.get_stride()
@@ -522,3 +636,20 @@ def test_needle():
             colour=RED
         )
     ])
+
+
+@approve_image
+def test_annotation():
+    return cairo_widget_test(widgets=[
+        EllipticAnnotation(
+            centre=Coordinate(x=0.5, y=0.5),
+            ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+            tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
+            colour=BLACK,
+            face=ToyFontFace("arial"),
+            mode=AnnotationMode.MovedInside,
+            texts=[str(x) for x in range(0, 180, 10)],
+            start=0.0,
+            length=math.tau
+        ),
+    ], repeat=1)
