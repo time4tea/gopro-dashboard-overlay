@@ -203,6 +203,9 @@ class Colour:
     def lighten(self, by: float) -> 'Colour':
         return self.hls().lighten(by).rgb()
 
+    def alpha(self, new_alpha: float):
+        return Colour(self.r, self.g, self.b, new_alpha)
+
 
 BLACK = Colour(0.0, 0.0, 0.0)
 WHITE = Colour(1.0, 1.0, 1.0)
@@ -353,6 +356,7 @@ class AbstractBordered:
         self.border_depth = 1.0
         self.border_shadow = ShadowMode.ShadowNone
         self.colour = RED
+        self.scaled = True
 
     def set_contents_path(self, context: cairo.Context):
         pass
@@ -376,6 +380,8 @@ class AbstractBordered:
 
             extent = abs(box.x2 - box.x1)
 
+            print(box)
+
             box_centre = Coordinate(
                 x=(box.x2 + box.x1) * 0.5,
                 y=(box.y2 + box.y1) * 0.5
@@ -387,6 +393,8 @@ class AbstractBordered:
 
                 FX = F
                 FY = F
+
+                print(f"F = {F} S={S}")
 
                 context.new_path()
                 context.scale(FX, FY)
@@ -402,22 +410,28 @@ class AbstractBordered:
                 elif action == DrawingAction.Region:
                     context.fill()
                 elif action == DrawingAction.Contents:
+                    print("Draw Contents")
                     self.draw_contents(context)
 
-            inner_size = extent
-            outer_size = extent + 2.0 * self.border_width
+            if self.scaled:
+                outer_size = extent
+                inner_size = extent - 2.0 * self.border_width
+                middle_size = outer_size
+            else:
+                inner_size = extent
+                outer_size = extent + 2.0 * self.border_width
 
-            if self.border_shadow == ShadowMode.ShadowNone:
-                middle_size = outer_size
-            elif self.border_shadow == ShadowMode.ShadowIn:
-                outer_size = outer_size + 2.0 * shadow_depth
-                middle_size = outer_size
-            elif self.border_shadow == ShadowMode.ShadowOut:
-                outer_size = outer_size + shadow_depth
-                middle_size = outer_size - 2.0 * shadow_depth
-            elif self.border_shadow in [ShadowMode.ShadowEtchedIn, ShadowMode.ShadowEtchedOut]:
-                outer_size = outer_size + 2.0 * shadow_depth
-                middle_size = outer_size - 2.0 * shadow_depth
+                if self.border_shadow == ShadowMode.ShadowNone:
+                    middle_size = outer_size
+                elif self.border_shadow == ShadowMode.ShadowIn:
+                    outer_size = outer_size + 2.0 * shadow_depth
+                    middle_size = outer_size
+                elif self.border_shadow == ShadowMode.ShadowOut:
+                    outer_size = outer_size + shadow_depth
+                    middle_size = outer_size - 2.0 * shadow_depth
+                elif self.border_shadow in [ShadowMode.ShadowEtchedIn, ShadowMode.ShadowEtchedOut]:
+                    outer_size = outer_size + 2.0 * shadow_depth
+                    middle_size = outer_size - 2.0 * shadow_depth
 
             def set_normal():
                 context.set_source_rgba(*self.colour.rgba())
@@ -486,8 +500,8 @@ class Cap(AbstractBordered):
         self.cfrom = cfrom
         self.cto = cto
 
-        self.pattern = None
-        self.mask = None
+        self.pattern: cairo.LinearGradient = None
+        self.mask: cairo.RadialGradient = None
 
     def init(self):
         pattern = cairo.LinearGradient(-cos45, -cos45, cos45, cos45)
@@ -500,10 +514,18 @@ class Cap(AbstractBordered):
         )
         mask.add_color_stop_rgba(0.0, *BLACK.rgba())
         mask.add_color_stop_rgba(1.0, *BLACK.rgba())
-        mask.add_color_stop_rgba(1.01, *BLACK.rgba())
+        mask.add_color_stop_rgba(1.00001, *BLACK.alpha(0).rgba())
 
         self.pattern = pattern
         self.mask = mask
+
+    # def draw(self, context: cairo.Context):
+    #     with saved(context):
+    #         context.new_path()
+    #         context.set_line_width(0.01)
+    # self.set_contents_path(context)
+    # context.close_path()
+    # self.draw_contents(context)
 
     def set_contents_path(self, context: cairo.Context):
         context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
@@ -512,18 +534,20 @@ class Cap(AbstractBordered):
         if self.pattern is None:
             self.init()
 
-        x1, y1, x2, y2 = context.path_extents()
-        r = 0.5 * (x2 - x1)
+        box = abox(*context.path_extents())
+        print(box)
+        r = 0.5 * (box.x2 - box.x1)
 
         matrix = context.get_matrix()
         matrix.xx = r
-        matrix.x0 = matrix.x0 + 0.5 * (x1 + x2)
+        matrix.x0 = matrix.x0 + 0.5 * (box.x1 + box.x2)
         matrix.yy = r
-        matrix.y0 = matrix.y0 + 0.5 + (y1 + y2)
+        matrix.y0 = matrix.y0 + 0.5 + (box.y1 + box.y2)
 
         context.set_matrix(matrix)
         context.set_source(self.pattern)
         context.mask(self.mask)
+        # context.stroke()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -649,27 +673,28 @@ class ToyFontFace(FontFace):
 
 class EllipticAnnotation:
 
-    def __init__(self, centre: Coordinate,
+    def __init__(self,
                  ellipse: EllipseParameters,
                  tick: TickParameters,
                  colour: Colour,
                  face: FontFace,
                  mode: AnnotationMode,
                  texts: List[str],
+                 height: float,
+                 stretch: float,
                  start: float,
                  length: float):
         self.mode = mode
         self.texts = texts
         self.face = face
         self.colour = colour
-        self.centre = centre
         self.tick = tick
         self.ellipse = ellipse
         self.start = start
         self.original_length = length
         self.length = length + tick.step * 0.05
-        self.height = 0.05  # hack
-        self.stretch = 0.8
+        self.height = height
+        self.stretch = stretch
 
     def draw(self, context: cairo.Context):
 
@@ -783,7 +808,7 @@ def test_cap():
     return cairo_widget_test(widgets=[
         Cap(
             centre=Coordinate(0.0, 0.0),
-            radius=0.2,
+            radius=0.5,
             cfrom=Colour(1.0, 1.0, 1.0),
             cto=Colour(0.5, 0.5, 0.5)
         )
@@ -821,7 +846,7 @@ def test_needle():
         Needle(
             value=lambda: 0.0,
             centre=Coordinate(0.5, 0.5),
-            start=math.radians(36),
+            start=math.radians(143),
             length=math.radians(254),
             tip=NeedleParameter(width=0.0175, length=0.46),
             rear=NeedleParameter(width=0.03, length=0.135),
@@ -837,13 +862,14 @@ def test_annotation():
 
     return cairo_widget_test(widgets=[
         EllipticAnnotation(
-            centre=Coordinate(x=0.5, y=0.5),
-            ellipse=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.41, minor_radius=0.41, angle=math.tau),
+            ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.41, minor_radius=0.41, angle=math.tau),
             tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
             colour=BLACK,
             face=ToyFontFace("arial"),
             mode=AnnotationMode.MovedInside,
             texts=[str(x) for x in range(0, 180, 10)],
+            height=0.05,
+            stretch=0.8,
             start=0.0 + step,
             length=math.tau - step
         ),
@@ -853,41 +879,45 @@ def test_annotation():
 class GaugeRound254:
 
     def __init__(self):
-        value = lambda: 0.23
+        value = lambda: 0.00
 
+        stretch = 0.8
         sectors = 17
         length = math.radians(254)
-        start = math.radians(-36)
+        start = math.radians(143)
 
         step = length / sectors
 
-        center = Coordinate(x=0.5, y=0.5)
-        background = EllipticBackground(Arc(
-            EllipseParameters(center, major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
-        ))
+        centre = Coordinate(x=0.5, y=0.5)
+        background = EllipticBackground(
+            arc=Arc(
+                EllipseParameters(centre, major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
+            ),
+            colour=BLACK
+        )
 
         pin = Cap(
-            centre=center, radius=0.12, cfrom=WHITE, cto=Colour(0.5, 0.5, 0.5)
+            centre=centre, radius=0.12, cfrom=WHITE, cto=Colour(0.5, 0.5, 0.5)
         )
 
         major_ticks = EllipticScale(
-            inner=EllipseParameters(center, major_curve=1.0 / 0.43, minor_radius=0.43, angle=length),
-            outer=EllipseParameters(center, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
+            inner=EllipseParameters(centre, major_curve=1.0 / 0.43, minor_radius=0.43, angle=length),
+            outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
             tick=TickParameters(step, 0, 0),
             line=LineParameters(6.0 / 4000),
             length=length
         )
 
         minor_ticks = EllipticScale(
-            inner=EllipseParameters(center, major_curve=1.0 / 0.46, minor_radius=0.46, angle=length),
-            outer=EllipseParameters(center, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
+            inner=EllipseParameters(centre, major_curve=1.0 / 0.46, minor_radius=0.46, angle=length),
+            outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
             tick=TickParameters(step / 2.0, 0, 2),
             line=LineParameters(1.0 / 4000),
             length=length
         )
 
         needle = Needle(
-            centre=center,
+            centre=centre,
             value=value,
             start=start,
             length=length,
@@ -896,8 +926,21 @@ class GaugeRound254:
             colour=RED
         )
 
+        major_annotation = EllipticAnnotation(
+            ellipse=EllipseParameters(centre=centre, major_curve=1.0 / 0.41, minor_radius=0.41, angle=length),
+            tick=TickParameters(2.0 * step, 0, 0),
+            colour=WHITE,
+            face=ToyFontFace("arial"),
+            mode=AnnotationMode.MovedInside,
+            texts=[str(x) for x in range(0, 180, 10)],
+            height=0.05,
+            stretch=stretch,
+            start=start,
+            length=length
+        )
+
         self.widgets = [
-            background, major_ticks, minor_ticks, needle
+            background, major_ticks, minor_ticks, needle, major_annotation
         ]
 
     def draw(self, context: cairo.Context):
@@ -908,4 +951,15 @@ class GaugeRound254:
 def test_gauge_round_254():
     return cairo_widget_test(widgets=[
         GaugeRound254()
+    ], repeat=1)
+
+
+@approve_image
+def test_elliptic_background():
+    return cairo_widget_test(widgets=[
+        EllipticBackground(
+            arc=Arc(
+                ellipse=EllipseParameters(Coordinate(x=0.25, y=0.25), major_curve=1.0 / 0.25, minor_radius=0.25)),
+            colour=Colour(0.2, 0.5, 0.5)
+        )
     ], repeat=1)
