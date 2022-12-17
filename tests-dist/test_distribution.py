@@ -4,21 +4,27 @@ import subprocess
 from pathlib import Path
 
 mydir = Path(os.path.dirname(__file__))
-top = mydir.parent.absolute()
+top = mydir.parent
 
-distribution = os.environ.get("DISTRIBUTION", os.path.join(top, "tmp/dist-test/venv"))
+if "DISTRIBUTION" in os.environ:
+    distribution = Path(os.environ["DISTRIBUTION"])
+else:
+    distribution = top / "tmp/dist-test/venv"
 
 
 def python_files_below(d):
     for root, dirs, files in os.walk(d):
         for name in [f for f in files if f.endswith(".py")]:
             rel = os.path.relpath(root, d)
-            yield Path(rel,  name)
+            yield Path(rel, name)
 
 
-expected_binaries = list(map(lambda f: os.path.join(distribution, "bin", f), python_files_below(Path(top, "bin"))))
+expected_binaries = list(map(lambda f: distribution / "bin" / f, python_files_below(top / "bin")))
 
-clip = os.path.join(top, "render", "clip.MP4")
+clip = top / "render" / "clip.MP4"
+join_dir = top / "render" / "contrib" / "strange-gps-times"
+to_join = join_dir / "GH010051.MP4"
+joined = join_dir / "joined.MP4"
 
 
 @contextlib.contextmanager
@@ -35,7 +41,7 @@ def working_directory(d):
 
 def test_expected_binaries_are_installed():
     for thing in expected_binaries:
-        assert os.path.exists(thing)
+        assert thing.exists()
 
 
 def test_can_at_least_show_help_for_all_binaries():
@@ -49,7 +55,7 @@ def test_can_at_least_show_help_for_all_binaries():
 
 # this is kind of a hack. works on my machine
 def test_init_pys_are_in_right_subfolders():
-    path = os.path.join(top, "gopro_overlay")
+    path = top / "gopro_overlay"
     expected_subpackages = list(
         map(os.path.basename, filter(
             os.path.isdir,
@@ -63,20 +69,25 @@ def test_init_pys_are_in_right_subfolders():
 
 
 def test_maybe_renders_something():
-    prog = os.path.join(distribution, "bin", "gopro-dashboard.py")
+    prog = distribution / "bin" / "gopro-dashboard.py"
     subprocess.run([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"], check=True)
 
 
 def test_maybe_makes_a_cvs():
-    prog = os.path.join(distribution, "bin", "gopro-to-csv.py")
+    prog = distribution / "bin" / "gopro-to-csv.py"
     subprocess.run([prog, clip, "-"])
 
 
 def test_maybe_clips_something():
-    prog = os.path.join(distribution, "bin", "gopro-cut.py")
+    prog = distribution / "bin" / "gopro-cut.py"
     subprocess.run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"], check=True)
 
 
 def test_maybe_clips_something_with_duration():
-    prog = os.path.join(distribution, "bin", "gopro-cut.py")
+    prog = distribution / "bin" / "gopro-cut.py"
     subprocess.run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"], check=True)
+
+
+def test_maybe_joins_some_files():
+    prog = distribution / "bin" / "gopro-join.py"
+    subprocess.run([prog, to_join, joined], check=True)

@@ -21,9 +21,8 @@ if __name__ == "__main__":
         raise IOError(f"File not found {source}")
 
     directory = source.parent.absolute()
-    filename = source.name
 
-    file = GoProFile(filename)
+    file = GoProFile(source)
 
     found = file.related_files(directory)
 
