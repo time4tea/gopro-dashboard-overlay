@@ -268,12 +268,12 @@ class LineParameters:
 class EllipticScale:
 
     def __init__(self, inner: EllipseParameters, outer: EllipseParameters,
-                 tick: TickParameters, line: LineParameters, length: float):
+                 tick: TickParameters, line: LineParameters, start: float, length: float):
         self.inner = inner
         self.outer = outer
         self.tick = tick
         self.line = line
-        self.start = 0.0
+        self.start = start
         self.length = length + tick.step * 0.05
 
     def draw(self, context: cairo.Context):
@@ -289,7 +289,7 @@ class EllipticScale:
                 if value >= self.length:
                     break
 
-                if value == self.tick.skipped:
+                if thick == self.tick.skipped:
                     thick = 1
                 else:
                     thick += 1
@@ -712,7 +712,10 @@ class EllipticAnnotation:
             else:
                 thick += 1
                 angle = self.start + angle
+                print(angle)
                 point = self.ellipse.get_point(self.ellipse * angle)
+
+                print(point)
 
                 if i >= len(self.texts):
                     break
@@ -817,21 +820,28 @@ def test_cap():
 
 @approve_image
 def test_scale():
+    start = math.radians(143)
+    length = math.radians(254)
+    step = math.pi / 12
+
     return cairo_widget_test(widgets=[
         EllipticScale(
             inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
             outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-            tick=TickParameters(step=math.pi / 12, first=1, skipped=1000),
-            length=2 * math.pi,
+            tick=TickParameters(step=step, first=1, skipped=1000),
+            length=length,
+            start=start,
             line=LineParameters(
                 width=6.0 / 400.0,
+                colour=BLACK
             )
         ),
         EllipticScale(
-            inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
+            inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.46, minor_radius=0.46, angle=0.0),
             outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-            tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
-            length=2 * math.pi,
+            tick=TickParameters(step=step / 2.0, first=2, skipped=2),
+            length=length,
+            start=start,
             line=LineParameters(
                 width=1.0 / 400.0,
                 colour=BLACK
@@ -883,8 +893,8 @@ class GaugeRound254:
 
         stretch = 0.8
         sectors = 17
-        length = math.radians(254)
         start = math.radians(143)
+        length = math.radians(254)
 
         step = length / sectors
 
@@ -893,7 +903,7 @@ class GaugeRound254:
             arc=Arc(
                 EllipseParameters(centre, major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
             ),
-            colour=BLACK
+            colour=WHITE
         )
 
         pin = Cap(
@@ -901,18 +911,20 @@ class GaugeRound254:
         )
 
         major_ticks = EllipticScale(
-            inner=EllipseParameters(centre, major_curve=1.0 / 0.43, minor_radius=0.43, angle=length),
-            outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
-            tick=TickParameters(step, 0, 0),
-            line=LineParameters(6.0 / 4000),
+            inner=EllipseParameters(centre, major_curve=1.0 / 0.43, minor_radius=0.43, angle=0),
+            outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=0),
+            tick=TickParameters(step, 1, 0),
+            line=LineParameters(6.0 / 4000, colour=BLACK),
+            start=start,
             length=length
         )
 
         minor_ticks = EllipticScale(
-            inner=EllipseParameters(centre, major_curve=1.0 / 0.46, minor_radius=0.46, angle=length),
-            outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=length),
-            tick=TickParameters(step / 2.0, 0, 2),
-            line=LineParameters(1.0 / 4000),
+            inner=EllipseParameters(centre, major_curve=1.0 / 0.46, minor_radius=0.46, angle=0),
+            outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=0),
+            tick=TickParameters(step / 2.0, 2, 2),
+            line=LineParameters(1.0 / 4000, colour=BLACK),
+            start=start,
             length=length
         )
 
@@ -927,9 +939,9 @@ class GaugeRound254:
         )
 
         major_annotation = EllipticAnnotation(
-            ellipse=EllipseParameters(centre=centre, major_curve=1.0 / 0.41, minor_radius=0.41, angle=length),
-            tick=TickParameters(2.0 * step, 0, 0),
-            colour=WHITE,
+            ellipse=EllipseParameters(centre=centre, major_curve=1.0 / 0.41, minor_radius=0.41, angle=0),
+            tick=TickParameters(2.0 * step, 1, 0),
+            colour=BLACK,
             face=ToyFontFace("arial"),
             mode=AnnotationMode.MovedInside,
             texts=[str(x) for x in range(0, 180, 10)],
@@ -940,7 +952,11 @@ class GaugeRound254:
         )
 
         self.widgets = [
-            background, major_ticks, minor_ticks, needle, major_annotation
+            # background,
+            major_ticks,
+            minor_ticks,
+            needle,
+            major_annotation
         ]
 
     def draw(self, context: cairo.Context):
