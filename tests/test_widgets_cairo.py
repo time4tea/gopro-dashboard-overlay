@@ -914,7 +914,7 @@ class GaugeRound254:
             inner=EllipseParameters(centre, major_curve=1.0 / 0.43, minor_radius=0.43, angle=0),
             outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=0),
             tick=TickParameters(step, 1, 0),
-            line=LineParameters(6.0 / 4000, colour=BLACK),
+            line=LineParameters(6.0 / 400, colour=BLACK),
             start=start,
             length=length
         )
@@ -923,7 +923,7 @@ class GaugeRound254:
             inner=EllipseParameters(centre, major_curve=1.0 / 0.46, minor_radius=0.46, angle=0),
             outer=EllipseParameters(centre, major_curve=1.0 / 0.49, minor_radius=0.49, angle=0),
             tick=TickParameters(step / 2.0, 2, 2),
-            line=LineParameters(1.0 / 4000, colour=BLACK),
+            line=LineParameters(1.0 / 400, colour=BLACK),
             start=start,
             length=length
         )
@@ -952,7 +952,7 @@ class GaugeRound254:
         )
 
         self.widgets = [
-            # background,
+            background,
             major_ticks,
             minor_ticks,
             needle,
