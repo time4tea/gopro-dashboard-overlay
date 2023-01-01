@@ -890,6 +890,8 @@ class GaugeRound254:
 
     def __init__(self):
         value = lambda: 0.00
+        minor_texts = [str(x) for x in range(0, 180, 20)]
+        major_texts = [str(x) for x in range(10, 190, 20)]
 
         stretch = 0.8
         sectors = 17
@@ -944,8 +946,21 @@ class GaugeRound254:
             colour=BLACK,
             face=ToyFontFace("arial"),
             mode=AnnotationMode.MovedInside,
-            texts=[str(x) for x in range(0, 180, 10)],
+            texts=major_texts,
             height=0.05,
+            stretch=stretch,
+            start=start + step,
+            length=length - step
+        )
+
+        minor_annotation = EllipticAnnotation(
+            ellipse=EllipseParameters(centre=centre, major_curve=1.0 / 0.41, minor_radius=0.41, angle=0),
+            tick=TickParameters(2.0 * step, 1, 0),
+            colour=BLACK,
+            face=ToyFontFace("arial"),
+            mode=AnnotationMode.MovedInside,
+            texts=minor_texts,
+            height=0.035,
             stretch=stretch,
             start=start,
             length=length
@@ -956,7 +971,8 @@ class GaugeRound254:
             major_ticks,
             minor_ticks,
             needle,
-            major_annotation
+            major_annotation,
+            minor_annotation
         ]
 
     def draw(self, context: cairo.Context):
