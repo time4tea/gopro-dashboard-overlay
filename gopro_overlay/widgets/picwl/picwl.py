@@ -392,7 +392,6 @@ class AbstractBordered:
                 elif action == DrawingAction.Region:
                     context.fill()
                 elif action == DrawingAction.Contents:
-                    print("Draw Contents")
                     self.draw_contents(context)
 
             if self.scaled:
