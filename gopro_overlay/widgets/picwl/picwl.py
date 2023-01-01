@@ -1,5 +1,4 @@
 import colorsys
-import contextlib
 import dataclasses
 import math
 from enum import Enum, auto
@@ -9,11 +8,11 @@ import cairo
 from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.exceptions import Defect
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
 
 from gopro_overlay.point import Coordinate, Point
+from gopro_overlay.widgets.cairo import saved, to_pillow
 
 
 #
@@ -152,15 +151,6 @@ class CairoCircuit:
             self.drawn = True
 
         image.alpha_composite(to_pillow(self.surface), (0, 0))
-
-
-@contextlib.contextmanager
-def saved(context: cairo.Context):
-    context.save()
-    try:
-        yield
-    finally:
-        context.restore()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -752,35 +742,6 @@ class EllipticAnnotation:
                         )
 
                         self.face.show(context, text)
-
-
-def to_pillow(surface: cairo.ImageSurface) -> Image:
-    size = (surface.get_width(), surface.get_height())
-    stride = surface.get_stride()
-
-    format = surface.get_format()
-    if format != cairo.FORMAT_ARGB32:
-        raise Defect(f"Only support ARGB32 images, not {format}")
-
-    with surface.get_data() as memory:
-        return Image.frombuffer("RGBA", size, memory.tobytes(), 'raw', "BGRa", stride)
-
-
-class CairoWidget:
-
-    def __init__(self, size: Dimension, widgets):
-        self.size = size
-        self.widgets = widgets
-
-    def draw(self, image: Image, draw: ImageDraw):
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.size.x, self.size.y)
-        ctx = cairo.Context(surface)
-        ctx.scale(surface.get_width(), surface.get_height())
-
-        for widget in self.widgets:
-            widget.draw(ctx)
-
-        image.alpha_composite(to_pillow(surface), (0, 0))
 
 
 class GaugeRound254:

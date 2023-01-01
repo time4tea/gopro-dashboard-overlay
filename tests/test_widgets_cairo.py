@@ -4,7 +4,8 @@ from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.picwl.picwl import EllipseParameters, Colour, BLACK, RED, Arc, TickParameters, \
     LineParameters, EllipticScale, EllipticBackground, Cap, NeedleParameter, Needle, AnnotationMode, ToyFontFace, \
-    EllipticAnnotation, CairoWidget, GaugeRound254
+    EllipticAnnotation, GaugeRound254
+from gopro_overlay.widgets.cairo import CairoWidget
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
