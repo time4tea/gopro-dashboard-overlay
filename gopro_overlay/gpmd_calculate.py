@@ -16,6 +16,11 @@ class CoriTimestampPacketTimeCalculator:
         self._adjust: Optional[Timeunit] = None
 
     def next_packet(self, timestamp, samples_before_this, num_samples):
+
+        if self._first_timestamp is not None and self._last_timestamp is not None and timestamp < self._last_timestamp:
+            print(f"Current: {timestamp}, First {self._first_timestamp}, Last {self._last_timestamp}")
+            self._cori_timestamp = timestamp
+
         if self._first_timestamp is None:
             self._first_timestamp = timestamp
             self._adjust = timestamp - self._cori_timestamp
