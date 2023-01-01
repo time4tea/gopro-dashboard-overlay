@@ -1,10 +1,12 @@
 import math
 
+import cairo
+
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.picwl.picwl import EllipseParameters, Colour, BLACK, RED, Arc, TickParameters, \
     LineParameters, EllipticScale, EllipticBackground, Cap, NeedleParameter, Needle, AnnotationMode, ToyFontFace, \
-    EllipticAnnotation
+    EllipticAnnotation, Border, ShadowMode, WHITE
 from gopro_overlay.widgets.picwl.gauge_round_254 import GaugeRound254
 from gopro_overlay.widgets.cairo import CairoWidget
 from tests.approval import approve_image
@@ -31,6 +33,26 @@ def test_ellipse():
                 start=0.0, length=math.pi
             ),
             colour=BLACK
+        )
+    ])
+
+@approve_image
+def test_ellipse_with_border():
+    return cairo_widget_test(widgets=[
+        EllipticBackground(
+            arc=Arc(
+                ellipse=EllipseParameters(
+                    Coordinate(x=0.5, y=0.5),
+                    major_curve=1.0 / 0.5,
+                    minor_radius=0.5,
+                    angle=0.0
+                ),
+                start=0.0, length=math.tau
+            ),
+            border=Border(
+                width=0.01, depth=0.005, shadow=ShadowMode.ShadowEtchedOut, colour=BLACK
+            ),
+            colour=WHITE
         )
     ])
 
@@ -120,6 +142,50 @@ def test_annotation():
 def test_gauge_round_254():
     return cairo_widget_test(widgets=[
         GaugeRound254()
+    ], repeat=1)
+
+
+class GaugeElliptic180:
+
+    def __init__(self):
+
+        bg = Colour(1.0, 0.0, 0.0)
+
+        length = math.pi
+        first = math.pi
+        excess = math.pi / 30.0
+        y = 0.225
+
+        inner = EllipseParameters(Coordinate(x=-0.045, y=y), 1.0 / 0.40, 0.31, -math.pi / 5.0)
+        outer = EllipseParameters(Coordinate(x=-0.020, y=y), 1.0 / 0.43, 0.36, -math.pi / 4.0)
+
+        background = EllipticBackground(
+            Arc(
+                ellipse=EllipseParameters(Coordinate(0, y), 1.0 / 0.5, 0.5, 0.0),
+                start=first - excess,
+                length=length + excess * 2.0,
+            ),
+            colour=bg
+        )
+
+        scale_area = EllipticBackground(
+            Arc(
+                ellipse=EllipseParameters(
+
+                )
+            )
+        )
+        self.widgets = [
+            background
+        ]
+
+    def draw(self, context: cairo.Context):
+        [w.draw(context) for w in self.widgets]
+
+
+def test_gauge_elliptic_180():
+    return cairo_widget_test(widgets=[
+        GaugeElliptic180()
     ], repeat=1)
 
 

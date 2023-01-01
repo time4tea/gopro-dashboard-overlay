@@ -15,7 +15,6 @@ from gopro_overlay.point import Coordinate, Point
 from gopro_overlay.widgets.cairo import saved, to_pillow
 
 
-
 @dataclasses.dataclass(frozen=True)
 class EllipseParameters:
     centre: Coordinate
@@ -56,7 +55,8 @@ class EllipseParameters:
             cos_angle = math.cos(angle)
             sin_angle = math.sin(angle)
 
-            return self.centre.x + cos_angle * math.cos(self.angle) / self.major_curve - sin_angle * math.sin(self.angle) * self.minor_radius
+            return self.centre.x + cos_angle * math.cos(self.angle) / self.major_curve - sin_angle * math.sin(
+                self.angle) * self.minor_radius
 
     def get_y(self, angle) -> float:
         if tiny(angle):
@@ -66,7 +66,8 @@ class EllipseParameters:
             cos_angle = math.cos(angle)
             sin_angle = math.sin(angle)
 
-            return self.centre.y + cos_angle * math.sin(self.angle) / self.major_curve + sin_angle * math.cos(self.angle) * self.minor_radius
+            return self.centre.y + cos_angle * math.sin(self.angle) / self.major_curve + sin_angle * math.cos(
+                self.angle) * self.minor_radius
 
     def get(self, angle) -> Coordinate:
         return Coordinate(x=self.get_x(angle), y=self.get_y(angle))
@@ -153,10 +154,10 @@ class HLSColour:
     a: float
 
     def lighten(self, by: float) -> 'HLSColour':
-        return HLSColour(self.h, math.min(self.l + by, 1.0), self.s, self.a)
+        return HLSColour(self.h, min(self.l + by, 1.0), self.s, self.a)
 
     def darken(self, by: float) -> 'HLSColour':
-        return HLSColour(self.h, math.max(self.l - by), self.s, self.a)
+        return HLSColour(self.h, max(self.l - by, 1.0), self.s, self.a)
 
     def rgb(self) -> 'Colour':
         r, g, b = colorsys.hls_to_rgb(self.h, self.l, self.s)
@@ -286,20 +287,6 @@ class EllipticScale:
             context.stroke()
 
 
-class EllipticBackground:
-    def __init__(self,
-                 arc: Arc,
-                 colour: Colour = BLACK):
-        self.arc = arc
-        self.colour = colour
-
-    def draw(self, context: cairo.Context):
-        self.arc.draw(context)
-
-        context.set_source_rgba(*self.colour.rgba())
-        context.fill()
-
-
 cos45 = math.sqrt(2.0) * 0.5
 
 
@@ -333,12 +320,24 @@ darkenBy = 1.0 / 3
 lightenBy = 1.0 / 3
 
 
+@dataclasses.dataclass
+class Border:
+    width: float
+    depth: float
+    shadow: ShadowMode
+    colour: Colour
+
+    @staticmethod
+    def NONE() -> 'Border':
+        return Border(width=0.0, depth=0.0, shadow=ShadowMode.ShadowNone, colour=BLACK)
+
+
 class AbstractBordered:
-    def __init__(self):
-        self.border_width = 0.1
-        self.border_depth = 1.0
-        self.border_shadow = ShadowMode.ShadowNone
-        self.colour = RED
+    def __init__(self, border: Border = Border.NONE()):
+        self.border_width = border.width
+        self.border_depth = border.depth
+        self.border_shadow = border.shadow
+        self.colour = border.colour
         self.scaled = True
 
     def set_contents_path(self, context: cairo.Context):
@@ -473,6 +472,20 @@ class AbstractBordered:
                     set_light()
                     _draw(1.0, inner_size + shadow_depth, shadow_depth)
                 _draw(0.0, inner_size, 0.0, DrawingAction.Contents)
+
+
+class EllipticBackground(AbstractBordered):
+    def __init__(self, arc: Arc, colour: Colour = BLACK, border=Border.NONE()):
+        super().__init__(border=border)
+        self.arc = arc
+        self.colour = colour
+
+    def set_contents_path(self, context: cairo.Context):
+        self.arc.draw(context)
+
+    def draw_contents(self, context: cairo.Context):
+        context.set_source_rgba(*self.colour.rgba())
+        context.fill()
 
 
 class Cap(AbstractBordered):
@@ -642,7 +655,8 @@ class PangoFontFace(FontFace):
 
 class ToyFontFace(FontFace):
 
-    def __init__(self, family: str, slant: cairo.FontSlant = cairo.FONT_SLANT_NORMAL, weight: cairo.FontWeight = cairo.FONT_WEIGHT_NORMAL):
+    def __init__(self, family: str, slant: cairo.FontSlant = cairo.FONT_SLANT_NORMAL,
+                 weight: cairo.FontWeight = cairo.FONT_WEIGHT_NORMAL):
         self.face = cairo.ToyFontFace(family, slant, weight)
 
     def text_extents(self, context: cairo.Context, text: str) -> cairo.TextExtents:
@@ -734,5 +748,3 @@ class EllipticAnnotation:
                         )
 
                         self.face.show(context, text)
-
-
