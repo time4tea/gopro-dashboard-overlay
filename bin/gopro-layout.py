@@ -11,6 +11,7 @@ from xml.etree import ElementTree
 from pint import DimensionalityError
 
 from gopro_overlay import fake, geo
+from gopro_overlay.arguments import default_config_location
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer, api_key_finder
@@ -26,14 +27,25 @@ if __name__ == "__main__":
 
     parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
     parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
+    parser.add_argument("--config-dir", help="Location of config files (api keys, profiles, ...)", type=pathlib.Path,
+                        default=default_config_location)
+    parser.add_argument("--cache-dir", help="Location of caches (map tiles, ...)", type=pathlib.Path,
+                        default=default_config_location)
 
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
     parser.add_argument("--overlay-size", default="1920x1080", help="Size of frame, XxY, e.g. 1920x1080")
 
     args = parser.parse_args()
+
+    config_dir = args.config_dir
+    config_dir.mkdir(exist_ok=True)
+
+    cache_dir = args.cache_dir
+    cache_dir.mkdir(exist_ok=True)
+
     font = load_font(args.font)
 
-    key_finder = api_key_finder(args)
+    key_finder = api_key_finder(args, config_dir=config_dir)
 
     font = font.font_variant(size=16)
 
@@ -44,7 +56,10 @@ if __name__ == "__main__":
 
     timeseries = fake.fake_framemeta(timedelta(minutes=5), step=timedelta(seconds=1), rng=rng, point_step=0.0001)
 
-    with CachingRenderer(style=args.map_style, api_key_finder=key_finder).open() as renderer:
+    with CachingRenderer(
+            cache_dir=cache_dir,
+            style=args.map_style,
+            api_key_finder=key_finder).open() as renderer:
 
         last_updated = None
 

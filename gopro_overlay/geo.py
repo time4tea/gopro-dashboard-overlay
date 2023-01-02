@@ -3,8 +3,8 @@ import dbm.ndbm
 import itertools
 import json
 import os
+import pathlib
 from functools import partial
-from pathlib import Path
 
 import geotiler
 from geotiler.cache import caching_downloader
@@ -136,11 +136,11 @@ class ArgsKeyFinder:
 
 
 class ConfigKeyFinder:
-    def __init__(self):
-        self.ourdir = Path.home().joinpath(".gopro-graphics")
+    def __init__(self, config_dir: pathlib.Path):
+        self.config_dir = config_dir
 
     def find_api_key(self, name):
-        config_file = self.ourdir / "map-api-keys.json"
+        config_file = self.config_dir / "map-api-keys.json"
         if config_file.exists():
             config = json.loads(config_file.read_text())
 
@@ -171,26 +171,24 @@ class SingleKeyFinder:
         return self.key
 
 
-def api_key_finder(args):
+def api_key_finder(args, config_dir: pathlib.Path):
     return CompositeKeyFinder(
         ArgsKeyFinder(args),
         EnvKeyFinder(),
-        ConfigKeyFinder()
+        ConfigKeyFinder(config_dir)
     )
 
 
 class CachingRenderer:
 
-    def __init__(self, style="osm", api_key_finder=None):
+    def __init__(self, cache_dir: pathlib.Path, style="osm", api_key_finder=None):
         if api_key_finder is None:
             api_key_finder = NullKeyFinder()
 
-        self.ourdir = Path.home().joinpath(".gopro-graphics")
+        self.cache_dir = cache_dir
         self.provider = provider_for_style(style, api_key_finder)
 
     @contextlib.contextmanager
     def open(self):
-        self.ourdir.mkdir(exist_ok=True)
-
-        with dbm.ndbm.open(str(self.ourdir.joinpath("tilecache.ndbm")), "c") as db:
+        with dbm.ndbm.open(str(self.cache_dir.joinpath("tilecache.ndbm")), "c") as db:
             yield dbm_caching_renderer(self.provider, db)

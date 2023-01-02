@@ -2,7 +2,7 @@ import random
 from datetime import timedelta
 from pathlib import Path
 
-from gopro_overlay import fake
+from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
@@ -19,7 +19,7 @@ rng.seed(12345)
 
 framemeta = fake.fake_framemeta(length=timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
-renderer = CachingRenderer()
+renderer = CachingRenderer(cache_dir=arguments.default_config_location)
 
 font = load_font("Roboto-Medium.ttf")
 

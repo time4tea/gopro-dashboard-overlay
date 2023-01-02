@@ -28,8 +28,6 @@ from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.profile import WidgetProfiler
 
-ourdir = Path.home().joinpath(".gopro-graphics")
-
 
 def accepter_from_args(include, exclude):
     if include and exclude:
@@ -95,6 +93,12 @@ if __name__ == "__main__":
     # need in this scope for now
     inputpath: Optional[Path] = None
     generate = args.generate
+
+    config_dir = args.config_dir
+    config_dir.mkdir(exist_ok=True)
+
+    cache_dir = args.cache_dir
+    cache_dir.mkdir(exist_ok=True)
 
     version = metadata.version("gopro_overlay")
     print(f"Starting gopro-dashboard version {version}")
@@ -169,8 +173,6 @@ if __name__ == "__main__":
             frame_meta.process(timeseries_process.calculate_odo())
             frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3)  # hack
 
-        ourdir.mkdir(exist_ok=True)
-
         # privacy zone applies everywhere, not just at start, so might not always be suitable...
         if args.privacy:
             lat, lon, km = args.privacy.split(",")
@@ -181,9 +183,12 @@ if __name__ == "__main__":
         else:
             privacy_zone = NoPrivacyZone()
 
-        key_finder = api_key_finder(args)
+        key_finder = api_key_finder(args, args.config_dir)
 
-        with CachingRenderer(style=args.map_style, api_key_finder=key_finder).open() as renderer:
+        with CachingRenderer(
+                cache_dir=cache_dir,
+                style=args.map_style,
+                api_key_finder=key_finder).open() as renderer:
 
             if args.profiler:
                 profiler = WidgetProfiler()
@@ -191,7 +196,7 @@ if __name__ == "__main__":
                 profiler = None
 
             if args.profile:
-                ffmpeg_options = load_ffmpeg_profile(ourdir, args.profile)
+                ffmpeg_options = load_ffmpeg_profile(config_dir, args.profile)
             else:
                 ffmpeg_options = None
 

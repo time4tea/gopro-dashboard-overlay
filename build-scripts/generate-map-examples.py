@@ -2,7 +2,7 @@ import os
 from itertools import zip_longest
 from pathlib import Path
 
-from gopro_overlay import geo
+from gopro_overlay import geo, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.font import load_font
@@ -50,7 +50,11 @@ if __name__ == "__main__":
     for style in geo.map_styles:
         print(style)
 
-        renderer = CachingRenderer(style=style, api_key_finder=ConfigKeyFinder())
+        renderer = CachingRenderer(
+            cache_dir=arguments.default_config_location,
+            style=style,
+            api_key_finder=ConfigKeyFinder(config_dir=arguments.default_config_location)
+        )
 
         with renderer.open() as map_renderer:
             xml = """

@@ -1,3 +1,4 @@
+import pathlib
 from pathlib import Path
 from typing import Optional
 
@@ -133,6 +134,16 @@ def test_exclude():
 def test_map_api_key():
     args = do_args("--map-api-key", "abcd")
     assert ArgsKeyFinder(args).find_api_key("thunderforest") == "abcd"
+
+
+def test_config_dir():
+    assert do_args().config_dir == pathlib.Path.home() / ".gopro-graphics"
+    assert do_args("--config-dir", "xx-config-xx").config_dir == pathlib.Path("xx-config-xx")
+
+
+def test_cache_dir():
+    assert do_args().cache_dir == pathlib.Path.home() / ".gopro-graphics"
+    assert do_args("--cache-dir", "xx-cache-xx").cache_dir == pathlib.Path("xx-cache-xx")
 
 
 def do_args(*args, input: Optional[str] = "input", output: Optional[str] = "output"):

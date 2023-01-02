@@ -4,7 +4,7 @@ from datetime import timedelta
 import pytest
 from PIL import ImageFont
 
-from gopro_overlay import fake
+from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import gps_framemeta
 from gopro_overlay.geo import CachingRenderer
@@ -16,8 +16,8 @@ from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
-from gopro_overlay.widgets.widgets import Translate, Frame
 from gopro_overlay.widgets.map import MovingJourneyMap, view_window
+from gopro_overlay.widgets.widgets import Translate, Frame
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 from tests.testenvironment import is_make
@@ -31,7 +31,7 @@ rng.seed(12345)
 
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
-renderer = CachingRenderer()
+renderer = CachingRenderer(cache_dir=arguments.default_config_location)
 
 
 def a_real_journey(name, dimension, f_scene):

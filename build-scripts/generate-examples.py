@@ -1,7 +1,9 @@
 import os
+import pathlib
 import re
 from pathlib import Path
 
+from gopro_overlay import arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.font import load_font
@@ -54,7 +56,7 @@ if __name__ == "__main__":
 
     examples = [os.path.join(example_dir, it) for it in examples]
 
-    renderer = CachingRenderer()
+    renderer = CachingRenderer(cache_dir=arguments.default_config_location)
 
     datapath = os.path.join(mydir, "..", "tests/meta/gopro-meta.gpmd")
     timeseries = framemeta_from_datafile(
