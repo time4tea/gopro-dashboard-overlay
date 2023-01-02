@@ -17,7 +17,7 @@ from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
-from gopro_overlay.geo import CachingRenderer, CompositeKeyFinder, ArgsKeyFinder, EnvKeyFinder, ConfigKeyFinder, api_key_finder
+from gopro_overlay.geo import CachingRenderer, api_key_finder
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
@@ -43,7 +43,8 @@ def accepter_from_args(include, exclude):
     return lambda n: True
 
 
-def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude, renderer, timeseries, font, privacy_zone, profiler):
+def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude, renderer, timeseries, font,
+                          privacy_zone, profiler):
     accepter = accepter_from_args(include, exclude)
 
     if layout_xml:
@@ -61,7 +62,8 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
     elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
     elif layout == "xml":
-        return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter, decorator=profiler)
+        return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter,
+                               decorator=profiler)
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
 
@@ -128,7 +130,8 @@ if __name__ == "__main__":
                     generate = "overlay"
 
                 external_file: Path = args.gpx
-                frame_meta = timeseries_to_framemeta(load_external(external_file, units), units, start_date=start_date, duration=duration)
+                frame_meta = timeseries_to_framemeta(load_external(external_file, units), units, start_date=start_date,
+                                                     duration=duration)
                 video_duration = frame_meta.duration()
                 packets_per_second = 1
             else:
@@ -153,7 +156,8 @@ if __name__ == "__main__":
                 dimensions = dimension_from(args.overlay_size)
 
         if len(frame_meta) < 1:
-            raise IOError(f"Unable to load GoPro metadata from {inputpath}. Use --debug-metadata to see more information")
+            raise IOError(
+                f"Unable to load GoPro metadata from {inputpath}. Use --debug-metadata to see more information")
 
         print(f"Generating overlay at {dimensions}")
         print(f"Timeseries has {len(frame_meta)} data points")
@@ -205,9 +209,11 @@ if __name__ == "__main__":
             if generate == "none":
                 ffmpeg = FFMPEGNull()
             elif generate == "overlay":
-                ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
+                ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions,
+                                       execution=execution)
             else:
-                ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options, vsize=args.output_size, overlay_size=dimensions, execution=execution)
+                ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options,
+                                            vsize=args.output_size, overlay_size=dimensions, execution=execution)
 
             write_timer = PoorTimer("writing to ffmpeg")
             byte_timer = PoorTimer("image to bytes")
