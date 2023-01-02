@@ -92,7 +92,7 @@ class Stepper:
             running += self._step
 
 
-max_distance = timeunits(seconds=2)
+max_distance = timeunits(seconds=6)
 
 
 class FrameMeta:
@@ -161,7 +161,7 @@ class FrameMeta:
         delta = frame_time - earlier_time
 
         if delta > max_distance:
-            return Entry(dt=earlier_item.dt + delta.timedelta())
+            print(f"Closest item to wanted time {frame_time} is {delta} away")
 
         return earlier_item
 
