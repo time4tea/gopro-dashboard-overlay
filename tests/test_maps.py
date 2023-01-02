@@ -31,6 +31,7 @@ rng.seed(12345)
 
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
+arguments.default_config_location.mkdir(parents=True, exist_ok=True)
 renderer = CachingRenderer(cache_dir=arguments.default_config_location)
 
 
