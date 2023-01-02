@@ -61,8 +61,8 @@ docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:0.64.0 gopro-dash
 
 Files created by the program will be created with the same uid that owns the mapped directory.
 
-Note Currently you can't easily use "GPU Profiles" with the docker image - you'll need to map a Docker volume for the folder "/home/dash/.gopro-graphics"
-to a suitable folder. This will be fixed in a later release.
+You can use the `--cache-dir` and `--config-dir` command line arguments to configure where the cache and config dirs are,
+thereby making it easier to use persistent mapped volumes.
 
 ### Installing and running with pip
 
