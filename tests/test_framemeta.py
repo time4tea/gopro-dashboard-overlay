@@ -92,14 +92,13 @@ def test_getting_intermediate_point_gets_earlier():
     assert fm.get(timeunits(seconds=2.0)).lat == 3.0
 
 
-def test_getting_point_too_far_away_returns_empty_entry():
+def test_getting_point_too_far_away():
     fm = FrameMeta()
     fm.add(timeunits(seconds=0), Entry(datetime_of(0), lat=1.0))
     fm.add(timeunits(seconds=1), Entry(datetime_of(1), lat=2.0))
     fm.add(timeunits(seconds=10), Entry(datetime_of(2), lat=3.0))
 
-    assert fm.get(timeunits(seconds=5)).lat is None
-    assert fm.get(timeunits(seconds=5)).dt == datetime_of(5)
+    assert fm.get(timeunits(seconds=20)).dt == datetime_of(2)
 
 
 def test_taking_a_view():
