@@ -4,6 +4,7 @@ from typing import Optional
 import pytest
 
 from gopro_overlay.arguments import gopro_dashboard_arguments
+from gopro_overlay.geo import ArgsKeyFinder
 
 
 def test_only_output():
@@ -30,7 +31,8 @@ def test_gpx_only_synonyms():
 
 
 def test_input_with_gpx_only():
-    assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something").input == Path("something")
+    assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input="something").input == Path(
+        "something")
     assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", input=None).input is None
 
 
@@ -50,13 +52,15 @@ def test_gpx_only_implies_generate_overlay_so_disallow_it():
 
 def test_gpx_only_enables_video_time_start():
     with pytest.raises(SystemExit):
-        assert do_args("--gpx", "bob", "--overlay-size", "10x10", "--generate", "overlay", "--video-time-start", "file-created")
+        assert do_args("--gpx", "bob", "--overlay-size", "10x10", "--generate", "overlay", "--video-time-start",
+                       "file-created")
     assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", "--video-time-start", "file-created")
 
 
 def test_gpx_only_enables_video_time_end():
     with pytest.raises(SystemExit):
-        assert do_args("--gpx", "bob", "--overlay-size", "10x10", "--generate", "overlay", "--video-time-end", "file-created")
+        assert do_args("--gpx", "bob", "--overlay-size", "10x10", "--generate", "overlay", "--video-time-end",
+                       "file-created")
 
     assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", "--video-time-end", "file-created")
 
@@ -124,6 +128,11 @@ def test_exclude():
     assert do_args().exclude is None
     assert do_args("--exclude", "something").exclude == ["something"]
     assert do_args("--exclude", "something", "else").exclude == ["something", "else"]
+
+
+def test_map_api_key():
+    args = do_args("--map-api-key", "abcd")
+    assert ArgsKeyFinder(args).find_api_key("thunderforest") == "abcd"
 
 
 def do_args(*args, input: Optional[str] = "input", output: Optional[str] = "output"):

@@ -28,7 +28,7 @@ The styles supported by the program all have free plans that are big enough to r
 cache of the tiles.
 
 ### Command Line
-API Keys can be provided on the command line, with `--api-key xxxxx`, 
+API Keys can be provided on the command line, with `--map-api-key xxxxx`, 
 
 ### Configuration File
 
