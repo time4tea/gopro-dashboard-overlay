@@ -10,7 +10,7 @@ from gopro_overlay import timeseries_process, progress_frames, gpx, fit
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.dimensions import dimension_from
-from gopro_overlay.execution import InProcessExecution, ThreadingExecution
+from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
     find_streams, FFMPEGNull
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
@@ -206,10 +206,7 @@ if __name__ == "__main__":
                 redirect = temp_file_name()
                 print(f"FFMPEG Output is in {redirect}")
 
-            if args.thread:
-                execution = ThreadingExecution(redirect=redirect)
-            else:
-                execution = InProcessExecution(redirect=redirect)
+            execution = InProcessExecution(redirect=redirect)
 
             if generate == "none":
                 ffmpeg = FFMPEGNull()
