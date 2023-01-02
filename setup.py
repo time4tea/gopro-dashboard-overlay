@@ -59,6 +59,7 @@ setup(
         "bin/gopro-rename.py",
         "bin/gopro-to-csv.py",
         "bin/gopro-to-gpx.py",
+        "bin/gopro-debug.py",
     ],
     python_requires=">=3.8",
     include_package_data=True,
