@@ -190,7 +190,7 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
-- 0.74.0 Experimental Support for speed from GPX files - using Garmin Extension
+- 0.74.0 Experimental Support for speed from GPX files - using Garmin Extension h/t [@Timmy-485](https://github.com/Timmy-485) 
   - Fix bug introduced in 0.73.0 to do with parsing map api keys.
 - 0.73.0 Support `--cache-dir` and `--config-dir` which should make use of profiles and map caches easier when using Docker
 - 0.72.0 Fix #42 - Data out of sequence when using joined files. h/t [@IbnGit](https://github.com/IbnGit) 
