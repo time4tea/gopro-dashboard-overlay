@@ -8,7 +8,7 @@ from .gpmd import GPSFix
 from .point import Point
 from .timeseries import Timeseries, Entry
 
-GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power")
+GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed")
 
 
 def fudge(gpx):
@@ -23,12 +23,13 @@ def fudge(gpx):
                     "atemp": None,
                     "hr": None,
                     "cad": None,
-                    "power": None
+                    "power": None,
+                    "speed": None
                 }
                 for extension in point.extensions:
                     for element in extension.iter():
                         tag = element.tag[element.tag.find("}") + 1:]
-                        if tag in ("atemp", "hr", "cad", "power"):
+                        if tag in ("atemp", "hr", "cad", "power", "speed"):
                             data[tag] = float(element.text)
                 yield GPX(**data)
 
@@ -42,7 +43,8 @@ def with_unit(gpx, units):
         units.Quantity(gpx.hr, units.bpm) if gpx.hr else None,
         units.Quantity(gpx.cad, units.rpm) if gpx.cad else None,
         units.Quantity(gpx.atemp, units.celsius) if gpx.atemp else None,
-        units.Quantity(gpx.power, units.watt) if gpx.power else None
+        units.Quantity(gpx.power, units.watt) if gpx.power else None,
+        units.Quantity(gpx.speed, units.mps) if gpx.speed else None,
     )
 
 
@@ -73,6 +75,7 @@ def gpx_to_timeseries(gpx):
             cad=point.cad,
             atemp=point.atemp,
             power=point.power,
+            speed=point.speed,
             # we should set the gps fix or Journey.accept() will skip the point:
             gpsfix=GPSFix.LOCK_3D.value,
         )

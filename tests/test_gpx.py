@@ -1,5 +1,4 @@
 import inspect
-import os
 from pathlib import Path
 
 import gpxpy
@@ -110,6 +109,34 @@ def test_feature_70_power_converted():
     assert entries[0].power == units.Quantity(103, units.W)
 
 
+def test_discussion_85_speed_elevation_from_gpx():
+    xml = """
+    <gpx 
+    xmlns="http://www.topografix.com/GPX/1/1" 
+    xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" 
+    version="1.1">
+  <trk>
+   <trkseg>
+    <trkpt lat="38.900207" lon="-77.008990">
+    <ele>11.67</ele>
+    <time>2013-06-11T04:04:49Z</time>
+    <extensions>
+      <gpxtpx:TrackPointExtension>
+        <gpxtpx:speed>6.86</gpxtpx:speed> 
+      </gpxtpx:TrackPointExtension>
+    </extensions>
+    </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
+    """
+
+    entries = list(gpx.load_xml(xml, units))
+    assert len(entries) == 1
+    assert entries[0].alt == units.Quantity(11.67, units.m)
+    assert entries[0].speed == units.Quantity(6.86, units.mps)
+
+
 def file_path_of_test_asset(name, in_dir="gpx") -> Path:
     sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 
@@ -171,4 +198,3 @@ def test_converting_gpx_to_timeseries_to_framemeta():
     gpx_framemeta = timeseries_to_framemeta(gpx_timeseries, units)
 
     assert len(gpx_framemeta) == len(gpx_timeseries)
-

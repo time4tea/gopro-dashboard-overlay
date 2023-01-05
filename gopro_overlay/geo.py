@@ -129,9 +129,10 @@ class ArgsKeyFinder:
         self.args = args
 
     def find_api_key(self, name):
-        arg_name = "map_api_key"
-        if arg_name in self.args:
-            return self.args.map_api_key
+        key = self.args.map_api_key
+        if key is not None:
+            return key
+
         raise ValueError(f"No api key for {name}")
 
 

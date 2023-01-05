@@ -130,6 +130,10 @@ def test_map_api_key():
     args = do_args("--map-api-key", "abcd")
     assert ArgsKeyFinder(args).find_api_key("thunderforest") == "abcd"
 
+def test_no_map_api_key():
+    args = do_args()
+    assert ArgsKeyFinder(args).find_api_key("thunderforest") is None
+
 
 def test_config_dir():
     assert do_args().config_dir == pathlib.Path.home() / ".gopro-graphics"
