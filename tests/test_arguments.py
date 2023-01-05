@@ -132,7 +132,8 @@ def test_map_api_key():
 
 def test_no_map_api_key():
     args = do_args()
-    assert ArgsKeyFinder(args).find_api_key("thunderforest") is None
+    with pytest.raises(ValueError):
+        ArgsKeyFinder(args).find_api_key("thunderforest")
 
 
 def test_config_dir():
