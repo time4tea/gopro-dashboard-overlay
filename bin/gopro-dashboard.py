@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-
+import traceback
 from importlib import metadata
 from pathlib import Path
+from subprocess import TimeoutExpired
 from typing import Optional
 
 import progressbar
@@ -148,7 +149,12 @@ if __name__ == "__main__":
                 dimensions = stream_info.video.dimension
                 video_duration = stream_info.video.duration
                 packets_per_second = 18
-                frame_meta = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
+                try:
+                    frame_meta = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
+                except TimeoutExpired:
+                    traceback.print_exc()
+                    print(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
+                    exit(1)
 
                 if args.gpx:
                     external_file: Path = args.gpx
