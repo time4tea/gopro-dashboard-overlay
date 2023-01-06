@@ -190,6 +190,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.75.0 Fixing some issues with True values in use of supplied or calculated values
+  - Thanks to [@Timmy-485](https://github.com/Timmy-485) for data files showing the issue.
 - 0.74.0 Experimental Support for speed from GPX files - using Garmin Extension h/t [@Timmy-485](https://github.com/Timmy-485) 
   - Fix bug introduced in 0.73.0 to do with parsing map api keys.
 - 0.73.0 Support `--cache-dir` and `--config-dir` which should make use of profiles and map caches easier when using Docker
