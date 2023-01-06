@@ -39,12 +39,12 @@ def with_unit(gpx, units):
         gpx.time,
         gpx.lat,
         gpx.lon,
-        units.Quantity(gpx.alt, units.m) if gpx.alt else None,
-        units.Quantity(gpx.hr, units.bpm) if gpx.hr else None,
-        units.Quantity(gpx.cad, units.rpm) if gpx.cad else None,
-        units.Quantity(gpx.atemp, units.celsius) if gpx.atemp else None,
-        units.Quantity(gpx.power, units.watt) if gpx.power else None,
-        units.Quantity(gpx.speed, units.mps) if gpx.speed else None,
+        units.Quantity(gpx.alt, units.m) if gpx.alt is not None else None,
+        units.Quantity(gpx.hr, units.bpm) if gpx.hr is not None else None,
+        units.Quantity(gpx.cad, units.rpm) if gpx.cad is not None else None,
+        units.Quantity(gpx.atemp, units.celsius) if gpx.atemp is not None else None,
+        units.Quantity(gpx.power, units.watt) if gpx.power is not None else None,
+        units.Quantity(gpx.speed, units.mps) if gpx.speed is not None else None,
     )
 
 

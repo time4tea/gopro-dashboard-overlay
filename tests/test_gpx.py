@@ -126,15 +126,36 @@ def test_discussion_85_speed_elevation_from_gpx():
       </gpxtpx:TrackPointExtension>
     </extensions>
     </trkpt>
+    <trkpt lat ="47.37736003508461" lon ="8.539389877469207">
+        <ele>444.746359774318</ele>
+        <time>2022-05-26T17:34:49Z</time>
+        <extensions>
+          <gpxtpx:TrackPointExtension>
+           <gpxtpx:speed>3.77</gpxtpx:speed>
+          </gpxtpx:TrackPointExtension>
+        </extensions>
+        </trkpt>
+            <trkpt lat ="47.37736003508461" lon ="8.539389877469207">
+        <ele>444.746359774318</ele>
+        <time>2022-05-26T17:34:49Z</time>
+        <extensions>
+          <gpxtpx:TrackPointExtension>
+           <gpxtpx:speed>0.0</gpxtpx:speed>
+          </gpxtpx:TrackPointExtension>
+        </extensions>
+        </trkpt>
     </trkseg>
   </trk>
 </gpx>
     """
 
     entries = list(gpx.load_xml(xml, units))
-    assert len(entries) == 1
+    assert len(entries) == 3
     assert entries[0].alt == units.Quantity(11.67, units.m)
     assert entries[0].speed == units.Quantity(6.86, units.mps)
+    assert entries[1].speed == units.Quantity(3.77, units.mps)
+    assert entries[2].speed == units.Quantity(0.0, units.mps)
+
 
 
 def file_path_of_test_asset(name, in_dir="gpx") -> Path:
