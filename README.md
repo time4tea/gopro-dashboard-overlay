@@ -214,12 +214,6 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
 - 0.65.0 Parse "power" from GPX files. Thanks to [@kfhdk](https://github.com/kfhdk)
   - See [docs/xml/examples/07-metrics](docs/xml/examples/04-metrics) for examples of how to use
   - Also example layout in layouts/power-1920x1080.xml
-- 0.64.0 Bump version only - no changes
-  - Docker Image now available! - Thanks to [@GitFun4All](https://github.com/GitFun4All) for the suggestion and example code 
-- 0.63.0 Bump version only - no changes
-- 0.62.0 Bump version only - no changes
-- 0.61.0 Update to Pillow version - should make the program run faster due to improvements in font rendering performance
-- 0.60.0 Possible fix for error using --gpx-only in timezones that are ahead of UTC
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
