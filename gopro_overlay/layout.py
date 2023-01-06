@@ -101,6 +101,6 @@ class Overlay:
     def entry(self):
         return self._entry
 
-    def draw(self, pts) -> Image:
+    def draw(self, pts) -> Image.Image:
         self._entry = self.framemeta.get(pts)
         return self.scene.draw()

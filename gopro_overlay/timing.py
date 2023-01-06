@@ -1,5 +1,8 @@
 import contextlib
 import time
+from typing import TypeVar, Callable
+
+T = TypeVar("T")
 
 
 class PoorTimer:
@@ -10,7 +13,7 @@ class PoorTimer:
         self.total = 0
         self.count = 0
 
-    def time(self, f):
+    def time(self, f: Callable[[], T]) -> T:
         t = time.time_ns()
         r = f()
         self.total += (time.time_ns() - t)
@@ -29,23 +32,23 @@ class PoorTimer:
                 print(self)
 
     @property
-    def seconds(self):
+    def seconds(self) -> float:
         return self.total / (10 ** 9)
 
     @property
-    def avg(self):
+    def avg(self) -> float:
         if self.count > 0:
             return self.seconds / self.count
         else:
             return 0
 
     @property
-    def rate(self):
+    def rate(self) -> float:
         a = self.avg
         if a == 0:
             return 0
         return 1 / a
 
     def __str__(self):
-        return f"{ ' ' * 4 * self.indent }Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, " \
+        return f"{' ' * 4 * self.indent}Timer({self.name} - Called: {self.count:,.0f}, Total: {self.seconds:.5f}, " \
                f"Avg: {self.avg:.5f}, Rate: {self.rate:,.2f})"

@@ -223,7 +223,7 @@ class Scene:
         self._widgets = widgets
         self._dimensions = dimensions
 
-    def draw(self) -> Image:
+    def draw(self) -> Image.Image:
         image = Image.new("RGBA", (self._dimensions.x, self._dimensions.y), (0, 0, 0, 0))
         draw = ImageDraw.Draw(image)
 
