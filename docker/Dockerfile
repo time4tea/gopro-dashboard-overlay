@@ -6,13 +6,14 @@ ARG GOPRO_OVERLAY_VERSION
 MAINTAINER gopro-overlay@time4tea.net
 ENV PATH=$PATH:/usr/bin
 
-RUN apk update && apk add bash python3 py3-pip curl unzip font-noto ffmpeg sudo
+RUN apk update && apk add bash python3 py3-pip curl unzip font-noto cairo-dev gcc python3-dev libc-dev ffmpeg sudo
 RUN curl "https://fonts.google.com/download?family=Roboto" -o /tmp/Roboto.zip && \
     mkdir -p /usr/share/fonts/Roboto && unzip -d /usr/share/fonts/Roboto /tmp/Roboto.zip && fc-cache -fv
 
 WORKDIR /
 RUN python3 -mvenv venv
 RUN /venv/bin/python3 -m pip install --upgrade pip
+RUN /venv/bin/pip install pycairo==1.23.0
 RUN /venv/bin/pip install gopro-overlay==${GOPRO_OVERLAY_VERSION}
 
 VOLUME /work
