@@ -208,6 +208,7 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.76.0 New widget - "cairo_circuit_map" - Much nicer looking circuit map, and first widget that uses new optional "cairo" library.
 - 0.75.0 Fixing some issues with True values in use of supplied or calculated values
   - Thanks to [@Timmy-485](https://github.com/Timmy-485) for data files showing the issue.
 - 0.74.0 Experimental Support for speed from GPX files - using Garmin Extension h/t [@Timmy-485](https://github.com/Timmy-485) 
