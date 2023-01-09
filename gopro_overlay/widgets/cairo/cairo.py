@@ -1,4 +1,5 @@
 import contextlib
+import math
 from typing import Tuple
 
 import cairo
@@ -49,14 +50,25 @@ def to_pillow(surface: cairo.ImageSurface) -> Image:
 
 class CairoWidget:
 
-    def __init__(self, size: Dimension, widgets):
+    def __init__(self, size: Dimension, rotation=0, widgets=None):
         self.size = size
-        self.widgets = widgets
+        self.rotation = rotation
+        self.widgets = [] if widgets is None else widgets
 
     def draw(self, image: Image, draw: ImageDraw):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.size.x, self.size.y)
         ctx = cairo.Context(surface)
         ctx.scale(surface.get_width(), surface.get_height())
+        ctx.translate(0.5, 0.5)
+
+        if self.rotation != 0:
+            # Need to scale to stop points being clipped outside image
+            # consider point at (1,1)
+            ctx.rotate(math.radians(self.rotation))
+            rotate = math.radians(self.rotation)
+            scale = max(math.cos(rotate) + math.sin(rotate), math.cos(rotate) - math.sin(rotate))
+            if scale > 1.0:
+                ctx.scale(1 / scale, 1 / scale)
 
         for widget in self.widgets:
             widget.draw(ctx)

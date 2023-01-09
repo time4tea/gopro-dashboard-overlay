@@ -17,12 +17,12 @@ rng.seed(12345)
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 
-def cairo_widget_test(widgets, repeat=100):
+def cairo_widget_test(widgets, rotation=0, repeat=1):
     return time_rendering(
         name="test_gauge",
         dimensions=Dimension(500, 500),
         widgets=[
-            CairoWidget(size=Dimension(500, 500), widgets=widgets)
+            CairoWidget(size=Dimension(500, 500), rotation=rotation, widgets=widgets)
         ],
         repeat=repeat
     )
@@ -35,6 +35,11 @@ def pt():
 @approve_image
 def test_cairo_circuit_defaults():
     return cairo_widget_test([CairoCircuit(framemeta=ts, location=pt)])
+
+
+@approve_image
+def test_cairo_circuit_defaults_rotate():
+    return cairo_widget_test([CairoCircuit(framemeta=ts, location=pt)], rotation=45)
 
 
 @approve_image

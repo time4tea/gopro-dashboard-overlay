@@ -55,3 +55,13 @@ The map will be simplified to reduce the number of points as the line width incr
 <kbd>![06-cairo-circuit-map-3.png](06-cairo-circuit-map-3.png)</kbd>
 
 
+# Rotation
+
+You can rotate the drawing with `rotate` and specify the clockwise rotation angle in degrees.
+
+
+```xml
+<component type="cairo_circuit_map" size="256" rotate="45" />
+```
+<kbd>![06-cairo-circuit-map-4.png](06-cairo-circuit-map-4.png)</kbd>
+

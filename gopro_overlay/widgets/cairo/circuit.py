@@ -49,31 +49,36 @@ class CairoCircuit:
         bbox = self.journey.bounding_box
         size = bbox.size() * 1.1
 
+        mid_x = ((bbox.max.lat - bbox.min.lat) / 2) + bbox.min.lat
+        mid_y = ((bbox.max.lon - bbox.min.lon) / 2) + bbox.min.lon
+
         def scale(point):
-            x = ((point.lat - bbox.min.lat) / size.x) + (1.0 / 20)
-            y = ((point.lon - bbox.min.lon) / size.y) + (1.0 / 20)
+            x = ((point.lat - mid_x) / size.x)
+            y = ((point.lon - mid_y) / size.y)
             return x, y
 
         start = self.journey.locations[0]
-        context.move_to(*scale(start))
-
-        if self.points is None:
-            self.points = rdp([scale(p) for p in self.journey.locations[1:]], epsilon=self.linespec.width / 4)
-
-        [context.line_to(*p) for p in self.points]
-
-        set_source(context, self.linespec.outline)
-        context.set_line_width(self.linespec.width)
-        context.stroke_preserve()
-
-        set_source(context, self.linespec.fill)
-        context.set_line_width(self.linespec.width * 0.75)
-        context.stroke()
 
         with saved(context):
-            context.translate(*(scale(self.location())))
-            context.arc(0, 0, self.locspec.width, 0, math.tau)
-            set_source(context, self.locspec.outline)
+            context.move_to(*(scale(start)))
+
+            if self.points is None:
+                self.points = rdp([scale(p) for p in self.journey.locations[1:]], epsilon=self.linespec.width / 4)
+
+            [context.line_to(*p) for p in self.points]
+
+            set_source(context, self.linespec.outline)
+            context.set_line_width(self.linespec.width)
             context.stroke_preserve()
-            set_source(context, self.locspec.fill)
-            context.fill()
+
+            set_source(context, self.linespec.fill)
+            context.set_line_width(self.linespec.width * 0.75)
+            context.stroke()
+
+            with saved(context):
+                context.translate(*(scale(self.location())))
+                context.arc(0, 0, self.locspec.width, 0, math.tau)
+                set_source(context, self.locspec.outline)
+                context.stroke_preserve()
+                set_source(context, self.locspec.fill)
+                context.fill()

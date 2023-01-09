@@ -7,9 +7,11 @@ from .widgets.cairo.circuit import Line
 
 def create_cairo_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
     size = iattrib(element, "size", d=256)
+    rotation = iattrib(element, "rotate", d=0)
 
     return CairoWidget(
         size=Dimension(size, size),
+        rotation=rotation,
         widgets=[
             CairoCircuit(
                 framemeta=timeseries,

@@ -30,3 +30,8 @@ The map will be simplified to reduce the number of points as the line width incr
 
 {{ <component type="cairo_circuit_map" size="256" line_width="0.05" loc_size="0.05" /> }}
 
+# Rotation
+
+You can rotate the drawing with `rotate` and specify the clockwise rotation angle in degrees.
+
+{{ <component type="cairo_circuit_map" size="256" rotate="45" /> }}
