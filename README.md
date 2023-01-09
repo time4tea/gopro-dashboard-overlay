@@ -42,6 +42,8 @@ Almost 30 different map styles are supported! - See [map styles](docs/maps/READM
 
 Install locally using `pip`, or use the provided Docker image
 
+Optional: Some widgets require the `cairo` library - which must be installed separately.
+
 ### Installing and running with docker
 
 The docker image is a new thing and still a bit experimental... please file an issue if you find any problems.
@@ -78,6 +80,22 @@ pacman -S ttf-roboto
 apt install truetype-roboto
 apt install fonts-roboto
 ```
+
+#### (Optional) Installing pycairo
+
+Optionally, install `pycairo`
+
+```shell
+venv/bin/pip install pycairo==1.23.0
+```
+
+You might need to install some system libraries - This is what the pycairo docs suggest: 
+
+Ubuntu/Debian: `sudo apt install libcairo2-dev pkg-config python3-dev`
+
+macOS/Homebrew: `brew install cairo pkg-config`
+
+
 
 ## Overlaying a dashboard
 

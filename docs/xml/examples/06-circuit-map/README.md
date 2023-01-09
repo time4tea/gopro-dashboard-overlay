@@ -6,7 +6,7 @@ Auto Generated File DO NOT EDIT
 
 # Circuit Map
 
-Chows a simple plot of the path, but no map behind it...
+Shows a simple plot of the path, but no map behind it...
 
 
 ```xml
@@ -27,6 +27,7 @@ You can change the colours with
 You can change the line widths with 
 
 `fill_width` and `outline_width`
+
 
 
 ```xml

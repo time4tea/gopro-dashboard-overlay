@@ -378,33 +378,6 @@ def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
     )
 
 
-def create_cairo_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
-    size = iattrib(element, "size", d=256)
-    from .widgets.cairo.circuit import CairoCircuit
-    from .widgets.cairo.cairo import CairoWidget
-    from .widgets.cairo.circuit import Line
-
-    return CairoWidget(
-        size=Dimension(size, size),
-        widgets=[
-            CairoCircuit(
-                framemeta=timeseries,
-                location=lambda: entry().point,
-                line=Line(
-                    fill=rgbattr(element, "fill", d=(255, 255, 255)),
-                    outline=rgbattr(element, "outline", d=(0, 0, 0)),
-                    width=fattrib(element, "line_width", d=0.01),
-                ),
-                loc=Line(
-                    fill=rgbattr(element, "loc_fill", d=(0, 0, 255)),
-                    outline=rgbattr(element, "loc_outline", d=(0, 0, 0)),
-                    width=fattrib(element, "loc_size", d=0.01 * 1.1)
-                )
-            )
-        ]
-    )
-
-
 def create_gradient_chart(*args, **kwargs):
     print("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
     return create_chart(*args, **kwargs)
@@ -521,3 +494,11 @@ def create_asi(element, entry, timeseries, font, **kwargs):
         Vne=iattrib(element, "vne", d=180),
         rotate=iattrib(element, "rotate", d=0),
     )
+
+
+def create_cairo_circuit_map(*args, **kwargs):
+    try:
+        import gopro_overlay.layout_xml_cairo
+        return gopro_overlay.layout_xml_cairo.create_cairo_circuit_map(*args, **kwargs)
+    except ModuleNotFoundError:
+        raise IOError("This widget needs pycairo to be installed - please see docs") from None

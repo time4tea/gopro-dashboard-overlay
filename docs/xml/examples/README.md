@@ -17,6 +17,8 @@ Auto Generated File DO NOT EDIT
 
 [05-moving-map](05-moving-map/README.md)
 
+[06-cairo-circuit-map](06-cairo-circuit-map/README.md)
+
 [06-circuit-map](06-circuit-map/README.md)
 
 [06-journey-map](06-journey-map/README.md)

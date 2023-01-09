@@ -1,7 +1,7 @@
 
 # Circuit Map
 
-Chows a simple plot of the path, but no map behind it...
+Shows a simple plot of the path, but no map behind it...
 
 {{ <component type="circuit_map" size="256" /> }}
 
