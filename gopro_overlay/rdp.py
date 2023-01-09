@@ -31,11 +31,11 @@ from math import sqrt
 
 
 def distance(a, b):
-    return  sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+    return sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
 
 def point_line_distance(point, start, end):
-    if (start == end):
+    if start == end:
         return distance(point, start)
     else:
         n = abs(
@@ -61,9 +61,8 @@ def rdp(points, epsilon):
             dmax = d
 
     if dmax >= epsilon:
-        results = rdp(points[:index+1], epsilon)[:-1] + rdp(points[index:], epsilon)
+        results = rdp(points[:index + 1], epsilon)[:-1] + rdp(points[index:], epsilon)
     else:
         results = [points[0], points[-1]]
 
     return results
-

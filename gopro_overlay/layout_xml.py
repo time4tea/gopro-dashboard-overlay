@@ -32,7 +32,8 @@ def load_xml_layout(filepath: Path):
             return f.read()
 
 
-def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True, decorator: Optional[WidgetProfiler] = None):
+def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
+                    decorator: Optional[WidgetProfiler] = None):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -73,7 +74,8 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
             return decorate(
                 name=name_of(child),
                 level=level,
-                widget=method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at, privacy=privacy)
+                widget=method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at,
+                              privacy=privacy)
             )
 
         def create_composite(element, level):
@@ -130,7 +132,6 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
             )]
         except ValueError as e:
             raise IOError(e)
-
 
     return create
 
@@ -362,6 +363,7 @@ def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **k
         zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
     )
 
+
 def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
     size = iattrib(element, "size", d=256)
     return Circuit(
@@ -374,6 +376,34 @@ def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
         fill_width=iattrib(element, "fill_width", d=4),
         outline_width=iattrib(element, "outline_width", d=0)
     )
+
+
+def create_cairo_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
+    size = iattrib(element, "size", d=256)
+    from .widgets.cairo.circuit import CairoCircuit
+    from .widgets.cairo.cairo import CairoWidget
+    from .widgets.cairo.circuit import Line
+
+    return CairoWidget(
+        size=Dimension(size, size),
+        widgets=[
+            CairoCircuit(
+                framemeta=timeseries,
+                location=lambda: entry().point,
+                line=Line(
+                    fill=rgbattr(element, "fill", d=(255, 255, 255)),
+                    outline=rgbattr(element, "outline", d=(0, 0, 0)),
+                    width=fattrib(element, "line_width", d=0.01),
+                ),
+                loc=Line(
+                    fill=rgbattr(element, "loc_fill", d=(0, 0, 255)),
+                    outline=rgbattr(element, "loc_outline", d=(0, 0, 0)),
+                    width=fattrib(element, "loc_size", d=0.01 * 1.1)
+                )
+            )
+        ]
+    )
+
 
 def create_gradient_chart(*args, **kwargs):
     print("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")

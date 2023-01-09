@@ -127,6 +127,10 @@
         </frame>
     </translate>
 
+    <translate x="250" y="250">
+        <component type="cairo_circuit_map" size="512"/>
+    </translate>
+
     <composite name="compass" x="500" y="100">
         <component type="compass" size="300" bg="0,0,0,128" fg="255,255,255" text="0,255,255" textsize="16"/>
 
