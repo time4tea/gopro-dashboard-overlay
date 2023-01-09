@@ -11,6 +11,8 @@ function show_available() {
     echo "The current directory is mapped into the docker container, so program inputs and outputs"
     echo "should be below the current directory, and referenced with relative names"
     echo "e.g. docker ... gopro-dashboard.py movies/input.MP4 overlays/output.MP4"
+    echo "Note: use --config-dir and --cache-dir to set location of config (e.g. profiles) and cache"
+    echo ".. these should either be below current directory, or use additional volume mounts"
 }
 
 program=$1
