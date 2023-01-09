@@ -232,25 +232,6 @@ def ffmpeg_libx264_is_installed():
     return len(libx264s) > 0
 
 
-# ffprobe -hide_banner -print_format json -show_packets -select_streams 3 -read_intervals '%+#1'  GH010278.MP4
-# {
-#     "packets": [
-#         {
-#             "codec_type": "data",
-#             "stream_index": 3,
-#             "pts": 0,
-#             "pts_time": "0.000000",
-#             "dts": 0,
-#             "dts_time": "0.000000",
-#             "duration": 1001,
-#             "duration_time": "1.001000",
-#             "size": "4248",
-#             "pos": "7867500",
-#             "flags": "K_"
-#         }
-#     ]
-# }
-
 class DiscardingBytesIO(BytesIO):
 
     def __init__(self, initial_bytes: bytes = ...) -> None:
