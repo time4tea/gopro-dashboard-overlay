@@ -232,6 +232,16 @@ def ffmpeg_libx264_is_installed():
     return len(libx264s) > 0
 
 
+def load_frame(filepath: Path, at_time: Timeunit) -> Optional[bytes]:
+    if filepath.exists():
+        cmd = ["ffmpeg", "-hide_banner", "-y", "-ss", str(at_time.millis() / 1000), "-i", str(filepath.absolute()), "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgba", "-"]
+        print(f"Executing '{' '.join(cmd)}'")
+        try:
+            return run(cmd, capture_output=True).stdout
+        except subprocess.CalledProcessError as e:
+            raise IOError(f"Error: {cmd}\n stderr: {e.stderr}")
+
+
 class DiscardingBytesIO(BytesIO):
 
     def __init__(self, initial_bytes: bytes = ...) -> None:

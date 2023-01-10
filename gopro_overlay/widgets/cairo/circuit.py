@@ -22,6 +22,13 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 blue = (0, 0, 255)
 
+def to_cairo_rgba(pillow_rgba):
+    if len(pillow_rgba) == 3:
+        return pillow_rgba
+    elif len(pillow_rgba) == 4:
+        return pillow_rgba[0], pillow_rgba[1], pillow_rgba[2], pillow_rgba[3] / 255.0
+    else:
+        raise ValueError("Only 3 or 4 tuples, please")
 
 class CairoCircuit:
 
@@ -63,22 +70,22 @@ class CairoCircuit:
             context.move_to(*(scale(start)))
 
             if self.points is None:
-                self.points = rdp([scale(p) for p in self.journey.locations[1:]], epsilon=self.linespec.width / 4)
+                self.points = rdp([scale(p) for p in self.journey.locations[1:]], epsilon=self.linespec.width / 8)
 
             [context.line_to(*p) for p in self.points]
 
-            set_source(context, self.linespec.outline)
+            set_source(context, to_cairo_rgba(self.linespec.outline))
             context.set_line_width(self.linespec.width)
             context.stroke_preserve()
 
-            set_source(context, self.linespec.fill)
+            set_source(context, to_cairo_rgba(self.linespec.fill))
             context.set_line_width(self.linespec.width * 0.75)
             context.stroke()
 
             with saved(context):
                 context.translate(*(scale(self.location())))
                 context.arc(0, 0, self.locspec.width, 0, math.tau)
-                set_source(context, self.locspec.outline)
+                set_source(context, to_cairo_rgba(self.locspec.outline))
                 context.stroke_preserve()
-                set_source(context, self.locspec.fill)
+                set_source(context, to_cairo_rgba(self.locspec.fill))
                 context.fill()

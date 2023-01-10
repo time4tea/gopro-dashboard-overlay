@@ -100,10 +100,13 @@ class JourneyMap:
             if self.map.zoom > 18:
                 self.map.zoom = 18
 
-            plots = [
-                self.map.rev_geocode((location.lon, location.lat))
-                for location in journey.locations if not self.privacy_zone.encloses(location)
-            ]
+            plots = rdp(
+                points=[
+                    self.map.rev_geocode((location.lon, location.lat))
+                    for location in journey.locations if not self.privacy_zone.encloses(location)
+                ],
+                epsilon=1
+            )
 
             image = self.renderer(self.map)
 

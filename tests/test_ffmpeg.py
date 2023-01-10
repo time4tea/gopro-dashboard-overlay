@@ -1,6 +1,9 @@
+import os
 from io import BytesIO
 from os import stat_result
 from pathlib import Path
+
+from PIL import Image
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
@@ -194,6 +197,17 @@ def test_ffmpeg_overlay_execute_options():
         "-output-option",  # output option goes before output
         "output"
     ]
+
+mydir = Path(os.path.dirname(__file__))
+top = mydir.parent
+clip = top / "render" / "clip.MP4"
+
+def test_extract_frame():
+    assert clip.exists()
+    dimension = ffmpeg.find_streams(clip).video.dimension
+    Image.frombytes(mode="RGBA", size=dimension.tuple(), data=ffmpeg.load_frame(clip, timeunits(seconds=2)))
+
+
 
 
 def test_flatten():

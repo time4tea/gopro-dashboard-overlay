@@ -214,6 +214,49 @@ def test_frame_clipping():
 
 
 @approve_image
+def test_frame_fill():
+    return time_rendering(name="viewport", widgets=[
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 255, 255)
+        )
+    ])
+
+@approve_image
+def test_frame_fill_opacity():
+    return time_rendering(name="viewport", widgets=[
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 255, 255, 128),
+            corner_radius=35
+        )
+    ])
+
+@approve_image
+def test_frame_fill_cr():
+    return time_rendering(name="viewport", widgets=[
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 255, 255),
+            corner_radius=35
+        )
+    ])
+
+
+@approve_image
+def test_frame_fill_cr_outline():
+    return time_rendering(name="viewport", widgets=[
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 255, 255),
+            outline=(255,0,0),
+            corner_radius=35
+        )
+    ])
+
+
+
+@approve_image
 def test_frame_fade_cr_zero():
     return time_rendering(name="viewport", widgets=[
         Frame(
@@ -227,6 +270,16 @@ def test_frame_fade_cr_zero():
         )
     ])
 
+
+@approve_image
+def test_frame_fade_cr_zero_new():
+    return time_rendering(name="viewport", widgets=[
+            Frame(
+                dimensions=Dimension(300, 200),
+                fill=(255, 0, 0),
+                fade_out=50,
+            )
+    ])
 
 @approve_image
 def test_frame_fade_cr_non_zero():
@@ -277,7 +330,7 @@ def test_out_line():
     ])
 
 
-def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=100):
+def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=1):
     timer = PoorTimer(name)
 
     scene = Scene(dimensions, widgets)

@@ -1,73 +1,27 @@
 <layout>
-    <translate x="50" y="550">
-        <component type="bar" width="400" height="50" metric="accl.x"/>
-        <component type="text" size="24" rgb="255,255,255">X Accl</component>
-        <component type="metric" x="200" metric="accl.x" size="24" rgb="255,255,255" dp="2"/>
-    </translate>
-
-    <translate x="50" y="600">
-        <component type="bar" width="400" height="50" metric="accl.y" />
-        <component type="text" size="24" rgb="255,255,255">Y Accl</component>
-        <component type="metric" x="200" metric="accl.y" size="24" rgb="255,255,255" dp="2"/>
-    </translate>
-
-    <translate x="50" y="650">
-        <component type="bar" width="400" height="50" metric="accl.z" />
-        <component type="text" size="24" rgb="255,255,255">Z Accl</component>
-        <component type="metric" x="200" metric="accl.z" size="24" rgb="255,255,255" dp="2"/>
-    </translate>
-
-    <translate x="0" y="800">
-        <component type="chart" name="chart" x="400" y="0" metric="accl.z" units="m/s^2" seconds="30"/>
-    </translate>
-
-    <translate x="600">
-        <component type="moving_map" name="moving_map" x="0" y="100" size="384" zoom="17" corner_radius="35" />
-        <component type="journey_map" name="journey_map" x="0" y="500" size="384" corner_radius="35"/>
-        <translate x="800">
-            <translate y="0">
-                <component type="cairo_circuit_map" size="784" line_width="0.01"/>
-            </translate>
-            <translate y="800">
-                <component type="moving_journey_map" name="moving_journey_map" size="384" corner_radius="35"/>
-            </translate>
+    <translate x="10" y="1000">
+        <component type="chart" metric="alt" seconds="30"/>
+        <translate x="290" y="40">
+            <component type="text" align="right">Alt (m)</component>
         </translate>
     </translate>
 
-    <translate x="300">
-        <translate y="0">
-          <component type="bar" width="400" height="50" min="-1" max="1" metric="grav.x"/>
-          <component type="text" x="10" y="10" size="24" rgb="255,255,255">X Grav</component>
-          <component type="metric" x="200" y="15" metric="grav.x" size="24" rgb="255,255,255" dp="2" align="centre" />
-        </translate>
+    <translate x="320" y="1000">
+        <component type="chart" metric="speed" units="mph" seconds="30"/>
+    </translate>
+
+    <translate x="50">
+        <component type="moving_map" x="0" y="100" size="384" zoom="16" corner_radius="35"/>
+        <component type="journey_map" x="0" y="500" size="384" corner_radius="35"/>
+    </translate>
+
+<!--    <translate x="500" y="100">-->
+<!--        <component type="moving_journey_map" name="moving_map" x="0" y="100" size="384" zoom="13"/>-->
+<!--    </translate>-->
+
+    <translate x="800">
         <translate y="50">
-            <component type="bar" width="400" height="50" min="-1" max="1" metric="grav.y" />
-            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Y Grav</component>
-            <component type="metric" x="200" y="15" metric="grav.y" size="24" rgb="255,255,255" dp="2"  align="centre"/>
-        </translate>
-        <translate y="100">
-            <component type="bar" width="400" height="50" min="-1" max="1" metric="grav.z" />
-            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Z Grav</component>
-            <component type="metric" x="200" y="15" metric="grav.z" size="24" rgb="255,255,255" dp="2" align="centre"/>
-        </translate>
-    </translate>
-
-
-    <translate x="900">
-        <translate y="0">
-          <component type="bar" width="400" height="50" min="-180" max="180" metric="ori.pitch" units="degrees" />
-          <component type="text" x="10" y="10" size="24" rgb="255,255,255">Pitch</component>
-          <component type="metric" x="200" y="15" metric="ori.pitch" units="degrees" size="24" rgb="255,255,255" dp="2" align="centre" />
-        </translate>
-        <translate y="50">
-            <component type="bar" width="400" height="50" min="-180" max="180" metric="ori.roll" />
-            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Roll</component>
-            <component type="metric" x="200" y="15" metric="ori.roll" units="degrees" size="24" rgb="255,255,255" dp="2"  align="centre"/>
-        </translate>
-        <translate y="100">
-            <component type="bar" width="400" height="50" min="-180" max="180" metric="ori.yaw" units="degrees"/>
-            <component type="text" x="10" y="10" size="24" rgb="255,255,255">Yaw</component>
-            <component type="metric" x="200" y="15" metric="ori.yaw" units="degrees" size="24" rgb="255,255,255" dp="2" align="centre"/>
+            <component type="cairo_circuit_map" size="1024" line_width="0.05" outline="0,0,255,0" fill="0,0,255,128" rotate="-90" loc_size="0.04" loc_outline="0,0,0,128" loc_fill="255,255,255,128"/>
         </translate>
     </translate>
 </layout>
