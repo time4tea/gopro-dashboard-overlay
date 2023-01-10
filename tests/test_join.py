@@ -4,6 +4,8 @@ import tempfile
 from os import chdir
 from pathlib import Path
 
+import pytest
+
 from gopro_overlay.filenaming import GoProFile, Encoding
 
 
@@ -24,6 +26,13 @@ def test_gopro_file_naming_hevc():
     assert f.recording == 1029
     assert f.sequence == 97
 
+
+def test_renamed_files():
+    with pytest.raises(ValueError):
+        GoProFile(Path("1.1-GX010092.MP4"))
+
+    with pytest.raises(ValueError):
+        GoProFile(Path("bob/1.1-GX010092.MP4"))
 
 files = [
     "GH010072.MP4", "GH020072.MP4", "GH030072.MP4", "GH040072.MP4",

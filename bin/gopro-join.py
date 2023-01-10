@@ -28,6 +28,10 @@ if __name__ == "__main__":
 
     print(f"Found: {[f.name for f in found]}")
 
+    if not found:
+        print("Didn't find any suitable files to join. Were the files renamed?")
+        exit(1)
+
     join_files(
         filepaths=[os.path.join(directory, file.name) for file in found],
         output=args.output

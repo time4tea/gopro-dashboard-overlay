@@ -37,7 +37,7 @@ class GoProFile:
     def __init__(self, filepath: Path):
         match = GoProFile.is_valid_filepath(filepath)
         if match is None:
-            raise ValueError(f"Not a GoPro file {filepath}")
+            raise ValueError(f"Not a valid GoPro filename {filepath}")
 
         self.name = filepath.name
         self.encoding = Encoding.from_letter(match.group(1))
@@ -47,7 +47,7 @@ class GoProFile:
 
     @staticmethod
     def is_valid_filepath(f: Path):
-        return re.search(r"G([HX])(\d{2})(\d{4}).MP4", f.name)
+        return re.search(r"^G([HX])(\d{2})(\d{4}).MP4", f.name)
 
     def related_files(self, d: Path, listdir=os.listdir):
         find = re.compile(r"G{l}\d\d{n}\.MP4".format(
