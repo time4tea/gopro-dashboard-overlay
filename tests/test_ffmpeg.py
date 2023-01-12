@@ -3,6 +3,7 @@ from io import BytesIO
 from os import stat_result
 from pathlib import Path
 
+import pytest
 from PIL import Image
 
 from gopro_overlay import ffmpeg
@@ -203,7 +204,9 @@ top = mydir.parent
 clip = top / "render" / "clip.MP4"
 
 def test_extract_frame():
-    assert clip.exists()
+    if not clip.exists():
+        pytest.xfail("Clip doesn't exist - should locally!")
+
     dimension = ffmpeg.find_streams(clip).video.dimension
     Image.frombytes(mode="RGBA", size=dimension.tuple(), data=ffmpeg.load_frame(clip, timeunits(seconds=2)))
 
