@@ -195,6 +195,13 @@ def metric_accessor_from(name):
         "dist": lambda e: e.dist,
         "azi": lambda e: e.azi,
         "cog": lambda e: e.cog,
+
+        "gps-dop": lambda e: e.dop,
+        "timestamp": lambda e:e.timestamp,
+        "gps-packet": lambda e:e.packet,
+        "gps-packet-index": lambda e:e.packet_index,
+        "gps-lock": lambda e: e.gpslock,
+
         "accl.x": lambda e: e.accl.x if e.accl else None,
         "accl.y": lambda e: e.accl.y if e.accl else None,
         "accl.z": lambda e: e.accl.z if e.accl else None,

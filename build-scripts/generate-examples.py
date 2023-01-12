@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 )
 
                 overlay = Overlay(dimensions_for(filepath), framemeta=timeseries, create_widgets=layout)
-                image = overlay.draw(timeseries.min + ((timeseries.max - timeseries.min) / 2))
+                image = overlay.draw(timeseries.mid)
 
                 os.makedirs(example_dest, exist_ok=True)
 

@@ -72,6 +72,8 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
 
     end_dt = current_dt + length
 
+    counter = 0
+
     while current_dt <= end_dt:
         fm.add(
             current_frame_time,
@@ -79,6 +81,11 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                 current_dt,
                 timestamp=units.Quantity(current_frame_time.millis(), units.number),
                 point=points.step(),
+
+                dop=units.Quantity(20, units.number),
+                packet=units.Quantity(counter // 18, units.number),
+                packet_index=units.Quantity(counter % 18, units.number),
+
                 speed=units.Quantity(speed.step(), units.mps),
                 cad=units.Quantity(cad.step(), units.rpm),
                 hr=units.Quantity(hr.step(), units.bpm),
@@ -96,11 +103,15 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                     z=units.Quantity(grav.step()),
                 ),
                 gpsfix=GPSFix.LOCK_2D.value,
+                gpslock=units.Quantity(GPSFix.LOCK_2D.value),
             )
         )
         current_dt = current_dt + step
         current_frame_time = current_frame_time + timeunits(seconds=step.total_seconds())
 
-        fm.process(timeseries_process.calculate_odo())
+        counter +=1
+
+
+    fm.process(timeseries_process.calculate_odo())
 
     return fm

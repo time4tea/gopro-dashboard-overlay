@@ -123,6 +123,10 @@ class FrameMeta:
         self.check_modified()
         return self.framelist[-1]
 
+    @property
+    def mid(self):
+        return self.min + ((self.max - self.min) / 2)
+
     def _update(self):
         self.framelist = sorted(list(self.frames.keys()))
         self.modified = False

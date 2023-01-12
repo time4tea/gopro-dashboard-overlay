@@ -43,7 +43,8 @@ class GPS5EntryConverter:
                     point=Point(point.lat, point.lon),
                     speed=self._units.Quantity(point.speed, self._units.mps),
                     alt=self._units.Quantity(point.alt, self._units.m),
-                    gpsfix=components.fix.value
+                    gpsfix=components.fix.value,
+                    gpslock=self._units.Quantity(components.fix.value),
                 )
             )
         self._total_samples += len(components.points)

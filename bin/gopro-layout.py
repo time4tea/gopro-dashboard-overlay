@@ -81,9 +81,7 @@ if __name__ == "__main__":
         try:
             timeseries = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
 
-            mid_point = timeseries.min + ((timeseries.max - timeseries.min) / 2)
-
-            video_frame = load_frame(inputpath, stream_info.video.dimension, mid_point)
+            video_frame = load_frame(inputpath, stream_info.video.dimension, timeseries.mid)
 
 
         except TimeoutExpired:
@@ -119,8 +117,7 @@ if __name__ == "__main__":
                         create_widgets=layout
                     )
 
-                    mid_point = timeseries.min + ((timeseries.max - timeseries.min) / 2)
-                    frame = overlay.draw(mid_point)
+                    frame = overlay.draw(timeseries.mid)
 
                     if video_frame is not None:
                         frame = Image.alpha_composite(video_frame, frame)

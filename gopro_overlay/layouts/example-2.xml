@@ -1,0 +1,9 @@
+<layout>
+    <translate x="10" y="10">
+        <component type="metric" y="0" metric="gps-dop" dp="0"/>
+        <component type="metric" y="50" metric="timestamp"/>
+        <component type="metric" y="100" metric="gps-packet" dp="0"/>
+        <component type="metric" y="150" metric="gps-packet-index" dp="0"/>
+        <component type="metric" y="200" metric="gps-lock" dp="0"/>
+    </translate>
+</layout>

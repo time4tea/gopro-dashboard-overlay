@@ -72,6 +72,13 @@ def test_render_example_layout():
     with renderer.open() as map_renderer:
         return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
+@approve_image
+def test_render_example_2_layout():
+    xmldoc = load_xml_layout(Path("example-2"))
+
+    with renderer.open() as map_renderer:
+        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
+
 
 @approve_image
 def test_render_xml_component():
@@ -124,7 +131,7 @@ def time_layout(name, layout, repeat=20, dimensions=Dimension(1920, 1080)):
     timer = PoorTimer(name)
 
     for i in range(0, repeat):
-        draw = timer.time(lambda: overlay.draw(framemeta.min))
+        draw = timer.time(lambda: overlay.draw(framemeta.mid))
 
     print(timer)
 
