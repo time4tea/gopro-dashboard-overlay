@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import argparse
+import atexit
+import curses
 import os
 import pathlib
 import random
 import traceback
 from datetime import timedelta
 from subprocess import TimeoutExpired
-from time import sleep
 from xml.etree import ElementTree
 
 from PIL import Image
@@ -46,7 +47,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
     parser.add_argument("--overlay-size", default="1920x1080", help="Size of frame, XxY, e.g. 1920x1080")
-    parser.add_argument("--gopro", type=pathlib.Path,  help="Use gopro video to supply a background image / journey")
+    parser.add_argument("--gopro", type=pathlib.Path, help="Use gopro video to supply a background image / journey")
 
     args = parser.parse_args()
 
@@ -94,6 +95,17 @@ if __name__ == "__main__":
     else:
         timeseries = fake.fake_framemeta(timedelta(minutes=5), step=timedelta(seconds=1), rng=rng, point_step=0.0001)
 
+    window = curses.initscr()
+    curses.noecho()
+    window.timeout(100)
+
+    def cleanup():
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
+
+    atexit.register(cleanup)
+
     with CachingRenderer(
             cache_dir=cache_dir,
             style=args.map_style,
@@ -134,4 +146,8 @@ if __name__ == "__main__":
                 except DimensionalityError as e:
                     print(f"Unable to load {layout_file}: Unit Conversion: {e}")
 
-            sleep(0.1)
+            char = window.getch()
+            if char == ord('z'):
+                print("Left")
+            elif char == ord('x'):
+                print("Right")
