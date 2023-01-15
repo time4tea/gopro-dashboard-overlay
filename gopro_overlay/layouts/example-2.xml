@@ -6,4 +6,9 @@
         <component type="metric" y="150" metric="gps-packet-index" dp="0"/>
         <component type="metric" y="200" metric="gps-lock" dp="0"/>
     </translate>
+
+    <translate x="100" y="50">
+        <component type="gps-lock-icon" size="64"/>
+    </translate>
+
 </layout>

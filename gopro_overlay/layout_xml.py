@@ -17,6 +17,7 @@ from .widgets.bar import Bar
 from .widgets.chart import SimpleChart
 from .widgets.compass import Compass
 from .widgets.compass_arrow import CompassArrow
+from .widgets.gps import GPSLock
 from .widgets.map import MovingJourneyMap, Circuit
 from .widgets.profile import WidgetProfiler
 from .widgets.widgets import simple_icon, Translate, Composite, Frame
@@ -509,3 +510,14 @@ def create_cairo_circuit_map(*args, **kwargs):
         return gopro_overlay.layout_xml_cairo.create_cairo_circuit_map(*args, **kwargs)
     except ModuleNotFoundError:
         raise IOError("This widget needs pycairo to be installed - please see docs") from None
+
+def create_gps_lock_icon(element, entry, timeseries, font, **kwargs):
+    at = Coordinate(0,0)
+    size = iattrib(element, "size", d=64)
+    return GPSLock(
+        fix=lambda: entry().gpsfix,
+        lock_no=simple_icon(at, attrib(element, "lock_none", d="gps_lock_none.png"), size ),
+        lock_unknown=simple_icon(at, attrib(element, "lock_unknown", d="gps_lock_unknown.png"), size ),
+        lock_2d=simple_icon(at, attrib(element, "lock_2d", d="gps_lock_2d.png"), size ),
+        lock_3d=simple_icon(at, attrib(element, "lock_3d", d="gps_lock_3d.png"), size ),
+    )

@@ -5,11 +5,13 @@ from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.gpmd import GPSFix
 from gopro_overlay.layout import BigMetric, gps_info
 from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
+from gopro_overlay.widgets.gps import GPSLock
 from gopro_overlay.widgets.info import ComparativeEnergy
 from gopro_overlay.widgets.map import OutLine
 from gopro_overlay.widgets.text import CachingText, Text
@@ -327,6 +329,26 @@ def test_out_line():
                 points=points
             )
         )
+    ])
+
+
+def gps_lock_with_fix(fix):
+    return GPSLock(
+        fix=lambda: fix.value,
+        lock_no=Text(at=Coordinate(0, 0), value=lambda: "No Lock", font=font),
+        lock_unknown=Text(at=Coordinate(0, 0), value=lambda: "Unknown", font=font),
+        lock_2d=Text(at=Coordinate(0, 0), value=lambda: "Lock 2D", font=font),
+        lock_3d=Text(at=Coordinate(0, 0), value=lambda: "Lock 3D", font=font),
+    )
+
+
+@approve_image
+def test_gps_lock():
+    return time_rendering(name="gps lock", widgets=[
+        Translate(Coordinate(0,0), gps_lock_with_fix(GPSFix.NO)),
+        Translate(Coordinate(0,128), gps_lock_with_fix(GPSFix.UNKNOWN)),
+        Translate(Coordinate(128,0), gps_lock_with_fix(GPSFix.LOCK_2D)),
+        Translate(Coordinate(128,128), gps_lock_with_fix(GPSFix.LOCK_3D)),
     ])
 
 

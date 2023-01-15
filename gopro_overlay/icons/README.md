@@ -7,3 +7,6 @@ These icons are (C) their respective creators.
 <div>Icons made by <a href="https://www.flaticon.com/authors/kiranshastry" title="Kiranshastry">Kiranshastry</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 <div>Icons made by <a href="https://www.flaticon.com/authors/yut1655" title="yut1655">yut1655</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 <div>Icons made by <a href="" title="Those Icons">Those Icons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+<div><a href="https://www.flaticon.com/free-icons/satellite" title="satellite icons">Satellite icons created by phatplus - Flaticon</a></div>
+<div><a href="https://www.flaticon.com/free-icons/forbidden" title="forbidden icons">Forbidden icons created by Freepik - Flaticon</a></div>
+<div><a href="https://www.flaticon.com/free-icons/question-mark" title="question mark icons">Question mark icons created by Creatype - Flaticon</a></div>
