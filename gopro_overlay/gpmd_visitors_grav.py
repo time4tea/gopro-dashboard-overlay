@@ -41,7 +41,7 @@ class GRAVComponentConverter:
         for index, vector in enumerate(components.vectors):
             sample_frame_timestamp, _ = sample_time_calculator(index)
 
-            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000)
+            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000, datetime.timezone.utc)
 
             grav_vector = PintPoint3(x=self._units.Quantity(vector.a, unit), y=self._units.Quantity(-vector.c, unit), z=self._units.Quantity(-vector.b, unit))
 

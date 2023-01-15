@@ -119,7 +119,7 @@ class XYZComponentConverter:
                 continue
             sample_frame_timestamp, _ = sample_time_calculator(index)
 
-            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000)
+            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000, tz=datetime.timezone.utc)
 
             correct_orientation = components.orin.apply(point)
             self._on_item(

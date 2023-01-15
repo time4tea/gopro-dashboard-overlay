@@ -54,7 +54,7 @@ class CORIComponentConverter:
         for index, cori in enumerate(components.orientations):
             sample_frame_timestamp, _ = sample_time_calculator(index)
 
-            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000)
+            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000, tz=datetime.timezone.utc)
 
             quat = Quaternion(
                 w=cori.w,
