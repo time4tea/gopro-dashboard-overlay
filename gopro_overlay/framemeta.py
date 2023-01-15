@@ -2,9 +2,10 @@ import bisect
 import datetime
 from datetime import timedelta
 from pathlib import Path
-from typing import Callable
+from typing import Callable, List, Generator, MutableMapping
 
 from gopro_overlay import timeseries_process
+from gopro_overlay.entry import Entry
 from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
@@ -99,8 +100,8 @@ max_distance = timeunits(seconds=6)
 class FrameMeta:
     def __init__(self):
         self.modified = False
-        self.framelist = []
-        self.frames = {}
+        self.framelist: List[Timeunit] = []
+        self.frames: MutableMapping[Timeunit, Entry] = {}
 
     def __len__(self):
         self.check_modified()
@@ -110,8 +111,8 @@ class FrameMeta:
         self.check_modified()
         return Stepper(self, step)
 
-    def add(self, time_ms, entry):
-        self.frames[time_ms] = entry
+    def add(self, at_time: Timeunit, entry):
+        self.frames[at_time] = entry
         self.modified = True
 
     @property
@@ -136,7 +137,7 @@ class FrameMeta:
         if self.modified:
             self._update()
 
-    def get(self, frame_time: Timeunit, interpolate=True):
+    def get(self, frame_time: Timeunit, interpolate=True) -> Entry:
         self.check_modified()
 
         if frame_time in self.frames:
@@ -147,7 +148,7 @@ class FrameMeta:
 
         return self._get_interpolate(frame_time)
 
-    def _get_interpolate(self, frame_time):
+    def _get_interpolate(self, frame_time) -> Entry:
 
         if frame_time < self.min:
             print(f"Request for data at time {frame_time}, before start of metadata, returning first item")
