@@ -12,7 +12,7 @@ from gopro_overlay import timeseries_process
 from gopro_overlay.common import smart_open
 from gopro_overlay.ffmpeg import find_streams
 from gopro_overlay.framemeta import framemeta_from
-from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.units import units
 
@@ -21,6 +21,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file / GPX File to CSV")
 
     parser.add_argument("--every", default=0, type=int, help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
+    parser.add_argument("--only-locked", action="store_true", help="Only output points where GPS is locked")
     parser.add_argument("input", type=pathlib.Path, help="Input file")
     parser.add_argument("output", type=pathlib.Path, nargs="?", default="-", help="Output CSV file (default stdout)")
 
@@ -47,6 +48,11 @@ if __name__ == "__main__":
     ts.process(timeseries_process.calculate_odo())
     ts.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)  # gradient hack
 
+    filter_fn = lambda e: True
+
+    if args.only_locked:
+        filter_fn = lambda e: e.gpsfix in GPS_FIXED_VALUES
+
 
     def printable_unit(v):
         if v is None:
@@ -63,7 +69,7 @@ if __name__ == "__main__":
                                             "dist", "time", "azi", "odo",
                                             "grad", "accl_x", "accl_y", "accl_z"])
         writer.writeheader()
-        for entry in ts.items(step=datetime.timedelta(seconds=args.every)):
+        for entry in filter(filter_fn, ts.items(step=datetime.timedelta(seconds=args.every))):
             writer.writerow({
                 "packet": printable_unit(entry.packet),
                 "packet_index": printable_unit(entry.packet_index),

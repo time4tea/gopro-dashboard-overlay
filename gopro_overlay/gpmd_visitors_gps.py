@@ -3,8 +3,45 @@ import datetime
 from typing import List, Optional
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5
+from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5, GPSFix
 from gopro_overlay.point import Point
+
+
+@dataclasses.dataclass(frozen=True)
+class GPS5Components:
+    samples: int
+    timestamp: int
+    basetime: datetime.datetime
+    fix: GPSFix
+    dop: float
+    scale: int
+    points: List[GPS5]
+
+
+class GPSLockTracker:
+
+    def __init__(self):
+        self.last_fix = None
+        self.last_point = None
+        self.last_speed = None
+
+    def _update(self, fix: GPSFix, point: Point, speed: float):
+        self.last_fix = fix
+        self.last_point = point
+        self.last_speed = speed
+
+    def submit(self, fix: GPSFix, point: Point, speed: float):
+        if self.last_fix is None:
+            self._update(fix, point, speed)
+            return fix
+
+        if fix in GPS_FIXED:
+            if self.last_fix not in GPS_FIXED:
+                if point == self.last_point or speed == self.last_speed:
+                    return self.last_fix
+
+        self._update(fix, point, speed)
+        return fix
 
 
 class GPS5EntryConverter:
@@ -13,10 +50,11 @@ class GPS5EntryConverter:
         self._on_item = on_item
         self._total_samples = 0
         self._frame_calculator = calculator
+        self._tracker = GPSLockTracker()
 
-    def convert(self, counter, components):
+    def convert(self, counter, components: GPS5Components):
 
-        # Turns out GPS5 can contain no points. Possibly accompanied with EMPT packet?
+        # Turns out GPS5 can contain no points. Possibly accompanied by EMPT packet?
         if len(components.points) == 0:
             return
 
@@ -26,8 +64,14 @@ class GPS5EntryConverter:
             len(components.points)
         )
 
+        gpsfix = components.fix
+
         for index, point in enumerate(components.points):
             sample_frame_timestamp, sample_time_offset = sample_time_calculator(index)
+
+            position = Point(point.lat, point.lon)
+
+            calculated_fix = self._tracker.submit(gpsfix, position, point.speed)
 
             point_datetime = components.basetime + datetime.timedelta(
                 microseconds=sample_time_offset.us
@@ -40,25 +84,14 @@ class GPS5EntryConverter:
                     dop=self._units.Quantity(components.dop, self._units.number),
                     packet=self._units.Quantity(counter, self._units.number),
                     packet_index=self._units.Quantity(index, self._units.number),
-                    point=Point(point.lat, point.lon),
+                    point=position,
                     speed=self._units.Quantity(point.speed, self._units.mps),
                     alt=self._units.Quantity(point.alt, self._units.m),
-                    gpsfix=components.fix.value,
-                    gpslock=self._units.Quantity(components.fix.value),
+                    gpsfix=calculated_fix.value,
+                    gpslock=self._units.Quantity(calculated_fix.value),
                 )
             )
         self._total_samples += len(components.points)
-
-
-@dataclasses.dataclass(frozen=True)
-class GPS5Components:
-    samples: int
-    timestamp: int
-    basetime: datetime.datetime
-    fix: int
-    dop: float
-    scale: int
-    points: List[GPS5]
 
 
 # noinspection PyPep8Naming
@@ -133,6 +166,7 @@ class DetermineFirstLockedGPSUVisitor:
             return self
 
     # Crazy bug where first couple of "FIX" GPS packets are not actually fixed, they gradually become correct..
+    # See GPSLockTracker
     def vi_GPSU(self, item):
         if self._fix in GPS_FIXED:
             self._count += 1

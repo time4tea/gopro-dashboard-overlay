@@ -9,7 +9,7 @@ from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeunits import Timeunit, timeunits
 
 
-def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0)):
+def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0), filter_fn = lambda e: True):
     gpx = gpxpy.gpx.GPX()
 
     gpx_track = gpxpy.gpx.GPXTrack()
@@ -18,7 +18,8 @@ def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0)):
     gpx_segment = gpxpy.gpx.GPXTrackSegment()
     gpx_track.segments.append(gpx_segment)
 
-    for entry in fm.items(step=step):
+    for entry in filter(filter_fn, fm.items(step=step)):
+
         entry_dt = entry.dt
 
         gpx_segment.points.append(

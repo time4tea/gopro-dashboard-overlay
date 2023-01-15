@@ -11,6 +11,7 @@ from gopro_overlay import ffmpeg
 from gopro_overlay.common import smart_open
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import framemeta_to_gpx
+from gopro_overlay.gpmd import GPS_FIXED_VALUES
 from gopro_overlay.units import units
 
 if __name__ == "__main__":
@@ -18,6 +19,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file to GPX")
 
     parser.add_argument("--every", default=0, type=int, help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
+    parser.add_argument("--only-locked", action="store_true", help="Only output points where GPS is locked")
     parser.add_argument("input", type=pathlib.Path, help="Input MP4 file")
     parser.add_argument("output", type=pathlib.Path, nargs="?", default="-", help="Output GPX file (default stdout)")
 
@@ -40,7 +42,12 @@ if __name__ == "__main__":
 
     print("Generating GPX")
 
-    gpx = framemeta_to_gpx(fm, step=datetime.timedelta(seconds=args.every))
+    filter_fn = lambda e: True
+
+    if args.only_locked:
+        filter_fn = lambda e: e.gpsfix in GPS_FIXED_VALUES
+
+    gpx = framemeta_to_gpx(fm, step=datetime.timedelta(seconds=args.every), filter_fn=filter_fn)
 
     dest: Optional[Path] = args.output
 

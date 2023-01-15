@@ -2,7 +2,7 @@ from typing import List
 
 from geographiclib.geodesic import Geodesic
 
-from .gpmd import XYZ
+from .gpmd import XYZ, GPS_FIXED_VALUES
 from .point import PintPoint3
 from .smoothing import Kalman, SimpleExponential
 from .units import units
@@ -75,6 +75,16 @@ def filter_dop(max_dop: float):
 
     def accept(e):
         if e.dop is not None and e.dop > max_dop:
+            return {f:None for f in fields}
+
+    return accept
+
+def filter_locked():
+
+    fields = [ "speed", "cspeed", "azi", "cog", "time", "dist" ]
+
+    def accept(e):
+        if e.gpsfix not in GPS_FIXED_VALUES:
             return {f:None for f in fields}
 
     return accept
