@@ -218,4 +218,7 @@ def test_converting_gpx_to_timeseries_to_framemeta():
 
     gpx_framemeta = timeseries_to_framemeta(gpx_timeseries, units)
 
-    assert len(gpx_framemeta) == len(gpx_timeseries)
+    ts_len = len(gpx_timeseries)
+    fm_len = len(gpx_framemeta)
+
+    assert fm_len > 11 * ts_len

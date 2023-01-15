@@ -4,6 +4,7 @@ from gopro_overlay.entry import Entry
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeseries_process import process_ses, calculate_speeds, calculate_gradient, calculate_odo
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 
 
@@ -20,6 +21,19 @@ def test_delta_processing():
     assert entry_b.d is None
     assert entry_a.c == 1
     assert entry_b.c is None
+
+def test_stepping_through_items():
+    ts = Timeseries()
+    ts.add(Entry(datetime_of(1), n=1))
+    ts.add(Entry(datetime_of(2), n=2))
+
+    stepper = ts.stepper(step=timeunits(seconds=0.1))
+    steps = list(stepper.steps())
+
+    assert len(steps) == 11
+    assert steps[0] == datetime_of(1)
+    assert steps[1] == datetime_of(1.1)
+    assert steps[10] == datetime_of(2.0)
 
 
 def datetime_of(i):

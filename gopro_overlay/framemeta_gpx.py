@@ -6,7 +6,7 @@ import gpxpy
 from gopro_overlay.entry import Entry
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.timeseries import Timeseries
-from gopro_overlay.timeunits import Timeunit
+from gopro_overlay.timeunits import Timeunit, timeunits
 
 
 def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0)):
@@ -66,7 +66,12 @@ def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datet
     else:
         end_date = start_date + duration.timedelta()
 
-    for index, entry in enumerate(gpx_timeseries.items()):
+    stepper = gpx_timeseries.stepper(step=timeunits(seconds=0.1))
+
+    for index, pts in enumerate(stepper.steps()):
+
+        entry = gpx_timeseries.get(pts)
+
         point_datetime = entry.dt
 
         if point_datetime < start_date:

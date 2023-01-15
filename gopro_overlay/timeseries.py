@@ -3,6 +3,7 @@ import datetime
 import itertools
 
 from gopro_overlay.entry import Entry
+from gopro_overlay.timeunits import Timeunit, timeunits
 
 
 def pairwise(iterable):  # Added in itertools v3.10
@@ -20,6 +21,10 @@ class Timeseries:
         self.modified = False
         if entries is not None:
             self.add(*entries)
+
+    def stepper(self, step: Timeunit):
+        self.check_modified()
+        return Stepper(self, step)
 
     @property
     def min(self) -> datetime.datetime:
@@ -86,5 +91,19 @@ class Timeseries:
                 self.entries[e].update(**updates)
 
 
+class Stepper:
 
+    def __init__(self, timeseries, step: Timeunit):
+        self._timeseries = timeseries
+        self._step = step.timedelta()
+
+    def __len__(self):
+        return int((self._timeseries.max - self._timeseries.min) / self._step) + 1
+
+    def steps(self):
+        end = self._timeseries.max
+        running = self._timeseries.min
+        while running <= end:
+            yield running
+            running += self._step
 
