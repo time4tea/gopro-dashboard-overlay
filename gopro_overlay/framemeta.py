@@ -2,7 +2,7 @@ import bisect
 import datetime
 from datetime import timedelta
 from pathlib import Path
-from typing import Callable, List, Generator, MutableMapping
+from typing import Callable, List, MutableMapping
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.entry import Entry
