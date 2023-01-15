@@ -1,3 +1,5 @@
+from typing import List
+
 from geographiclib.geodesic import Geodesic
 
 from .gpmd import XYZ
@@ -63,6 +65,17 @@ def calculate_odo():
         if e.dist is not None:
             total[0] += e.dist
         return {"codo": total[0]}
+
+    return accept
+
+
+def filter_dop(max_dop: float):
+
+    fields = [ "speed", "cspeed", "azi", "cog", "time", "dist" ]
+
+    def accept(e):
+        if e.dop is not None and e.dop > max_dop:
+            return {f:None for f in fields}
 
     return accept
 

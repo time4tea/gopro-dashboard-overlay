@@ -1,9 +1,10 @@
 import bisect
+import datetime
+from datetime import timedelta
 from pathlib import Path
 from typing import Callable
 
 from gopro_overlay import timeseries_process
-from gopro_overlay.entry import Entry
 from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
@@ -169,9 +170,19 @@ class FrameMeta:
 
         return earlier_item
 
-    def items(self):
+    def items(self, step: timedelta = timedelta(seconds=0)):
         self.check_modified()
-        return [self.frames[k] for k in self.framelist]
+
+        last_dt = datetime.datetime(year=1900, month=1, day=1, tzinfo=datetime.timezone.utc)
+
+        for pts in self.framelist:
+            entry = self.frames[pts]
+            entry_dt = entry.dt
+
+            if entry_dt >= last_dt + step:
+                last_dt = entry_dt
+
+                yield entry
 
     def process_deltas(self, processor, skip=1):
         self.check_modified()
@@ -292,17 +303,17 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta):
                 lambda a: {"grav": a.grav}
             )
 
-        with PoorTimer("extract CORI",1).timing():
+        with PoorTimer("extract CORI", 1).timing():
             merge_frame_meta(
                 gps_frame_meta,
                 cori_framemeta(gopro_meta, units, metameta=metameta),
-                lambda a: {"cori": a.cori, "ori": a.ori }
+                lambda a: {"cori": a.cori, "ori": a.ori}
             )
 
         return gps_frame_meta
 
 
-def framemeta_from(filepath:Path, units, metameta: MetaMeta):
+def framemeta_from(filepath: Path, units, metameta: MetaMeta):
     gpmd_from = load_gpmd_from(filepath)
     return parse_gopro(gpmd_from, units, metameta)
 

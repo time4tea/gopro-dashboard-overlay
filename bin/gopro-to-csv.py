@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+import datetime
 import pathlib
 import sys
 from pathlib import Path
@@ -19,6 +20,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file / GPX File to CSV")
 
+    parser.add_argument("--every", default=0, type=int, help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
     parser.add_argument("input", type=pathlib.Path, help="Input file")
     parser.add_argument("output", type=pathlib.Path, nargs="?", default="-", help="Output CSV file (default stdout)")
 
@@ -61,7 +63,7 @@ if __name__ == "__main__":
                                             "dist", "time", "azi", "odo",
                                             "grad", "accl_x", "accl_y", "accl_z"])
         writer.writeheader()
-        for entry in ts.items():
+        for entry in ts.items(step=datetime.timedelta(seconds=args.every)):
             writer.writerow({
                 "packet": printable_unit(entry.packet),
                 "packet_index": printable_unit(entry.packet_index),
