@@ -1,4 +1,5 @@
 import collections
+import datetime
 from datetime import timedelta
 
 from gopro_overlay import fake
@@ -29,7 +30,7 @@ def test_putting_in_a_point_gets_back_that_point():
 
 def test_iterating_empty():
     fm = FrameMeta()
-    assert len(fm.items()) == 0
+    assert len(list(fm.items())) == 0
     assert len(fm) == 0
     assert not bool(fm)
 
@@ -44,11 +45,11 @@ def test_size():
 
 def test_iterates_in_frame_time_order_not_insertion_order():
     fm = FrameMeta()
-    fm.add(timeunits(seconds=2), Entry(datetime_of(0), point=Point(lat=3.0, lon=1.0), alt=12))
+    fm.add(timeunits(seconds=2), Entry(datetime_of(2), point=Point(lat=3.0, lon=1.0), alt=12))
     fm.add(timeunits(seconds=1), Entry(datetime_of(1), point=Point(lat=2.0, lon=1.0), alt=12))
-    fm.add(timeunits(seconds=0), Entry(datetime_of(2), point=Point(lat=1.0, lon=1.0), alt=12))
+    fm.add(timeunits(seconds=0), Entry(datetime_of(0), point=Point(lat=1.0, lon=1.0), alt=12))
 
-    iterator = iter(fm.items())
+    iterator = iter(list(fm.items()))
     assert next(iterator).point.lat == 1.0
     assert next(iterator).point.lat == 2.0
     assert next(iterator).point.lat == 3.0
@@ -143,3 +144,19 @@ def test_stepping_through_time():
     assert steps[0] == timeunits(minutes=0)
     assert steps[1] == timeunits(minutes=1)
     assert steps[10] == timeunits(minutes=10)
+
+def test_skipping_items():
+    fm = FrameMeta()
+    fm.add(timeunits(seconds=0), Entry(datetime_of(0), lat=1.0))
+    fm.add(timeunits(seconds=1), Entry(datetime_of(0.5), lat=2.0))
+    fm.add(timeunits(seconds=2), Entry(datetime_of(1), lat=3.0))
+    fm.add(timeunits(seconds=2.1), Entry(datetime_of(1.5), lat=4.0))
+    fm.add(timeunits(seconds=2.2), Entry(datetime_of(1.6), lat=5.0))
+    fm.add(timeunits(seconds=2.3), Entry(datetime_of(2.0), lat=6.0))
+
+    skipped = list(fm.items(step=datetime.timedelta(seconds=1)))
+
+    assert len(skipped) == 3
+    assert skipped[0].lat == 1.0
+    assert skipped[1].lat == 3.0
+    assert skipped[2].lat == 6.0
