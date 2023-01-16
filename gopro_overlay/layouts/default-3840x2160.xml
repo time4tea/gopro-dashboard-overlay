@@ -4,12 +4,18 @@
         <component type="datetime" x="0" y="24" format="%H:%M:%S.%f" truncate="5" size="32" align="right"/>
     </composite>
 
-    <composite x="3260" y="36" name="gps_info">
-        <component type="text" x="256" y="0" size="16" align="right">GPS INFO</component>
-        <component type="text" x="0" y="24" size="16" align="left">Lat: </component>
-        <component type="text" x="128" y="24" size="16" align="left">Lon: </component>
-        <component type="metric" x="118" y="24" metric="lat" dp="6" size="16" align="right" cache="False"/>
-        <component type="metric" x="256"    y="24" metric="lon" dp="6" size="16" align="right" cache="False"/>
+    <composite x="3260" y="0" name="gps_info">
+        <frame name="gps-lock" x="226" y="24" width="32" height="32" bg="0,0,0,128" cr="5" opacity="0.4">
+            <component type="gps-lock-icon" size="32"/>
+         </frame>
+
+        <composite y="36">
+            <component type="text" x="0" y="0" size="16" align="left">GPS INFO</component>
+            <component type="text" x="0" y="24" size="16" align="left">Lat: </component>
+            <component type="text" x="128" y="24" size="16" align="left">Lon: </component>
+            <component type="metric" x="118" y="24" metric="lat" dp="6" size="16" align="right" cache="False"/>
+            <component type="metric" x="256"    y="24" metric="lon" dp="6" size="16" align="right" cache="False"/>
+        </composite>
     </composite>
 
     <composite x="16" y="1800" name="big_mph">
