@@ -208,7 +208,11 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
-- 0.76.0 New widget - "cairo_circuit_map" - Much nicer looking circuit map, and first widget that uses new optional "cairo" library.
+- 0.77.0 [Change] Disable speed and other calculations when GPS is not locked - stops unbelievable values
+  - [Change] changes to GPS parsing, should make detection of GPS lock more accurate (some 'not locked' values used to be included) still not perfect h/t [@falumas](https://github.com/falumas)
+  - [Change] add new widget "gps-lock-icon" at top of screen to show GPS lock - hopefully not too intrusive - can switch off with `--exclude`
+  - [Change] interpolate GPX/FIT tracks so they update every 0.1s - h/t [0x10](https://github.com/0x10)
+- 0.76.0 [New Feature] New widget - "cairo_circuit_map" - Much nicer looking circuit map, and first widget that uses new optional "cairo" library.
   - See examples [Cairo Circuit Map](docs/xml/examples/06-cairo-circuit-map/README.md)
 - 0.75.0 Fixing some issues with True values in use of supplied or calculated values
   - Thanks to [@Timmy-485](https://github.com/Timmy-485) for data files showing the issue.
