@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 
+import pytest
 from PIL import ImageFont
 
 from gopro_overlay import fake
@@ -29,6 +30,7 @@ rng.seed(12345)
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_icon():
     return time_rendering("icon", widgets=[
@@ -36,31 +38,37 @@ def test_render_icon():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_text():
     return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font)])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_text_colour():
     return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font, fill=(255, 255, 0))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_text_vertical():
     return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font, direction="ttb", align="lt")])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_caching_text_vertical():
     return time_rendering("simple text", [Text(Coordinate(50, 50), lambda: "Hello", font, direction="ttb", align="lt")])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_caching_text_small():
     return time_rendering("simple text (cached)", [CachingText(Coordinate(50, 50), lambda: "Hello", font)])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_text_big():
     # 15ms target to beat
@@ -68,6 +76,7 @@ def test_render_text_big():
                           [Text(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_caching_text_big():
     # Avg: 0.00014, Rate: 6,966.58
@@ -75,6 +84,7 @@ def test_render_caching_text_big():
                           [CachingText(Coordinate(50, 50), lambda: "Hello", font.font_variant(size=160))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_gps_info():
     # Avg: 0.00645, Rate: 155.05
@@ -85,6 +95,7 @@ def test_render_gps_info():
     )
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_big_metric():
     # Avg: 0.00026, Rate: 3,871.63
@@ -94,6 +105,7 @@ def test_render_big_metric():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_comparative_energy():
     # Avg: 0.00148, Rate: 676.70
@@ -116,6 +128,7 @@ def test_render_comparative_energy():
                           ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_text_component():
     return time_rendering(name="text", widgets=[
@@ -123,6 +136,7 @@ def test_text_component():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_metric_component():
     return time_rendering(name="text", widgets=[
@@ -136,6 +150,7 @@ def test_metric_component():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_composite_viewport():
     return time_rendering(name="viewport", widgets=[
@@ -149,6 +164,7 @@ def test_composite_viewport():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_frame_border_visible_over_content():
     return time_rendering(name="viewport", widgets=[
@@ -170,6 +186,7 @@ def test_frame_border_visible_over_content():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_frame_circular():
     return time_rendering(name="viewport", widgets=[
@@ -195,6 +212,7 @@ def test_frame_circular():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_frame_clipping():
     return time_rendering(name="viewport", widgets=[
@@ -215,6 +233,7 @@ def test_frame_clipping():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_frame_fill():
     return time_rendering(name="viewport", widgets=[
@@ -224,6 +243,8 @@ def test_frame_fill():
         )
     ])
 
+
+@pytest.mark.gfx
 @approve_image
 def test_frame_fill_opacity():
     return time_rendering(name="viewport", widgets=[
@@ -234,6 +255,8 @@ def test_frame_fill_opacity():
         )
     ])
 
+
+@pytest.mark.gfx
 @approve_image
 def test_frame_fill_cr():
     return time_rendering(name="viewport", widgets=[
@@ -245,19 +268,20 @@ def test_frame_fill_cr():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_frame_fill_cr_outline():
     return time_rendering(name="viewport", widgets=[
         Frame(
             dimensions=Dimension(300, 200),
             fill=(255, 255, 255),
-            outline=(255,0,0),
+            outline=(255, 0, 0),
             corner_radius=35
         )
     ])
 
 
-
+@pytest.mark.gfx
 @approve_image
 def test_frame_fade_cr_zero():
     return time_rendering(name="viewport", widgets=[
@@ -273,16 +297,19 @@ def test_frame_fade_cr_zero():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_frame_fade_cr_zero_new():
     return time_rendering(name="viewport", widgets=[
-            Frame(
-                dimensions=Dimension(300, 200),
-                fill=(255, 0, 0),
-                fade_out=50,
-            )
+        Frame(
+            dimensions=Dimension(300, 200),
+            fill=(255, 0, 0),
+            fade_out=50,
+        )
     ])
 
+
+@pytest.mark.gfx
 @approve_image
 def test_frame_fade_cr_non_zero():
     return time_rendering(name="viewport", widgets=[
@@ -297,7 +324,6 @@ def test_frame_fade_cr_non_zero():
             )
         )
     ])
-
 
 
 class OutlineWidget:
@@ -325,7 +351,7 @@ def test_out_line():
         Translate(
             Coordinate(0, 100),
             OutlineWidget(
-                outline=OutLine(fill=(255, 0, 0), fill_width=10, outline=(255,255,255), outline_width=2),
+                outline=OutLine(fill=(255, 0, 0), fill_width=10, outline=(255, 255, 255), outline_width=2),
                 points=points
             )
         )
@@ -345,10 +371,10 @@ def gps_lock_with_fix(fix):
 @approve_image
 def test_gps_lock():
     return time_rendering(name="gps lock", widgets=[
-        Translate(Coordinate(0,0), gps_lock_with_fix(GPSFix.NO)),
-        Translate(Coordinate(0,128), gps_lock_with_fix(GPSFix.UNKNOWN)),
-        Translate(Coordinate(128,0), gps_lock_with_fix(GPSFix.LOCK_2D)),
-        Translate(Coordinate(128,128), gps_lock_with_fix(GPSFix.LOCK_3D)),
+        Translate(Coordinate(0, 0), gps_lock_with_fix(GPSFix.NO)),
+        Translate(Coordinate(0, 128), gps_lock_with_fix(GPSFix.UNKNOWN)),
+        Translate(Coordinate(128, 0), gps_lock_with_fix(GPSFix.LOCK_2D)),
+        Translate(Coordinate(128, 128), gps_lock_with_fix(GPSFix.LOCK_3D)),
     ])
 
 

@@ -1,13 +1,14 @@
 import random
 from datetime import timedelta
 
+import pytest
 from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.widgets import Translate
 from gopro_overlay.widgets.asi import AirspeedIndicator
+from gopro_overlay.widgets.widgets import Translate
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
@@ -21,6 +22,7 @@ rng.seed(12345)
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 
+@pytest.mark.gfx
 @approve_image
 def test_gauge():
     size = 256
@@ -36,6 +38,7 @@ def test_gauge():
     )
 
 
+@pytest.mark.gfx
 @approve_image
 def test_gauge_rotate_90():
     size = 256
@@ -50,6 +53,8 @@ def test_gauge_rotate_90():
         ]
     )
 
+
+@pytest.mark.gfx
 @approve_image
 def test_gauge_rotate_180():
     size = 256
@@ -65,7 +70,7 @@ def test_gauge_rotate_180():
     )
 
 
-
+@pytest.mark.gfx
 @approve_image
 def test_gauge_below_min():
     size = 256
@@ -81,6 +86,7 @@ def test_gauge_below_min():
     )
 
 
+@pytest.mark.gfx
 @approve_image
 def test_gauge_smaller_values():
     size = 256
@@ -96,6 +102,7 @@ def test_gauge_smaller_values():
     )
 
 
+@pytest.mark.gfx
 @approve_image
 def test_gauge_translated():
     size = 256

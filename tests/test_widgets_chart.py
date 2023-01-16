@@ -2,6 +2,7 @@ import itertools
 import random
 from datetime import timedelta
 
+import pytest
 from PIL import ImageFont
 
 from gopro_overlay import fake
@@ -9,8 +10,8 @@ from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import View, Window
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
-from gopro_overlay.widgets.widgets import Translate, Composite
 from gopro_overlay.widgets.chart import SimpleChart
+from gopro_overlay.widgets.widgets import Translate, Composite
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
@@ -24,6 +25,7 @@ rng.seed(12345)
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_simple_chart():
     # Avg: 0.00018, Rate: 5,491.91
@@ -39,6 +41,7 @@ def test_render_simple_chart():
     ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_chart():
     # Avg: 0.00019, Rate: 5,325.79
@@ -123,6 +126,7 @@ def test_render_chart():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_chart_with_no_data():
     window = Window(
@@ -143,6 +147,7 @@ def test_render_chart_with_no_data():
 
 
 # start = 0.04 / 24.52
+@pytest.mark.gfx
 @approve_image
 def test_render_moving_chart():
     window = Window(

@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 
+import pytest
 from PIL import ImageFont
 
 from gopro_overlay import fake
@@ -21,7 +22,7 @@ rng.seed(12345)
 
 ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
-
+@pytest.mark.gfx
 @approve_image
 def test_compass_med():
     return time_rendering(
@@ -42,7 +43,7 @@ def test_compass_med():
             )
         ])
 
-
+@pytest.mark.gfx
 @approve_image
 def test_compass_small():
     return time_rendering(
@@ -62,7 +63,7 @@ def test_compass_small():
             )
         ])
 
-
+@pytest.mark.gfx
 @approve_image
 def test_compass_big():
     return time_rendering(

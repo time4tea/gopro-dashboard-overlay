@@ -77,6 +77,7 @@ def test_rendering_moving_map_journey():
         )
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_journey_map():
     with renderer.open() as map_renderer:
@@ -86,6 +87,7 @@ def test_render_journey_map():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_journey_map_rounded():
     with renderer.open() as map_renderer:
@@ -95,6 +97,7 @@ def test_render_journey_map_rounded():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_journey_very_transparent():
     with renderer.open() as map_renderer:
@@ -104,6 +107,7 @@ def test_render_journey_very_transparent():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_moving_map():
     with renderer.open() as map_renderer:
@@ -112,6 +116,7 @@ def test_render_moving_map():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_moving_map_not_transparent():
     with renderer.open() as map_renderer:
@@ -121,6 +126,7 @@ def test_render_moving_map_not_transparent():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_moving_map_very_transparent():
     with renderer.open() as map_renderer:
@@ -130,6 +136,7 @@ def test_render_moving_map_very_transparent():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_moving_map_rounded():
     with renderer.open() as map_renderer:
@@ -139,6 +146,7 @@ def test_render_moving_map_rounded():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_render_moving_map_very_rounded():
     with renderer.open() as map_renderer:
@@ -148,6 +156,7 @@ def test_render_moving_map_very_rounded():
         ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_moving_journey_map_at_start():
     with renderer.open() as map_renderer:
@@ -165,6 +174,7 @@ def test_moving_journey_map_at_start():
             ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_moving_journey_map_halfway():
     ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)
@@ -187,6 +197,7 @@ def test_moving_journey_map_halfway():
             ])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_moving_journey_map_in_frame():
     ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng, point_step=0.0005)

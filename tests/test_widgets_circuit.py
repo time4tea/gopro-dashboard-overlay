@@ -1,6 +1,8 @@
 import random
 from datetime import timedelta
 
+import pytest
+
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.privacy import NoPrivacyZone
@@ -32,40 +34,47 @@ def pt():
     return ts.get(ts.min).point
 
 
+@pytest.mark.gfx
 @approve_image
 def test_cairo_circuit_defaults():
     return cairo_widget_test([CairoCircuit(framemeta=ts, location=pt)])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_cairo_circuit_defaults_rotate():
     return cairo_widget_test([CairoCircuit(framemeta=ts, location=pt)], rotation=45)
 
 
+@pytest.mark.gfx
 @approve_image
 def test_cairo_circuit_line_width():
     return cairo_widget_test(
         [CairoCircuit(framemeta=ts, location=pt, line=Line(circuit.black, circuit.white, width=0.05))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_cairo_circuit_fill():
     return cairo_widget_test(
         [CairoCircuit(framemeta=ts, location=pt, line=Line((255, 0, 255), circuit.white, width=0.01))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_cairo_circuit_outline():
     return cairo_widget_test(
         [CairoCircuit(framemeta=ts, location=pt, line=Line(circuit.black, (255, 0, 255), width=0.01))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_cairo_circuit_location():
     return cairo_widget_test(
         [CairoCircuit(framemeta=ts, location=pt, loc=Line(circuit.blue, circuit.white, width=0.025))])
 
 
+@pytest.mark.gfx
 @approve_image
 def test_circuit():
     return time_rendering(

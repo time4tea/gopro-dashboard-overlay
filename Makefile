@@ -19,6 +19,16 @@ test:
 ci:
 	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all tests
 
+.PHONY: check
+check:
+	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all -m "not gfx"  tests
+
+.PHONY: gfx
+gfx:
+	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all -m "gfx"  tests
+
+
+
 .PHONY: flake
 flake:
 	$(BIN)/flake8 gopro_overlay/ --count --select=E9,F63,F7,F82 --show-source --statistics
