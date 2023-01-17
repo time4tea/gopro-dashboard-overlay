@@ -18,30 +18,33 @@ class GPS5Components:
     points: List[GPS5]
 
 
+@dataclasses.dataclass(frozen=True)
+class GPSLockComponents:
+    fix: GPSFix
+    point: Point
+    speed: float
+
 class GPSLockTracker:
 
-    def __init__(self):
-        self.last_fix = None
-        self.last_point = None
-        self.last_speed = None
+    def __init__(self, max_dop=20):
+        self.max_dop = max_dop
+        self.last = None
 
-    def _update(self, fix: GPSFix, point: Point, speed: float):
-        self.last_fix = fix
-        self.last_point = point
-        self.last_speed = speed
+    def _update(self, components: GPSLockComponents):
+        self.last = components
 
-    def submit(self, fix: GPSFix, point: Point, speed: float):
-        if self.last_fix is None:
-            self._update(fix, point, speed)
-            return fix
+    def submit(self, components: GPSLockComponents):
+        if self.last is None:
+            self._update(components)
+            return components.fix
 
-        if fix in GPS_FIXED:
-            if self.last_fix not in GPS_FIXED:
-                if point == self.last_point or speed == self.last_speed:
-                    return self.last_fix
+        if components.fix in GPS_FIXED:
+            if self.last.fix not in GPS_FIXED:
+                if components.point == self.last.point or components.speed == self.last.speed:
+                    return self.last.fix
 
-        self._update(fix, point, speed)
-        return fix
+        self._update(components)
+        return components.fix
 
 
 class GPS5EntryConverter:
@@ -71,7 +74,7 @@ class GPS5EntryConverter:
 
             position = Point(point.lat, point.lon)
 
-            calculated_fix = self._tracker.submit(gpsfix, position, point.speed)
+            calculated_fix = self._tracker.submit(GPSLockComponents(gpsfix, position, point.speed))
 
             point_datetime = components.basetime + datetime.timedelta(
                 microseconds=sample_time_offset.us
