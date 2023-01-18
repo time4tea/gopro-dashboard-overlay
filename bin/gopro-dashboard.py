@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import traceback
+from collections import Counter
 from importlib import metadata
 from pathlib import Path
 from subprocess import TimeoutExpired
@@ -19,6 +20,7 @@ from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.geo import CachingRenderer, api_key_finder
+from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.point import Point
@@ -149,8 +151,30 @@ if __name__ == "__main__":
                 dimensions = stream_info.video.dimension
                 video_duration = stream_info.video.duration
                 packets_per_second = 18
+
+                counter = Counter()
+
                 try:
-                    frame_meta = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
+                    # frame_meta = framemeta_from(
+                    #     inputpath,
+                    #     metameta=stream_info.meta,
+                    #     units=units,
+                    #     gps_lock_filter=GPSLockTracker()
+                    # )
+                    frame_meta = framemeta_from(
+                        inputpath,
+                        metameta=stream_info.meta,
+                        units=units,
+                        gps_lock_filter=WorstOfGPSLockFilter(
+                            GPSLockTracker(),
+                            GPSReportingFilter(GPSDOPFilter(args.gps_dop_max), rejected=lambda: counter.update({f"DOP > {args.gps_dop_max}": 1})),
+                            GPSReportingFilter(GPSMaxSpeedFilter(units.Quantity(args.gps_speed_max, args.gps_speed_max_units).to("mps").m), rejected=lambda: counter.update({f"Speed > {args.gps_speed_max} {args.gps_speed_max_units}": 1}))
+                        )
+                    )
+
+                    print(f"Note: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
+                    [print(f"* {k} -> {v}") for k,v in counter.items()]
+
                 except TimeoutExpired:
                     traceback.print_exc()
                     print(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")

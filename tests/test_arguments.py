@@ -146,6 +146,12 @@ def test_cache_dir():
     assert do_args("--cache-dir", "xx-cache-xx").cache_dir == pathlib.Path("xx-cache-xx")
 
 
+def test_gps_dop():
+    assert do_args().gps_dop_max == 10
+    assert do_args().gps_speed_max == 60
+    assert do_args().gps_speed_max_units == "kph"
+
+
 def do_args(*args, input: Optional[str] = "input", output: Optional[str] = "output"):
     all_args = [a for a in [input, output, *args] if a]
     print(all_args)

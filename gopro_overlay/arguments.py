@@ -60,6 +60,12 @@ def gopro_dashboard_arguments(args=None):
     layout.add_argument("--exclude", nargs="+", help="exclude named component (will include all others")
     layout.add_argument("--include", nargs="+", help="include named component (will exclude all others)")
 
+    gps = parser.add_argument_group("GPS", "Controlling GPS Parsing (from GoPro Only)")
+
+    gps.add_argument("--gps-dop-max", type=float, default=10, help="Max DOP - Points with greater DOP will be considered 'Not Locked'")
+    gps.add_argument("--gps-speed-max", type=float, default=60, help="Max GPS Speed - Points with greater speed will be considered 'Not Locked'")
+    gps.add_argument("--gps-speed-max-units", default="kph", help="Units for --gps-speed-max")
+
     debugging = parser.add_argument_group("Debugging", "Controlling debugging outputs")
 
     debugging.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")

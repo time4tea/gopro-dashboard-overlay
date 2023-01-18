@@ -10,7 +10,7 @@ from gopro_overlay.ffmpeg import load_gpmd_from, MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
 from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter
-from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor
+from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor, NullGPSLockFilter
 from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.timeunits import Timeunit, timeunits
@@ -206,7 +206,7 @@ class FrameMeta:
         return self.framelist[-1]
 
 
-def gps_framemeta(meta: GoproMeta, units, metameta=None):
+def gps_framemeta(meta: GoproMeta, units, metameta=None, gps_lock_filter=NullGPSLockFilter()):
     frame_meta = FrameMeta()
 
     meta.accept(
@@ -214,7 +214,8 @@ def gps_framemeta(meta: GoproMeta, units, metameta=None):
             converter=GPS5EntryConverter(
                 units,
                 calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS5"),
-                on_item=lambda c, e: frame_meta.add(c, e)
+                on_item=lambda c, e: frame_meta.add(c, e),
+                gps_lock_filter=gps_lock_filter
             ).convert
         )
     )
@@ -282,13 +283,13 @@ def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMe
             item.update(**update(closest_previous))
 
 
-def parse_gopro(gpmd_from, units, metameta: MetaMeta):
+def parse_gopro(gpmd_from, units, metameta: MetaMeta, gps_lock_filter=NullGPSLockFilter()):
     with PoorTimer("parsing").timing():
         with PoorTimer("GPMD", 1).timing():
             gopro_meta = GoproMeta.parse(gpmd_from)
 
         with PoorTimer("extract GPS", 1).timing():
-            gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta)
+            gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta, gps_lock_filter=gps_lock_filter)
 
         with PoorTimer("extract ACCL", 1).timing():
             merge_frame_meta(
@@ -314,9 +315,9 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta):
         return gps_frame_meta
 
 
-def framemeta_from(filepath: Path, units, metameta: MetaMeta):
+def framemeta_from(filepath: Path, units, metameta: MetaMeta, gps_lock_filter=NullGPSLockFilter()):
     gpmd_from = load_gpmd_from(filepath)
-    return parse_gopro(gpmd_from, units, metameta)
+    return parse_gopro(gpmd_from, units, metameta, gps_lock_filter=gps_lock_filter)
 
 
 def framemeta_from_datafile(datapath, units, metameta: MetaMeta):
