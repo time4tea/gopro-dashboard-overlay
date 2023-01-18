@@ -400,7 +400,7 @@ def create_chart(element, entry, timeseries, font, **kwargs):
         if v is not None:
             v = converter(v)
             return v.magnitude
-        return 0
+        return None
 
     window = Window(
         timeseries,
