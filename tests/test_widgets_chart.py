@@ -1,15 +1,19 @@
 import itertools
 import random
 from datetime import timedelta
+from pathlib import Path
 
 import pytest
 from PIL import ImageFont
 
 from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.framemeta import View, Window
+from gopro_overlay.ffmpeg import find_streams
+from gopro_overlay.framemeta import View, Window, framemeta_from
+from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
+from gopro_overlay.units import units
 from gopro_overlay.widgets.chart import SimpleChart
 from gopro_overlay.widgets.widgets import Translate, Composite
 from tests.approval import approve_image
@@ -155,7 +159,6 @@ def test_render_moving_chart():
         duration=timeunits(minutes=2),
         samples=256,
         key=lambda e: e.alt.magnitude,
-        missing=0
     )
 
     stepper = iter(ts.stepper(timeunits(seconds=1)).steps())
@@ -167,5 +170,42 @@ def test_render_moving_chart():
         Translate(
             at=Coordinate(50, 50),
             widget=SimpleChart(get_view, filled=True, font=font)
+        )
+    ])
+
+
+def load_test_file(inputpath):
+
+    if not inputpath.exists():
+        pytest.xfail("contrib file not exist")
+
+
+    stream_info = find_streams(inputpath)
+    return framemeta_from(
+            inputpath,
+            metameta=stream_info.meta,
+            units=units,
+            gps_lock_filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
+        )
+
+
+@pytest.mark.gfx
+def test_example_chart():
+
+    test_file = Path("/home/richja/dev/gopro-graphics/render/contrib/poor-gps/GX010303.MP4")
+
+    ts = load_test_file(test_file)
+
+    window = Window(
+        ts,
+        duration=timeunits(minutes=5),
+        samples=256,
+        key=lambda e: e.alt.magnitude,
+    )
+
+    return time_rendering(name="Moving Chart", repeat=1, widgets=[
+        Translate(
+            at=Coordinate(50, 50),
+            widget=SimpleChart(lambda: window.view(at=timeunits(seconds=(4 * 60) + 27)), filled=True, font=font)
         )
     ])
