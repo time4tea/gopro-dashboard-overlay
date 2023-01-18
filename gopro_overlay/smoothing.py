@@ -8,12 +8,15 @@ class Kalman:
         self.H = 1.00
         self.Q = 10
         self.P = 0
-        self.U_hat = 0
+        self.U_hat = None
         self.K = 0
 
     def update(self, U):
         if U is None:
             U = 0.0
+
+        if self.U_hat is None:
+            self.U_hat = U
 
         self.K = self.P * self.H / (self.H * self.P * self.H + self.R)
         self.U_hat = self.U_hat + self.K * (U - self.H * self.U_hat)

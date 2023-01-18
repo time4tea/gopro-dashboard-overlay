@@ -15,7 +15,7 @@ def test_ses():
 def test_kalman():
     kal = Kalman()
 
-    assert kal.update(1.0) == 0.0
-    assert kal.update(2.0) == 0.18181818181818182
-    assert kal.update(3.0) == 0.633587786259542
-    assert kal.update(-1.0) == 0.2961841308298001
+    assert kal.update(1.0) == 1.0
+    assert kal.update(2.0) == 1.0909090909090908
+    assert kal.update(3.0) == 1.3969465648854962
+    assert kal.update(-1.0) == 0.9018776499091459
