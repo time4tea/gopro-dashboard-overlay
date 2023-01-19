@@ -207,14 +207,11 @@ I don't know the formula for calculating the correct number of threads... this w
 ### Usage
 
 ```
-usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--privacy PRIVACY] [--generate {default,overlay,none}]
-                          [--overlay-size OVERLAY_SIZE] [--output-size OUTPUT_SIZE] [--profile PROFILE] [--use-gpx-only]
-                          [--video-time-start {file-created,file-modified,file-accessed}]
-                          [--video-time-end {file-created,file-modified,file-accessed}]
+usage: gopro-dashboard.py [-h] [--font FONT] [--gpx GPX] [--privacy PRIVACY] [--generate {default,overlay,none}] [--overlay-size OVERLAY_SIZE] [--output-size OUTPUT_SIZE] [--profile PROFILE] [--config-dir CONFIG_DIR]
+                          [--cache-dir CACHE_DIR] [--use-gpx-only] [--video-time-start {file-created,file-modified,file-accessed}] [--video-time-end {file-created,file-modified,file-accessed}]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas,geo-osm-carto,geo-osm-bright,geo-osm-bright-grey,geo-osm-bright-smooth,geo-klokantech-basic,geo-osm-liberty,geo-maptiler-3d,geo-toner,geo-toner-grey,geo-positron,geo-positron-blue,geo-positron-red,geo-dark-matter,geo-dark-matter-brown,geo-dark-matter-dark-grey,geo-dark-matter-dark-purple,geo-dark-matter-purple-roads,geo-dark-matter-yellow-roads}]
-                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}] [--layout-xml LAYOUT_XML]
-                          [--exclude EXCLUDE [EXCLUDE ...]] [--include INCLUDE [INCLUDE ...]] [--show-ffmpeg] [--debug-metadata]
-                          [--profiler] [--thread]
+                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}] [--layout-xml LAYOUT_XML] [--exclude EXCLUDE [EXCLUDE ...]] [--include INCLUDE [INCLUDE ...]] [--gps-dop-max GPS_DOP_MAX]
+                          [--gps-speed-max GPS_SPEED_MAX] [--gps-speed-max-units GPS_SPEED_MAX_UNITS] [--gps-bbox-lon-lat GPS_BBOX_LON_LAT] [--show-ffmpeg] [--debug-metadata] [--profiler]
                           [input] output
 
 Overlay gadgets on to GoPro MP4
@@ -231,11 +228,14 @@ options:
   --generate {default,overlay,none}
                         Type of output to generate (default: default)
   --overlay-size OVERLAY_SIZE
-                        <XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled overlay sizes
-                        (1920x1080, 3840x2160), Required if --use-gpx-only (default: None)
+                        <XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160), Required if --use-gpx-only (default: None)
   --output-size OUTPUT_SIZE
                         Vertical size of output movie (default: 1080)
   --profile PROFILE     Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json (default: None)
+  --config-dir CONFIG_DIR
+                        Location of config files (api keys, profiles, ...) (default: /home/richja/.gopro-graphics)
+  --cache-dir CACHE_DIR
+                        Location of caches (map tiles, ...) (default: /home/richja/.gopro-graphics)
 
 GPX Only:
   Creating Movies from GPX File only
@@ -243,11 +243,9 @@ GPX Only:
   --use-gpx-only, --use-fit-only
                         Use only the GPX/FIT file - no GoPro location data (default: False)
   --video-time-start {file-created,file-modified,file-accessed}
-                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be
-                        changed/removed (default: None)
+                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed (default: None)
   --video-time-end {file-created,file-modified,file-accessed}
-                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be
-                        changed/removed (default: None)
+                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed (default: None)
 
 Mapping:
   Display of Maps
@@ -269,14 +267,25 @@ Layout:
   --include INCLUDE [INCLUDE ...]
                         include named component (will exclude all others) (default: None)
 
+GPS:
+  Controlling GPS Parsing (from GoPro Only)
+
+  --gps-dop-max GPS_DOP_MAX
+                        Max DOP - Points with greater DOP will be considered 'Not Locked' (default: 10)
+  --gps-speed-max GPS_SPEED_MAX
+                        Max GPS Speed - Points with greater speed will be considered 'Not Locked' (default: 60)
+  --gps-speed-max-units GPS_SPEED_MAX_UNITS
+                        Units for --gps-speed-max (default: kph)
+  --gps-bbox-lon-lat GPS_BBOX_LON_LAT
+                        Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat (default: None)
+
 Debugging:
   Controlling debugging outputs
 
   --show-ffmpeg         Show FFMPEG output (not usually useful) (default: False)
   --debug-metadata      Show detailed information when parsing GoPro Metadata (default: False)
   --profiler            Do some basic profiling of the widgets to find ones that may be slow (default: False)
-  --thread              (VERY EXPERIMENTAL MAY CRASH) Use an intermediate buffer before ffmpeg as possible performance enhancement
-                        (default: False)
+
 ```
 
 # gopro-extract.py
@@ -314,20 +323,22 @@ according to that location:
 ### Usage
 
 ```text
-usage: gopro-rename.py [-h] [--desc DESC] [--geo] [--yes] [--dirs] file [file ...]
+usage: gopro-rename.py [-h] [-t] [-to] [--desc DESC] [--geo] [-y] [--dirs] file [file ...]
 
 Rename a series of GoPro files by date. Does nothing (so its safe) by default.
 
 positional arguments:
-  file         The files to rename, or directory/ies containing files
+  file               The files to rename, or directory/ies containing files
 
-optional arguments:
-  -h, --help   show this help message and exit
-  --desc DESC  a descriptive name to add to the filename - the filename will be yyyymmdd-hhmmss-{desc}.MP4
-  --geo        [EXPERIMENTAL] Use Geocode.xyz to add description for you (city-state) - see
-               https://geocode.xyz/pricing for terms
-  --yes        Rename the files, don't just print what would be done
-  --dirs       Allow directory
+options:
+  -h, --help         show this help message and exit
+  -t, --touch        change the modification time of the file
+  -to, --touch-only  change the modification time of the file only - don't rename
+  --desc DESC        a descriptive name to add to the filename - the filename will be yyyymmdd-hhmmss-{desc}.MP4
+  --geo              [EXPERIMENTAL] Use Geocode.xyz to add description for you (city-state) - see https://geocode.xyz/pricing for terms
+  -y, --yes          Rename the files, don't just print what would be done
+  --dirs             Allow directory
+
 ```
 
 # gopro-to-csv.py
@@ -339,17 +350,29 @@ Not hugely flexible at the moment.
 ### Usage
 
 ```text
-usage: gopro-to-csv.py [-h] [--gpx] input [output]
+usage: gopro-to-csv.py [-h] [--every EVERY] [--only-locked] [--gps-dop-max GPS_DOP_MAX] [--gps-speed-max GPS_SPEED_MAX] [--gps-speed-max-units GPS_SPEED_MAX_UNITS] [--gps-bbox-lon-lat GPS_BBOX_LON_LAT] [--gpx]
+                       input [output]
 
 Convert GoPro MP4 file / GPX File to CSV
 
 positional arguments:
-  input       Input file
-  output      Output CSV file (default stdout)
+  input                 Input file
+  output                Output CSV file (default stdout)
 
-optional arguments:
-  -h, --help  show this help message and exit
-  --gpx       Input is a gpx file
+options:
+  -h, --help            show this help message and exit
+  --every EVERY         Output a point every 'n' seconds. Default is output all points (usually 20/s)
+  --only-locked         Only output points where GPS is locked
+  --gps-dop-max GPS_DOP_MAX
+                        Max DOP - Points with greater DOP will be considered 'Not Locked'
+  --gps-speed-max GPS_SPEED_MAX
+                        Max GPS Speed - Points with greater speed will be considered 'Not Locked'
+  --gps-speed-max-units GPS_SPEED_MAX_UNITS
+                        Units for --gps-speed-max
+  --gps-bbox-lon-lat GPS_BBOX_LON_LAT
+                        Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat
+  --gpx                 Input is a gpx file
+
 ```
 
 # gopro-to-gpx.py
@@ -359,16 +382,27 @@ Convert GoPro metadata to a GPX file for upload/import into other software
 ### Usage
 
 ```text
-usage: gopro-to-gpx.py [-h] input [output]
+sage: gopro-to-gpx.py [-h] [--every EVERY] [--only-locked] [--gps-dop-max GPS_DOP_MAX] [--gps-speed-max GPS_SPEED_MAX] [--gps-speed-max-units GPS_SPEED_MAX_UNITS] [--gps-bbox-lon-lat GPS_BBOX_LON_LAT] input [output]
 
 Convert GoPro MP4 file to GPX
 
 positional arguments:
-  input       Input MP4 file
-  output      Output GPX file (default stdout)
+  input                 Input MP4 file
+  output                Output GPX file (default stdout)
 
-optional arguments:
-  -h, --help  show this help message and exit
+options:
+  -h, --help            show this help message and exit
+  --every EVERY         Output a point every 'n' seconds. Default is output all points (usually 20/s)
+  --only-locked         Only output points where GPS is locked
+  --gps-dop-max GPS_DOP_MAX
+                        Max DOP - Points with greater DOP will be considered 'Not Locked'
+  --gps-speed-max GPS_SPEED_MAX
+                        Max GPS Speed - Points with greater speed will be considered 'Not Locked'
+  --gps-speed-max-units GPS_SPEED_MAX_UNITS
+                        Units for --gps-speed-max
+  --gps-bbox-lon-lat GPS_BBOX_LON_LAT
+                        Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat
+
 ```
 
 # gopro-join.py
