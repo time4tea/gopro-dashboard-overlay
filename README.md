@@ -214,6 +214,7 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
   - [Feature] Can now filter GPS points by bounding box - Useful if a few points claim to be locked, but are far away. Load GPX file into mapping software to see bounding box easily, for now. `--gps-bbox-lon-lat`
   - [Change] Outputs except for generated files are now to stderr rather than stdout
   - [Feature] `gopro-to-csv.py` and `gopro-to-gpx.py` now support `--only-locked` and `--every` to limit number of points (also GPS point filters, as above)
+  - [Change] Change in the way chart handles missing values - stops chart going to 0.
   - Updated various library dependency versions.
 - 0.77.0 [Change] Disable speed and other calculations when GPS is not locked - stops unbelievable values
   - [Change] changes to GPS parsing, should make detection of GPS lock more accurate (some 'not locked' values used to be included) still not perfect h/t [@falumas](https://github.com/falumas)
