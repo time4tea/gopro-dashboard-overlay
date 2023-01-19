@@ -2,6 +2,16 @@
 # Changelog
 
 Newest changes are always in [README.md](README.md)
+- 0.68.0 EXPERIMENTAL support for FIT files - Use just like a GPX file, either supplementing the GoPro or by itself.
+  - Not expecting any major issues, with FIT support, but I don't have a huge number of test files.
+- 0.67.0 EXPERIMENTAL support for parsing camera orientation. This means it's now possible to show pitch/roll/yaw.
+  - But I'm not 100% on the maths, particularly around the rotation axes - so maybe it's not quite right.
+  - Use `ori.pich` `ori.roll` `ori.yaw` in widgets/metrics. They have a unit of radians - Feedback welcomed!
+- 0.66.0 Fix #78 - Crash when GPS5 packets have zero entries.
+  - Add accelerometer entries to csv output 
+- 0.65.0 Parse "power" from GPX files. Thanks to [@kfhdk](https://github.com/kfhdk)
+  - See [docs/xml/examples/07-metrics](docs/xml/examples/04-metrics) for examples of how to use
+  - Also example layout in layouts/power-1920x1080.xml
 - 0.64.0 Bump version only - no changes
   - Docker Image now available! - Thanks to [@GitFun4All](https://github.com/GitFun4All) for the suggestion and example code 
 - 0.63.0 Bump version only - no changes

@@ -236,16 +236,7 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
     - Some layout examples are now in [examples/layout](examples/layout)
     - Minor tweaks to `text`, `metric` and `chart` to control outline width and colour
   - New widget type `circuit_map` shows a simple plot of the path, but no map graphics. See [docs/xml/examples/06-circuit-map](docs/xml/examples/06-circuit-map) 
-- 0.68.0 EXPERIMENTAL support for FIT files - Use just like a GPX file, either supplementing the GoPro or by itself.
-  - Not expecting any major issues, with FIT support, but I don't have a huge number of test files.
-- 0.67.0 EXPERIMENTAL support for parsing camera orientation. This means it's now possible to show pitch/roll/yaw.
-  - But I'm not 100% on the maths, particularly around the rotation axes - so maybe it's not quite right.
-  - Use `ori.pich` `ori.roll` `ori.yaw` in widgets/metrics. They have a unit of radians - Feedback welcomed!
-- 0.66.0 Fix #78 - Crash when GPS5 packets have zero entries.
-  - Add accelerometer entries to csv output 
-- 0.65.0 Parse "power" from GPX files. Thanks to [@kfhdk](https://github.com/kfhdk)
-  - See [docs/xml/examples/07-metrics](docs/xml/examples/04-metrics) for examples of how to use
-  - Also example layout in layouts/power-1920x1080.xml
+
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
