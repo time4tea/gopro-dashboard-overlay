@@ -208,6 +208,12 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.78.0 [Fix] Gradient calculation had become disabled.
+  - [Feature] Can now filter GPS points by max DOP `--gps-dop-max`
+  - [Feature] Can now filter GPS points by max Speed `--gps-speed-max` `--gps-speed-max-units`
+  - [Feature] Can now filter GPS points by bounding box - Useful if a few points claim to be locked, but are far away. Load GPX file into mapping software to see bounding box easily, for now. `--gps-bbox-lon-lat`
+  - [Change] Outputs except for generated files are now to stderr rather than stdout
+  - [Feature] `gopro-to-csv.py` and `gopro-to-gpx.py` now support `--only-locked` and `--every` to limit number of points (also GPS point filters, as above)
 - 0.77.0 [Change] Disable speed and other calculations when GPS is not locked - stops unbelievable values
   - [Change] changes to GPS parsing, should make detection of GPS lock more accurate (some 'not locked' values used to be included) still not perfect h/t [@falumas](https://github.com/falumas)
   - [Change] add new widget "gps-lock-icon" at top of screen to show GPS lock - hopefully not too intrusive - can switch off with `--exclude`
