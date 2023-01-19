@@ -1,5 +1,6 @@
 from typing import Any
 
+from gopro_overlay.log import log
 from gopro_overlay.timing import PoorTimer
 
 
@@ -28,4 +29,4 @@ class WidgetProfiler:
 
     def print(self):
         for widget in reversed(self.widgets):
-            print(widget.timer)
+            log(widget.timer)

@@ -2,6 +2,8 @@ import contextlib
 import time
 from typing import TypeVar, Callable
 
+from gopro_overlay.log import log
+
 T = TypeVar("T")
 
 
@@ -29,7 +31,7 @@ class PoorTimer:
             self.total += (time.time_ns() - t)
             self.count += 1
             if doprint:
-                print(self)
+                log(self)
 
     @property
     def seconds(self) -> float:

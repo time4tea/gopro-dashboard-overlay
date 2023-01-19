@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import traceback
-from collections import Counter
 from importlib import metadata
 from pathlib import Path
 from subprocess import TimeoutExpired
@@ -11,6 +10,7 @@ import progressbar
 from gopro_overlay import timeseries_process, progress_frames, gpx, fit
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
+from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
@@ -20,9 +20,11 @@ from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.geo import CachingRenderer, api_key_finder
-from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter
+from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
+from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter, GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
+from gopro_overlay.log import log
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timeseries import Timeseries
@@ -84,10 +86,10 @@ if __name__ == "__main__":
     args = gopro_dashboard_arguments()
 
     if not ffmpeg_is_installed():
-        print("Can't start ffmpeg - is it installed?")
+        log("Can't start ffmpeg - is it installed?")
         exit(1)
     if not ffmpeg_libx264_is_installed():
-        print("ffmpeg doesn't seem to handle libx264 files - it needs to be compiled with support for this, "
+        log("ffmpeg doesn't seem to handle libx264 files - it needs to be compiled with support for this, "
               "check your installation")
         exit(1)
 
@@ -104,7 +106,7 @@ if __name__ == "__main__":
     cache_dir.mkdir(exist_ok=True)
 
     version = metadata.version("gopro_overlay")
-    print(f"Starting gopro-dashboard version {version}")
+    log(f"Starting gopro-dashboard version {version}")
 
     with PoorTimer("program").timing():
 
@@ -140,8 +142,13 @@ if __name__ == "__main__":
                 frame_meta = timeseries_to_framemeta(load_external(external_file, units), units, start_date=start_date,
                                                      duration=duration)
                 video_duration = frame_meta.duration()
-                packets_per_second = 1
+                packets_per_second = 10
             else:
+                if args.gps_bbox_lon_lat:
+                    bbox_filter = GPSBBoxFilter(bbox=args.gps_bbox_lon_lat)
+                else:
+                    bbox_filter = NullGPSLockFilter()
+
                 inputpath = args.input
                 stream_info = find_streams(inputpath)
 
@@ -152,38 +159,34 @@ if __name__ == "__main__":
                 video_duration = stream_info.video.duration
                 packets_per_second = 18
 
-                counter = Counter()
+                counter = ReasonCounter()
 
                 try:
-                    # frame_meta = framemeta_from(
-                    #     inputpath,
-                    #     metameta=stream_info.meta,
-                    #     units=units,
-                    #     gps_lock_filter=GPSLockTracker()
-                    # )
                     frame_meta = framemeta_from(
                         inputpath,
                         metameta=stream_info.meta,
                         units=units,
                         gps_lock_filter=WorstOfGPSLockFilter(
-                            GPSLockTracker(),
-                            GPSReportingFilter(GPSDOPFilter(args.gps_dop_max), rejected=lambda: counter.update({f"DOP > {args.gps_dop_max}": 1})),
-                            GPSReportingFilter(GPSMaxSpeedFilter(units.Quantity(args.gps_speed_max, args.gps_speed_max_units).to("mps").m), rejected=lambda: counter.update({f"Speed > {args.gps_speed_max} {args.gps_speed_max_units}": 1}))
+                            GPSReportingFilter(GPSLockTracker(), rejected=counter.inc("Heuristics")),
+                            GPSReportingFilter(bbox_filter, rejected=counter.inc("Outside BBox")),
+                            GPSReportingFilter(GPSDOPFilter(args.gps_dop_max), rejected=counter.inc(f"DOP > {args.gps_dop_max}")),
+                            GPSReportingFilter(GPSMaxSpeedFilter(units.Quantity(args.gps_speed_max, args.gps_speed_max_units).to("mps").m), rejected=counter.inc(f"Speed > {args.gps_speed_max} {args.gps_speed_max_units}"))
                         )
                     )
 
-                    print(f"Note: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
-                    [print(f"* {k} -> {v}") for k,v in counter.items()]
+                    if counter.total() > 0:
+                        log(f"Note: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
+                        [log(f"* {k} -> {v}") for k, v in counter.items()]
 
                 except TimeoutExpired:
                     traceback.print_exc()
-                    print(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
+                    log(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
                     exit(1)
 
                 if args.gpx:
                     external_file: Path = args.gpx
                     gpx_timeseries = load_external(external_file, units)
-                    print(f"GPX/FIT Timeseries has {len(gpx_timeseries)} data points.. merging...")
+                    log(f"GPX/FIT Timeseries has {len(gpx_timeseries)} data points.. merging...")
                     merge_gpx_with_gopro(gpx_timeseries, frame_meta)
 
             if args.overlay_size:
@@ -193,15 +196,18 @@ if __name__ == "__main__":
             raise IOError(
                 f"Unable to load GoPro metadata from {inputpath}. Use --debug-metadata to see more information")
 
-        print(f"Generating overlay at {dimensions}")
-        print(f"Timeseries has {len(frame_meta)} data points")
-        print("Processing....")
+        log(f"Generating overlay at {dimensions}")
+        log(f"Timeseries has {len(frame_meta)} data points")
+        log("Processing....")
 
         with PoorTimer("processing").timing():
-            frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45))
-            frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3)
-            frame_meta.process(timeseries_process.calculate_odo())
-            frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3)  # hack
+            locked_2d = lambda e: e.gpsfix in GPS_FIXED_VALUES
+            locked_3d = lambda e: e.gpsfix == GPSFix.LOCK_3D.value
+
+            frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45), filter_fn=locked_2d)
+            frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3, filter_fn=locked_2d)
+            frame_meta.process(timeseries_process.calculate_odo(), filter_fn=locked_2d)
+            frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3, filter_fn=locked_3d)  # hack
             frame_meta.process(timeseries_process.filter_locked())
 
         # privacy zone applies everywhere, not just at start, so might not always be suitable...
@@ -235,7 +241,7 @@ if __name__ == "__main__":
                 redirect = None
             else:
                 redirect = temp_file_name()
-                print(f"FFMPEG Output is in {redirect}")
+                log(f"FFMPEG Output is in {redirect}")
 
             execution = InProcessExecution(redirect=redirect)
 
@@ -254,7 +260,7 @@ if __name__ == "__main__":
 
             # Draw an overlay frame every 0.1 seconds of video
             timelapse_correction = frame_meta.duration() / video_duration
-            print(f"Timelapse Factor = {timelapse_correction:.3f}")
+            log(f"Timelapse Factor = {timelapse_correction:.3f}")
             stepper = frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
             progress = progressbar.ProgressBar(
                 widgets=[
@@ -285,17 +291,17 @@ if __name__ == "__main__":
                         frame = draw_timer.time(lambda: overlay.draw(dt))
                         tobytes = byte_timer.time(lambda: frame.tobytes())
                         write_timer.time(lambda: writer.write(tobytes))
-                print("Finished drawing frames. waiting for ffmpeg to catch up")
+                log("Finished drawing frames. waiting for ffmpeg to catch up")
                 progress.finish()
 
             except KeyboardInterrupt:
-                print("...Stopping...")
+                log("...Stopping...")
                 pass
             finally:
                 for t in [byte_timer, write_timer, draw_timer]:
-                    print(t)
+                    log(t)
 
                 if profiler:
-                    print("\n\n*** Widget Timings ***")
+                    log("\n\n*** Widget Timings ***")
                     profiler.print()
-                    print("***\n\n")
+                    log("***\n\n")

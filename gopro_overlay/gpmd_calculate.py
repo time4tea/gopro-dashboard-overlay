@@ -5,6 +5,7 @@ from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
     CalculateCorrectionFactorsVisitor
+from gopro_overlay.log import log
 from gopro_overlay.timeunits import Timeunit, timeunits
 
 
@@ -20,7 +21,7 @@ class CoriTimestampPacketTimeCalculator:
         if self._first_timestamp is not None and self._last_timestamp is not None and timestamp < self._last_timestamp:
             # This is definitely wrong - need all the SHUT timings from the joined files...
             self._adjust += self._last_timestamp
-            print(f"Joined file detected... adjusting by {self._adjust}")
+            log(f"Joined file detected... adjusting by {self._adjust}")
             self._first_timestamp = timestamp
             self._last_timestamp = timestamp
 

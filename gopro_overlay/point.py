@@ -211,3 +211,18 @@ class Quaternion:
         yaw = math.atan2(siny_cosp, cosy_cosp)
 
         return EulerRadians(roll=pitch, pitch=roll, yaw=yaw)
+
+
+@dataclasses.dataclass(frozen=True)
+class BoundingBox:
+    min: Point
+    max: Point
+
+    def contains(self, point:Point)->bool:
+        return self.min.lat <= point.lat <= self.max.lat and self.min.lon <= point.lon <= self.max.lon
+
+    def __eq__(self, other):
+        return type(other) == type(self) and other.min == self.min and other.max == self.max
+
+    def size(self) -> Coordinate:
+        return Coordinate(x=self.max.lat - self.min.lat, y=self.max.lon - self.min.lon)

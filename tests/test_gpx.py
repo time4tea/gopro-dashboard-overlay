@@ -6,8 +6,8 @@ import gpxpy
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
-from gopro_overlay.journey import Journey, BoundingBox
-from gopro_overlay.point import Point
+from gopro_overlay.journey import Journey
+from gopro_overlay.point import Point, BoundingBox
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
 from tests.test_timeseries import datetime_of

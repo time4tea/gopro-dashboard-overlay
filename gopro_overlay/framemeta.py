@@ -13,6 +13,7 @@ from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter
 from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor, NullGPSLockFilter
 from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
+from gopro_overlay.log import log
 from gopro_overlay.timeunits import Timeunit, timeunits
 from gopro_overlay.timing import PoorTimer
 
@@ -151,11 +152,11 @@ class FrameMeta:
     def _get_interpolate(self, frame_time) -> Entry:
 
         if frame_time < self.min:
-            print(f"Request for data at time {frame_time}, before start of metadata, returning first item")
+            log(f"Request for data at time {frame_time}, before start of metadata, returning first item")
             return self.frames[self.framelist[0]]
 
         if frame_time > self.max:
-            print(f"Request for data at time {frame_time}, after end of metadata, returning last item")
+            log(f"Request for data at time {frame_time}, after end of metadata, returning last item")
             return self.frames[self.framelist[-1]]
 
         later_idx = bisect.bisect_left(self.framelist, frame_time)
@@ -167,7 +168,7 @@ class FrameMeta:
         delta = frame_time - earlier_time
 
         if delta > max_distance:
-            print(f"Closest item to wanted time {frame_time} is {delta} away")
+            log(f"Closest item to wanted time {frame_time} is {delta} away")
 
         return earlier_item
 
@@ -185,21 +186,26 @@ class FrameMeta:
 
                 yield entry
 
-    def process_deltas(self, processor, skip=1):
+    def process_deltas(self, processor, skip=1, filter_fn: Callable[[Entry], bool]=lambda e: True):
         self.check_modified()
         diffs = list(zip(self.framelist, self.framelist[skip:]))
 
         for a, b in diffs:
-            updates = processor(self.frames[a], self.frames[b], skip)
-            if updates:
-                self.frames[a].update(**updates)
+            entry_a = self.frames[a]
+            entry_b = self.frames[b]
+            if filter_fn(entry_a) and filter_fn(entry_b):
+                updates = processor(entry_a, entry_b, skip)
+                if updates:
+                    entry_a.update(**updates)
 
-    def process(self, processor):
+    def process(self, processor, filter_fn:Callable[[Entry], bool]=lambda e: True):
         self.check_modified()
-        for e in self.framelist:
-            updates = processor(self.frames[e])
-            if updates:
-                self.frames[e].update(**updates)
+        for pts in self.framelist:
+            entry = self.frames[pts]
+            if filter_fn(entry):
+                updates = processor(entry)
+                if updates:
+                    entry.update(**updates)
 
     def duration(self):
         self.check_modified()

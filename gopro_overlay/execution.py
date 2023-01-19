@@ -3,6 +3,8 @@ from __future__ import annotations
 import subprocess
 import sys
 
+from gopro_overlay.log import log
+
 
 class InProcessExecution:
 
@@ -12,7 +14,7 @@ class InProcessExecution:
 
     def execute(self, cmd):
         try:
-            print(f"Executing '{' '.join(cmd)}'")
+            log(f"Executing '{' '.join(cmd)}'")
             if self.redirect:
                 with open(self.redirect, "w") as std:
                     process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)
@@ -30,7 +32,7 @@ class InProcessExecution:
             raise IOError(f"Unable to execute the process - is '{cmd[0]}' installed") from None
         except BrokenPipeError:
             if self.redirect:
-                print("FFMPEG Output:")
+                log("FFMPEG Output:")
                 with open(self.redirect) as f:
-                    print("".join(f.readlines()), file=sys.stderr)
+                    log("".join(f.readlines()), file=sys.stderr)
             raise IOError(f"Process {cmd[0]} failed") from None

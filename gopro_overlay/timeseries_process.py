@@ -1,14 +1,12 @@
-from typing import List
-
 from geographiclib.geodesic import Geodesic
 
-from .gpmd import XYZ, GPS_FIXED_VALUES
-from .point import PintPoint3
+from .gpmd import GPS_FIXED_VALUES
+from .point import PintPoint3, Point
 from .smoothing import Kalman, SimpleExponential
 from .units import units
 
 
-# this is almost certainly wrong? - we are treating this as 3x1D samples, but its not.
+# this is almost certainly wrong? - we are treating this as 3x1D samples, but it's not.
 def process_kalman_pp3(new, key):
     kx = Kalman()
     ky = Kalman()
@@ -25,6 +23,16 @@ def process_kalman_pp3(new, key):
     return process
 
 
+def process_kalman(new, key):
+    k = Kalman()
+
+    def process(item):
+        v = key(item)
+        return {new: k.update(v)}
+
+    return process
+
+
 def process_ses(new, key, alpha=0.4):
     ses = SimpleExponential(alpha=alpha)
 
@@ -34,12 +42,18 @@ def process_ses(new, key, alpha=0.4):
     return process
 
 
+def distance_azi_between(a: Point, b: Point):
+    inverse = Geodesic.WGS84.Inverse(a.lat, a.lon, b.lat, b.lon)
+    dist = units.Quantity(inverse['s12'], units.m)
+    raw_azi = inverse['azi1']
+    return dist, raw_azi
+
+
 def calculate_speeds():
     def accept(a, b, c):
-        inverse = Geodesic.WGS84.Inverse(a.point.lat, a.point.lon, b.point.lat, b.point.lon)
-        dist = units.Quantity(inverse['s12'], units.m)
+        dist, raw_azi = distance_azi_between(a.point, b.point)
+
         time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
-        raw_azi = inverse['azi1']
         azi = units.Quantity(raw_azi, units.degree)
 
         raw_cog = 0 + raw_azi if raw_azi >= 0 else 360 + raw_azi
@@ -69,23 +83,12 @@ def calculate_odo():
     return accept
 
 
-def filter_dop(max_dop: float):
-
-    fields = [ "speed", "cspeed", "azi", "cog", "time", "dist" ]
-
-    def accept(e):
-        if e.dop is not None and e.dop > max_dop:
-            return {f:None for f in fields}
-
-    return accept
-
 def filter_locked():
-
-    fields = [ "speed", "cspeed", "azi", "cog", "time", "dist" ]
+    fields = ["speed", "cspeed", "azi", "cog", "time", "dist", "grad", "cgrad", "alt"]
 
     def accept(e):
         if e.gpsfix not in GPS_FIXED_VALUES:
-            return {f:None for f in fields}
+            return {f: None for f in fields}
 
     return accept
 
@@ -96,9 +99,22 @@ def calculate_gradient():
     def accept(a, b, c):
         if a.alt and b.alt:
             gain = b.alt - a.alt
-            if a.odo and b.odo:
-                dist = b.odo - a.odo
-                if dist and dist.magnitude > 1.0:
-                    return {"cgrad": (gain / dist) * 100.0}
+
+            dist, _ = distance_azi_between(a.point, b.point)
+
+            if dist and dist.magnitude > 1.0:
+                grad = (gain / dist) * 100.0
+                if abs(grad.magnitude) < 45:
+                    field = "cgrad"
+                else:
+                    field = "bad_grad"
+
+                return {
+                    field: grad,
+                    "grad_gain": gain,
+                    "grad_dist": dist,
+                    "grad_other_packet": b.packet,
+                    "grad_other_packet_index": b.packet_index,
+                }
 
     return accept

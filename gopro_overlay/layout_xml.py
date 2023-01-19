@@ -12,6 +12,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
+from .log import log
 from .widgets.asi import AirspeedIndicator
 from .widgets.bar import Bar
 from .widgets.chart import SimpleChart
@@ -49,7 +50,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         name = name_of(element)
         if name is not None:
             b = include(name)
-            print(f"Layout -> Include component '{name}' = {b}")
+            log(f"Layout -> Include component '{name}' = {b}")
             return b
         return True
 
@@ -387,7 +388,7 @@ def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
 
 
 def create_gradient_chart(*args, **kwargs):
-    print("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
+    log("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
     return create_chart(*args, **kwargs)
 
 

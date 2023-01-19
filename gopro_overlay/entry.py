@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+from gopro_overlay.log import log
+
 
 class Entry:
 
@@ -20,7 +22,7 @@ class Entry:
         if self.dt == other.dt:
             return other
         if self.dt > other.dt:
-            print(f"**Note** Requested interpolation [{self.dt} < *{dt}* < {other.dt}] : Lower point should be first - data out of order?")
+            log(f"**Note** Requested interpolation [{self.dt} < *{dt}* < {other.dt}] : Lower point should be first - data out of order?")
             return other.interpolate(self, dt)
         if dt < self.dt:
             raise ValueError(f"Requested interpolation [{self.dt} < *{dt}* < {other.dt}] lies before this point [{self.dt}] (should be after)")

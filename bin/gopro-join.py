@@ -6,6 +6,7 @@ import pathlib
 
 from gopro_overlay.ffmpeg import join_files
 from gopro_overlay.filenaming import GoProFile
+from gopro_overlay.log import log
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Concatenate sequence of GoPro Files")
@@ -26,10 +27,10 @@ if __name__ == "__main__":
 
     found = file.related_files(directory)
 
-    print(f"Found: {[f.name for f in found]}")
+    log(f"Found: {[f.name for f in found]}")
 
     if not found:
-        print("Didn't find any suitable files to join. Were the files renamed?")
+        log("Didn't find any suitable files to join. Were the files renamed?")
         exit(1)
 
     join_files(

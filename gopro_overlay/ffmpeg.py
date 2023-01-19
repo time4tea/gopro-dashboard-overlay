@@ -16,18 +16,9 @@ from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.functional import flatten
+from gopro_overlay.log import log
+from gopro_overlay.process import run, invoke
 from gopro_overlay.timeunits import Timeunit, timeunits
-
-
-def run(cmd, **kwargs):
-    return subprocess.run(cmd, check=True, **kwargs)
-
-
-def invoke(cmd, **kwargs):
-    try:
-        return run(cmd, **kwargs, text=True, capture_output=True)
-    except subprocess.CalledProcessError as e:
-        raise IOError(f"Error: {cmd}\n stdout: {e.stdout}\n stderr: {e.stderr}")
 
 
 @dataclass(frozen=True)
@@ -84,7 +75,7 @@ def cut_file(input, output, start, duration):
             "-c", "copy",
             output]
 
-    print(args)
+    log(args)
 
     run(args)
 
@@ -113,7 +104,7 @@ def join_files(filepaths, output):
                 "-copy_unknown",
                 "-c", "copy",
                 output]
-        print(f"Running {args}")
+        log(f"Running {args}")
         run(args)
 
 
@@ -235,7 +226,7 @@ def ffmpeg_libx264_is_installed():
 def load_frame(filepath: Path, at_time: Timeunit) -> Optional[bytes]:
     if filepath.exists():
         cmd = ["ffmpeg", "-hide_banner", "-y", "-ss", str(at_time.millis() / 1000), "-i", str(filepath.absolute()), "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgba", "-"]
-        print(f"Executing '{' '.join(cmd)}'")
+        log(f"Executing '{' '.join(cmd)}'")
         try:
             return run(cmd, capture_output=True).stdout
         except subprocess.CalledProcessError as e:

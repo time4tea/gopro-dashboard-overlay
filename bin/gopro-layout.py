@@ -22,6 +22,7 @@ from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.geo import CachingRenderer, api_key_finder
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
+from gopro_overlay.log import log
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
@@ -86,7 +87,7 @@ if __name__ == "__main__":
 
         except TimeoutExpired:
             traceback.print_exc()
-            print(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
+            log(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
             exit(1)
 
     else:
@@ -101,7 +102,7 @@ if __name__ == "__main__":
 
         while True:
             if not layout_file.exists():
-                print(f"Layout file not found: {layout_file}")
+                log(f"Layout file not found: {layout_file}")
 
             updated = os.stat(layout_file).st_mtime
 
@@ -125,10 +126,10 @@ if __name__ == "__main__":
                     frame.save("frame.png")
 
                 except IOError as e:
-                    print(f"Unable to load {layout_file}: {e}")
+                    log(f"Unable to load {layout_file}: {e}")
                 except ElementTree.ParseError as e:
-                    print(f"Unable to load {layout_file}: XML Parsing Error: {e}")
+                    log(f"Unable to load {layout_file}: XML Parsing Error: {e}")
                 except DimensionalityError as e:
-                    print(f"Unable to load {layout_file}: Unit Conversion: {e}")
+                    log(f"Unable to load {layout_file}: Unit Conversion: {e}")
 
             sleep(0.1)

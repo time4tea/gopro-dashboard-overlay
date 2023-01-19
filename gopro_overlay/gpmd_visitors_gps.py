@@ -1,11 +1,10 @@
 import dataclasses
 import datetime
-import warnings
 from typing import List, Optional
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5, GPSFix
-from gopro_overlay.point import Point
+from gopro_overlay.point import Point, BoundingBox
 
 
 @dataclasses.dataclass(frozen=True)
@@ -63,6 +62,16 @@ class WorstOfGPSLockFilter(GPSLockFilter):
             if result.value < components.fix.value:
                 components = dataclasses.replace(components, fix=result)
 
+        return components.fix
+
+
+class GPSBBoxFilter(GPSLockFilter):
+    def __init__(self, bbox: BoundingBox):
+        self.bbox = bbox
+
+    def submit(self, components: GPSLockComponents) -> GPSFix:
+        if not self.bbox.contains(components.point):
+            return GPSFix.NO
         return components.fix
 
 

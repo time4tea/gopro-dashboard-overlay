@@ -2,7 +2,7 @@ import math
 from typing import List
 
 from .gpmd import GPS_FIXED_VALUES
-from .point import Point, Coordinate
+from .point import Point, BoundingBox
 
 
 class MinMax:
@@ -52,19 +52,6 @@ class Extents:
 
 
 MIN_BOX_SIZE = 0.0001
-
-
-class BoundingBox:
-
-    def __init__(self, min: Point, max: Point):
-        self.min = min
-        self.max = max
-
-    def __eq__(self, other):
-        return type(other) == type(self) and other.min == self.min and other.max == self.max
-
-    def size(self) -> Coordinate:
-        return Coordinate(x=self.max.lat - self.min.lat, y=self.max.lon - self.min.lon)
 
 
 class Journey:

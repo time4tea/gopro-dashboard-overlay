@@ -6,6 +6,7 @@ import pytest
 
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.geo import ArgsKeyFinder
+from gopro_overlay.point import Point, BoundingBox
 
 
 def test_only_output():
@@ -150,6 +151,11 @@ def test_gps_dop():
     assert do_args().gps_dop_max == 10
     assert do_args().gps_speed_max == 60
     assert do_args().gps_speed_max_units == "kph"
+
+
+def test_gps_bbox():
+    assert do_args().gps_bbox_lon_lat is None
+    assert do_args("--gps-bbox-lon-lat", "1,2,3,4").gps_bbox_lon_lat == BoundingBox(min=Point(lon=1, lat=2), max=Point(lon=3, lat=4))
 
 
 def do_args(*args, input: Optional[str] = "input", output: Optional[str] = "output"):

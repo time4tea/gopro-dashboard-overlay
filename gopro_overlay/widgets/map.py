@@ -7,6 +7,7 @@ from PIL import ImageDraw, Image
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
+from gopro_overlay.log import log
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.rdp import rdp
@@ -227,11 +228,11 @@ class MovingJourneyMap:
         # add self.size / 2 to each side of the map, so adding self.size overall
         map.size = (map.size[0] + self.size), (map.size[1] + self.size)
 
-        print(f"{self.__class__.__name__} Rendering backing map ({map.size}) (can be slow)", end="")
+        log(f"{self.__class__.__name__} Rendering backing map ({map.size}) (can be slow)", end="")
 
         map_image = self.renderer(map)
 
-        print(f"... done")
+        log(f"... done")
 
         plots = [
             map.rev_geocode((location.lon, location.lat))

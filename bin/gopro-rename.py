@@ -9,6 +9,7 @@ from typing import List
 from gopro_overlay import functional, filenaming, ffmpeg, geocode
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_visitors_gps import DetermineFirstLockedGPSUVisitor
+from gopro_overlay.log import log
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Rename a series of GoPro files by date. Does nothing (so its safe) by default.")
@@ -24,7 +25,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not args.yes:
-        print("*** DRY RUN - NOT ACTUALLY DOING ANYTHING ***")
+        log("*** DRY RUN - NOT ACTUALLY DOING ANYTHING ***")
 
     inputs: List[pathlib.Path] = args.file
 
@@ -46,7 +47,7 @@ if __name__ == "__main__":
         found = meta.accept(DetermineFirstLockedGPSUVisitor())
         gps_datetime = found.packet_time
         if gps_datetime is None:
-            print(f"Unable to determine GPS date for {file} - GPS never locked")
+            log(f"Unable to determine GPS date for {file} - GPS never locked")
             continue
 
         formatted_datetime = gps_datetime.strftime("%Y%m%d-%H%M%S")
@@ -73,9 +74,9 @@ if __name__ == "__main__":
         new_file = file.with_name(new_name)
 
         if should_rename:
-            print(f"Rename {file} to {new_file}")
+            log(f"Rename {file} to {new_file}")
         if should_touch:
-            print(f"Update time to {gps_datetime}")
+            log(f"Update time to {gps_datetime}")
 
         if args.yes:
             if should_touch:

@@ -3,6 +3,29 @@ import pathlib
 import sys
 
 from gopro_overlay import geo
+from gopro_overlay.log import log
+from gopro_overlay.point import Point, BoundingBox
+
+
+class SplitArgs(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values.split(','))
+
+
+class SplitArgsFloat(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, tuple(map(float, values.split(","))))
+
+
+class BBoxArgs(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        bbox = tuple(map(float, values.split(",")))
+        if len(bbox) != 4:
+            raise ValueError("Bounding Box requires 4 values - minlon,minlat,maxlon,maxlat")
+        extent_min = Point(lon=bbox[0], lat=bbox[1])
+        extent_max = Point(lon=bbox[2], lat=bbox[3])
+        setattr(namespace, self.dest, BoundingBox(min=extent_min, max=extent_max))
+
 
 default_config_location = pathlib.Path.home() / ".gopro-graphics"
 
@@ -65,6 +88,7 @@ def gopro_dashboard_arguments(args=None):
     gps.add_argument("--gps-dop-max", type=float, default=10, help="Max DOP - Points with greater DOP will be considered 'Not Locked'")
     gps.add_argument("--gps-speed-max", type=float, default=60, help="Max GPS Speed - Points with greater speed will be considered 'Not Locked'")
     gps.add_argument("--gps-speed-max-units", default="kph", help="Units for --gps-speed-max")
+    gps.add_argument("--gps-bbox-lon-lat", action=BBoxArgs, help="Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat")
 
     debugging = parser.add_argument_group("Debugging", "Controlling debugging outputs")
 
@@ -76,8 +100,8 @@ def gopro_dashboard_arguments(args=None):
     args = parser.parse_args(args)
 
     def quit(reason):
-        print(f"Invalid arguments: {reason}", file=sys.stderr)
-        parser.print_help()
+        log(f"Invalid arguments: {reason}")
+        parser.print_help(file=sys.stderr)
         exit(1)
 
     if (args.video_time_start or args.video_time_end) and not args.use_gpx_only:

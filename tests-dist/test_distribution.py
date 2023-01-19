@@ -1,11 +1,10 @@
 import contextlib
-import hashlib
-import inspect
 import os
 import subprocess
-import tempfile
 from pathlib import Path
-from typing import Callable, Any
+
+from gopro_overlay.process import invoke, run
+from tests.approval import approve_text
 
 mydir = Path(os.path.dirname(__file__))
 top = mydir.parent
@@ -72,70 +71,49 @@ def test_init_pys_are_in_right_subfolders():
             os.path.join(distribution, "lib", "python3.10", "site-packages", "gopro_overlay", p, "__init__.py"))
 
 
-def sha256sum(filename):
-    h = hashlib.sha256()
-    b = bytearray(128 * 1024)
-    mv = memoryview(b)
-    with open(filename, 'rb', buffering=0) as f:
-        while n := f.readinto(mv):
-            h.update(mv[:n])
-    return h.hexdigest()
-
-
 def test_maybe_renders_something():
     prog = distribution / "bin" / "gopro-dashboard.py"
-    subprocess.run([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"], check=True)
+    run([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"])
 
 
-def whoami():
-    return inspect.stack()[2].function
-
-
-def assert_output(f: Callable[[str], Any], hv: str):
-    tmp = tempfile.mktemp()
-    print(f"{whoami()} - {tmp}")
-    f(tmp)
-    assert sha256sum(tmp) == hv
-
-
+@approve_text
 def test_maybe_makes_a_csv():
-    assert_output(
-        f=lambda tmp: subprocess.run([(distribution / "bin" / "gopro-to-csv.py"), clip, tmp]),
-        hv="fdaff024b8ca1c23b4a7d2073d68394e759e66aedfd999ec69b0d6068ec41577"
-    )
+    r = invoke([(distribution / "bin" / "gopro-to-csv.py"), clip, "-"])
+    print(r.stderr)
+    return r.stdout
 
 
+@approve_text
 def test_maybe_makes_a_csv_every_second():
-    assert_output(
-        f=lambda tmp: subprocess.run([(distribution / "bin" / "gopro-to-csv.py"), "--every", "1", clip, tmp]),
-        hv="1db3c7fa85138faf41f6de0d8dc6e0e07ed2187b11aa2896f0757def7ae53b75"
-    )
+    r = invoke([(distribution / "bin" / "gopro-to-csv.py"), "--every", "1", clip, "-"])
+    print(r.stderr)
+    return r.stdout
 
 
+@approve_text
 def test_maybe_makes_a_gpx():
-    assert_output(
-        f=lambda tmp: subprocess.run([(distribution / "bin" / "gopro-to-gpx.py"), clip, tmp]),
-        hv="4b43e46b63ac5aebf29358ce838e2c34d2298dab08e0311c355ba8d467a1d0d6"
-    )
+    r = invoke([(distribution / "bin" / "gopro-to-gpx.py"), clip, "-"])
+    print(r.stderr)
+    return r.stdout
 
 
+@approve_text
 def test_maybe_makes_a_gpx_every_second():
-    assert_output(
-        f=lambda tmp: subprocess.run([(distribution / "bin" / "gopro-to-gpx.py"), "--every", "1", clip, tmp]),
-        hv="f04e1fa5ef6956314710b0bc7d8378a843d97a0837f5edb91c0261f012b20f2c"
-    )
+    r = invoke([(distribution / "bin" / "gopro-to-gpx.py"), "--every", "1", clip, "-"])
+    print(r.stderr)
+    return r.stdout
 
 
 def test_maybe_clips_something():
     prog = distribution / "bin" / "gopro-cut.py"
-    subprocess.run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"], check=True)
+    run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"])
 
 
 def test_maybe_clips_something_with_duration():
     prog = distribution / "bin" / "gopro-cut.py"
-    subprocess.run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"], check=True)
+    run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"])
 
 
 def test_maybe_joins_some_files():
     prog = distribution / "bin" / "gopro-join.py"
-    subprocess.run([prog, to_join, joined], check=True)
+    run([prog, to_join, joined])
