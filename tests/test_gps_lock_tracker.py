@@ -1,7 +1,8 @@
 from collections import Counter
 
+from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.gpmd import GPSFix
-from gopro_overlay.gpmd_visitors_gps import GPSLockTracker, GPSLockComponents, GPSDOPFilter, GPSLockFilter, GPSMaxSpeedFilter
+from gopro_overlay.gpmd_visitors_gps import GPSLockTracker, GPSLockComponents, GPSDOPFilter, GPSLockFilter, GPSMaxSpeedFilter, GPSReportingFilter
 from gopro_overlay.point import Point
 
 
@@ -56,9 +57,9 @@ def test_max_speed_filter():
 
 
 def test_reporting_filter():
-    counter = Counter()
+    counter = ReasonCounter()
 
-    filter = GPSReportingFilter(GPSDOPFilter(10), submitted=lambda: counter.update({"DOP Submitted", 1}), rejected=lambda: counter.update({"DOP Rejected": 1}))
+    filter = GPSReportingFilter(GPSDOPFilter(10), submitted=counter.inc("DOP Submitted"), rejected=counter.inc("DOP Rejected"))
     assert filter.submit(GPSLockComponents(GPSFix.LOCK_2D, Point(1.0, 1.0), 8.0, 10)) == GPSFix.LOCK_2D
     assert filter.submit(GPSLockComponents(GPSFix.LOCK_2D, Point(1.0, 1.0), 8.0, 10.1)) == GPSFix.NO
     assert filter.submit(GPSLockComponents(GPSFix.LOCK_2D, Point(1.0, 1.0), 8.0, 10.1)) == GPSFix.NO

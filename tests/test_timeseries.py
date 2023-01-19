@@ -1,5 +1,7 @@
 import datetime
 
+import pytest
+
 from gopro_overlay.entry import Entry
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries
@@ -79,11 +81,11 @@ def metres(n):
 def test_process_gradient():
     processor = calculate_gradient()
     r = processor(
-        a=Entry(datetime_of(0), alt=metres(5), odo=metres(10)),
-        b=Entry(datetime_of(0), alt=metres(6), odo=metres(26)),
+        a=Entry(datetime_of(0), alt=metres(5), point=Point(51.50186, -0.14056)),
+        b=Entry(datetime_of(0), alt=metres(6), point=Point(51.50665, -0.12895)),
         c=None
     )
-    assert r["cgrad"].magnitude == 6.25
+    assert r["cgrad"].magnitude == pytest.approx(0.10348, abs=0.0001)
 
 
 def test_process_gradient_missing_alt():
