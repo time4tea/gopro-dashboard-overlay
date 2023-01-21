@@ -49,7 +49,15 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta)
     def processor(gopro_entry: Entry):
         try:
             gpx_entry = gpx_timeseries.get(gopro_entry.dt)
-            return gpx_entry.items
+
+            updates = {
+                "speed": None,
+                "dop": None,
+            }
+
+            updates.update(**gpx_entry.items)
+
+            return updates
         except ValueError:
             pass
 
@@ -69,7 +77,7 @@ def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datet
 
     stepper = gpx_timeseries.stepper(step=timeunits(seconds=0.1))
 
-    for index, pts in enumerate(stepper.steps()):
+    for pts in stepper.steps():
 
         entry = gpx_timeseries.get(pts)
 
@@ -88,8 +96,6 @@ def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datet
                 dt=point_datetime,
                 timestamp=units.Quantity(offset.millis(), units.number),
                 dop=units.Quantity(10, units.number),
-                packet=units.Quantity(index, units.number),
-                packet_index=units.Quantity(0, units.number),
                 **entry.items
             )
         )

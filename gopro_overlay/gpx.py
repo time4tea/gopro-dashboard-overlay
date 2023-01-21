@@ -1,6 +1,7 @@
 import collections
 import gzip
 from pathlib import Path
+from typing import List
 
 import gpxpy
 
@@ -57,13 +58,13 @@ def load(filepath: Path, units):
             return load_xml(gpx_file, units)
 
 
-def load_xml(file_or_str, units):
+def load_xml(file_or_str, units) -> List[GPX]:
     gpx = gpxpy.parse(file_or_str)
 
     return [with_unit(p, units) for p in fudge(gpx)]
 
 
-def gpx_to_timeseries(gpx):
+def gpx_to_timeseries(gpx: List[GPX], units):
     gpx_timeseries = Timeseries()
 
     points = [
@@ -76,10 +77,13 @@ def gpx_to_timeseries(gpx):
             atemp=point.atemp,
             power=point.power,
             speed=point.speed,
+            packet=units.Quantity(index),
+            packet_index=units.Quantity(0),
             # we should set the gps fix or Journey.accept() will skip the point:
             gpsfix=GPSFix.LOCK_3D.value,
+            gpslock=units.Quantity(GPSFix.LOCK_3D.value)
         )
-        for point in gpx
+        for index, point in enumerate(gpx)
     ]
 
     gpx_timeseries.add(*points)
@@ -87,5 +91,5 @@ def gpx_to_timeseries(gpx):
     return gpx_timeseries
 
 
-def load_timeseries(filepath: Path, units):
-    return gpx_to_timeseries(load(filepath, units))
+def load_timeseries(filepath: Path, units) -> Timeseries:
+    return gpx_to_timeseries(load(filepath, units), units)
