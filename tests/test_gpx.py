@@ -5,10 +5,14 @@ import gpxpy
 
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
+from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpx import gpx_to_timeseries
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point, BoundingBox
-from gopro_overlay.timeseries import Entry
+from gopro_overlay.timeseries import Entry, Timeseries
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 from tests.test_timeseries import datetime_of
 
@@ -45,9 +49,11 @@ def test_loading_a_simple_gpx_file():
     entries = list(gpx.load_xml(xml, units))
 
     assert len(entries) == 1
-    assert entries[0].lat == 1.23
-    assert entries[0].lon == 4.56
-    assert entries[0].hr is None
+    entry = entries[0]
+    assert entry.lat == 1.23
+    assert entry.lon == 4.56
+    assert entry.alt.m == 23
+    assert entry.hr is None
 
 
 def test_bugfix_20_gpsbabel_converted():
@@ -175,6 +181,17 @@ def test_loading_gpx_file():
     gpx.load(file_path_of_test_asset("test.gpx.gz"), units)
 
 
+def test_converting_gpx_item_to_timeseries():
+    dt = datetime_of(0)
+    xml = simple_gpx_file(Entry(dt=dt, point=Point(lat=1, lon=2), alt=units.Quantity(1, units.m)))
+    ts = gpx_to_timeseries(gpx.load_xml(xml, units), units)
+    assert len(ts) == 1
+    assert ts.get(dt).gpsfix == GPSFix.LOCK_3D.value
+    assert ts.get(dt).gpslock.m == GPSFix.LOCK_3D.value
+    assert ts.get(dt).packet.m == 0
+    assert ts.get(dt).packet_index.m == 0
+
+
 def test_converting_gpx_to_timeseries():
     ts = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
 
@@ -211,6 +228,60 @@ def test_merge_gpx_with_gopro():
     assert gpx_timeseries.max > gopro_framemeta.get(gopro_framemeta.max).dt
 
     merge_gpx_with_gopro(gpx_timeseries, gopro_framemeta)
+
+
+def test_merge_gpx_with_gopro_gpx_gps_location_and_speed_takes_priority():
+
+    dt = datetime_of(1)
+
+    gopro_data = FrameMeta()
+    t = timeunits(seconds=0)
+    gopro_data.add(t, Entry(dt=dt, point=Point(lat=1, lon=1), speed=units.Quantity(1, units.mps)))
+
+    gpx_data = Timeseries()
+    gpx_data.add(Entry(dt=dt, point=Point(lat=2, lon=2), speed=units.Quantity(2, units.mps)))
+
+    merge_gpx_with_gopro(gpx_data, gopro_data)
+
+    assert gopro_data.get(t).dt == dt
+    assert gopro_data.get(t).point == Point(lat=2, lon=2)
+    assert gopro_data.get(t).speed == units.Quantity(2, units.mps)
+
+def test_merge_gpx_with_gopro_gpx_dop_and_gpsfix_are_corrected():
+
+    dt = datetime_of(1)
+
+    gopro_data = FrameMeta()
+    t = timeunits(seconds=0)
+    gopro_data.add(t, Entry(dt=dt, dop=units.Quantity(99), gpsfix=GPSFix.UNKNOWN.value))
+
+    gpx_data = Timeseries()
+    gpx_data.add(Entry(dt=dt, gpsfix=GPSFix.LOCK_3D.value))
+
+    merge_gpx_with_gopro(gpx_data, gopro_data)
+
+    assert len(gopro_data) == 1
+    assert gopro_data.get(t).dt == dt
+    assert gopro_data.get(t).dop is None
+    assert gopro_data.get(t).gpsfix == GPSFix.LOCK_3D.value
+
+
+def test_merge_gpx_with_gopro_speed_is_removed_if_not_present_in_gpx():
+
+    dt = datetime_of(1)
+
+    gopro_data = FrameMeta()
+    t = timeunits(seconds=0)
+    gopro_data.add(t, Entry(dt=dt, speed=units.Quantity(1, units.mps)))
+
+    gpx_data = Timeseries()
+    gpx_data.add(Entry(dt=dt))
+
+    merge_gpx_with_gopro(gpx_data, gopro_data)
+
+    assert gopro_data.get(t).dt == dt
+    assert gopro_data.get(t).speed is None
+
 
 
 def test_converting_gpx_to_timeseries_to_framemeta():

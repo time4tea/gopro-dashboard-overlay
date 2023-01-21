@@ -116,6 +116,11 @@ class FrameMeta:
         self.frames[at_time] = entry
         self.modified = True
 
+    def clone(self) -> 'FrameMeta':
+        fm = FrameMeta()
+        [fm.add(t,e) for t,e in self.frames.items()]
+        return fm
+
     @property
     def min(self):
         self.check_modified()
