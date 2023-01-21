@@ -3,6 +3,7 @@ import sys
 from functools import wraps
 from pathlib import Path
 
+import pytest
 from PIL import ImageChops, Image, ImageStat
 
 from tests.testenvironment import is_ci
@@ -32,7 +33,11 @@ def approve_image(f):
             raise AssertionError(f"{function_name} needs to return the image it created")
 
         actual_image.save(actual_location, "PNG")
-        if approved_location.exists():
+        if not approved_location.exists():
+            print(f"cp {actual_location} {approved_location}", file=sys.stderr)
+            pytest.xfail(f"{function_name}: approved File does not exist, no assertion")
+
+        else:
             approved_image = Image.open(approved_location)
             difference = ImageChops.difference(actual_image, approved_image)
             stat = ImageStat.Stat(difference)
@@ -62,9 +67,6 @@ def approve_image(f):
                 print(f"If this is OK....", file=sys.stderr)
                 print(f"cp {actual_location} {approved_location}", file=sys.stderr)
                 raise AssertionError("Actual and Approved do not match")
-        else:
-            print(f"{function_name}: approved File does not exist, no assertion", file=sys.stderr)
-            print(f"cp {actual_location} {approved_location}", file=sys.stderr)
 
     return wrapper
 
@@ -96,6 +98,6 @@ def approve_text(f):
                 print(f"cp {actual_location} {approved_location}", file=sys.stderr)
                 raise AssertionError("Actual and Approved do not match")
         else:
-            print(f"{function_name}: approved File does not exist, no assertion", file=sys.stderr)
             print(f"cp {actual_location} {approved_location}", file=sys.stderr)
+            pytest.xfail(f"{function_name}: approved File does not exist, no assertion")
     return wrapper

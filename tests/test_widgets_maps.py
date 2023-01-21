@@ -1,8 +1,6 @@
-import random
 from datetime import timedelta
 
 import pytest
-from PIL import ImageFont
 
 from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
@@ -18,18 +16,13 @@ from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.map import MovingJourneyMap, view_window
 from gopro_overlay.widgets.widgets import Translate, Frame
+from tests import test_widgets_setup
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 from tests.testenvironment import is_make
 
-font = ImageFont.truetype(font='Roboto-Medium.ttf', size=18)
-title_font = font.font_variant(size=16)
-
-# Need reproducible results for approval tests
-rng = random.Random()
-rng.seed(12345)
-
-ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
+font = test_widgets_setup.font
+ts = test_widgets_setup.ts
 
 arguments.default_config_location.mkdir(parents=True, exist_ok=True)
 renderer = CachingRenderer(cache_dir=arguments.default_config_location)
