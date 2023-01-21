@@ -1,25 +1,15 @@
-import random
-from datetime import timedelta
-
 import pytest
-from PIL import ImageFont
 
-from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.widgets import Composite, Translate
 from gopro_overlay.widgets.compass_arrow import CompassArrow
+from gopro_overlay.widgets.widgets import Composite, Translate
+from tests import test_widgets_setup
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
-font = ImageFont.truetype(font='Roboto-Medium.ttf', size=18)
-title_font = font.font_variant(size=16)
-
-# Need reproducible results for approval tests
-rng = random.Random()
-rng.seed(12345)
-
-ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
+font = test_widgets_setup.font
+ts = test_widgets_setup.ts
 
 
 @pytest.mark.gfx
@@ -57,6 +47,7 @@ def test_compass_small():
                 ), )
             )
         ])
+
 
 @pytest.mark.gfx
 @approve_image

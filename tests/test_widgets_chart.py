@@ -1,12 +1,8 @@
 import itertools
-import random
-from datetime import timedelta
 from pathlib import Path
 
 import pytest
-from PIL import ImageFont
 
-from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import find_streams
 from gopro_overlay.framemeta import View, Window, framemeta_from
@@ -16,17 +12,13 @@ from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 from gopro_overlay.widgets.chart import SimpleChart
 from gopro_overlay.widgets.widgets import Translate, Composite
+from tests import test_widgets_setup
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
-font = ImageFont.truetype(font='Roboto-Medium.ttf', size=18)
-title_font = font.font_variant(size=16)
-
-# Need reproducible results for approval tests
-rng = random.Random()
-rng.seed(12345)
-
-ts = fake.fake_framemeta(timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
+font = test_widgets_setup.font
+title_font = test_widgets_setup.title_font
+ts = test_widgets_setup.ts
 
 
 @pytest.mark.gfx
@@ -175,23 +167,20 @@ def test_render_moving_chart():
 
 
 def load_test_file(inputpath):
-
     if not inputpath.exists():
         pytest.xfail("contrib file not exist")
 
-
     stream_info = find_streams(inputpath)
     return framemeta_from(
-            inputpath,
-            metameta=stream_info.meta,
-            units=units,
-            gps_lock_filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
-        )
+        inputpath,
+        metameta=stream_info.meta,
+        units=units,
+        gps_lock_filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
+    )
 
 
 @pytest.mark.gfx
 def test_example_chart():
-
     test_file = Path("/home/richja/dev/gopro-graphics/render/contrib/poor-gps/GX010303.MP4")
 
     ts = load_test_file(test_file)
