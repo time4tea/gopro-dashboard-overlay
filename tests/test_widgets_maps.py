@@ -19,6 +19,7 @@ from gopro_overlay.widgets.widgets import Translate, Frame
 from tests import test_widgets_setup
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
+from tests.test_widgets_setup import rng
 from tests.testenvironment import is_make
 
 font = test_widgets_setup.font
