@@ -62,7 +62,7 @@ setup(
         "bin/gopro-to-gpx.py",
         "bin/gopro-debug.py",
     ],
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     include_package_data=True,
     entry_points={
         "console_scripts": []
