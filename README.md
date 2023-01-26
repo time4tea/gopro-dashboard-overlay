@@ -34,7 +34,7 @@ Almost 30 different map styles are supported! - See [map styles](docs/maps/READM
 
 ## Requirements
 
-- Python3.8
+- Python3.10
 - ffmpeg (you'll need the ffmpeg program installed)
 - Unixy machine (probably, untested on Windows)
 
