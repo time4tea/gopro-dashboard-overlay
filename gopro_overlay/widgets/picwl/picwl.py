@@ -1,18 +1,17 @@
-import colorsys
 import dataclasses
 import math
 from enum import Enum, auto
-from typing import Callable, Tuple, List
+from typing import List
 
 import cairo
-from PIL import Image, ImageDraw
 
-from gopro_overlay.dimensions import Dimension
-from gopro_overlay.framemeta import FrameMeta
-from gopro_overlay.journey import Journey
-
-from gopro_overlay.point import Coordinate, Point
-from gopro_overlay.widgets.cairo import saved, to_pillow
+from gopro_overlay.point import Coordinate
+from gopro_overlay.widgets.cairo.cairo import saved
+from gopro_overlay.widgets.picwl.bordered import Border, AbstractBordered
+from gopro_overlay.widgets.picwl.box import abox
+from gopro_overlay.widgets.picwl.colours import Colour, WHITE, BLACK
+from gopro_overlay.widgets.picwl.constants import cos45
+from gopro_overlay.widgets.picwl.face import FontFace
 
 
 @dataclasses.dataclass(frozen=True)
@@ -98,102 +97,6 @@ class EllipseParameters:
 
 def tiny(f: float) -> bool:
     return abs(f) < 0.000001
-
-
-class CairoCircuit:
-
-    def __init__(self, dimensions: Dimension, framemeta: FrameMeta, location: Callable[[], Point]):
-        self.framemeta = framemeta
-        self.location = location
-        self.dimensions = dimensions
-        self.surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, dimensions.x, dimensions.y)
-
-        self.drawn = False
-
-    def draw(self, image: Image, draw: ImageDraw):
-        if not self.drawn:
-            journey = Journey()
-            self.framemeta.process(journey.accept)
-
-            bbox = journey.bounding_box
-            size = bbox.size() * 1.1
-
-            ctx = cairo.Context(self.surface)
-            ctx.scale(self.dimensions.x, self.dimensions.y)
-
-            def scale(point):
-                x = (point.lat - bbox.min.lat) / size.x
-                y = (point.lon - bbox.min.lon) / size.y
-                return x, y
-
-            start = journey.locations[0]
-            ctx.move_to(*scale(start))
-
-            [ctx.line_to(*scale(p)) for p in journey.locations[1:]]
-
-            line_width = 0.01
-
-            ctx.set_source_rgba(*Colour(0.3, 0.2, 0.5).rgba())
-            ctx.set_line_width(line_width)
-            ctx.stroke_preserve()
-
-            ctx.set_source_rgba(*WHITE.rgba())
-            ctx.set_line_width(line_width / 4)
-            ctx.stroke()
-
-            self.drawn = True
-
-        image.alpha_composite(to_pillow(self.surface), (0, 0))
-
-
-@dataclasses.dataclass(frozen=True)
-class HLSColour:
-    h: float
-    l: float
-    s: float
-    a: float
-
-    def lighten(self, by: float) -> 'HLSColour':
-        return HLSColour(self.h, min(self.l + by, 1.0), self.s, self.a)
-
-    def darken(self, by: float) -> 'HLSColour':
-        return HLSColour(self.h, max(self.l - by, 1.0), self.s, self.a)
-
-    def rgb(self) -> 'Colour':
-        r, g, b = colorsys.hls_to_rgb(self.h, self.l, self.s)
-        return Colour(r, g, b, self.a)
-
-
-@dataclasses.dataclass(frozen=True)
-class Colour:
-    r: float
-    g: float
-    b: float
-    a: float = 1.0
-
-    def rgba(self) -> Tuple[float, float, float, float]:
-        return self.r, self.g, self.b, self.a
-
-    def rgb(self) -> Tuple[float, float, float]:
-        return self.r, self.g, self.b
-
-    def hls(self) -> HLSColour:
-        h, l, s = colorsys.rgb_to_hls(self.r, self.g, self.b)
-        return HLSColour(h, l, s, self.a)
-
-    def darken(self, by: float) -> 'Colour':
-        return self.hls().darken(by).rgb()
-
-    def lighten(self, by: float) -> 'Colour':
-        return self.hls().lighten(by).rgb()
-
-    def alpha(self, new_alpha: float):
-        return Colour(self.r, self.g, self.b, new_alpha)
-
-
-BLACK = Colour(0.0, 0.0, 0.0)
-WHITE = Colour(1.0, 1.0, 1.0)
-RED = Colour(1.0, 0.0, 0.0)
 
 
 class Arc:
@@ -287,192 +190,6 @@ class EllipticScale:
             context.stroke()
 
 
-cos45 = math.sqrt(2.0) * 0.5
-
-
-@dataclasses.dataclass(frozen=True)
-class Box:
-    x1: float
-    y1: float
-    x2: float
-    y2: float
-
-
-def abox(x1, y1, x2, y2):
-    return Box(x1, y1, x2, y2)
-
-
-class ShadowMode(Enum):
-    ShadowNone = auto()
-    ShadowIn = auto()
-    ShadowOut = auto()
-    ShadowEtchedIn = auto()
-    ShadowEtchedOut = auto()
-
-
-class DrawingAction(Enum):
-    Region = auto()
-    Line = auto()
-    Contents = auto()
-
-
-darkenBy = 1.0 / 3
-lightenBy = 1.0 / 3
-
-
-@dataclasses.dataclass
-class Border:
-    width: float
-    depth: float
-    shadow: ShadowMode
-    colour: Colour
-
-    @staticmethod
-    def NONE() -> 'Border':
-        return Border(width=0.0, depth=0.0, shadow=ShadowMode.ShadowNone, colour=BLACK)
-
-
-class AbstractBordered:
-    def __init__(self, border: Border = Border.NONE()):
-        self.border_width = border.width
-        self.border_depth = border.depth
-        self.border_shadow = border.shadow
-        self.colour = border.colour
-        self.scaled = True
-
-    def set_contents_path(self, context: cairo.Context):
-        pass
-
-    def draw_contents(self, context: cairo.Context):
-        pass
-
-    def draw(self, context: cairo.Context):
-
-        if self.border_width > 0:
-            shadow_depth = self.border_depth
-        else:
-            shadow_depth = 0.0
-
-        with saved(context):
-            context.new_path()
-            self.set_contents_path(context)
-            context.close_path()
-
-            box = abox(*context.path_extents())
-
-            extent = abs(box.x2 - box.x1)
-
-            print(box)
-
-            box_centre = Coordinate(
-                x=(box.x2 + box.x1) * 0.5,
-                y=(box.y2 + box.y1) * 0.5
-            )
-
-            def _draw(shift: float, bound: float, width: float, action: DrawingAction = DrawingAction.Line):
-                F = (bound - width) / extent
-                S = shift * shadow_depth * 0.5
-
-                FX = F
-                FY = F
-
-                print(f"F = {F} S={S}")
-
-                context.new_path()
-                context.scale(FX, FY)
-                context.translate(
-                    box_centre.x * (1.0 / FX - 1.0) + S * cos45 / FX,
-                    box_centre.y * (1.0 / FY - 1.0) + S * cos45 / FY
-                )
-                context.append_path(path)
-                context.set_line_width(width / F)
-
-                if action == DrawingAction.Line:
-                    context.stroke()
-                elif action == DrawingAction.Region:
-                    context.fill()
-                elif action == DrawingAction.Contents:
-                    self.draw_contents(context)
-
-            if self.scaled:
-                outer_size = extent
-                inner_size = extent - 2.0 * self.border_width
-                middle_size = outer_size
-            else:
-                inner_size = extent
-                outer_size = extent + 2.0 * self.border_width
-
-                if self.border_shadow == ShadowMode.ShadowNone:
-                    middle_size = outer_size
-                elif self.border_shadow == ShadowMode.ShadowIn:
-                    outer_size = outer_size + 2.0 * shadow_depth
-                    middle_size = outer_size
-                elif self.border_shadow == ShadowMode.ShadowOut:
-                    outer_size = outer_size + shadow_depth
-                    middle_size = outer_size - 2.0 * shadow_depth
-                elif self.border_shadow in [ShadowMode.ShadowEtchedIn, ShadowMode.ShadowEtchedOut]:
-                    outer_size = outer_size + 2.0 * shadow_depth
-                    middle_size = outer_size - 2.0 * shadow_depth
-
-            def set_normal():
-                context.set_source_rgba(*self.colour.rgba())
-
-            def set_light():
-                context.set_source_rgba(*self.colour.lighten(lightenBy).rgba())
-
-            def set_dark():
-                context.set_source_rgba(*self.colour.darken(darkenBy).rgba())
-
-            if inner_size > 0:
-                path = context.copy_path()
-
-                if self.border_shadow == ShadowMode.ShadowNone:
-                    if self.border_width > 0.0:
-                        set_normal()
-                        _draw(0.0, middle_size, 0.0)
-                elif self.border_shadow == ShadowMode.ShadowIn:
-                    if self.border_width > 0.0:
-                        set_normal()
-                        _draw(0.0, middle_size, 0.0)
-                    set_dark()
-                    _draw(-1.0, inner_size + shadow_depth, shadow_depth)
-                    set_light()
-                    _draw(1.0, inner_size + shadow_depth, shadow_depth)
-                elif self.border_shadow == ShadowMode.ShadowOut:
-                    set_light()
-                    _draw(-1.0, outer_size - shadow_depth, shadow_depth)
-                    set_dark()
-                    _draw(1.0, outer_size - shadow_depth, shadow_depth)
-                    if self.border_width > 0.0:
-                        set_normal()
-                        _draw(0.0, middle_size, 0.0)
-                elif self.border_shadow == ShadowMode.ShadowEtchedIn:
-                    set_dark()
-                    _draw(-1.0, outer_size - shadow_depth, shadow_depth)
-                    set_light()
-                    _draw(1.0, outer_size - shadow_depth, shadow_depth)
-                    if self.border_width > 0.0:
-                        set_normal()
-                        _draw(0.0, middle_size, 0.0)
-                    set_light()
-                    _draw(-1.0, inner_size + shadow_depth, shadow_depth)
-                    set_dark()
-                    _draw(1.0, inner_size + shadow_depth, shadow_depth)
-                elif self.border_shadow == ShadowMode.ShadowEtchedOut:
-                    set_light()
-                    _draw(-1.0, outer_size - shadow_depth, shadow_depth)
-                    set_dark()
-                    _draw(1.0, outer_size - shadow_depth, shadow_depth)
-                    if self.border_width > 0.0:
-                        set_normal()
-                        _draw(0.0, middle_size, 0.0)
-                    set_dark()
-                    _draw(-1.0, inner_size + shadow_depth, shadow_depth)
-                    set_light()
-                    _draw(1.0, inner_size + shadow_depth, shadow_depth)
-                _draw(0.0, inner_size, 0.0, DrawingAction.Contents)
-
-
 class EllipticBackground(AbstractBordered):
     def __init__(self, arc: Arc, colour: Colour = BLACK, border=Border.NONE()):
         super().__init__(border=border)
@@ -545,91 +262,6 @@ class Cap(AbstractBordered):
         # context.stroke()
 
 
-@dataclasses.dataclass(frozen=True)
-class NeedleParameter:
-    width: float
-    length: float
-    cap: cairo.LineCap = cairo.LINE_CAP_BUTT
-
-    @property
-    def radius(self):
-        return self.width / 2.0
-
-
-class Needle:
-
-    def __init__(self, centre: Coordinate,
-                 value: Callable[[], float],
-                 start: float, length: float,
-                 tip: NeedleParameter, rear: NeedleParameter,
-                 colour: Colour):
-        self.centre = centre
-        self.colour = colour
-        self.rear = rear
-        self.tip = tip
-        self.length = length
-        self.start = start
-        self.value = value
-
-    def draw(self, context: cairo.Context):
-        with saved(context):
-            context.new_path()
-            context.translate(*self.centre.tuple())
-            context.rotate(self.start + self.value() * self.length)
-
-            tip = self.tip
-            rear = self.rear
-
-            if tip.cap == cairo.LINE_CAP_BUTT:
-                context.move_to(tip.length, -tip.radius)
-                context.line_to(tip.length, tip.radius)
-            elif tip.cap == cairo.LINE_CAP_ROUND:
-
-                angle = math.atan2(
-                    tip.radius - rear.radius,
-                    tip.length + rear.length
-                )
-                cos_angle = math.cos(angle)
-                sin_angle = math.sin(angle)
-
-                context.move_to(tip.length + tip.radius * sin_angle, -tip.radius * cos_angle)
-                context.arc(tip.length, 0.0, tip.radius, angle - math.pi / 2.0, math.pi / 2.0 - angle)
-                context.line_to(tip.length + tip.radius * sin_angle, tip.radius * cos_angle)
-
-            elif tip.cap == cairo.LINE_CAP_SQUARE:
-                context.move_to(tip.length, -tip.radius)
-                context.line_to(tip.length + tip.radius * math.sqrt(2.0), 0.0)
-                context.line_to(tip.length, tip.radius)
-            else:
-                raise ValueError("Unsupported needle tip type")
-
-            if rear.cap == cairo.LINE_CAP_BUTT:
-                context.line_to(-rear.length, rear.radius)
-                context.line_to(-rear.length, -rear.radius)
-            elif tip.cap == cairo.LINE_CAP_ROUND:
-                angle = math.atan2(
-                    rear.radius - tip.radius,
-                    tip.length + rear.length
-                )
-                cos_angle = math.cos(angle)
-                sin_angle = math.sin(angle)
-
-                context.line_to(-rear.length - rear.radius * sin_angle, rear.radius * cos_angle)
-                context.arc(-rear.length, 0.0, rear.radius, math.pi / 2.0 - angle, angle - math.pi / 2.0)
-                context.line_to(-rear.length - rear.radius * sin_angle, -rear.radius * cos_angle)
-
-            elif tip.cap == cairo.LINE_CAP_SQUARE:
-                context.line_to(-rear.length, rear.radius)
-                context.line_to(-rear.length - rear.radius * math.sqrt(2.0), 0.0)
-                context.line_to(-rear.length, -rear.radius)
-            else:
-                raise ValueError("Unsupported needle rear type")
-
-            context.close_path()
-            context.set_source_rgba(*self.colour.rgba())
-
-            context.fill()
-
 
 class AnnotationMode(Enum):
     MovedInside = auto()
@@ -637,34 +269,6 @@ class AnnotationMode(Enum):
     MovedCentred = auto()
     Rotated = auto()
     Skewed = auto()
-
-
-class FontFace:
-
-    def text_extents(self, context: cairo.Context, text: str) -> cairo.TextExtents:
-        raise NotImplementedError()
-
-    def show(self, context: cairo.Context, text: str):
-        raise NotImplementedError()
-
-
-class PangoFontFace(FontFace):
-    pass
-
-
-class ToyFontFace(FontFace):
-
-    def __init__(self, family: str, slant: cairo.FontSlant = cairo.FONT_SLANT_NORMAL,
-                 weight: cairo.FontWeight = cairo.FONT_WEIGHT_NORMAL):
-        self.face = cairo.ToyFontFace(family, slant, weight)
-
-    def text_extents(self, context: cairo.Context, text: str) -> cairo.TextExtents:
-        context.set_font_face(self.face)
-        return context.text_extents(text)
-
-    def show(self, context: cairo.Context, text: str):
-        context.set_font_face(self.face)
-        context.show_text(text)
 
 
 class EllipticAnnotation:

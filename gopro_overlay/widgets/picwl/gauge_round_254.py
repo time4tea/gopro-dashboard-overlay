@@ -3,9 +3,11 @@ import math
 import cairo
 
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.picwl.picwl import EllipticBackground, Arc, EllipseParameters, WHITE, Cap, Colour, \
-    EllipticScale, TickParameters, LineParameters, BLACK, Needle, NeedleParameter, RED, EllipticAnnotation, ToyFontFace, \
-    AnnotationMode
+from gopro_overlay.widgets.picwl.colours import WHITE, BLACK, RED
+from gopro_overlay.widgets.picwl.needle import Needle, NeedleParameter
+from gopro_overlay.widgets.picwl.picwl import EllipticBackground, Arc, EllipseParameters, Cap, Colour, \
+    EllipticScale, TickParameters, LineParameters, EllipticAnnotation, AnnotationMode
+from gopro_overlay.widgets.picwl.face import ToyFontFace
 
 
 class GaugeRound254:
