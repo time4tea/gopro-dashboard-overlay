@@ -208,6 +208,8 @@ https://github.com/JuanIrache/gopro-telemetry
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
+- 0.80.0 [Fix] Use speeds from GPX file, in preference to GoPro file, when using GPX and GoPro together.
+  - [Change] Bump Required python version to 3.10
 - 0.79.0 [Fix] Changed GPS filtering reporting, it was a bit off.
 - 0.78.0 [Fix] Gradient calculation had become disabled.
   - [Feature] Can now filter GPS points by max DOP `--gps-dop-max`
