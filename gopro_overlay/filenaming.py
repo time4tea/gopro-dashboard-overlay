@@ -27,7 +27,8 @@ def gopro_files_in(path:Path) -> List[Path]:
         if GoProFile.is_valid_filepath(path):
             return [path]
     elif path.is_dir():
-        return [path / f for f in os.listdir(path) if GoProFile.is_valid_filepath(f)]
+        potentials = [ path / f for f in os.listdir(path) ]
+        return [p for p in potentials if GoProFile.is_valid_filepath(p)]
     else:
         raise ValueError(f"{path} is not file or directory?")
 
@@ -54,6 +55,9 @@ class GoProFile:
             l=self.letter,
             n=f"{self.recording:04}"
         ))
-        found = [GoProFile(Path(name)) for name in listdir(d) if find.match(name)]
+
+        potentials = [ d / name for name in listdir(d) ]
+
+        found = [GoProFile(p) for p in potentials if find.match(p.name)]
         found.sort(key=lambda f: f.sequence)
         return found

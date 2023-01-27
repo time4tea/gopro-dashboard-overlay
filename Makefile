@@ -58,13 +58,20 @@ CURRENT_VERSION=$(shell PYTHONPATH=. python3 -c 'import gopro_overlay.__version_
 version:
 	@echo $(CURRENT_VERSION)
 
-.PHONY:
-test-distribution: dist
+
+.PHONY: test-distribution-install
+test-distribution-install: dist
 	@echo "Current Version is $(CURRENT_VERSION)"
 	rm -rf $(DIST_TEST)
 	python3 -m venv $(DIST_TEST)/venv
 	$(DIST_TEST)/venv/bin/pip install wheel dist/gopro-overlay-$(CURRENT_VERSION).tar.gz
+
+.PHONY: test-distribution-test
+test-distribution-test:
 	DISTRIBUTION=$(DIST_TEST)/venv $(BIN)/pytest --capture sys --show-capture all tests-dist
+
+.PHONY: test-distribution
+test-distribution: test-distribution-install test-distribution-test
 
 
 .PHONY: ensure-not-released

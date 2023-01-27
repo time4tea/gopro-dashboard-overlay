@@ -117,3 +117,24 @@ def test_maybe_clips_something_with_duration():
 def test_maybe_joins_some_files():
     prog = distribution / "bin" / "gopro-join.py"
     run([prog, to_join, joined])
+
+
+def test_maybe_rename_some_files_in_a_folder():
+    prog = distribution / "bin" / "gopro-rename.py"
+    output = invoke([prog, "--dirs", join_dir]).stderr
+    assert "GH010051.MP4" in output
+    assert "20210905-062805.MP4" in output
+
+    assert "GH020051.MP4" in output
+    assert "20210905-074046.MP4" in output
+
+    assert "GH030051.MP4" in output
+    assert "20210905-083538.MP4" in output
+
+
+def test_maybe_rename_some_files():
+    prog = distribution / "bin" / "gopro-rename.py"
+    print(prog)
+    output = invoke([prog, to_join]).stderr
+    assert "GH010051.MP4" in output
+    assert "20210905-062805.MP4" in output
