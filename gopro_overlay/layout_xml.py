@@ -1,5 +1,4 @@
 import importlib
-import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Callable, Optional
@@ -34,7 +33,6 @@ def load_xml_layout(filepath: Path):
             return f.read()
 
 
-
 def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
                     decorator: Optional[WidgetProfiler] = None):
     root = ET.fromstring(xml)
@@ -45,7 +43,6 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         return fonts.setdefault(size, font.font_variant(size=size))
 
     factory = Widgets(font_at, privacy, renderer, framemeta)
-
 
     def name_of(element):
         return attrib(element, "name", d=None)
@@ -224,34 +221,35 @@ def metric_accessor_from(name):
     raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
 
 
-def metric_converter_from(name):
-    if name is None:
-        return lambda x: x
-    converters = {
-        # speed
-        "mph": lambda u: u.to("MPH"),
-        "kph": lambda u: u.to("KPH"),
-        "knots": lambda u: u.to("knot"),
+class Converters:
+    def converter(self, name):
+        if name is None:
+            return lambda x: x
+        converters = {
+            # speed
+            "mph": lambda u: u.to("MPH"),
+            "kph": lambda u: u.to("KPH"),
+            "knots": lambda u: u.to("knot"),
 
-        # accel
-        "G": lambda u: u.to("gravity"),
+            # accel
+            "G": lambda u: u.to("gravity"),
 
-        # alt / dist
-        "feet": lambda u: u.to("international_feet"),
-        "miles": lambda u: u.to("mile"),
-        "metres": lambda u: u.to("m"),
-        "nautical_miles": lambda u: u.to("nautical_mile"),
-    }
-    if name in converters:
-        return converters[name]
+            # alt / dist
+            "feet": lambda u: u.to("international_feet"),
+            "miles": lambda u: u.to("mile"),
+            "metres": lambda u: u.to("m"),
+            "nautical_miles": lambda u: u.to("nautical_mile"),
+        }
+        if name in converters:
+            return converters[name]
 
-    # Try to see if specified unit is recognised by pint... if so allow it - this only means its a valid
-    # unit, but actual metric might be different... if unconvertible it will blow up later...
-    try:
-        units.Quantity(1, units=name)
-        return lambda u: u.to(name)
-    except Exception as e:
-        raise IOError(f"The conversion '{name}' is not supported.")
+        # Try to see if specified unit is recognised by pint... if so allow it - this only means its a valid
+        # unit, but actual metric might be different... if unconvertible it will blow up later...
+        try:
+            units.Quantity(1, units=name)
+            return lambda u: u.to(name)
+        except Exception as e:
+            raise IOError(f"The conversion '{name}' is not supported.")
 
 
 def formatter_from(element):
@@ -301,6 +299,7 @@ class Widgets:
         self.renderer = renderer
         self.privacy = privacy
         self.font = font
+        self.converters = Converters()
 
     def create_metric(self, element, entry, **kwargs) -> Widget:
         return metric(
@@ -309,7 +308,7 @@ class Widgets:
             accessor=metric_accessor_from(attrib(element, "metric")),
             formatter=formatter_from(element),
             font=self.font(iattrib(element, "size", d=16)),
-            converter=metric_converter_from(attrib(element, "units", d=None)),
+            converter=self.converters.converter(attrib(element, "units", d=None)),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),
             fill=rgbattr(element, "rgb", d=(255, 255, 255)),
@@ -403,7 +402,7 @@ class Widgets:
 
     def create_chart(self, element, entry, **kwargs) -> Widget:
         accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
-        converter = metric_converter_from(attrib(element, "units", d="metres"))
+        converter = self.converters.converter(attrib(element, "units", d="metres"))
 
         def value(e):
             v = accessor(e)
@@ -467,7 +466,7 @@ class Widgets:
             reading=metric_value(
                 entry,
                 accessor=metric_accessor_from(attrib(element, "metric")),
-                converter=metric_converter_from(attrib(element, "units", d=None)),
+                converter=self.converters.converter(attrib(element, "units", d=None)),
                 formatter=lambda x: x,
                 default=0
             ),
@@ -489,7 +488,7 @@ class Widgets:
             reading=metric_value(
                 entry,
                 accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
-                converter=metric_converter_from(attrib(element, "units", d="knots")),
+                converter=self.converters.converter(attrib(element, "units", d="knots")),
                 formatter=lambda x: x,
                 default=0
             ),
