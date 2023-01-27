@@ -34,6 +34,7 @@ def load_xml_layout(filepath: Path):
             return f.read()
 
 
+
 def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
                     decorator: Optional[WidgetProfiler] = None):
     root = ET.fromstring(xml)
@@ -42,6 +43,9 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
     def font_at(size):
         return fonts.setdefault(size, font.font_variant(size=size))
+
+    factory = Widgets(font_at, privacy, renderer, framemeta)
+
 
     def name_of(element):
         return attrib(element, "name", d=None)
@@ -69,15 +73,14 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
             attr = f"create_{component_type}"
 
-            if not hasattr(sys.modules[__name__], attr):
+            if not hasattr(factory, attr):
                 raise IOError(f"Component of type of '{component_type}' is not recognised, check spelling / examples")
 
-            method = getattr(sys.modules[__name__], attr)
+            method = getattr(factory, attr)
             return decorate(
                 name=name_of(child),
                 level=level,
-                widget=method(child, entry=entry, renderer=renderer, timeseries=framemeta, font=font_at,
-                              privacy=privacy)
+                widget=method(child, entry=entry)
             )
 
         def create_composite(element, level):
@@ -199,9 +202,9 @@ def metric_accessor_from(name):
         "cog": lambda e: e.cog,
 
         "gps-dop": lambda e: e.dop,
-        "timestamp": lambda e:e.timestamp,
-        "gps-packet": lambda e:e.packet,
-        "gps-packet-index": lambda e:e.packet_index,
+        "timestamp": lambda e: e.timestamp,
+        "gps-packet": lambda e: e.packet,
+        "gps-packet-index": lambda e: e.packet_index,
         "gps-lock": lambda e: e.gpslock,
 
         "accl.x": lambda e: e.accl.x if e.accl else None,
@@ -270,31 +273,6 @@ def formatter_from(element):
         return lambda v: format(v, f".{dp}f")
 
 
-def create_metric(element, entry, font, **kwargs) -> Widget:
-    return metric(
-        at=at(element),
-        entry=entry,
-        accessor=metric_accessor_from(attrib(element, "metric")),
-        formatter=formatter_from(element),
-        font=font(iattrib(element, "size", d=16)),
-        converter=metric_converter_from(attrib(element, "units", d=None)),
-        align=attrib(element, "align", d="left"),
-        cache=battrib(element, "cache", d=True),
-        fill=rgbattr(element, "rgb", d=(255, 255, 255)),
-        stroke=rgbattr(element, "outline", d=(0, 0, 0)),
-        stroke_width=iattrib(element, "outline_width", d=2),
-    )
-
-
-def create_icon(element, **kwargs) -> Widget:
-    return simple_icon(
-        at=at(element),
-        file=attrib(element, "file"),
-        size=iattrib(element, "size", d=64),
-        invert=battrib(element, "invert", d=True)
-    )
-
-
 def date_formatter_from(entry: Callable[[], Entry], format_string, truncate=0, tz=None) -> Callable[[], str]:
     if truncate > 0:
         return lambda: entry().dt.astimezone(tz=tz).strftime(format_string)[:-truncate]
@@ -309,128 +287,6 @@ def date_formatter_from_element(element, entry: Callable[[], Entry]):
     return date_formatter_from(entry, format_string, truncate)
 
 
-def create_datetime(element, entry, font, **kwargs):
-    return text(
-        at=at(element),
-        value=date_formatter_from_element(element, entry),
-        font=font(iattrib(element, "size", d=16)),
-        align=attrib(element, "align", d="left"),
-        cache=battrib(element, "cache", d=True),
-        fill=rgbattr(element, "rgb", d=(255, 255, 255))
-    )
-
-
-def create_text(element, font, **kwargs) -> Widget:
-    if element.text is None:
-        raise IOError("Text components should have the text in the element like <component...>Text</component>")
-
-    return text(
-        at=at(element),
-        value=lambda: element.text,
-        font=font(iattrib(element, "size", d=16)),
-        align=attrib(element, "align", d="left"),
-        direction=attrib(element, "direction", d="ltr"),
-        fill=rgbattr(element, "rgb", d=(255, 255, 255)),
-        stroke=rgbattr(element, "outline", d=(0, 0, 0)),
-        stroke_width=iattrib(element, "outline_width", d=2),
-    )
-
-
-def create_moving_map(element, entry, renderer, **kwargs) -> Widget:
-    return moving_map(
-        at=at(element),
-        entry=entry,
-        size=iattrib(element, "size", d=256),
-        zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
-        renderer=renderer,
-        corner_radius=iattrib(element, "corner_radius", 0),
-        opacity=fattrib(element, "opacity", 0.7),
-        rotate=battrib(element, "rotate", d=True)
-    )
-
-
-def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
-    return journey_map(
-        at(element),
-        entry,
-        privacy_zone=privacy,
-        renderer=renderer,
-        timeseries=timeseries,
-        size=iattrib(element, "size", d=256),
-        corner_radius=iattrib(element, "corner_radius", 0),
-        opacity=fattrib(element, "opacity", 0.7)
-    )
-
-
-def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
-    return MovingJourneyMap(
-        location=lambda: entry().point,
-        privacy_zone=privacy,
-        renderer=renderer,
-        timeseries=timeseries,
-        size=iattrib(element, "size", d=256),
-        zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
-    )
-
-
-def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
-    size = iattrib(element, "size", d=256)
-    return Circuit(
-        location=lambda: entry().point,
-        privacy_zone=privacy,
-        framemeta=timeseries,
-        dimensions=Dimension(size, size),
-        fill=rgbattr(element, "fill", d=(255, 0, 0)),
-        outline=rgbattr(element, "outline", d=(255, 255, 255)),
-        fill_width=iattrib(element, "fill_width", d=4),
-        outline_width=iattrib(element, "outline_width", d=0)
-    )
-
-
-def create_gradient_chart(*args, **kwargs):
-    log("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
-    return create_chart(*args, **kwargs)
-
-
-def create_chart(element, entry, timeseries, font, **kwargs) -> Widget:
-    accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
-    converter = metric_converter_from(attrib(element, "units", d="metres"))
-
-    def value(e):
-        v = accessor(e)
-        if v is not None:
-            v = converter(v)
-            return v.magnitude
-        return None
-
-    window = Window(
-        timeseries,
-        duration=timeunits(seconds=iattrib(element, "seconds", d=5 * 60)),
-        samples=iattrib(element, "samples", d=256),
-        key=value
-    )
-
-    title = font(iattrib(element, "size_title", d=16))
-    values = battrib(element, "values", d=True)
-    if not values:
-        title = None
-
-    return Translate(
-        at=at(element),
-        widget=SimpleChart(
-            value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
-            font=title,
-            filled=battrib(element, "filled", d=True),
-            height=iattrib(element, "height", d=64),
-            bg=rgbattr(element, "bg", d=(0, 0, 0, 170)),
-            fill=rgbattr(element, "fill", d=(91, 113, 146)),
-            line=rgbattr(element, "line", d=(255, 255, 255)),
-            text=rgbattr(element, "text", d=(255, 255, 255)),
-            alpha=iattrib(element, "alpha", d=179, r=range(0, 256)),
-        )
-    )
-
-
 def nonesafe(v):
     if v is not None:
         return v.magnitude
@@ -438,87 +294,228 @@ def nonesafe(v):
         return 0
 
 
-def create_compass(element, entry, timeseries, font, **kwargs) -> Widget:
-    return Compass(
-        size=iattrib(element, "size", d=256),
-        reading=lambda: nonesafe(entry().cog),
-        font=font(iattrib(element, "textsize", d=16)),
-        fg=rgbattr(element, "fg", d=(255, 255, 255)),
-        bg=rgbattr(element, "bg", d=None),
-        text=rgbattr(element, "text", d=(255, 255, 255)),
-    )
+class Widgets:
 
+    def __init__(self, font, privacy, renderer, framemeta):
+        self.framemeta = framemeta
+        self.renderer = renderer
+        self.privacy = privacy
+        self.font = font
 
-def create_compass_arrow(element, entry, timeseries, font, **kwargs) -> Widget:
-    return CompassArrow(
-        size=iattrib(element, "size", d=256),
-        reading=lambda: nonesafe(entry().cog),
-        font=font(iattrib(element, "textsize", d=32)),
-        arrow=rgbattr(element, "arrow", d=(255, 255, 255)),
-        bg=rgbattr(element, "bg", d=(0, 0, 0, 0)),
-        text=rgbattr(element, "text", d=(255, 255, 255)),
-        outline=rgbattr(element, "outline", d=(0, 0, 0)),
-        arrow_outline=rgbattr(element, "arrow_outline", d=(0, 0, 0)),
-    )
-
-
-def create_bar(element, entry, timeseries, font, **kwargs) -> Widget:
-    return Bar(
-        size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
-        reading=metric_value(
-            entry,
+    def create_metric(self, element, entry, **kwargs) -> Widget:
+        return metric(
+            at=at(element),
+            entry=entry,
             accessor=metric_accessor_from(attrib(element, "metric")),
+            formatter=formatter_from(element),
+            font=self.font(iattrib(element, "size", d=16)),
             converter=metric_converter_from(attrib(element, "units", d=None)),
-            formatter=lambda x: x,
-            default=0
-        ),
-        fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
-        zero=rgbattr(element, "zero", d=(255, 255, 255)),
-        bar=rgbattr(element, "bar", d=(255, 255, 255)),
-        outline=rgbattr(element, "outline", d=(255, 255, 255)),
-        outline_width=iattrib(element, "outline-width", d=3),
-        highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),
-        highlight_colour_positive=rgbattr(element, "h-pos", d=(0, 255, 0)),
-        max_value=iattrib(element, "max", d=20),
-        min_value=iattrib(element, "min", d=-20),
-        cr=iattrib(element, "cr", d=5),
-    )
+            align=attrib(element, "align", d="left"),
+            cache=battrib(element, "cache", d=True),
+            fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+            stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+            stroke_width=iattrib(element, "outline_width", d=2),
+        )
 
+    def create_icon(self, element, **kwargs) -> Widget:
+        return simple_icon(
+            at=at(element),
+            file=attrib(element, "file"),
+            size=iattrib(element, "size", d=64),
+            invert=battrib(element, "invert", d=True)
+        )
 
-def create_asi(element, entry, timeseries, font, **kwargs) -> Widget:
-    return AirspeedIndicator(
-        size=iattrib(element, "size", d=256),
-        reading=metric_value(
+    def create_datetime(self, element, entry, **kwargs):
+        return text(
+            at=at(element),
+            value=date_formatter_from_element(element, entry),
+            font=self.font(iattrib(element, "size", d=16)),
+            align=attrib(element, "align", d="left"),
+            cache=battrib(element, "cache", d=True),
+            fill=rgbattr(element, "rgb", d=(255, 255, 255))
+        )
+
+    def create_text(self, element, entry, **kwargs) -> Widget:
+        if element.text is None:
+            raise IOError("Text components should have the text in the element like <component...>Text</component>")
+
+        return text(
+            at=at(element),
+            value=lambda: element.text,
+            font=self.font(iattrib(element, "size", d=16)),
+            align=attrib(element, "align", d="left"),
+            direction=attrib(element, "direction", d="ltr"),
+            fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+            stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+            stroke_width=iattrib(element, "outline_width", d=2),
+        )
+
+    def create_moving_map(self, element, entry, **kwargs) -> Widget:
+        return moving_map(
+            at=at(element),
+            entry=entry,
+            size=iattrib(element, "size", d=256),
+            zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
+            renderer=self.renderer,
+            corner_radius=iattrib(element, "corner_radius", 0),
+            opacity=fattrib(element, "opacity", 0.7),
+            rotate=battrib(element, "rotate", d=True)
+        )
+
+    def create_journey_map(self, element, entry, **kwargs) -> Widget:
+        return journey_map(
+            at(element),
             entry,
-            accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
-            converter=metric_converter_from(attrib(element, "units", d="knots")),
-            formatter=lambda x: x,
-            default=0
-        ),
-        font=font(iattrib(element, "textsize", d=16)),
-        Vs0=iattrib(element, "vs0", d=40),
-        Vs=iattrib(element, "vs", d=46),
-        Vfe=iattrib(element, "vfe", d=103),
-        Vno=iattrib(element, "vno", d=126),
-        Vne=iattrib(element, "vne", d=180),
-        rotate=iattrib(element, "rotate", d=0),
-    )
+            privacy_zone=self.privacy,
+            renderer=self.renderer,
+            timeseries=self.framemeta,
+            size=iattrib(element, "size", d=256),
+            corner_radius=iattrib(element, "corner_radius", 0),
+            opacity=fattrib(element, "opacity", 0.7)
+        )
 
+    def create_moving_journey_map(self, element, entry, **kwargs) -> Widget:
+        return MovingJourneyMap(
+            location=lambda: entry().point,
+            privacy_zone=self.privacy,
+            renderer=self.renderer,
+            timeseries=self.framemeta,
+            size=iattrib(element, "size", d=256),
+            zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
+        )
 
-def create_cairo_circuit_map(*args, **kwargs):
-    try:
-        import gopro_overlay.layout_xml_cairo
-        return gopro_overlay.layout_xml_cairo.create_cairo_circuit_map(*args, **kwargs)
-    except ModuleNotFoundError:
-        raise IOError("This widget needs pycairo to be installed - please see docs") from None
+    def create_circuit_map(self, element, entry, **kwargs) -> Widget:
+        size = iattrib(element, "size", d=256)
+        return Circuit(
+            location=lambda: entry().point,
+            privacy_zone=self.privacy,
+            framemeta=self.framemeta,
+            dimensions=Dimension(size, size),
+            fill=rgbattr(element, "fill", d=(255, 0, 0)),
+            outline=rgbattr(element, "outline", d=(255, 255, 255)),
+            fill_width=iattrib(element, "fill_width", d=4),
+            outline_width=iattrib(element, "outline_width", d=0)
+        )
 
-def create_gps_lock_icon(element, entry, timeseries, font, **kwargs) -> Widget:
-    at = Coordinate(0,0)
-    size = iattrib(element, "size", d=64)
-    return GPSLock(
-        fix=lambda: entry().gpsfix,
-        lock_no=simple_icon(at, attrib(element, "lock_none", d="gps_lock_none.png"), size ),
-        lock_unknown=simple_icon(at, attrib(element, "lock_unknown", d="gps_lock_unknown.png"), size ),
-        lock_2d=simple_icon(at, attrib(element, "lock_2d", d="gps_lock_2d.png"), size ),
-        lock_3d=simple_icon(at, attrib(element, "lock_3d", d="gps_lock_3d.png"), size ),
-    )
+    def create_gradient_chart(self, *args, **kwargs):
+        log("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
+        return self.create_chart(*args, **kwargs)
+
+    def create_chart(self, element, entry, **kwargs) -> Widget:
+        accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
+        converter = metric_converter_from(attrib(element, "units", d="metres"))
+
+        def value(e):
+            v = accessor(e)
+            if v is not None:
+                v = converter(v)
+                return v.magnitude
+            return None
+
+        window = Window(
+            self.framemeta,
+            duration=timeunits(seconds=iattrib(element, "seconds", d=5 * 60)),
+            samples=iattrib(element, "samples", d=256),
+            key=value
+        )
+
+        title = self.font(iattrib(element, "size_title", d=16))
+        values = battrib(element, "values", d=True)
+        if not values:
+            title = None
+
+        return Translate(
+            at=at(element),
+            widget=SimpleChart(
+                value=lambda: window.view(timeunits(millis=entry().timestamp.magnitude)),
+                font=title,
+                filled=battrib(element, "filled", d=True),
+                height=iattrib(element, "height", d=64),
+                bg=rgbattr(element, "bg", d=(0, 0, 0, 170)),
+                fill=rgbattr(element, "fill", d=(91, 113, 146)),
+                line=rgbattr(element, "line", d=(255, 255, 255)),
+                text=rgbattr(element, "text", d=(255, 255, 255)),
+                alpha=iattrib(element, "alpha", d=179, r=range(0, 256)),
+            )
+        )
+
+    def create_compass(self, element, entry, **kwargs) -> Widget:
+        return Compass(
+            size=iattrib(element, "size", d=256),
+            reading=lambda: nonesafe(entry().cog),
+            font=self.font(iattrib(element, "textsize", d=16)),
+            fg=rgbattr(element, "fg", d=(255, 255, 255)),
+            bg=rgbattr(element, "bg", d=None),
+            text=rgbattr(element, "text", d=(255, 255, 255)),
+        )
+
+    def create_compass_arrow(self, element, entry, **kwargs) -> Widget:
+        return CompassArrow(
+            size=iattrib(element, "size", d=256),
+            reading=lambda: nonesafe(entry().cog),
+            font=self.font(iattrib(element, "textsize", d=32)),
+            arrow=rgbattr(element, "arrow", d=(255, 255, 255)),
+            bg=rgbattr(element, "bg", d=(0, 0, 0, 0)),
+            text=rgbattr(element, "text", d=(255, 255, 255)),
+            outline=rgbattr(element, "outline", d=(0, 0, 0)),
+            arrow_outline=rgbattr(element, "arrow_outline", d=(0, 0, 0)),
+        )
+
+    def create_bar(self, element, entry, **kwargs) -> Widget:
+        return Bar(
+            size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
+            reading=metric_value(
+                entry,
+                accessor=metric_accessor_from(attrib(element, "metric")),
+                converter=metric_converter_from(attrib(element, "units", d=None)),
+                formatter=lambda x: x,
+                default=0
+            ),
+            fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
+            zero=rgbattr(element, "zero", d=(255, 255, 255)),
+            bar=rgbattr(element, "bar", d=(255, 255, 255)),
+            outline=rgbattr(element, "outline", d=(255, 255, 255)),
+            outline_width=iattrib(element, "outline-width", d=3),
+            highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),
+            highlight_colour_positive=rgbattr(element, "h-pos", d=(0, 255, 0)),
+            max_value=iattrib(element, "max", d=20),
+            min_value=iattrib(element, "min", d=-20),
+            cr=iattrib(element, "cr", d=5),
+        )
+
+    def create_asi(self, element, entry, **kwargs) -> Widget:
+        return AirspeedIndicator(
+            size=iattrib(element, "size", d=256),
+            reading=metric_value(
+                entry,
+                accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
+                converter=metric_converter_from(attrib(element, "units", d="knots")),
+                formatter=lambda x: x,
+                default=0
+            ),
+            font=self.font(iattrib(element, "textsize", d=16)),
+            Vs0=iattrib(element, "vs0", d=40),
+            Vs=iattrib(element, "vs", d=46),
+            Vfe=iattrib(element, "vfe", d=103),
+            Vno=iattrib(element, "vno", d=126),
+            Vne=iattrib(element, "vne", d=180),
+            rotate=iattrib(element, "rotate", d=0),
+        )
+
+    def create_cairo_circuit_map(self, element, entry, **kwargs):
+        try:
+            import gopro_overlay.layout_xml_cairo
+            return gopro_overlay.layout_xml_cairo.create_cairo_circuit_map(element, entry, self.framemeta, **kwargs)
+        except ModuleNotFoundError:
+            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+
+    def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
+        at = Coordinate(0, 0)
+        size = iattrib(element, "size", d=64)
+        return GPSLock(
+            fix=lambda: entry().gpsfix,
+            lock_no=simple_icon(at, attrib(element, "lock_none", d="gps_lock_none.png"), size),
+            lock_unknown=simple_icon(at, attrib(element, "lock_unknown", d="gps_lock_unknown.png"), size),
+            lock_2d=simple_icon(at, attrib(element, "lock_2d", d="gps_lock_2d.png"), size),
+            lock_3d=simple_icon(at, attrib(element, "lock_3d", d="gps_lock_3d.png"), size),
+        )
