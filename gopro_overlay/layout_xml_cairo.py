@@ -3,9 +3,10 @@ from .layout_xml import iattrib, rgbattr, fattrib
 from .widgets.cairo.cairo import CairoWidget
 from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
+from .widgets.widgets import Widget
 
 
-def create_cairo_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
+def create_cairo_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
     rotation = iattrib(element, "rotate", d=0)
 

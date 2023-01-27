@@ -1,7 +1,10 @@
+from PIL import Image, ImageDraw
+
 from gopro_overlay.gpmd import GPSFix
+from .widgets import Widget
 
 
-class GPSLock:
+class GPSLock(Widget):
 
     def __init__(self, fix, lock_no, lock_unknown, lock_2d, lock_3d):
         self.w = {
@@ -12,5 +15,5 @@ class GPSLock:
         }
         self.fix = fix
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self.w[self.fix()].draw(image, draw)

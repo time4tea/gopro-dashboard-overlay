@@ -1,4 +1,5 @@
 import pytest
+from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.gpmd import GPSFix
@@ -11,7 +12,7 @@ from gopro_overlay.widgets.gps import GPSLock
 from gopro_overlay.widgets.info import ComparativeEnergy
 from gopro_overlay.widgets.map import OutLine
 from gopro_overlay.widgets.text import CachingText, Text
-from gopro_overlay.widgets.widgets import simple_icon, Scene, Composite, Translate
+from gopro_overlay.widgets.widgets import simple_icon, Scene, Composite, Translate, Widget
 from tests import test_widgets_setup
 from tests.approval import approve_image
 from tests.testenvironment import is_make
@@ -154,13 +155,13 @@ def test_composite_viewport():
     ])
 
 
-class OutlineWidget:
+class OutlineWidget(Widget):
 
     def __init__(self, outline, points):
         self.points = points
         self.outline = outline
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self.outline.draw(draw, self.points)
 
 

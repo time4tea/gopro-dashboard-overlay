@@ -21,7 +21,7 @@ from .widgets.compass_arrow import CompassArrow
 from .widgets.gps import GPSLock
 from .widgets.map import MovingJourneyMap, Circuit
 from .widgets.profile import WidgetProfiler
-from .widgets.widgets import simple_icon, Translate, Composite, Frame
+from .widgets.widgets import simple_icon, Translate, Composite, Frame, Widget
 
 
 def load_xml_layout(filepath: Path):
@@ -270,7 +270,7 @@ def formatter_from(element):
         return lambda v: format(v, f".{dp}f")
 
 
-def create_metric(element, entry, font, **kwargs):
+def create_metric(element, entry, font, **kwargs) -> Widget:
     return metric(
         at=at(element),
         entry=entry,
@@ -286,7 +286,7 @@ def create_metric(element, entry, font, **kwargs):
     )
 
 
-def create_icon(element, **kwargs):
+def create_icon(element, **kwargs) -> Widget:
     return simple_icon(
         at=at(element),
         file=attrib(element, "file"),
@@ -320,7 +320,7 @@ def create_datetime(element, entry, font, **kwargs):
     )
 
 
-def create_text(element, font, **kwargs):
+def create_text(element, font, **kwargs) -> Widget:
     if element.text is None:
         raise IOError("Text components should have the text in the element like <component...>Text</component>")
 
@@ -336,7 +336,7 @@ def create_text(element, font, **kwargs):
     )
 
 
-def create_moving_map(element, entry, renderer, **kwargs):
+def create_moving_map(element, entry, renderer, **kwargs) -> Widget:
     return moving_map(
         at=at(element),
         entry=entry,
@@ -349,7 +349,7 @@ def create_moving_map(element, entry, renderer, **kwargs):
     )
 
 
-def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
+def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
     return journey_map(
         at(element),
         entry,
@@ -362,7 +362,7 @@ def create_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
     )
 
 
-def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **kwargs):
+def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
     return MovingJourneyMap(
         location=lambda: entry().point,
         privacy_zone=privacy,
@@ -373,7 +373,7 @@ def create_moving_journey_map(element, entry, privacy, renderer, timeseries, **k
     )
 
 
-def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs):
+def create_circuit_map(element, entry, privacy, renderer, timeseries, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
     return Circuit(
         location=lambda: entry().point,
@@ -392,7 +392,7 @@ def create_gradient_chart(*args, **kwargs):
     return create_chart(*args, **kwargs)
 
 
-def create_chart(element, entry, timeseries, font, **kwargs):
+def create_chart(element, entry, timeseries, font, **kwargs) -> Widget:
     accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
     converter = metric_converter_from(attrib(element, "units", d="metres"))
 
@@ -438,7 +438,7 @@ def nonesafe(v):
         return 0
 
 
-def create_compass(element, entry, timeseries, font, **kwargs):
+def create_compass(element, entry, timeseries, font, **kwargs) -> Widget:
     return Compass(
         size=iattrib(element, "size", d=256),
         reading=lambda: nonesafe(entry().cog),
@@ -449,7 +449,7 @@ def create_compass(element, entry, timeseries, font, **kwargs):
     )
 
 
-def create_compass_arrow(element, entry, timeseries, font, **kwargs):
+def create_compass_arrow(element, entry, timeseries, font, **kwargs) -> Widget:
     return CompassArrow(
         size=iattrib(element, "size", d=256),
         reading=lambda: nonesafe(entry().cog),
@@ -462,7 +462,7 @@ def create_compass_arrow(element, entry, timeseries, font, **kwargs):
     )
 
 
-def create_bar(element, entry, timeseries, font, **kwargs):
+def create_bar(element, entry, timeseries, font, **kwargs) -> Widget:
     return Bar(
         size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
         reading=metric_value(
@@ -485,7 +485,7 @@ def create_bar(element, entry, timeseries, font, **kwargs):
     )
 
 
-def create_asi(element, entry, timeseries, font, **kwargs):
+def create_asi(element, entry, timeseries, font, **kwargs) -> Widget:
     return AirspeedIndicator(
         size=iattrib(element, "size", d=256),
         reading=metric_value(
@@ -512,7 +512,7 @@ def create_cairo_circuit_map(*args, **kwargs):
     except ModuleNotFoundError:
         raise IOError("This widget needs pycairo to be installed - please see docs") from None
 
-def create_gps_lock_icon(element, entry, timeseries, font, **kwargs):
+def create_gps_lock_icon(element, entry, timeseries, font, **kwargs) -> Widget:
     at = Coordinate(0,0)
     size = iattrib(element, "size", d=64)
     return GPSLock(

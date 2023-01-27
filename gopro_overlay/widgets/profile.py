@@ -2,11 +2,12 @@ from typing import Any
 
 from gopro_overlay.log import log
 from gopro_overlay.timing import PoorTimer
+from gopro_overlay.widgets.widgets import Widget
 
 
-class ProfiledWidget:
+class ProfiledWidget(Widget):
 
-    def __init__(self, name: str, level: int, widget: Any):
+    def __init__(self, name: str, level: int, widget: Widget):
         self.widget = widget
         self.timer = PoorTimer(name, level)
 

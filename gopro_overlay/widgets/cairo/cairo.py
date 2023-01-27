@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.exceptions import Defect
+from gopro_overlay.widgets.widgets import Widget
 
 
 class CairoCache:
@@ -48,7 +49,7 @@ def to_pillow(surface: cairo.ImageSurface) -> Image:
         return Image.frombuffer("RGBA", size, memory.tobytes(), 'raw', "BGRa", stride)
 
 
-class CairoWidget:
+class CairoWidget(Widget):
 
     def __init__(self, size: Dimension, rotation=0, widgets=None):
         self.size = size

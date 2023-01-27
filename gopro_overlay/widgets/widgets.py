@@ -1,8 +1,8 @@
 import functools
 import importlib
-import os
 import math
-from typing import Tuple, Any
+import os
+from typing import Tuple, List
 
 from PIL import Image, ImageDraw
 
@@ -12,31 +12,36 @@ from gopro_overlay.functional import compose
 from gopro_overlay.point import Coordinate
 
 
-class EmptyDrawable:
-    def draw(self, image, draw):
+class Widget:
+    def draw(self, image: Image, draw: ImageDraw):
+        raise NotImplemented("not implemented")
+
+
+class EmptyDrawable(Widget):
+    def draw(self, image: Image, draw: ImageDraw):
         pass
 
 
-class Composite:
+class Composite(Widget):
 
     def __init__(self, *widgets):
         self.widgets = widgets
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         for w in self.widgets:
             w.draw(image, draw)
 
 
-class Drawable:
+class Drawable(Widget):
     def __init__(self, at, drawable):
         self.at = at
         self.drawable = drawable
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         image.alpha_composite(self.drawable, self.at.tuple())
 
 
-def icon(file, at, transform=lambda x: x):
+def icon(file, at, transform=lambda x: x) -> Widget:
     if os.path.exists(file):
         image = Image.open(file)
     else:
@@ -127,7 +132,7 @@ class DrawTranslate:
         self.draw.polygon([self._txy(pair) for pair in xy], *args, **kwargs)
 
 
-class Translate:
+class Translate(Widget):
     """Extremely rudimentary translation support!
 
     Translate the 'at' of child widget by this widget's location. Use in combination with a Composite
@@ -138,14 +143,14 @@ class Translate:
         self.at = at
         self.widget = widget
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         ivp = ImageTranslate(self.at, image)
         dvp = DrawTranslate(self.at, draw)
 
         self.widget.draw(ivp, dvp)
 
 
-class Frame:
+class Frame(Widget):
     """
     A clipping bordered frame that also makes a child controllably transparent
     """
@@ -156,7 +161,7 @@ class Frame:
                  corner_radius: int = 0,
                  outline: Tuple = None,
                  fill: Tuple = None,
-                 child: Any = EmptyDrawable(),
+                 child: Widget = EmptyDrawable(),
                  fade_out: int = 0) -> None:
         self.child = child
         self.corner_radius = corner_radius
@@ -179,25 +184,25 @@ class Frame:
                 self._init_fadeout()
 
     def _init_fadeout(self):
-            for y in range(self.dimensions.y):
-                for x in range(self.dimensions.x):
-                    distance_to_center = math.sqrt((x - self.dimensions.x/2) ** 2 + (y - self.dimensions.y/2) ** 2)
-                    radius = min(self.dimensions.x, self.dimensions.y) / 2
-                    distance_from_side = 1 - (distance_to_center / radius)
-                    distance_from_side = min(x, min(y, min(self.dimensions.x - x, self.dimensions.y - y))) / radius
-                    if self.corner_radius == 0:
-                        # no radius defined, we will use distance_from_side
-                        distance_from_corner_radius = distance_from_side
-                    else:
-                        # we can use a more complex formula for getting the distance from corner_radius, but for simplicity we will use this one
-                        # it will lead to more straight lines instead of rounded corners
-                        outer_radius = math.sqrt(self.corner_radius ** 2 + self.corner_radius ** 2) - self.corner_radius
-                        rounder_radius = math.sqrt((self.dimensions.x/2) ** 2 + (self.dimensions.y/2) ** 2) - outer_radius
-                        distance_from_corner_radius = (rounder_radius - distance_to_center) / rounder_radius
-                    fade_out_percents = max(0.01, min(1.0, self.fade_out / radius))
-                    self.mask.putpixel((x, y), int(min(1.0, min(distance_from_side, distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
+        for y in range(self.dimensions.y):
+            for x in range(self.dimensions.x):
+                distance_to_center = math.sqrt((x - self.dimensions.x / 2) ** 2 + (y - self.dimensions.y / 2) ** 2)
+                radius = min(self.dimensions.x, self.dimensions.y) / 2
+                distance_from_side = 1 - (distance_to_center / radius)
+                distance_from_side = min(x, min(y, min(self.dimensions.x - x, self.dimensions.y - y))) / radius
+                if self.corner_radius == 0:
+                    # no radius defined, we will use distance_from_side
+                    distance_from_corner_radius = distance_from_side
+                else:
+                    # we can use a more complex formula for getting the distance from corner_radius, but for simplicity we will use this one
+                    # it will lead to more straight lines instead of rounded corners
+                    outer_radius = math.sqrt(self.corner_radius ** 2 + self.corner_radius ** 2) - self.corner_radius
+                    rounder_radius = math.sqrt((self.dimensions.x / 2) ** 2 + (self.dimensions.y / 2) ** 2) - outer_radius
+                    distance_from_corner_radius = (rounder_radius - distance_to_center) / rounder_radius
+                fade_out_percents = max(0.01, min(1.0, self.fade_out / radius))
+                self.mask.putpixel((x, y), int(min(1.0, min(distance_from_side, distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self._maybe_init()
 
         rect = Image.new('RGBA', (self.dimensions.x, self.dimensions.y), self.fill)
@@ -219,7 +224,7 @@ class Frame:
 
 class Scene:
 
-    def __init__(self, dimensions: Dimension, widgets, ):
+    def __init__(self, dimensions: Dimension, widgets: List[Widget]):
         self._widgets = widgets
         self._dimensions = dimensions
 

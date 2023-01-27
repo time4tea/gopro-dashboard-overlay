@@ -1,10 +1,12 @@
+from PIL import ImageDraw, Image
+
 from gopro_overlay.models import KineticEnergyModel
 from gopro_overlay.point import Coordinate
-from .widgets import Composite, simple_icon, Translate
+from .widgets import Composite, simple_icon, Translate, Widget
 from .text import CachingText
 
 
-class ComparativeEnergy:
+class ComparativeEnergy(Widget):
 
     def __init__(self, font, speed, person, bike, car, van):
         font = font.font_variant(size=48)
@@ -50,5 +52,5 @@ class ComparativeEnergy:
             Translate(Coordinate(900, 0), thing("van-black-side-view.png", van + person, van_model)),
         )
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self.widget.draw(image, draw)

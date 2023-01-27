@@ -2,6 +2,8 @@ import math
 
 from PIL import Image, ImageDraw
 
+from gopro_overlay.widgets.widgets import Widget
+
 
 def roundup(x, n=10):
     return int(math.ceil(x / n)) * n
@@ -63,7 +65,7 @@ def scale(min_value, max_value, rotate=0):
     return s
 
 
-class AirspeedIndicator:
+class AirspeedIndicator(Widget):
     """Modelled on https://aerotoolbox.com/airspeed-indicator/"""
 
     def __init__(self, size, font, reading, Vs0, Vs, Vfe, Vno, Vne, rotate=0):
@@ -127,7 +129,7 @@ class AirspeedIndicator:
 
         return image
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
 
         if self.image is None:
             self.image = self.draw_asi()

@@ -1,9 +1,10 @@
 from PIL import Image, ImageDraw
 
-from gopro_overlay.widgets.map import draw_marker
+from .map import draw_marker
+from .widgets import Widget
 
 
-class SimpleChart:
+class SimpleChart(Widget):
 
     def __init__(
             self,
@@ -34,7 +35,7 @@ class SimpleChart:
         self.view = None
         self.image = None
 
-    def draw(self, i, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         view = self.value()
 
         if self.view and self.view.version == view.version:
@@ -84,4 +85,4 @@ class SimpleChart:
 
             self.image.putalpha(self.alpha)
 
-        i.alpha_composite(self.image, (0, 0))
+        image.alpha_composite(self.image, (0, 0))

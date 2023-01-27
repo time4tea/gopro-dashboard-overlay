@@ -3,9 +3,10 @@ from typing import Callable, Any, Tuple
 from PIL import Image, ImageDraw
 
 from gopro_overlay.point import Coordinate
+from gopro_overlay.widgets.widgets import Widget
 
 
-class CachingText:
+class CachingText(Widget):
     def __init__(self, at: Coordinate, value: Callable, font,
                  align="left", direction="ltr",
                  fill=None,
@@ -22,7 +23,7 @@ class CachingText:
         self.stroke_width = stroke_width
         self.cache = {}
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
 
         text = self.value()
 
@@ -67,7 +68,7 @@ class CachingText:
         image.alpha_composite(cached["image"], (self.at + cached["at"]).tuple())
 
 
-class Text:
+class Text(Widget):
     def __init__(self,
                  at: Coordinate,
                  value: Callable[[], str],
@@ -86,7 +87,7 @@ class Text:
         self.stroke = stroke if stroke else (0, 0, 0)
         self.stroke_width = stroke_width
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         draw.text(
             self.at.tuple(),
             self.value(),

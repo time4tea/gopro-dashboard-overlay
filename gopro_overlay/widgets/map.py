@@ -11,6 +11,7 @@ from gopro_overlay.log import log
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.rdp import rdp
+from gopro_overlay.widgets.widgets import Widget
 
 
 class PerceptibleMovementCheck:
@@ -75,7 +76,7 @@ class MaybeRoundedBorder:
         return mask
 
 
-class JourneyMap:
+class JourneyMap(Widget):
     def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
                  privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
@@ -116,7 +117,7 @@ class JourneyMap:
 
             self.image = self.border.rounded(image)
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self._init_maybe()
 
         location = self.location()
@@ -137,7 +138,7 @@ def draw_marker(draw, position, size, fill=None):
                  outline=(0, 0, 0))
 
 
-class MovingMap:
+class MovingMap(Widget):
     def __init__(self, at, location, azimuth, renderer,
                  rotate=True, size=256, zoom=17, corner_radius=None, opacity=0.7):
         self.at = at
@@ -176,7 +177,7 @@ class MovingMap:
 
         return self.border.rounded(crop)
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         location = self.location()
         if location.lon is not None and location.lat is not None:
 
@@ -198,7 +199,7 @@ def view_window(size, d):
     return f
 
 
-class MovingJourneyMap:
+class MovingJourneyMap(Widget):
 
     def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer):
         self.privacy_zone = privacy_zone
@@ -244,7 +245,7 @@ class MovingJourneyMap:
 
         return map, map_image
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         if self.cached_map is None:
             self.cached_map, self.cached_map_image = self._redraw()
 
@@ -275,7 +276,7 @@ class OutLine:
         draw.line(points, fill=self.fill, width=self.fill_width - self.outline_width)
 
 
-class Circuit:
+class Circuit(Widget):
     def __init__(self, dimensions: Dimension, framemeta: FrameMeta, location: Callable[[], Point],
                  privacy_zone=NoPrivacyZone(),
                  fill=(255, 0, 0), fill_width=4, outline=(255, 255, 255), outline_width=2):

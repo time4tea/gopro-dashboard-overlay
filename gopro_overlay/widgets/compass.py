@@ -3,8 +3,10 @@ import math
 
 from PIL import Image, ImageDraw
 
+from .widgets import Widget
 
-class Compass:
+
+class Compass(Widget):
 
     def __init__(self, size, reading, font, fg=(255, 255, 255), bg=(0, 0, 0), text=(255, 255, 255)):
         self.reading = reading
@@ -110,7 +112,7 @@ class Compass:
 
         return actual
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         reading = - int(self.reading())
 
         if self.image is None or reading != self.last_reading:

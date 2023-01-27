@@ -2,10 +2,11 @@ import functools
 
 from PIL import Image, ImageDraw
 
-from gopro_overlay.widgets.compass import Compass
+from .compass import Compass
+from .widgets import Widget
 
 
-class CompassArrow:
+class CompassArrow(Widget):
 
     def __init__(self, size, reading, font,
                  arrow=(255, 255, 255),
@@ -65,7 +66,7 @@ class CompassArrow:
 
         return image
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         reading = - int(self.reading())
 
         if self.image is None or reading != self.last_reading:

@@ -1,8 +1,9 @@
 from .widgets.text import CachingText, Text
 from .widgets.map import MovingMap, JourneyMap
+from .widgets.widgets import Widget
 
 
-def journey_map(at, entry, **kwargs):
+def journey_map(at, entry, **kwargs) -> Widget:
     return JourneyMap(
         at=at,
         location=lambda: entry().point,
@@ -10,7 +11,7 @@ def journey_map(at, entry, **kwargs):
     )
 
 
-def moving_map(at, entry, **kwargs):
+def moving_map(at, entry, **kwargs) -> Widget:
     return MovingMap(
         at=at,
         location=lambda: entry().point,
@@ -30,7 +31,7 @@ def metric_value(entry, accessor, converter, formatter, default="-"):
     return value
 
 
-def text(cache=True, **kwargs):
+def text(cache=True, **kwargs) -> Widget:
     if cache:
         return CachingText(**kwargs)
     else:

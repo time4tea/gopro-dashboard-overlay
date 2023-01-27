@@ -2,12 +2,14 @@ import bisect
 
 import matplotlib
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageDraw
+
+from gopro_overlay.widgets.widgets import Widget
 
 matplotlib.use("Agg")
 
 
-class SparkLine:
+class SparkLine(Widget):
 
     def __init__(self, at, timeseries, dt):
         self.at = at
@@ -28,7 +30,7 @@ class SparkLine:
         if not self.cadences:
             self.timeseries.process(process)
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self._maybe_init()
 
         data = self.cadences

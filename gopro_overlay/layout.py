@@ -1,13 +1,13 @@
 from typing import Callable
 
-from PIL import ImageFont, Image
+from PIL import ImageFont, Image, ImageDraw
 
 from .dimensions import Dimension
 from .framemeta import FrameMeta
 from .layout_components import moving_map
 from .point import Coordinate
 from .units import units
-from .widgets.widgets import Scene, Translate, Composite
+from .widgets.widgets import Scene, Translate, Composite, Widget
 from .widgets.text import CachingText, Text
 from gopro_overlay.widgets.info import ComparativeEnergy
 
@@ -35,7 +35,7 @@ def date_and_time(at, entry, font_title, font_metric):
     )
 
 
-class BigMetric:
+class BigMetric(Widget):
 
     def __init__(self, at, title, value, font_title, font_metric=None):
         self.widget = Translate(
@@ -46,7 +46,7 @@ class BigMetric:
             )
         )
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         self.widget.draw(image, draw)
 
 

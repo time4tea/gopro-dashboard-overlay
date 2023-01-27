@@ -1,4 +1,9 @@
-class Bar:
+from PIL import ImageDraw, Image
+
+from .widgets import Widget
+
+
+class Bar(Widget):
 
     def __init__(self, size, reading, min_value=-10, max_value=10, cr=5, fill=(255, 255, 255, 0),
                  outline=(255, 255, 255),
@@ -29,7 +34,7 @@ class Bar:
         shifted = value - self.min_value
         return shifted * scale
 
-    def draw(self, image, draw):
+    def draw(self, image: Image, draw: ImageDraw):
         current = self.reading()
         draw.rounded_rectangle(
             ((0, 0), (self.size.x - 1, self.size.y - 1)),
