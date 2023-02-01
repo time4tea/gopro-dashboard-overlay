@@ -1,11 +1,6 @@
-from functools import cache, cached_property
+from functools import cached_property
 from PIL import ImageDraw, Image
-
 from .widgets import Widget
-
-
-
-
 
 class GradientBar(Widget):
 
@@ -17,20 +12,14 @@ class GradientBar(Widget):
                  z1_color=(67, 235, 52),
                  z2_color=(240, 232, 19),
                  z3_color=(207, 19, 2),
-                #  highlight_colour_negative=(255, 0, 0),
-                #  highlight_colour_positive=(0, 255, 0),
                  divider=(255, 255, 255),
-                #  bar=(255, 255, 255)
                  ):
         self.reading = reading
         self.size = size
         self.corner_radius = cr
         self.outline = outline
         self.fill = fill
-        # self.highlight_colour_positive = highlight_colour_positive
-        # self.highlight_colour_negative = highlight_colour_negative
         self.divider = divider
-        # self.bar = bar
 
         self.line_width = outline_width
         self.min_value = min_value
@@ -42,9 +31,8 @@ class GradientBar(Widget):
         self.z1_color = z1_color
         self.z2_color = z2_color
         self.z3_color = z3_color
-        # print(self.min_value)
 
-    @cache
+
     def x_coord(self, value):
         value = max(min(value, self.max_value), self.min_value)
         scale = self.scale
@@ -57,22 +45,14 @@ class GradientBar(Widget):
         scale = (self.size.x - (self.line_width + 2)) / range #px/unit
         return scale
 
-    @cache
     def value(self, x_coord):
         scale = self.scale
         shifted = x_coord / scale
         return shifted + self.min_value
 
-    # @staticmethod
-    # def interpolate(f_co, t_co, interval):
-    #     det_co =[(t - f) / interval for f , t in zip(f_co, t_co)]
-    #     for i in range(interval):
-    #         yield [round(f + det * i) for f, det in zip(f_co, det_co)]
-
-    @cache
+    # TODO: REFACTOR
     def get_color(self, x_coord):
         value = self.value(x_coord)
-        # print(f"x={x_coord} value={value}", file=sys.stderr)
         if value < self.z1_value:
             range = self.x_coord(self.z1_value) - self.x_coord(self.min_value)
             i = x_coord - self.x_coord(self.min_value)
@@ -112,13 +92,4 @@ class GradientBar(Widget):
                     ((self.x_coord(v), self.line_width), (self.x_coord(v), self.size.y-self.line_width-1)),
                     fill=self.divider
                 )
-        # draw.rectangle(
-        #     ((self.x_coord(current), self.line_width + 1), (self.x_coord(0), self.size.y - (self.line_width + 2))),
-        #     fill=self.bar
-        # )
-        # highlight_colour = self.highlight_colour_positive if current >= 0 else self.highlight_colour_negative
-        # draw.rectangle(
-        #     ((self.x_coord(current * 0.95), self.line_width + 1),
-        #      (self.x_coord(current), self.size.y - (self.line_width + 2))),
-        #     fill=highlight_colour
-        # )
+
