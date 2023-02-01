@@ -29,3 +29,4 @@ tests/approvals/*.diff_over_approved.png
 
 **/__pycache__/
 
+.vscode/settings.json
