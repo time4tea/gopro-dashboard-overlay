@@ -25,16 +25,3 @@ def test_gauge():
     )
 
 
-# @pytest.mark.gfx
-# @approve_image
-# def test_gauge_negative():
-#     return time_rendering(
-#         name="test_gauge",
-#         dimensions=Dimension(500, 75),
-#         widgets=[
-#             Bar(
-#                 size=Dimension(400, 30),
-#                 reading=lambda: -9
-#             )
-#         ]
-#     )
