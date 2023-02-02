@@ -23,7 +23,7 @@ from gopro_overlay.geo import CachingRenderer, api_key_finder
 from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter, GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
-from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
+from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
 from gopro_overlay.log import log
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
@@ -47,7 +47,7 @@ def accepter_from_args(include, exclude):
 
 
 def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude, renderer, timeseries, font,
-                          privacy_zone, profiler):
+                          privacy_zone, profiler, converters:Converters):
     accepter = accepter_from_args(include, exclude)
 
     if layout_xml:
@@ -56,8 +56,10 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
     if layout == "default":
         resource_name = Path(f"default-{dimensions.x}x{dimensions.y}")
         try:
-            return layout_from_xml(load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone,
-                                   include=accepter, decorator=profiler)
+            return layout_from_xml(
+                load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone, include=accepter,
+                decorator=profiler, converters=converters
+            )
         except FileNotFoundError:
             raise IOError(f"Unable to locate bundled layout resource: {resource_name}. "
                           f"You may need to create a custom layout for this frame size") from None
@@ -65,8 +67,10 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
     elif layout == "speed-awareness":
         return speed_awareness_layout(renderer, font=font)
     elif layout == "xml":
-        return layout_from_xml(load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter,
-                               decorator=profiler)
+        return layout_from_xml(
+            load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter,
+            decorator=profiler, converters=converters
+        )
     else:
         raise ValueError(f"Unsupported layout {args.layout}")
 
@@ -90,7 +94,7 @@ if __name__ == "__main__":
         exit(1)
     if not ffmpeg_libx264_is_installed():
         log("ffmpeg doesn't seem to handle libx264 files - it needs to be compiled with support for this, "
-              "check your installation")
+            "check your installation")
         exit(1)
 
     font = load_font(args.font)
@@ -274,6 +278,8 @@ if __name__ == "__main__":
                 max_value=len(stepper)
             )
 
+            unit_converters = Converters()
+
             overlay = Overlay(
                 dimensions=dimensions,
                 framemeta=frame_meta,
@@ -281,7 +287,13 @@ if __name__ == "__main__":
                     layout=args.layout, layout_xml=args.layout_xml,
                     dimensions=dimensions,
                     include=args.include, exclude=args.exclude,
-                    renderer=renderer, timeseries=frame_meta, font=font, privacy_zone=privacy_zone, profiler=profiler)
+                    renderer=renderer,
+                    timeseries=frame_meta,
+                    font=font,
+                    privacy_zone=privacy_zone,
+                    profiler=profiler,
+                    converters=unit_converters
+                )
             )
 
             try:
