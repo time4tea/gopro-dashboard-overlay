@@ -33,8 +33,49 @@ def load_xml_layout(filepath: Path):
             return f.read()
 
 
+class Converters:
+
+    def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m"):
+        self.speed_unit = speed_unit
+        self.distance_unit = distance_unit
+        self.altitude_unit = altitude_unit
+
+    def converter(self, name):
+        if name is None:
+            return lambda x: x
+        converters = {
+            # speed
+            "mph": lambda u: u.to("MPH"),
+            "kph": lambda u: u.to("KPH"),
+            "knots": lambda u: u.to("knot"),
+
+            "speed": lambda u: u.to(self.speed_unit),
+            "distance": lambda u: u.to(self.distance_unit),
+            "altitude": lambda u: u.to(self.altitude_unit),
+
+            # accel
+            "G": lambda u: u.to("gravity"),
+
+            # alt / dist
+            "feet": lambda u: u.to("international_feet"),
+            "miles": lambda u: u.to("mile"),
+            "metres": lambda u: u.to("m"),
+            "nautical_miles": lambda u: u.to("nautical_mile"),
+        }
+        if name in converters:
+            return converters[name]
+
+        # Try to see if specified unit is recognised by pint... if so allow it - this only means its a valid
+        # unit, but actual metric might be different... if unconvertible it will blow up later...
+        try:
+            units.Quantity(1, units=name)
+            return lambda u: u.to(name)
+        except Exception as e:
+            raise IOError(f"The conversion '{name}' is not supported.")
+
+
 def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
-                    decorator: Optional[WidgetProfiler] = None):
+                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters()):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -47,7 +88,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         privacy=privacy,
         renderer=renderer,
         framemeta=framemeta,
-        converters=Converters()
+        converters=converters,
     )
 
     def name_of(element):
@@ -225,47 +266,6 @@ def metric_accessor_from(name):
     if name in accessors:
         return accessors[name]
     raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
-
-
-class Converters:
-
-    def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m"):
-        self.speed_unit = speed_unit
-        self.distance_unit = distance_unit
-        self.altitude_unit = altitude_unit
-
-    def converter(self, name):
-        if name is None:
-            return lambda x: x
-        converters = {
-            # speed
-            "mph": lambda u: u.to("MPH"),
-            "kph": lambda u: u.to("KPH"),
-            "knots": lambda u: u.to("knot"),
-
-            "speed": lambda u: u.to(self.speed_unit),
-            "distance": lambda u: u.to(self.distance_unit),
-            "altitude": lambda u: u.to(self.altitude_unit),
-
-            # accel
-            "G": lambda u: u.to("gravity"),
-
-            # alt / dist
-            "feet": lambda u: u.to("international_feet"),
-            "miles": lambda u: u.to("mile"),
-            "metres": lambda u: u.to("m"),
-            "nautical_miles": lambda u: u.to("nautical_mile"),
-        }
-        if name in converters:
-            return converters[name]
-
-        # Try to see if specified unit is recognised by pint... if so allow it - this only means its a valid
-        # unit, but actual metric might be different... if unconvertible it will blow up later...
-        try:
-            units.Quantity(1, units=name)
-            return lambda u: u.to(name)
-        except Exception as e:
-            raise IOError(f"The conversion '{name}' is not supported.")
 
 
 def formatter_from(element):
