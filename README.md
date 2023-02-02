@@ -58,7 +58,7 @@ docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:<version> <progra
 e.g.
 
 ```shell
-docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:latest gopro-dashboard.py GH010122.MP4 render/docker.MP4
+docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:v0.81.0 gopro-dashboard.py GH010122.MP4 render/docker.MP4
 ```
 
 Files created by the program will be created with the same uid that owns the mapped directory.
