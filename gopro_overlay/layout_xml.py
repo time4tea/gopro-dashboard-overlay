@@ -42,7 +42,13 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
     def font_at(size):
         return fonts.setdefault(size, font.font_variant(size=size))
 
-    factory = Widgets(font_at, privacy, renderer, framemeta)
+    factory = Widgets(
+        font=font_at,
+        privacy=privacy,
+        renderer=renderer,
+        framemeta=framemeta,
+        converters=Converters()
+    )
 
     def name_of(element):
         return attrib(element, "name", d=None)
@@ -222,6 +228,12 @@ def metric_accessor_from(name):
 
 
 class Converters:
+
+    def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m"):
+        self.speed_unit = speed_unit
+        self.distance_unit = distance_unit
+        self.altitude_unit = altitude_unit
+
     def converter(self, name):
         if name is None:
             return lambda x: x
@@ -230,6 +242,10 @@ class Converters:
             "mph": lambda u: u.to("MPH"),
             "kph": lambda u: u.to("KPH"),
             "knots": lambda u: u.to("knot"),
+
+            "speed": lambda u: u.to(self.speed_unit),
+            "distance": lambda u: u.to(self.distance_unit),
+            "altitude": lambda u: u.to(self.altitude_unit),
 
             # accel
             "G": lambda u: u.to("gravity"),
@@ -294,12 +310,12 @@ def nonesafe(v):
 
 class Widgets:
 
-    def __init__(self, font, privacy, renderer, framemeta):
+    def __init__(self, font, privacy, renderer, framemeta, converters):
         self.framemeta = framemeta
         self.renderer = renderer
         self.privacy = privacy
         self.font = font
-        self.converters = Converters()
+        self.converters = converters
 
     def create_metric(self, element, entry, **kwargs) -> Widget:
         return metric(
