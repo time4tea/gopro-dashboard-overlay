@@ -158,6 +158,20 @@ def test_gps_bbox():
     assert do_args("--gps-bbox-lon-lat", "1,2,3,4").gps_bbox_lon_lat == BoundingBox(min=Point(lon=1, lat=2), max=Point(lon=3, lat=4))
 
 
+def test_units_default():
+    assert do_args().units_distance == "mile"
+    assert do_args().units_speed == "mph"
+    assert do_args().units_altitude == "metre"
+    assert do_args().units_temperature == "degC"
+
+
+def test_units_user():
+    assert do_args("--units-distance", "angstrom").units_distance == "angstrom"
+    assert do_args("--units-speed", "kph").units_speed == "kph"
+    assert do_args("--units-distance", "metre").units_altitude == "metre"
+    assert do_args("--units-temperature", "kelvin").units_temperature == "kelvin"
+
+
 def do_args(*args, input: Optional[str] = "input", output: Optional[str] = "output"):
     all_args = [a for a in [input, output, *args] if a]
     print(all_args)

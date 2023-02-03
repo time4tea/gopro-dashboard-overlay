@@ -25,7 +25,7 @@ def metric_value(entry, accessor, converter, formatter, default="-"):
         v = accessor(entry())
         if v is not None:
             v = converter(v)
-            return formatter(v.magnitude)
+            return formatter(v)
         return default
 
     return value

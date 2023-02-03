@@ -278,7 +278,12 @@ if __name__ == "__main__":
                 max_value=len(stepper)
             )
 
-            unit_converters = Converters()
+            unit_converters = Converters(
+                speed_unit=args.units_speed,
+                distance_unit=args.units_distance,
+                altitude_unit=args.units_altitude,
+                temperature_unit=args.units_temperature,
+            )
 
             overlay = Overlay(
                 dimensions=dimensions,

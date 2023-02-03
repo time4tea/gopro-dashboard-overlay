@@ -19,8 +19,8 @@
     </composite>
 
     <composite x="16" y="800" name="big_kph">
-        <component type="text" x="0" y="0" size="16">kph</component>
-        <component type="metric" x="0" y="0" metric="speed" units="kph" dp="0" size="160" />
+        <component type="metric_unit" metric="speed" units="speed" size="16">{:~c}</component>
+        <component type="metric" x="0" y="0" metric="speed" units="speed" dp="0" size="160" />
     </composite>
 
     <component type="gradient_chart" name="gradient_chart" x="400" y="980"/>
@@ -32,9 +32,9 @@
     </composite>
 
     <composite x="16" y="980" name="altitude">
-        <component type="text" x="70" y="0" size="16">ALT(m)</component>
+        <component type="metric_unit" x="70" y="0" metric="alt" units="alt" size="16">ALT({:~C})</component>
         <component type="icon" x="0" y="0" file="mountain.png" size="64"/>
-        <component type="metric" x="70" y="18" metric="alt" dp="1" size="32" />
+        <component type="metric" x="70" y="18" metric="alt" units="alt" dp="1" size="32" />
     </composite>
 
     <composite x="1900" y="820" name="power">

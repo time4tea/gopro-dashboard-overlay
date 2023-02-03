@@ -1,4 +1,5 @@
 import pytest
+from pint import UndefinedUnitError, DimensionalityError
 
 from gopro_overlay.layout_xml import Converters
 from gopro_overlay.units import units
@@ -31,11 +32,14 @@ def test_distance_conversion():
 
     [converters.converter(i)(start) for i in ["mile", "miles", "m", "metres", "km", "nmi", "foot", "yard", "hand", "angstrom", "parsec"]]
 
-def test_default_units_are_mph_miles_metres():
 
-    speed = units.Quantity(100, units.mps)
-    distance = units.Quantity(100, units.m)
-    altitude = units.Quantity(100, units.m)
+speed = units.Quantity(100, units.mps)
+distance = units.Quantity(100, units.m)
+altitude = units.Quantity(100, units.m)
+temp = units.Quantity(100, units.kelvin)
+
+
+def test_default_units_are_mph_miles_metres():
 
     converters = Converters()
     assert converters.converter("speed")(speed).m == pytest.approx(223.693629, abs=0.000001)
@@ -47,20 +51,47 @@ def test_default_units_are_mph_miles_metres():
     assert converters.converter("altitude")(altitude).m == pytest.approx(100, abs=0.000001)
     assert converters.converter("altitude")(altitude).units == units.metres
 
+    assert converters.converter("temp")(temp).m == pytest.approx(-173.15, abs=0.01)
+    assert converters.converter("temp")(temp).units == units.degC
+
 def test_overriding_default_units():
 
-    speed = units.Quantity(100, units.mps)
-    distance = units.Quantity(100, units.m)
-    altitude = units.Quantity(100, units.m)
-
-    converters = Converters(speed_unit="kph", distance_unit="km", altitude_unit="foot")
+    converters = Converters(speed_unit="kph", distance_unit="km", altitude_unit="foot", temperature_unit="kelvin")
 
     assert converters.converter("speed")(speed).units == units.kph
     assert converters.converter("distance")(distance).units == units.km
     assert converters.converter("altitude")(altitude).units == units.feet
+    assert converters.converter("temp")(temp).units == units.kelvin
 
     assert converters.converter("speed")(speed).m == pytest.approx(360, abs=0.1)
     assert converters.converter("distance")(distance).m == pytest.approx(0.1, abs=0.1)
     assert converters.converter("altitude")(altitude).m == pytest.approx(328.0839895, abs=0.000001)
+    assert converters.converter("temp")(temp).m == pytest.approx(100, abs=0.01)
 
+
+def test_various_speed_conversions_dont_blow_up():
+    for i in "mph, mps, kph, kph, knot".split(","):
+        Converters(speed_unit=i).converter("speed")(speed)
+
+def test_illegal_speed_conversion_does_blow_up():
+    for i in "unknown, whatever".split(","):
+        with pytest.raises(UndefinedUnitError):
+            Converters(speed_unit=i).converter("speed")(speed)
+
+def test_invalid_speed_conversion_does_blow_up():
+    for i in "radian, kilogram".split(","):
+        with pytest.raises(DimensionalityError):
+            Converters(speed_unit=i).converter("speed")(speed)
+
+def test_various_altitude_conversions_dont_blow_up():
+    for i in "foot, mile, metre, meter, parsec, angstrom".split(","):
+        Converters(altitude_unit=i).converter("altitude")(altitude)
+
+def test_various_distance_conversions_dont_blow_up():
+    for i in "mile, km, foot, nmi, meter, metre, parsec".split(","):
+        Converters(distance_unit=i).converter("distance")(distance)
+
+def test_various_temperature_conversions_dont_blow_up():
+    for i in "degC, degF, kelvin".split(","):
+        Converters(temperature_unit=i).converter("temp")(temp)
 

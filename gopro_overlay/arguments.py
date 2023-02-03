@@ -83,6 +83,13 @@ def gopro_dashboard_arguments(args=None):
     layout.add_argument("--exclude", nargs="+", help="exclude named component (will include all others")
     layout.add_argument("--include", nargs="+", help="include named component (will exclude all others)")
 
+    units = parser.add_argument_group("Units", "Controlling Units")
+
+    units.add_argument("--units-speed", default="mph", help="Default unit for speed. Many units supported: mph, mps, kph, kph, knot, ...")
+    units.add_argument("--units-altitude", default="metre", help="Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec, angstrom, ...")
+    units.add_argument("--units-distance", default="mile", help="Default unit for distance. Many units supported: mile, km, foot, nmi, meter, metre, parsec, ...")
+    units.add_argument("--units-temperature", default="degC", choices=["kelvin", "degC", "degF"], help="Default unit for temperature")
+
     gps = parser.add_argument_group("GPS", "Controlling GPS Parsing (from GoPro Only)")
 
     gps.add_argument("--gps-dop-max", type=float, default=10, help="Max DOP - Points with greater DOP will be considered 'Not Locked'")

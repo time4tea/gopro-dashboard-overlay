@@ -7,7 +7,7 @@ from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
 from gopro_overlay.geo import CachingRenderer
 from gopro_overlay.layout import Overlay, speed_awareness_layout
-from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
+from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from tests.approval import approve_image
@@ -32,6 +32,20 @@ def test_render_default_layout():
 
     with renderer.open() as map_renderer:
         return time_layout("default", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
+
+
+@approve_image
+def test_render_default_layout_different_units():
+    xmldoc = load_xml_layout(Path("default-1920x1080"))
+
+    with renderer.open() as map_renderer:
+        return time_layout(
+            "default",
+            layout_from_xml(
+                xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone(),
+                converters=Converters(speed_unit="kph", temperature_unit="kelvin")
+            )
+        )
 
 
 @approve_image
@@ -71,6 +85,7 @@ def test_render_example_layout():
 
     with renderer.open() as map_renderer:
         return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
+
 
 @approve_image
 def test_render_example_2_layout():

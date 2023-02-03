@@ -3,6 +3,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Callable, Optional
 
+import pint
+from pint.formatting import format_unit
+
 from gopro_overlay import layouts
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import Window
@@ -35,10 +38,11 @@ def load_xml_layout(filepath: Path):
 
 class Converters:
 
-    def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m"):
+    def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m", temperature_unit="degC"):
         self.speed_unit = speed_unit
         self.distance_unit = distance_unit
         self.altitude_unit = altitude_unit
+        self.temperature_unit = temperature_unit
 
     def converter(self, name):
         if name is None:
@@ -49,9 +53,15 @@ class Converters:
             "kph": lambda u: u.to("KPH"),
             "knots": lambda u: u.to("knot"),
 
+            # User selectable
             "speed": lambda u: u.to(self.speed_unit),
             "distance": lambda u: u.to(self.distance_unit),
+
             "altitude": lambda u: u.to(self.altitude_unit),
+            "alt": lambda u: u.to(self.altitude_unit),
+
+            "temp": lambda u: u.to(self.temperature_unit),
+            "temperature": lambda u: u.to(self.temperature_unit),
 
             # accel
             "G": lambda u: u.to("gravity"),
@@ -268,7 +278,7 @@ def metric_accessor_from(name):
     raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
 
 
-def formatter_from(element):
+def quantity_formatter_from(element) -> Callable[[pint.Quantity], str]:
     format_string = attrib(element, "format", d=None)
     dp = attrib(element, "dp", d=None)
 
@@ -280,11 +290,11 @@ def formatter_from(element):
 
     if format_string:
         try:
-            return lambda v: format(v, format_string)
+            return lambda q: format(q.m, format_string)
         except ValueError:
             raise ValueError(f"Unable to format value with format string {format_string}")
     if dp:
-        return lambda v: format(v, f".{dp}f")
+        return lambda q: format(q.m, f".{dp}f")
 
 
 def date_formatter_from(entry: Callable[[], Entry], format_string, truncate=0, tz=None) -> Callable[[], str]:
@@ -308,6 +318,21 @@ def nonesafe(v):
         return 0
 
 
+@pint.register_unit_format("c")
+def format_uppercase(unit, registry, **options):
+    return format_unit(unit, "C", registry).upper()
+
+
+@pint.register_unit_format("p")
+def format_uppercase(unit, registry, **options):
+    return format_unit(unit, "P", registry).upper()
+
+
+@pint.register_unit_format("d")
+def format_uppercase(unit, registry, **options):
+    return format_unit(unit, "D", registry).upper()
+
+
 class Widgets:
 
     def __init__(self, font, privacy, renderer, framemeta, converters):
@@ -322,11 +347,29 @@ class Widgets:
             at=at(element),
             entry=entry,
             accessor=metric_accessor_from(attrib(element, "metric")),
-            formatter=formatter_from(element),
+            formatter=quantity_formatter_from(element),
             font=self.font(iattrib(element, "size", d=16)),
             converter=self.converters.converter(attrib(element, "units", d=None)),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),
+            fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+            stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+            stroke_width=iattrib(element, "outline_width", d=2),
+        )
+
+    def create_metric_unit(self, element, entry, **kwargs) -> Widget:
+
+        format_string = element.text or "{:~C}"
+
+        return metric(
+            at=at(element),
+            entry=entry,
+            accessor=metric_accessor_from(attrib(element, "metric")),
+            formatter=lambda q: format_string.format(q.u),
+            font=self.font(iattrib(element, "size", d=16)),
+            converter=self.converters.converter(attrib(element, "units", d=None)),
+            align=attrib(element, "align", d="left"),
+            cache=True,
             fill=rgbattr(element, "rgb", d=(255, 255, 255)),
             stroke=rgbattr(element, "outline", d=(0, 0, 0)),
             stroke_width=iattrib(element, "outline_width", d=2),
@@ -483,7 +526,7 @@ class Widgets:
                 entry,
                 accessor=metric_accessor_from(attrib(element, "metric")),
                 converter=self.converters.converter(attrib(element, "units", d=None)),
-                formatter=lambda x: x,
+                formatter=lambda q: q.m,
                 default=0
             ),
             fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
@@ -505,7 +548,7 @@ class Widgets:
                 entry,
                 accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
                 converter=self.converters.converter(attrib(element, "units", d="knots")),
-                formatter=lambda x: x,
+                formatter=lambda q: q.m,
                 default=0
             ),
             font=self.font(iattrib(element, "textsize", d=16)),

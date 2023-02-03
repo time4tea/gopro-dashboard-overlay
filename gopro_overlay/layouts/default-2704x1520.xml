@@ -19,8 +19,8 @@
     </composite>
 
     <composite x="16" y="1200" name="big_mph">
-        <component type="text" x="0" y="0" size="16">MPH</component>
-        <component type="metric" x="0" y="0" metric="speed" units="mph" dp="0" size="160" />
+        <component type="metric_unit" metric="speed" units="speed" size="16">{:~c}</component>
+        <component type="metric" x="0" y="0" metric="speed" units="speed" dp="0" size="160" />
     </composite>
 
     <translate x="0" y="1380">
@@ -31,9 +31,9 @@
         </composite>
 
         <composite x="16" y="0" name="altitude">
-            <component type="text" x="70" y="0" size="16">ALT(m)</component>
+            <component type="metric_unit" x="70" y="0" metric="alt" units="alt" size="16">ALT({:~C})</component>
             <component type="icon" x="0" y="0" file="mountain.png" size="64"/>
-            <component type="metric" x="70" y="18" metric="alt" dp="1" size="32" />
+            <component type="metric" x="70" y="18" metric="alt" units="alt" dp="1" size="32" />
         </composite>
 
         <component type="chart" name="gradient_chart" x="400" y="0"/>
@@ -41,9 +41,9 @@
 
     <translate x="2650" y="1200">
         <composite x="0" y="0" name="temperature">
-            <component type="text" x="-70" y="0" size="16" align="right">TEMP(C)</component>
+            <component type="metric_unit" x="-70" y="0" size="16" align="right" metric="temp" units="temp">TEMP({:~C})</component>
             <component type="icon" x="-64" y="0" file="thermometer.png" size="64"/>
-            <component type="metric" x="-70" y="18" metric="temp" dp="0" size="32" align="right"/>
+            <component type="metric" x="-70" y="18" dp="0" size="32" align="right" metric="temp" units="temp"/>
         </composite>
 
         <composite x="0" y="80" name="cadence">
