@@ -31,6 +31,28 @@ The following units are supported:
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
+## Controllable units
+
+Some units can be controlled by the command line, so instead of using a particular unit, you can also use on eof the following
+
+| Unit          | Meaning                            |
+|---------------|------------------------------------|
+| `speed`       | User-controllable speed unit       |
+| `distance`    | User-controllable distance unit    |
+| `temperature` | User-controllable temperature unit |
+| `altitude`    | User-controllable altitude unit    |
+
+Using these units, along with the `metric-unit` component, means that a single layout can serve for UK, EU and US measurements, or mixed unit layouts 
+like distances in km, but altitude in feet (to give higher numbers if you are cycling!)
+
+{{
+<component type="metric"      y="0" metric="speed" unit="speed" dp="0" />
+<component type="metric-unit" y="32" metric="speed" unit="speed">Using {:P} </component>
+<component type="metric-unit" y="64" metric="speed" unit="speed">Using {:~P} </component>
+}}
+
+
+
 ## Lat & Lon
 
 GPS Location is just another metric...

@@ -61,6 +61,31 @@ The following units are supported:
 
 Conversions that don't make sense for a given metric will fail with a suitable message.
 
+## Controllable units
+
+Some units can be controlled by the command line, so instead of using a particular unit, you can also use on eof the following
+
+| Unit          | Meaning                            |
+|---------------|------------------------------------|
+| `speed`       | User-controllable speed unit       |
+| `distance`    | User-controllable distance unit    |
+| `temperature` | User-controllable temperature unit |
+| `altitude`    | User-controllable altitude unit    |
+
+Using these units, along with the `metric-unit` component, means that a single layout can serve for UK, EU and US measurements, or mixed unit layouts 
+like distances in km, but altitude in feet (to give higher numbers if you are cycling!)
+
+
+```xml
+<component type="metric"      y="0" metric="speed" unit="speed" dp="0" />
+<component type="metric-unit" y="32" metric="speed" unit="speed">Using {:P} </component>
+<component type="metric-unit" y="64" metric="speed" unit="speed">Using {:~P} </component>
+```
+<kbd>![04-metrics-5.png](04-metrics-5.png)</kbd>
+
+
+
+
 ## Lat & Lon
 
 GPS Location is just another metric...
@@ -72,7 +97,7 @@ quite slow to render. This can be ignored really unless there are memory errors 
 ```xml
 <component type="metric" metric="lat" dp="6" size="16" cache="false"/>
 ```
-<kbd>![04-metrics-5.png](04-metrics-5.png)</kbd>
+<kbd>![04-metrics-6.png](04-metrics-6.png)</kbd>
 
 
 ## Formatting
@@ -87,19 +112,19 @@ use the `dp` attribute
 ```xml
 <component type="metric" metric="speed" dp="0" />
 ```
-<kbd>![04-metrics-6.png](04-metrics-6.png)</kbd>
+<kbd>![04-metrics-7.png](04-metrics-7.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" dp="2" />
 ```
-<kbd>![04-metrics-7.png](04-metrics-7.png)</kbd>
+<kbd>![04-metrics-8.png](04-metrics-8.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" dp="5" />
 ```
-<kbd>![04-metrics-8.png](04-metrics-8.png)</kbd>
+<kbd>![04-metrics-9.png](04-metrics-9.png)</kbd>
 
 
 ### Format string
@@ -110,7 +135,7 @@ Use the `format` attribute.
 ```xml
 <component type="metric" metric="speed" format=".4f" />
 ```
-<kbd>![04-metrics-9.png](04-metrics-9.png)</kbd>
+<kbd>![04-metrics-10.png](04-metrics-10.png)</kbd>
 
 
 ## Positioning
@@ -121,7 +146,7 @@ The same positioning as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" x="40" metric="speed" />
 ```
-<kbd>![04-metrics-10.png](04-metrics-10.png)</kbd>
+<kbd>![04-metrics-11.png](04-metrics-11.png)</kbd>
 
 
 ## Alignment
@@ -132,7 +157,7 @@ The same alignment as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" x="40" metric="speed" align="right" />
 ```
-<kbd>![04-metrics-11.png](04-metrics-11.png)</kbd>
+<kbd>![04-metrics-12.png](04-metrics-12.png)</kbd>
 
 
 ## Colour
@@ -143,25 +168,25 @@ The same colour as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" metric="speed" rgb="255,255,0" />
 ```
-<kbd>![04-metrics-12.png](04-metrics-12.png)</kbd>
+<kbd>![04-metrics-13.png](04-metrics-13.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" rgb="255,255,0,128" />
 ```
-<kbd>![04-metrics-13.png](04-metrics-13.png)</kbd>
+<kbd>![04-metrics-14.png](04-metrics-14.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" rgb="255,0,0" outline="255,255,255" size="48" />
 ```
-<kbd>![04-metrics-14.png](04-metrics-14.png)</kbd>
+<kbd>![04-metrics-15.png](04-metrics-15.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" rgb="255,0,0" outline="255,255,255" outline_width="5" size="48"  />
 ```
-<kbd>![04-metrics-15.png](04-metrics-15.png)</kbd>
+<kbd>![04-metrics-16.png](04-metrics-16.png)</kbd>
 
 
 ## Supported Metrics
