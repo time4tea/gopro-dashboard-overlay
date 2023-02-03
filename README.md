@@ -34,6 +34,7 @@ Almost 30 different map styles are supported! - See [map styles](docs/maps/READM
 
 ## Requirements
 
+
 - Python3.10
 - ffmpeg (you'll need the ffmpeg program installed)
 - Unixy machine (probably, untested on Windows)
@@ -49,7 +50,7 @@ Optional: Some widgets require the `cairo` library - which must be installed sep
 The docker image is a new thing and still a bit experimental... please file an issue if you find any problems.
 
 The docker image contains all you need to get started, and uses a volume `/work/`, which we suggest you map to the current directory which can contain your GoPro
-files.
+files. Note that the docker version doesn't support nvidia GPU extensions.
 
 ```shell
 docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:<version> <program> [args...]
