@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import datetime
 import traceback
 from importlib import metadata
 from pathlib import Path
@@ -11,6 +12,7 @@ from gopro_overlay import timeseries_process, progress_frames, gpx, fit
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.counter import ReasonCounter
+from gopro_overlay.date_overlap import DateRange
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
@@ -24,11 +26,11 @@ from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter, GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
-from gopro_overlay.log import log
+from gopro_overlay.log import log, fatal
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timeseries import Timeseries
-from gopro_overlay.timeunits import timeunits
+from gopro_overlay.timeunits import timeunits, Timeunit
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.profile import WidgetProfiler
@@ -47,7 +49,7 @@ def accepter_from_args(include, exclude):
 
 
 def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude, renderer, timeseries, font,
-                          privacy_zone, profiler, converters:Converters):
+                          privacy_zone, profiler, converters: Converters):
     accepter = accepter_from_args(include, exclude)
 
     if layout_xml:
@@ -82,7 +84,11 @@ def load_external(filepath: Path, units) -> Timeseries:
     elif suffix == ".fit":
         return fit.load_timeseries(filepath, units)
     else:
-        raise IOError(f"Don't recognise filetype from {filepath} - support .gpx and .fit")
+        fatal(f"Don't recognise filetype from {filepath} - support .gpx and .fit")
+
+
+def fmtdt(dt: datetime.datetime):
+    return dt.replace(microsecond=0).isoformat()
 
 
 if __name__ == "__main__":
@@ -118,8 +124,9 @@ if __name__ == "__main__":
 
             if args.use_gpx_only:
 
-                start_date = None
-                duration = None
+                start_date: Optional[datetime.datetime] = None
+                end_date: Optional[datetime.datetime] = None
+                duration: Optional[Timeunit] = None
 
                 if args.input:
                     inputpath = args.input
@@ -136,15 +143,31 @@ if __name__ == "__main__":
 
                     if args.video_time_start:
                         start_date = fns[args.video_time_start](stream_info.file)
+                        end_date = start_date + duration.timedelta()
 
                     if args.video_time_end:
                         start_date = fns[args.video_time_end](stream_info.file) - duration.timedelta()
+                        end_date = start_date + duration.timedelta()
+
                 else:
                     generate = "overlay"
 
                 external_file: Path = args.gpx
-                frame_meta = timeseries_to_framemeta(load_external(external_file, units), units, start_date=start_date,
-                                                     duration=duration)
+                fit_or_gpx_timeseries = load_external(external_file, units)
+
+                log(f"GPX/FIT file:     {fmtdt(fit_or_gpx_timeseries.min)} -> {fmtdt(fit_or_gpx_timeseries.max)}")
+
+                # Give a bit of information here about what is going on
+                if start_date is not None:
+                    log(f"Video File Dates: {fmtdt(start_date)} -> {fmtdt(end_date)}")
+
+                    overlap = DateRange(start=start_date, end=end_date).overlap_seconds(
+                        DateRange(start=fit_or_gpx_timeseries.min, end=fit_or_gpx_timeseries.max))
+
+                    if overlap == 0:
+                        fatal("Video file and GPX/FIT file don't overlap in time -  See https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
+
+                frame_meta = timeseries_to_framemeta(fit_or_gpx_timeseries, units, start_date=start_date, duration=duration)
                 video_duration = frame_meta.duration()
                 packets_per_second = 10
             else:
@@ -184,8 +207,7 @@ if __name__ == "__main__":
 
                 except TimeoutExpired:
                     traceback.print_exc()
-                    log(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
-                    exit(1)
+                    fatal(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
 
                 if args.gpx:
                     external_file: Path = args.gpx
@@ -197,8 +219,7 @@ if __name__ == "__main__":
                 dimensions = dimension_from(args.overlay_size)
 
         if len(frame_meta) < 1:
-            raise IOError(
-                f"Unable to load GoPro metadata from {inputpath}. Use --debug-metadata to see more information")
+            fatal(f"Unable to load GoPro metadata from {inputpath}. Use --debug-metadata to see more information")
 
         log(f"Generating overlay at {dimensions}")
         log(f"Timeseries has {len(frame_meta)} data points")

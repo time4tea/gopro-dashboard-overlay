@@ -47,6 +47,10 @@ def test_overlay_size_required_with_gpx_only():
         assert do_args("--use-gpx-only", "--gpx", "bob", input=None)
 
 
+def test_overlay_size_required_with_gpx_only_unless_video_file():
+    assert do_args("--use-gpx-only", "--gpx", "bob", input="something")
+
+
 def test_gpx_only_implies_generate_overlay_so_disallow_it():
     with pytest.raises(SystemExit):
         assert do_args("--use-gpx-only", "--gpx", "bob", "--overlay-size", "10x10", "--generate", "overlay", input=None)
@@ -130,6 +134,7 @@ def test_exclude():
 def test_map_api_key():
     args = do_args("--map-api-key", "abcd")
     assert ArgsKeyFinder(args).find_api_key("thunderforest") == "abcd"
+
 
 def test_no_map_api_key():
     args = do_args()
