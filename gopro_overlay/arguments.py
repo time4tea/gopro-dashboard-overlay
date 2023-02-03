@@ -3,7 +3,7 @@ import pathlib
 import sys
 
 from gopro_overlay import geo
-from gopro_overlay.log import log
+from gopro_overlay.log import fatal
 from gopro_overlay.point import Point, BoundingBox
 
 
@@ -107,9 +107,8 @@ def gopro_dashboard_arguments(args=None):
     args = parser.parse_args(args)
 
     def quit(reason):
-        log(f"Invalid arguments: {reason}")
         parser.print_help(file=sys.stderr)
-        exit(1)
+        fatal(f"Invalid arguments: {reason}")
 
     if (args.video_time_start or args.video_time_end) and not args.use_gpx_only:
         quit("--video-time-start/--video-time-end only applies when --use-gpx-only")

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import subprocess
-import sys
 
 from gopro_overlay.log import log
 
@@ -34,5 +33,5 @@ class InProcessExecution:
             if self.redirect:
                 log("FFMPEG Output:")
                 with open(self.redirect) as f:
-                    log("".join(f.readlines()), file=sys.stderr)
+                    log("".join(f.readlines()))
             raise IOError(f"Process {cmd[0]} failed") from None

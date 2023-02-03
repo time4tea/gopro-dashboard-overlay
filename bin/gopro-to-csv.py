@@ -16,7 +16,7 @@ from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
 from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSReportingFilter, GPSDOPFilter, GPSMaxSpeedFilter, NullGPSLockFilter, GPSBBoxFilter
 from gopro_overlay.gpx import load_timeseries
-from gopro_overlay.log import log
+from gopro_overlay.log import log, fatal
 from gopro_overlay.units import units
 
 if __name__ == "__main__":
@@ -41,8 +41,7 @@ if __name__ == "__main__":
     source = args.input
 
     if not source.exists():
-        log(f"{source}: No such file or directory")
-        exit(1)
+        fatal(f"{source}: No such file or directory")
 
     if args.gpx:
         ts = load_timeseries(source, units)
