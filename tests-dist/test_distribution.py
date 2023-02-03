@@ -76,6 +76,11 @@ def test_maybe_renders_something():
     run([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"])
 
 
+def test_maybe_renders_something_kph():
+    prog = distribution / "bin" / "gopro-dashboard.py"
+    run([prog, "--overlay-size", "1920x1080", "--units-speed", "kph", "--units-altitude", "inch", clip, "/tmp/render-clip-kph.MP4"])
+
+
 @approve_text
 def test_maybe_makes_a_csv():
     r = invoke([(distribution / "bin" / "gopro-to-csv.py"), clip, "-"])
