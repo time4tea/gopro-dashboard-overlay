@@ -54,6 +54,13 @@ You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
 venv/bin/gopro-dashboard.py --profile nvgpu ~/layouts/my-layout.xml ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
 
+## Units
+
+The units for `speed`, `altitude`, `distance` and `temperature` can be controlled from the command line. 
+
+```shell
+venv/bin/gopro-dashboard.py --units-speed kph --units-altitude feet --units-temperature degreeF ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
+```
 
 ## Omitting Widgets
 
