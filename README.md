@@ -207,6 +207,8 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.82.0 [Change] Support for changing units in layouts from the command line. Use `--units-speed` etc to control. Examples are in [docs/bin](docs/bin)
+  - Thanks to [matzeruegge](https://github.com/matzeruegge) for the suggestion.
 - 0.81.0 [Fix] gopro-rename was broken when using `--dirs` - added tests so hopefully won't reoccur. Thanks to [matzeruegge](https://github.com/matzeruegge) for reporting 
 - 0.80.0 [Fix] Use speeds from GPX file, in preference to GoPro file, when using GPX and GoPro together.
   - [Change] Bump Required python version to 3.10
