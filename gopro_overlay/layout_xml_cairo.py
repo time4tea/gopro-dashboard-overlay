@@ -7,7 +7,7 @@ from .widgets.cairo.circuit import Line
 from .widgets.widgets import Widget
 
 
-@allow_attributes({"size", "rotate", "fill", "outline", "line_width", "loc_fill", "loc_outline", "loc_size"})
+@allow_attributes({"size", "rotate", "fill", "outline", "line-width", "loc-fill", "loc-outline", "loc-size"})
 def create_cairo_circuit_map(element, entry, timeseries, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
     rotation = iattrib(element, "rotate", d=0)
@@ -22,12 +22,12 @@ def create_cairo_circuit_map(element, entry, timeseries, **kwargs) -> Widget:
                 line=Line(
                     fill=rgbattr(element, "fill", d=(255, 255, 255)),
                     outline=rgbattr(element, "outline", d=(255, 0, 0)),
-                    width=fattrib(element, "line_width", d=0.01),
+                    width=fattrib(element, "line-width", d=0.01),
                 ),
                 loc=Line(
-                    fill=rgbattr(element, "loc_fill", d=(0, 0, 255)),
-                    outline=rgbattr(element, "loc_outline", d=(0, 0, 0)),
-                    width=fattrib(element, "loc_size", d=0.01 * 1.1)
+                    fill=rgbattr(element, "loc-fill", d=(0, 0, 255)),
+                    outline=rgbattr(element, "loc-outline", d=(0, 0, 0)),
+                    width=fattrib(element, "loc-size", d=0.01 * 1.1)
                 )
             )
         ]

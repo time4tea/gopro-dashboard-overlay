@@ -12,7 +12,7 @@
     </translate>
 
     <translate x="100" y="150">
-        <component type="zone-bar"  width="800" height="75" metric="hr" max="200" min="0" z1="130" z2="163" z3="183" z0-col="52, 122, 235,200" z1-col="67,235,52,200" z2-col="240,232,19,200" z3-col="207,19,2,200" />
+        <component type="zone-bar"  width="800" height="75" metric="hr" max="200" min="0" z1="130" z2="163" z3="183" z0-rgb="52, 122, 235,200" z1-rgb="67,235,52,200" z2-rgb="240,232,19,200" z3-rgb="207,19,2,200" />
     </translate>
 
     <translate x="300" y="150">

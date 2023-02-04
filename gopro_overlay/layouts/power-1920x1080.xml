@@ -48,7 +48,7 @@
         <component type="icon" x="-64" y="0" file="heartbeat.png" size="64"/>
         <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
         <translate x="-930" name="heartbeat-zone">
-            <component type="zone-bar" width="800" height="75" metric="hr" max="200" z1="130" z2="163" z3="183" z0-col="52, 122, 235,200" z1-col="67,235,52,200" z2-col="240,232,19,200" z3-col="207,19,2,200"/>
+            <component type="zone-bar" width="800" height="75" metric="hr" max="200" z1="130" z2="163" z3="183" z0-rgb="52, 122, 235,200" z1-rgb="67,235,52,200" z2-rgb="240,232,19,200" z3-rgb="207,19,2,200"/>
         </translate>
     </composite>
 
@@ -57,7 +57,7 @@
         <component type="icon" x="-64" y="0" file="power.png" size="64"/>
         <component type="metric" x="-70" y="18" metric="power" dp="0" size="32" align="right"/>
         <translate x="-930" name="power-zone">
-            <component type="zone-bar"  width="800" height="75" metric="power" max="600" z1="130" z2="160" z3="200" z0-col="67, 235, 52,200" z1-col="67,235,52,200" z2-col="240,232,19,200" z3-col="207,19,2,200" />
+            <component type="zone-bar"  width="800" height="75" metric="power" max="600" z1="130" z2="160" z3="200" z0-rgb="67, 235, 52,200" z1-rgb="67,235,52,200" z2-rgb="240,232,19,200" z3-rgb="207,19,2,200" />
         </translate>
     </composite>
 

@@ -562,8 +562,8 @@ class Widgets:
         )
 
     @allow_attributes({"width", "height", "metric", "units", "fill", "zone-divider", "outline",
-                       "outline-width", "cr", "max", "min", "z1", "z2", "z3", "z0-col", "z1-col",
-                       "z2-col", "z3-col"})
+                       "outline-width", "cr", "max", "min", "z1", "z2", "z3", "z0-rgb", "z1-rgb",
+                       "z2-rgb", "z3-rgb"})
     def create_zone_bar(self, element, entry, **kwargs):
         return GradientBar(
             size=Dimension(
@@ -587,10 +587,10 @@ class Widgets:
             z1_value=iattrib(element, "z1", d=120),
             z2_value=iattrib(element, "z2", d=160),
             z3_value=iattrib(element, "z3", d=200),
-            z0_col=rgbattr(element, "z0-col", d=(255, 255, 255)),
-            z1_col=rgbattr(element, "z1-col", d=(67, 235, 52)),
-            z2_col=rgbattr(element, "z2-col", d=(240, 232, 19)),
-            z3_col=rgbattr(element, "z3-col", d=(207, 19, 2)),
+            z0_col=rgbattr(element, "z0-rgb", d=(255, 255, 255)),
+            z1_col=rgbattr(element, "z1-rgb", d=(67, 235, 52)),
+            z2_col=rgbattr(element, "z2-rgb", d=(240, 232, 19)),
+            z3_col=rgbattr(element, "z3-rgb", d=(207, 19, 2)),
         )
 
     @allow_attributes({"size", "metric", "units", "textsize", "vs0", "vs", "vfe", "vno", "vne", "rotate"})

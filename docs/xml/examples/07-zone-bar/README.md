@@ -117,13 +117,13 @@ zone-0 which lies between `min` and `z1`.
 
 ## Setting Colours
 
-Use `z0-col`, `z1-col`, `z2-col`, and `z3-col` to control the colours of the various zones. The colours will 
+Use `z0-rgb`, `z1-rgb`, `z2-rgb`, and `z3-rgb` to control the colours of the various zones. The colours will 
 be used to create a linear gradient. Like all colours, either `r,g,b`, or `r,g,b,a` can be used. Currently, all must be specified
 in the same format - you'll likely get an error mixing and matching colours with and without alpha.
 
 
 ```xml
-<component type="zone-bar" metric="alt" units="feet" max="50" z1="10" z2="20" z3="30" z0-col="255,255,255" z1-col="255,0,0" z2-col="0,255,0" z3-col="0,0,255" />
+<component type="zone-bar" metric="alt" units="feet" max="50" z1="10" z2="20" z3="30" z0-rgb="255,255,255" z1-rgb="255,0,0" z2-rgb="0,255,0" z3-rgb="0,0,255" />
 ```
 <kbd>![07-zone-bar-10.png](07-zone-bar-10.png)</kbd>
 
