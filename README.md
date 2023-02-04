@@ -208,11 +208,13 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.84.0 [Feature] New component `zone-bar` - a 3-zone bar control that can be used for HR/Cadence/Power zones. See docs in [docs/xml/examples/07-zone-bar](docs/xml/examples/07-zone-bar)
+  - Many thanks to [@jchinte](https://github.com/jchinte) for contributing!
 - 0.83.0 [Change] No longer require --overlay-size when using --use-gpx-only, but supplying input video
   - [Fix] Give better error message when video and GPX don't overlap in time, but told to sync 
-  - Thanks to [mfloryan](https://github.com/mfloryan) for reporting both of these
+  - Thanks to [@mfloryan](https://github.com/mfloryan) for reporting both of these
 - 0.82.0 [Change] Support for changing units in layouts from the command line. Use `--units-speed` etc to control. Examples are in [docs/bin](docs/bin)
-  - Thanks to [matzeruegge](https://github.com/matzeruegge) for the suggestion.
+  - Thanks to [@matzeruegge](https://github.com/matzeruegge) for the suggestion.
 - 0.81.0 [Fix] gopro-rename was broken when using `--dirs` - added tests so hopefully won't reoccur. Thanks to [matzeruegge](https://github.com/matzeruegge) for reporting 
 - 0.80.0 [Fix] Use speeds from GPX file, in preference to GoPro file, when using GPX and GoPro together.
   - [Change] Bump Required python version to 3.10
@@ -228,7 +230,7 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
 - 0.77.0 [Change] Disable speed and other calculations when GPS is not locked - stops unbelievable values
   - [Change] changes to GPS parsing, should make detection of GPS lock more accurate (some 'not locked' values used to be included) still not perfect h/t [@falumas](https://github.com/falumas)
   - [Change] add new widget "gps-lock-icon" at top of screen to show GPS lock - hopefully not too intrusive - can switch off with `--exclude`
-  - [Change] interpolate GPX/FIT tracks so they update every 0.1s - h/t [0x10](https://github.com/0x10)
+  - [Change] interpolate GPX/FIT tracks so they update every 0.1s - h/t [@0x10](https://github.com/0x10)
 - 0.76.0 [New Feature] New widget - "cairo_circuit_map" - Much nicer looking circuit map, and first widget that uses new optional "cairo" library.
   - See examples [Cairo Circuit Map](docs/xml/examples/06-cairo-circuit-map/README.md)
 - 0.75.0 Fixing some issues with True values in use of supplied or calculated values
