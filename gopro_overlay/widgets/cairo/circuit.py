@@ -8,7 +8,7 @@ from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point
 from gopro_overlay.rdp import rdp
-from gopro_overlay.widgets.cairo.cairo import set_source, saved
+from gopro_overlay.widgets.cairo.cairo import set_source, saved, CairoWidget
 
 
 @dataclasses.dataclass(frozen=True)
@@ -22,6 +22,7 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 blue = (0, 0, 255)
 
+
 def to_cairo_rgba(pillow_rgba):
     if len(pillow_rgba) == 3:
         return pillow_rgba
@@ -30,7 +31,8 @@ def to_cairo_rgba(pillow_rgba):
     else:
         raise ValueError("Only 3 or 4 tuples, please")
 
-class CairoCircuit:
+
+class CairoCircuit(CairoWidget):
 
     def __init__(
             self,

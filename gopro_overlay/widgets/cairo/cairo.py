@@ -1,6 +1,6 @@
 import contextlib
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 import cairo
 from PIL import Image, ImageDraw
@@ -10,7 +10,21 @@ from gopro_overlay.exceptions import Defect
 from gopro_overlay.widgets.widgets import Widget
 
 
-class CairoCache:
+class CairoWidget:
+    def draw(self, context: cairo.Context):
+        raise NotImplemented()
+
+
+class CairoComposite(CairoWidget):
+    def __init__(self, widgets: List[CairoWidget]):
+        self.widgets = widgets
+
+    def draw(self, context: cairo.Context):
+        for w in self.widgets:
+            w.draw(context)
+
+
+class CairoCache(CairoWidget):
     def __init__(self):
         self.surface = None
 
@@ -49,12 +63,12 @@ def to_pillow(surface: cairo.ImageSurface) -> Image:
         return Image.frombuffer("RGBA", size, memory.tobytes(), 'raw', "BGRa", stride)
 
 
-class CairoWidget(Widget):
+class CairoAdapter(Widget):
 
-    def __init__(self, size: Dimension, rotation=0, widgets=None):
+    def __init__(self, size: Dimension, widget:CairoWidget, rotation=0):
         self.size = size
         self.rotation = rotation
-        self.widgets = [] if widgets is None else widgets
+        self.widget = widget
 
     def draw(self, image: Image, draw: ImageDraw):
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.size.x, self.size.y)
@@ -71,8 +85,7 @@ class CairoWidget(Widget):
             if scale > 1.0:
                 ctx.scale(1 / scale, 1 / scale)
 
-        for widget in self.widgets:
-            widget.draw(ctx)
+        self.widget.draw(ctx)
 
         image.alpha_composite(to_pillow(surface), (0, 0))
 
