@@ -94,6 +94,13 @@ def test_render_example_2_layout():
     with renderer.open() as map_renderer:
         return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
+@approve_image
+def test_render_power_1920_1080():
+    xmldoc = load_xml_layout(Path("power-1920x1080"))
+
+    with renderer.open() as map_renderer:
+        return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
+
 
 @approve_image
 def test_render_xml_component():

@@ -37,23 +37,30 @@
         <component type="metric" x="70" y="18" metric="alt" units="alt" dp="1" size="32" />
     </composite>
 
-    <composite x="1900" y="820" name="power">
-        <component type="text" x="-70" y="0" size="16" align="right">Watt</component>
-        <component type="icon" x="-64" y="0" file="power.png" size="64"/>
-        <component type="metric" x="-70" y="18" metric="power" dp="0" size="32" align="right"/>
-    </composite>
-
-    <composite x="1900" y="900" name="cadence">
+    <composite x="1900" y="820" name="cadence">
         <component type="text" x="-70" y="0" size="16" align="right">RPM</component>
         <component type="icon" x="-64" y="0" file="gauge.png" size="64"/>
         <component type="metric" x="-70" y="18" metric="cadence" dp="0" size="32" align="right"/>
     </composite>
 
-    <composite x="1900" y="980" name="heartbeat">
+    <composite x="1900" y="900" name="heartbeat">
         <component type="text" x="-70" y="0" size="16" align="right">BPM</component>
         <component type="icon" x="-64" y="0" file="heartbeat.png" size="64"/>
         <component type="metric" x="-70" y="18" metric="hr" dp="0" size="32" align="right"/>
+        <translate x="-930" name="heartbeat-zone">
+            <component type="zone-bar" width="800" height="75" metric="hr" max="200" z1="130" z2="163" z3="183" z0-color="52, 122, 235,200" z1-color="67,235,52,200" z2-color="240,232,19,200" z3-color="207,19,2,200"/>
+        </translate>
     </composite>
+
+    <composite x="1900" y="980" name="power">
+        <component type="text" x="-70" y="0" size="16" align="right">Watt</component>
+        <component type="icon" x="-64" y="0" file="power.png" size="64"/>
+        <component type="metric" x="-70" y="18" metric="power" dp="0" size="32" align="right"/>
+        <translate x="-930" name="power-zone">
+            <component type="zone-bar"  width="800" height="75" metric="power" max="600" z1="130" z2="160" z3="200" z0-color="67, 235, 52,200" z1-color="67,235,52,200" z2-color="240,232,19,200" z3-color="207,19,2,200" />
+        </translate>
+    </composite>
+
 
     <component type="moving_map" name="moving_map" x="1644" y="100" size="256" zoom="16" corner_radius="35"/>
     <component type="journey_map" name="journey_map" x="1644" y="376" size="256" corner_radius="35"/>
