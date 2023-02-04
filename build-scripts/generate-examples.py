@@ -30,6 +30,7 @@ def alphanum_key(s):
 
 dimensions_by_file = {
     "07-bar.md": Dimension(500, 150),
+    "07-zone-bar.md": Dimension(500, 100),
     "05-moving-map.md": Dimension(256, 256),
     "06-journey-map.md": Dimension(256, 256),
     "06-moving-journey-map.md": Dimension(384, 384),

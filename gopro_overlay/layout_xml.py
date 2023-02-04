@@ -556,15 +556,15 @@ class Widgets:
             outline=rgbattr(element, "outline", d=(255, 255, 255)),
             outline_width=iattrib(element, "outline-width", d=3),
             cr=iattrib(element, "cr", d=5),
-            max_value=iattrib(element, "max", d=1000),
+            max_value=iattrib(element, "max", d=400),
             min_value=iattrib(element, "min", d=0),
             z1_value=iattrib(element, "z1", d=120),
             z2_value=iattrib(element, "z2", d=160),
             z3_value=iattrib(element, "z3", d=200),
-            z0_color=rgbattr(element, "z0-color", d=(255, 255, 255)),
-            z1_color=rgbattr(element, "z1-color", d=(67, 235, 52)),
-            z2_color=rgbattr(element, "z2-color", d=(240, 232, 19)),
-            z3_color=rgbattr(element, "z3-color", d=(207, 19, 2)),
+            z0_col=rgbattr(element, "z0-col", d=(255, 255, 255)),
+            z1_col=rgbattr(element, "z1-col", d=(67, 235, 52)),
+            z2_col=rgbattr(element, "z2-col", d=(240, 232, 19)),
+            z3_col=rgbattr(element, "z3-col", d=(207, 19, 2)),
         )
 
 

@@ -37,6 +37,8 @@ Auto Generated File DO NOT EDIT
 
 [07-compass](07-compass/README.md)
 
+[07-zone-bar](07-zone-bar/README.md)
+
 [08-translate](08-translate/README.md)
 
 [09-frame](09-frame/README.md)
