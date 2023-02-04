@@ -130,3 +130,6 @@ in the same format - you'll likely get an error mixing and matching colours with
 
 
 
+### History
+
+01/2023 - Briefly, the `z?-rgb` attributes were `z?-col` - but we use `rgb` in a few places so that seemed more consistent.
