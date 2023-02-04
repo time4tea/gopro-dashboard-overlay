@@ -541,31 +541,31 @@ class Widgets:
             cr=iattrib(element, "cr", d=5),
         )
 
-        def create_gradient_bar(self, element, entry, **kwargs):
-            return GradientBar(
-                size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
-                reading=metric_value(
-                    entry,
-                    accessor=metric_accessor_from(attrib(element, "metric")),
-                    converter=self.converters.converter(attrib(element, "units", d=None)),
-                    formatter=lambda x: x,
-                    default=0
-                ),
-                fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
-                divider=rgbattr(element, "zone-divider", d=(255, 255, 255)),
-                outline=rgbattr(element, "outline", d=(255, 255, 255)),
-                outline_width=iattrib(element, "outline-width", d=3),
-                cr=iattrib(element, "cr", d=5),
-                max_value=iattrib(element, "max", d=1000),
-                min_value=iattrib(element, "min", d=0),
-                z1_value=iattrib(element, "z1", d=120),
-                z2_value=iattrib(element, "z2", d=160),
-                z3_value=iattrib(element, "z3", d=200),
-                z0_color=rgbattr(element, "z0-color", d=(255, 255, 255)),
-                z1_color=rgbattr(element, "z1-color", d=(67, 235, 52)),
-                z2_color=rgbattr(element, "z2-color", d=(240, 232, 19)),
-                z3_color=rgbattr(element, "z3-color", d=(207, 19, 2)),
-            )
+    def create_zone_bar(self, element, entry, **kwargs):
+        return GradientBar(
+            size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
+            reading=metric_value(
+                entry,
+                accessor=metric_accessor_from(attrib(element, "metric")),
+                converter=self.converters.converter(attrib(element, "units", d=None)),
+                formatter=lambda q: q.m,
+                default=0
+            ),
+            fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
+            divider=rgbattr(element, "zone-divider", d=(255, 255, 255)),
+            outline=rgbattr(element, "outline", d=(255, 255, 255)),
+            outline_width=iattrib(element, "outline-width", d=3),
+            cr=iattrib(element, "cr", d=5),
+            max_value=iattrib(element, "max", d=1000),
+            min_value=iattrib(element, "min", d=0),
+            z1_value=iattrib(element, "z1", d=120),
+            z2_value=iattrib(element, "z2", d=160),
+            z3_value=iattrib(element, "z3", d=200),
+            z0_color=rgbattr(element, "z0-color", d=(255, 255, 255)),
+            z1_color=rgbattr(element, "z1-color", d=(67, 235, 52)),
+            z2_color=rgbattr(element, "z2-color", d=(240, 232, 19)),
+            z3_color=rgbattr(element, "z3-color", d=(207, 19, 2)),
+        )
 
 
     def create_asi(self, element, entry, **kwargs) -> Widget:
