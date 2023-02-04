@@ -64,11 +64,11 @@ To get rid of the outline completely, specify an alpha of `0`
 <kbd>![07-zone-bar-4.png](07-zone-bar-4.png)</kbd>
 
 
-Use `divider` to change the colour of the zone dividers
+Use `zone-divider` to change the colour of the zone dividers
 
 
 ```xml
-<component type="zone-bar" metric="alt" units="feet" marker="255,0,255" />
+<component type="zone-bar" metric="alt" units="feet" zone-divider="255,0,255" />
 ```
 <kbd>![07-zone-bar-5.png](07-zone-bar-5.png)</kbd>
 
@@ -118,7 +118,7 @@ zone-0 which lies between `min` and `z1`.
 ## Setting Colours
 
 Use `z0-col`, `z1-col`, `z2-col`, and `z3-col` to control the colours of the various zones. The colours will 
-be used to create a lineir gradient. Like all colours, either `r,g,b`, or `r,g,b,a` can be used. Currently, all must be specified
+be used to create a linear gradient. Like all colours, either `r,g,b`, or `r,g,b,a` can be used. Currently, all must be specified
 in the same format - you'll likely get an error mixing and matching colours with and without alpha.
 
 
