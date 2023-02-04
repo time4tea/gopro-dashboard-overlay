@@ -236,21 +236,6 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
   - [Change] interpolate GPX/FIT tracks so they update every 0.1s - h/t [@0x10](https://github.com/0x10)
 - 0.76.0 [New Feature] New widget - "cairo_circuit_map" - Much nicer looking circuit map, and first widget that uses new optional "cairo" library.
   - See examples [Cairo Circuit Map](docs/xml/examples/06-cairo-circuit-map/README.md)
-- 0.75.0 Fixing some issues with True values in use of supplied or calculated values
-  - Thanks to [@Timmy-485](https://github.com/Timmy-485) for data files showing the issue.
-- 0.74.0 Experimental Support for speed from GPX files - using Garmin Extension h/t [@Timmy-485](https://github.com/Timmy-485) 
-  - Fix bug introduced in 0.73.0 to do with parsing map api keys.
-- 0.73.0 Support `--cache-dir` and `--config-dir` which should make use of profiles and map caches easier when using Docker
-- 0.72.0 Fix #42 - Data out of sequence when using joined files. h/t [@IbnGit](https://github.com/IbnGit) 
-- 0.71.0 Fix #84 - Error introduced when updating to use pathlib - Added test so shouldn't reoccur. h/t [@j0ker-npw](https://github.com/j0ker-npw) 
-- 0.70.0 Using GPX/FIT files - file extension is now case insensitive - #83 - h/t [@j0ker-npw](https://github.com/j0ker-npw) 
-- 0.69.0 
-  - New Program:- gopro-layout.py
-    - This should help if you want to create your own layouts. Just point this to a layout file, and it will render a frame each time the layout file changes, so you can see your changes "live"
-    - Some layout examples are now in [examples/layout](examples/layout)
-    - Minor tweaks to `text`, `metric` and `chart` to control outline width and colour
-  - New widget type `circuit_map` shows a simple plot of the path, but no map graphics. See [docs/xml/examples/06-circuit-map](docs/xml/examples/06-circuit-map) 
-
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
