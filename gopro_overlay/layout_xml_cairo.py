@@ -1,11 +1,13 @@
 from .dimensions import Dimension
 from .layout_xml import iattrib, rgbattr, fattrib
+from .layout_xml_attribute import allow_attributes
 from .widgets.cairo.cairo import CairoWidget
 from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
 from .widgets.widgets import Widget
 
 
+@allow_attributes({"size", "rotate", "fill", "outline", "line_width", "loc_fill", "loc_outline", "loc_size"})
 def create_cairo_circuit_map(element, entry, timeseries, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
     rotation = iattrib(element, "rotate", d=0)

@@ -14,6 +14,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
+from .layout_xml_attribute import allow_attributes
 from .log import log
 from .widgets.asi import AirspeedIndicator
 from .widgets.bar import Bar
@@ -21,10 +22,11 @@ from .widgets.chart import SimpleChart
 from .widgets.compass import Compass
 from .widgets.compass_arrow import CompassArrow
 from .widgets.gps import GPSLock
+from .widgets.gradient_bar import GradientBar
 from .widgets.map import MovingJourneyMap, Circuit
 from .widgets.profile import WidgetProfiler
 from .widgets.widgets import simple_icon, Translate, Composite, Frame, Widget
-from .widgets.gradient_bar import GradientBar
+
 
 def load_xml_layout(filepath: Path):
     if filepath.exists():
@@ -137,6 +139,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
                 widget=method(child, entry=entry)
             )
 
+        @allow_attributes({"x", "y"})
         def create_composite(element, level):
             return decorate(
                 name=name_of(element),
@@ -149,6 +152,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
                 )
             )
 
+        @allow_attributes({"x", "y", "width", "height", "opacity", "cr", "outline", "bg", "fo"})
         def create_frame(element, level):
             return decorate(
                 name=name_of(element),
@@ -342,6 +346,7 @@ class Widgets:
         self.font = font
         self.converters = converters
 
+    @allow_attributes({"x", "y", "metric", "size", "format", "dp", "units", "align", "cache", "rgb", "outline", "outline_width"})
     def create_metric(self, element, entry, **kwargs) -> Widget:
         return metric(
             at=at(element),
@@ -357,6 +362,7 @@ class Widgets:
             stroke_width=iattrib(element, "outline_width", d=2),
         )
 
+    @allow_attributes({"x", "y", "metric", "size", "units", "align", "rgb", "outline", "outline_width"})
     def create_metric_unit(self, element, entry, **kwargs) -> Widget:
 
         format_string = element.text or "{:~C}"
@@ -375,6 +381,7 @@ class Widgets:
             stroke_width=iattrib(element, "outline_width", d=2),
         )
 
+    @allow_attributes({"x", "y", "file", "size", "invert"})
     def create_icon(self, element, **kwargs) -> Widget:
         return simple_icon(
             at=at(element),
@@ -383,6 +390,7 @@ class Widgets:
             invert=battrib(element, "invert", d=True)
         )
 
+    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb"})
     def create_datetime(self, element, entry, **kwargs):
         return text(
             at=at(element),
@@ -393,6 +401,7 @@ class Widgets:
             fill=rgbattr(element, "rgb", d=(255, 255, 255))
         )
 
+    @allow_attributes({"x", "y", "size", "align", "direction", "rgb", "outline", "outline_width"})
     def create_text(self, element, entry, **kwargs) -> Widget:
         if element.text is None:
             raise IOError("Text components should have the text in the element like <component...>Text</component>")
@@ -408,6 +417,7 @@ class Widgets:
             stroke_width=iattrib(element, "outline_width", d=2),
         )
 
+    @allow_attributes({"x", "y", "size", "zoom", "corner_radius", "opacity", "rotate"})
     def create_moving_map(self, element, entry, **kwargs) -> Widget:
         return moving_map(
             at=at(element),
@@ -420,6 +430,7 @@ class Widgets:
             rotate=battrib(element, "rotate", d=True)
         )
 
+    @allow_attributes({"x", "y", "size", "corner_radius", "opacity"})
     def create_journey_map(self, element, entry, **kwargs) -> Widget:
         return journey_map(
             at(element),
@@ -432,6 +443,7 @@ class Widgets:
             opacity=fattrib(element, "opacity", 0.7)
         )
 
+    @allow_attributes({"size", "zoom"})
     def create_moving_journey_map(self, element, entry, **kwargs) -> Widget:
         return MovingJourneyMap(
             location=lambda: entry().point,
@@ -442,6 +454,7 @@ class Widgets:
             zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
         )
 
+    @allow_attributes({"size", "fill", "outline", "fill_width", "outline_width"})
     def create_circuit_map(self, element, entry, **kwargs) -> Widget:
         size = iattrib(element, "size", d=256)
         return Circuit(
@@ -459,6 +472,9 @@ class Widgets:
         log("Use of component `gradient_chart` is now deprecated - please use `chart` instead.")
         return self.create_chart(*args, **kwargs)
 
+    @allow_attributes({"x", "y", "metric", "units", "seconds",
+                       "samples", "values", "size_title", "filled",
+                       "height", "bg", "fill", "line", "text", "alpha"})
     def create_chart(self, element, entry, **kwargs) -> Widget:
         accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
         converter = self.converters.converter(attrib(element, "units", d="metres"))
@@ -497,6 +513,7 @@ class Widgets:
             )
         )
 
+    @allow_attributes({"size", "textsize", "fg", "bg", "text"})
     def create_compass(self, element, entry, **kwargs) -> Widget:
         return Compass(
             size=iattrib(element, "size", d=256),
@@ -507,6 +524,7 @@ class Widgets:
             text=rgbattr(element, "text", d=(255, 255, 255)),
         )
 
+    @allow_attributes({"size", "textsize", "arrow", "bg", "text", "outline", "arrow-outline"})
     def create_compass_arrow(self, element, entry, **kwargs) -> Widget:
         return CompassArrow(
             size=iattrib(element, "size", d=256),
@@ -516,9 +534,11 @@ class Widgets:
             bg=rgbattr(element, "bg", d=(0, 0, 0, 0)),
             text=rgbattr(element, "text", d=(255, 255, 255)),
             outline=rgbattr(element, "outline", d=(0, 0, 0)),
-            arrow_outline=rgbattr(element, "arrow_outline", d=(0, 0, 0)),
+            arrow_outline=rgbattr(element, "arrow-outline", d=(0, 0, 0)),
         )
 
+    @allow_attributes({"width", "height", "metric", "units", "fill", "zero", "bar",
+                       "outline", "outline-width", "h-neg", "h-pos", "max", "min", "cr"})
     def create_bar(self, element, entry, **kwargs) -> Widget:
         return Bar(
             size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
@@ -541,9 +561,15 @@ class Widgets:
             cr=iattrib(element, "cr", d=5),
         )
 
+    @allow_attributes({"width", "height", "metric", "units", "fill", "zone-divider", "outline",
+                       "outline-width", "cr", "max", "min", "z1", "z2", "z3", "z0-col", "z1-col",
+                       "z2-col", "z3-col"})
     def create_zone_bar(self, element, entry, **kwargs):
         return GradientBar(
-            size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
+            size=Dimension(
+                x=iattrib(element, "width", d=400),
+                y=iattrib(element, "height", d=30)
+            ),
             reading=metric_value(
                 entry,
                 accessor=metric_accessor_from(attrib(element, "metric")),
@@ -567,7 +593,7 @@ class Widgets:
             z3_col=rgbattr(element, "z3-col", d=(207, 19, 2)),
         )
 
-
+    @allow_attributes({"size", "metric", "units", "textsize", "vs0", "vs", "vfe", "vno", "vne", "rotate"})
     def create_asi(self, element, entry, **kwargs) -> Widget:
         return AirspeedIndicator(
             size=iattrib(element, "size", d=256),
@@ -594,6 +620,7 @@ class Widgets:
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
 
+    @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
     def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
         at = Coordinate(0, 0)
         size = iattrib(element, "size", d=64)

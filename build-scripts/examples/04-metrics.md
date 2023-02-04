@@ -46,9 +46,9 @@ Using these units, along with the `metric-unit` component, means that a single l
 like distances in km, but altitude in feet (to give higher numbers if you are cycling!)
 
 {{
-<component type="metric"      y="0" metric="speed" unit="speed" dp="0" />
-<component type="metric-unit" y="32" metric="speed" unit="speed">Using {:P} </component>
-<component type="metric-unit" y="64" metric="speed" unit="speed">Using {:~P} </component>
+<component type="metric"      y="0" metric="speed" units="speed" dp="0" />
+<component type="metric-unit" y="32" metric="speed" units="speed">Using {:P} </component>
+<component type="metric-unit" y="64" metric="speed" units="speed">Using {:~P} </component>
 }}
 
 
