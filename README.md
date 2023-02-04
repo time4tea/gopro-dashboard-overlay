@@ -208,6 +208,9 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.85.0 [Feature/Breaking Possibly] Add validation to attributes in layout files. This may cause some custom layouts to break! - But they wouldn't have been working as intended anyway.
+  - [Change/Breaking] Change some `zone-bar` attribute names, aiming for standardisation
+  - [Change/Breaking] Change some `cairo-circuit-map` attribute names, aiming for standardisation
 - 0.84.0 [Feature] New component `zone-bar` - a 3-zone bar control that can be used for HR/Cadence/Power zones. See docs in [docs/xml/examples/07-zone-bar](docs/xml/examples/07-zone-bar)
   - Many thanks to [@jchinte](https://github.com/jchinte) for contributing!
 - 0.83.0 [Change] No longer require --overlay-size when using --use-gpx-only, but supplying input video
