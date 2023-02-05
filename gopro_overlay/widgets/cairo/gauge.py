@@ -4,7 +4,7 @@ from typing import Callable, List
 import cairo
 
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite
+from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite, saved
 from gopro_overlay.widgets.cairo.colour import Colour
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters, Arc
 from gopro_overlay.widgets.cairo.line import LineParameters
@@ -36,6 +36,42 @@ class CairoSimpleGauge(CairoWidget):
             line.apply_to(context)
             context.stroke_preserve()
         context.new_path()
+
+
+
+class CairoEllipseMarker(CairoWidget):
+
+    def __init__(self,
+                 ellipse: EllipseParameters,
+                 outer: LineParameters,
+                 inner: LineParameters,
+                 start,
+                 length,
+                 reading,
+                 ):
+        self.ellipse = ellipse
+        self.outer = outer
+        self.inner = inner
+        self.reading = reading
+        self.start = start
+        self.length = length
+
+    def draw(self, context: cairo.Context):
+        to = self.start + (self.length * self.reading().value())
+
+        coordinate = self.ellipse.get_point(to)
+
+        with saved(context):
+            context.rotate(self.ellipse.angle)
+
+            context.arc(coordinate.x, coordinate.y, 0.05, 0, math.tau)
+            self.outer.apply_to(context)
+            context.fill()
+
+            context.arc(coordinate.x, coordinate.y, 0.03, 0, math.tau)
+            self.inner.apply_to(context)
+            context.fill()
+
 
 
 def minimum_reading(m: Reading, r: Callable[[], Reading]) -> Callable[[], Reading]:
@@ -105,6 +141,14 @@ class CairoGauge270(CairoWidget):
                 length=length,
                 reading=reading,
             ),
+            CairoEllipseMarker(
+                ellipse=circle_with_radius(0.40),
+                outer=LineParameters(0.05, colour=scale_colour.alpha(0.7)),
+                inner=LineParameters(0.05, colour=gauge_colour.alpha(0.7)),
+                start=start,
+                length=length,
+                reading=reading
+            )
         ])
 
     def draw(self, context: cairo.Context):
