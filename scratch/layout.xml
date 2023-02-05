@@ -21,7 +21,11 @@
 
     <translate x="800">
         <translate y="50">
-            <component type="cairo_circuit_map" size="1024" line_width="0.05" outline="0,0,255,0" fill="0,0,255,128" rotate="-90" loc_size="0.04" loc_outline="0,0,0,128" loc_fill="255,255,255,128"/>
+            <component type="cairo_circuit_map" size="1024" line-width="0.05" outline="0,0,255,0" fill="0,0,255,128" rotate="-90" loc-size="0.04" loc-outline="0,0,0,128" loc-fill="255,255,255,128"/>
+        </translate>
+
+        <translate y="100">
+            <component type="cairo_gauge_marker" size="512" metric="speed" units="mph" min="0" max="30"/>
         </translate>
     </translate>
 </layout>
