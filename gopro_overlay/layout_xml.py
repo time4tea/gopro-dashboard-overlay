@@ -620,6 +620,13 @@ class Widgets:
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
 
+    def create_cairo_gauge_270(self, element, entry, **kwargs):
+        try:
+            import gopro_overlay.layout_xml_cairo
+            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_270(element, entry, self.converters, **kwargs)
+        except ModuleNotFoundError:
+            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+
     @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
     def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
         at = Coordinate(0, 0)
