@@ -19,4 +19,11 @@
         <component type="cairo-circuit-map"/>
     </translate>
 
+    <translate x="400" y="400">
+        <translate x="150" y="150">
+            <component type="metric" metric="speed" units="mph" size="60" dp="0" rgb="255,255,255,160" outline="0,0,0,160"/>
+        </translate>
+        <component type="cairo-gauge-marker" metric="speed" units="mph" />
+    </translate>
+
 </layout>

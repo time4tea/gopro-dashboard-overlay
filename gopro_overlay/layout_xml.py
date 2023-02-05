@@ -620,10 +620,10 @@ class Widgets:
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
 
-    def create_cairo_gauge_270(self, element, entry, **kwargs):
+    def create_cairo_gauge_marker(self, element, entry, **kwargs):
         try:
             import gopro_overlay.layout_xml_cairo
-            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_270(element, entry, self.converters, **kwargs)
+            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_marker(element, entry, self.converters, **kwargs)
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
 

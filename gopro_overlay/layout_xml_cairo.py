@@ -1,12 +1,16 @@
 from typing import Callable
 
+from cairo import LineCap
+
 from .dimensions import Dimension
 from .layout_components import metric_value
 from .layout_xml import iattrib, rgbattr, fattrib, metric_accessor_from, attrib
 from .layout_xml_attribute import allow_attributes
+from .widgets.cairo.angle import Angle
 from .widgets.cairo.cairo import CairoAdapter
 from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
+from .widgets.cairo.colour import Colour
 from .widgets.cairo.gauge import CairoGaugeMarker
 from .widgets.cairo.reading import Reading
 from .widgets.widgets import Widget
@@ -41,9 +45,23 @@ def as_reading(metric, min_value, max_value) -> Callable[[], Reading]:
     range = max_value - min_value
     scale = 1.0 / range
 
-    return lambda : Reading(metric() * scale)
+    return lambda: Reading(metric() * scale)
 
-def create_cairo_gauge_270(element, entry, converters, **kwargs) -> Widget:
+
+def cap_from(name):
+    caps = {
+        "square": LineCap.SQUARE,
+        "butt": LineCap.BUTT,
+        "round": LineCap.ROUND
+    }
+    if name not in caps:
+        raise IOError(f"Cap {name} is not recognised. Should be one of '{list(caps.keys())}'")
+    return caps[name]
+
+
+@allow_attributes({"size", "min", "max", "metric", "units", "start", "length",
+                   "sectors", "tick-rgb", "gauge-rgb", "dot-outer-rgb", "dot-inner-rgb", "cap"})
+def create_cairo_gauge_marker(element, entry, converters, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
 
     min_value = iattrib(element, "min", d=0)
@@ -58,8 +76,16 @@ def create_cairo_gauge_270(element, entry, converters, **kwargs) -> Widget:
     )
 
     return CairoAdapter(
-        size=Dimension(size,size),
+        size=Dimension(size, size),
         widget=CairoGaugeMarker(
-          reading=as_reading(metric, min_value, max_value)
+            reading=as_reading(metric, min_value, max_value),
+            start=Angle(degrees=iattrib(element, "start", d=90)),
+            length=Angle(degrees=iattrib(element, "length", d=270)),
+            sectors=iattrib(element, "sectors", d=6),
+            tick_colour=Colour.from_pil(*rgbattr(element, "tick-rgb", d=(255, 255, 255))),
+            gauge_colour=Colour.from_pil(*rgbattr(element, "gauge-rgb", d=(0, 191, 255))),
+            marker_outer=Colour.from_pil(*rgbattr(element, "dot-outer-rgb", d=(255, 255, 255, 180))),
+            marker_inner=Colour.from_pil(*rgbattr(element, "dot-inner-rgb", d=(0, 192, 255))),
+            cap=cap_from(attrib(element, "cap", d="square")),
         )
     )

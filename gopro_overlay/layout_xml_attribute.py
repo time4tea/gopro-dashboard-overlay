@@ -26,7 +26,7 @@ def allow_attributes(allowed: Set[str]):
             extra = attributes - (allowed | common_attributes)
             if extra:
                 component_type = element.attrib["type"]
-                raise IOError(f"Component '{component_type}' - Unknown attributes '{','.join(extra)}'")
+                raise IOError(f"Component '{component_type}' - Unknown attributes '{','.join(extra)}', Allowed are: '{','.join(allowed)}'")
 
             return f(*args, **kwargs)
 

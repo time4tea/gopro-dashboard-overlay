@@ -50,9 +50,17 @@ class Colour:
         return Colour(self.r, self.g, self.b, new_alpha)
 
     @staticmethod
+    def _rescale(t):
+        return map(lambda v: v / 255.0, t)
+
+    @staticmethod
     def hex(hexcolour: str, alpha=1.0):
-        r, g, b = map(lambda v: v / 256.0, tuple(int(hexcolour[i:i + 2], 16) for i in (0, 2, 4)))
+        r, g, b = Colour._rescale(tuple(int(hexcolour[i:i + 2], 16) for i in (0, 2, 4)))
         return Colour(r, g, b, alpha)
+
+    @staticmethod
+    def from_pil(r, g, b, a=255):
+        return Colour(*Colour._rescale((r, g, b, a)))
 
     def apply_to(self, context: cairo.Context):
         context.set_source_rgba(*self.rgba())
