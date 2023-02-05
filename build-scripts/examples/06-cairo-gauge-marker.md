@@ -47,4 +47,12 @@ Changing the tick-colour will change the background colour so to get the desired
 {{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-outer-rgb="255,0,0" /> }}
 {{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-inner-rgb="255,0,0,128" /> }}
 
+# Transparency
 
+Any colour that is completely transparent will disappear... this can be used to change the appearance of the widget quite a bit.
+
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" background-rgb="0,0,0,0"/> }}
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" tick-rgb="0,0,0,0"/> }}
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" gauge-rgb="0,0,0,0"/> }}
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-inner-rgb="0,0,0,0"/> }}
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-outer-rgb="0,0,0,0"/> }}

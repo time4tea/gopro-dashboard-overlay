@@ -112,4 +112,37 @@ Changing the tick-colour will change the background colour so to get the desired
 <kbd>![06-cairo-gauge-marker-11.png](06-cairo-gauge-marker-11.png)</kbd>
 
 
+# Transparency
+
+Any colour that is completely transparent will disappear... this can be used to change the appearance of the widget quite a bit.
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" background-rgb="0,0,0,0"/>
+```
+<kbd>![06-cairo-gauge-marker-12.png](06-cairo-gauge-marker-12.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" tick-rgb="0,0,0,0"/>
+```
+<kbd>![06-cairo-gauge-marker-13.png](06-cairo-gauge-marker-13.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" gauge-rgb="0,0,0,0"/>
+```
+<kbd>![06-cairo-gauge-marker-14.png](06-cairo-gauge-marker-14.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-inner-rgb="0,0,0,0"/>
+```
+<kbd>![06-cairo-gauge-marker-15.png](06-cairo-gauge-marker-15.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-outer-rgb="0,0,0,0"/>
+```
+<kbd>![06-cairo-gauge-marker-16.png](06-cairo-gauge-marker-16.png)</kbd>
 
