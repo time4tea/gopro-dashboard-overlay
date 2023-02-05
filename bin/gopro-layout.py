@@ -103,33 +103,36 @@ if __name__ == "__main__":
         while True:
             if not layout_file.exists():
                 log(f"Layout file not found: {layout_file}")
+                sleep(1)
+            else:
+                updated = os.stat(layout_file).st_mtime
 
-            updated = os.stat(layout_file).st_mtime
+                if updated != last_updated:
+                    last_updated = updated
 
-            if updated != last_updated:
-                last_updated = updated
+                    try:
+                        layout = layout_from_xml(load_xml_layout(args.file), renderer, timeseries, font, NoPrivacyZone())
 
-                try:
-                    layout = layout_from_xml(load_xml_layout(args.file), renderer, timeseries, font, NoPrivacyZone())
+                        overlay = Overlay(
+                            dimensions=dimension_from(args.overlay_size),
+                            framemeta=timeseries,
+                            create_widgets=layout
+                        )
 
-                    overlay = Overlay(
-                        dimensions=dimension_from(args.overlay_size),
-                        framemeta=timeseries,
-                        create_widgets=layout
-                    )
+                        frame = overlay.draw(timeseries.mid)
 
-                    frame = overlay.draw(timeseries.mid)
+                        if video_frame is not None:
+                            frame = Image.alpha_composite(video_frame, frame)
 
-                    if video_frame is not None:
-                        frame = Image.alpha_composite(video_frame, frame)
+                        frame.save("frame.png")
 
-                    frame.save("frame.png")
-
-                except IOError as e:
-                    log(f"Unable to load {layout_file}: {e}")
-                except ElementTree.ParseError as e:
-                    log(f"Unable to load {layout_file}: XML Parsing Error: {e}")
-                except DimensionalityError as e:
-                    log(f"Unable to load {layout_file}: Unit Conversion: {e}")
+                    except IOError as e:
+                        log(f"Unable to load {layout_file}: {e}")
+                    except ElementTree.ParseError as e:
+                        log(f"Unable to load {layout_file}: XML Parsing Error: {e}")
+                    except DimensionalityError as e:
+                        log(f"Unable to load {layout_file}: Unit Conversion: {e}")
+                    except ValueError as e:
+                        log(f"Unable to load {layout_file}: {e}")
 
             sleep(0.1)

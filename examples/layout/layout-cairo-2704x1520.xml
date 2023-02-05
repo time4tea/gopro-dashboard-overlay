@@ -1,0 +1,18 @@
+<layout>
+    <translate x="50" y="1000">
+        <component size="512" type="cairo-gauge-marker" metric="speed" units="kph" max="45" start="90" tick-rgb="255,2555,255,128" background-rgb="0,0,0,0" gauge-rgb="255,0,0,64" dot-inner-rgb="255,0,0,128"/>
+        <translate y="220" x="256">
+            <component type="metric" metric="speed" units="kph" align="centre" dp="0" size="72"/>
+            <component type="text" y="80" size="32" align="centre">kph</component>
+        </translate>
+    </translate>
+
+    <translate x="1850">
+        <translate  y="50">
+            <component type="moving-map" size="768" opacity="0.85" zoom="17" corner_radius="30"/>
+        </translate>
+        <translate y="900">
+            <component type="cairo-circuit-map" size="512" line-width="0.05" rotate="180"/>
+        </translate>
+    </translate>
+</layout>

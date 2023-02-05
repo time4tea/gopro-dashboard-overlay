@@ -1,3 +1,4 @@
+import dataclasses
 import importlib
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -336,6 +337,16 @@ def format_uppercase(unit, registry, **options):
 def format_uppercase(unit, registry, **options):
     return format_unit(unit, "D", registry).upper()
 
+@dataclasses.dataclass(frozen=True)
+class FloatRange:
+    start: float
+    stop: float
+
+    def __contains__(self, item):
+        if type(item) != float:
+            return NotImplemented
+        return self.start <= item <= self.stop
+
 
 class Widgets:
 
@@ -426,7 +437,7 @@ class Widgets:
             zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
             renderer=self.renderer,
             corner_radius=iattrib(element, "corner_radius", 0),
-            opacity=fattrib(element, "opacity", 0.7),
+            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0,1.0)),
             rotate=battrib(element, "rotate", d=True)
         )
 
@@ -440,7 +451,7 @@ class Widgets:
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             corner_radius=iattrib(element, "corner_radius", 0),
-            opacity=fattrib(element, "opacity", 0.7)
+            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0))
         )
 
     @allow_attributes({"size", "zoom"})

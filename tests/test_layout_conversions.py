@@ -1,7 +1,7 @@
 import pytest
 from pint import UndefinedUnitError, DimensionalityError
 
-from gopro_overlay.layout_xml import Converters
+from gopro_overlay.layout_xml import Converters, FloatRange
 from gopro_overlay.units import units
 
 # in tests not really bothered about the outcome of the conversion, only that they are recognised by the converter
@@ -95,3 +95,14 @@ def test_various_temperature_conversions_dont_blow_up():
     for i in "degC, degF, kelvin".split(","):
         Converters(temperature_unit=i).converter("temp")(temp)
 
+
+def test_float_range():
+    assert 0.9 in FloatRange(0.0, 1.0)
+    assert 1.0 in FloatRange(0.0, 1.0)
+    assert 0.0 in FloatRange(0.0, 1.0)
+    assert -0.1 not in FloatRange(0.0, 1.0)
+    assert 1.1 not in FloatRange(0.0, 1.0)
+
+def test_float_range_looks_a_bit_like_a_range():
+    assert FloatRange(0.0, 1.0).start == 0.0
+    assert FloatRange(0.0, 1.0).stop == 1.0
