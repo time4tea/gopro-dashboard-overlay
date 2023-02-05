@@ -33,6 +33,7 @@ dimensions_by_file = {
     "07-zone-bar.md": Dimension(500, 100),
     "05-moving-map.md": Dimension(256, 256),
     "06-journey-map.md": Dimension(256, 256),
+    "06-cairo-gauge-marker.md": Dimension(256, 256),
     "06-moving-journey-map.md": Dimension(384, 384),
     "07-air-speed-indicator.md": Dimension(256, 256),
     "07-chart.md": Dimension(256, 128),

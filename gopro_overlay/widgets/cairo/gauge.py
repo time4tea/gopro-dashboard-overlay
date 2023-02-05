@@ -102,7 +102,7 @@ def circle_with_radius(r: float) -> EllipseParameters:
 def ifnone(v, d):
     if v is None:
         return d
-    return d
+    return v
 
 
 class CairoGaugeMarker(CairoWidget):

@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Optional
 
 from cairo import LineCap
 
@@ -59,8 +59,14 @@ def cap_from(name):
     return caps[name]
 
 
+def cairo_colour(t) -> Optional[Colour]:
+    if t is None:
+        return None
+    return Colour.from_pil(*t)
+
+
 @allow_attributes({"size", "min", "max", "metric", "units", "start", "length",
-                   "sectors", "tick-rgb", "gauge-rgb", "dot-outer-rgb", "dot-inner-rgb", "cap"})
+                   "sectors", "tick-rgb", "background-rgb", "gauge-rgb", "dot-outer-rgb", "dot-inner-rgb", "cap"})
 def create_cairo_gauge_marker(element, entry, converters, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
 
@@ -79,13 +85,14 @@ def create_cairo_gauge_marker(element, entry, converters, **kwargs) -> Widget:
         size=Dimension(size, size),
         widget=CairoGaugeMarker(
             reading=as_reading(metric, min_value, max_value),
-            start=Angle(degrees=iattrib(element, "start", d=90)),
+            start=Angle(degrees=iattrib(element, "start", d=0)),
             length=Angle(degrees=iattrib(element, "length", d=270)),
             sectors=iattrib(element, "sectors", d=6),
-            tick_colour=Colour.from_pil(*rgbattr(element, "tick-rgb", d=(255, 255, 255))),
-            gauge_colour=Colour.from_pil(*rgbattr(element, "gauge-rgb", d=(0, 191, 255))),
-            marker_outer=Colour.from_pil(*rgbattr(element, "dot-outer-rgb", d=(255, 255, 255, 180))),
-            marker_inner=Colour.from_pil(*rgbattr(element, "dot-inner-rgb", d=(0, 192, 255))),
+            tick_colour=cairo_colour(rgbattr(element, "tick-rgb", d=(255, 255, 255))),
+            background_colour=cairo_colour(rgbattr(element, "background-rgb", d=None)),
+            gauge_colour=cairo_colour(rgbattr(element, "gauge-rgb", d=(0, 191, 255))),
+            marker_outer=cairo_colour(rgbattr(element, "dot-outer-rgb", d=None)),
+            marker_inner=cairo_colour(rgbattr(element, "dot-inner-rgb", d=None)),
             cap=cap_from(attrib(element, "cap", d="square")),
         )
     )
