@@ -2,6 +2,7 @@ from typing import List, Callable
 
 import cairo
 
+from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.cairo import CairoWidget, saved
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters
 from gopro_overlay.widgets.cairo.line import LineParameters
@@ -17,16 +18,16 @@ class CairoScale(CairoWidget):
             outer: EllipseParameters,
             tick: TickParameters,
             lines: List[LineParameters],
-            start: float,
-            length: float,
+            start: Angle,
+            length: Angle,
             reading: Callable[[], Reading] = lambda: Reading.full()
     ):
         self.inner = inner
         self.outer = outer
         self.tick = tick
         self.lines = lines
-        self.start = start
-        self.length = length + tick.step * 0.05
+        self.start = start.radians()
+        self.length = length.radians() + tick.step.radians() * 0.05
         self.reading = reading
 
     def draw(self, context: cairo.Context):
@@ -39,7 +40,7 @@ class CairoScale(CairoWidget):
             thick = self.tick.first
 
             for i in range(0, 1000):
-                value = self.tick.step * i
+                value = self.tick.step.radians() * i
                 if value >= current:
                     break
 

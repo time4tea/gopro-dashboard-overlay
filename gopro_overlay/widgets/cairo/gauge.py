@@ -1,9 +1,10 @@
 import math
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 import cairo
 
 from gopro_overlay.point import Coordinate
+from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite, saved
 from gopro_overlay.widgets.cairo.colour import Colour
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters, Arc
@@ -38,40 +39,52 @@ class CairoSimpleGauge(CairoWidget):
         context.new_path()
 
 
+class CairoMarker:
+    def draw(self, context: cairo.Context, coordinate: Coordinate):
+        raise NotImplementedError()
+
+
+class MarkerCircle(CairoMarker):
+
+    def __init__(self,
+                 outer: LineParameters,
+                 inner: LineParameters,
+                 ):
+        self.outer = outer
+        self.inner = inner
+
+    def draw(self, context: cairo.Context, coordinate: Coordinate):
+        context.arc(coordinate.x, coordinate.y, 0.05, 0, math.tau)
+        self.outer.apply_to(context)
+        context.fill()
+
+        context.arc(coordinate.x, coordinate.y, 0.03, 0, math.tau)
+        self.inner.apply_to(context)
+        context.fill()
+
 
 class CairoEllipseMarker(CairoWidget):
 
     def __init__(self,
                  ellipse: EllipseParameters,
-                 outer: LineParameters,
-                 inner: LineParameters,
-                 start,
-                 length,
+                 start: Angle,
+                 length: Angle,
+                 marker: CairoMarker,
                  reading,
                  ):
         self.ellipse = ellipse
-        self.outer = outer
-        self.inner = inner
         self.reading = reading
         self.start = start
         self.length = length
+        self.marker = marker
 
     def draw(self, context: cairo.Context):
         to = self.start + (self.length * self.reading().value())
-
-        coordinate = self.ellipse.get_point(to)
+        coordinate = self.ellipse.get_point(to.radians())
 
         with saved(context):
             context.rotate(self.ellipse.angle)
-
-            context.arc(coordinate.x, coordinate.y, 0.05, 0, math.tau)
-            self.outer.apply_to(context)
-            context.fill()
-
-            context.arc(coordinate.x, coordinate.y, 0.03, 0, math.tau)
-            self.inner.apply_to(context)
-            context.fill()
-
+            self.marker.draw(context, coordinate)
 
 
 def minimum_reading(m: Reading, r: Callable[[], Reading]) -> Callable[[], Reading]:
@@ -86,33 +99,54 @@ def circle_with_radius(r: float) -> EllipseParameters:
     return EllipseParameters(Coordinate(0.0, 0.0), major_curve=1.0 / r, minor_radius=r, angle=0)
 
 
-class CairoGauge270(CairoWidget):
-    def __init__(self, reading: Callable[[], Reading]):
-        start = math.pi / 2
-        length = math.pi * 3 / 2
-        reading = minimum_reading(Reading(0.0001), reading)
+def ifnone(v, d):
+    if v is None:
+        return d
+    return d
 
-        scale_colour = Colour(1, 1, 1)
-        gauge_colour = Colour.hex("00BFFF")
-        cap = cairo.LINE_CAP_SQUARE
+
+class CairoGaugeMarker(CairoWidget):
+    def __init__(
+            self,
+            start=Angle(degrees=90),
+            length=Angle(degrees=270),
+            sectors=6,
+            tick_colour: Colour = Colour(1, 1, 1),
+            gauge_colour: Colour = Colour.hex("00BFFF"),
+            marker_outer: Optional[Colour] = None,
+            marker_inner: Optional[Colour] = None,
+            background_colour: Optional[Colour] = None,
+            cap: cairo.LineCap = cairo.LINE_CAP_SQUARE,
+            reading: Callable[[], Reading] = lambda: Reading.full(),
+    ):
+        tick_every = length / sectors
+        reading = minimum_reading(Reading(0.0001), reading)
+        marker_outer = ifnone(marker_outer, tick_colour.alpha(0.7))
+        marker_inner = ifnone(marker_inner, gauge_colour.alpha(0.7))
+        background_colour = ifnone(background_colour, tick_colour.alpha(0.2))
 
         gauge_shadow = gauge_colour.darken(0.2)
+
+        marker = MarkerCircle(
+            outer=LineParameters(0.05, colour=marker_outer),
+            inner=LineParameters(0.05, colour=marker_inner),
+        )
 
         self.widget = CairoComposite([
             CairoSimpleBackground(
                 arc=Arc(
                     ellipse=circle_with_radius(0.45),
                     start=start,
-                    length=math.tau
+                    length=Angle(degrees=360)
                 ),
-                colour=scale_colour.alpha(0.2)
+                colour=background_colour
             ),
             CairoScale(
                 outer=circle_with_radius(0.45),
                 inner=circle_with_radius(0.35),
-                tick=TickParameters(math.radians(45)),
+                tick=TickParameters(tick_every),
                 lines=[
-                    LineParameters(0.02, scale_colour, cap=cap)
+                    LineParameters(0.02, tick_colour, cap=cap)
                 ],
                 start=start,
                 length=length
@@ -132,9 +166,9 @@ class CairoGauge270(CairoWidget):
             CairoScale(
                 outer=circle_with_radius(0.41),
                 inner=circle_with_radius(0.39),
-                tick=TickParameters(math.radians(45)),
+                tick=TickParameters(tick_every),
                 lines=[
-                    LineParameters(0.02, scale_colour, cap=cap),
+                    LineParameters(0.02, tick_colour, cap=cap),
                     LineParameters(0.018, gauge_shadow, cap=cap)
                 ],
                 start=start,
@@ -143,11 +177,10 @@ class CairoGauge270(CairoWidget):
             ),
             CairoEllipseMarker(
                 ellipse=circle_with_radius(0.40),
-                outer=LineParameters(0.05, colour=scale_colour.alpha(0.7)),
-                inner=LineParameters(0.05, colour=gauge_colour.alpha(0.7)),
                 start=start,
                 length=length,
-                reading=reading
+                marker=marker,
+                reading=reading,
             )
         ])
 

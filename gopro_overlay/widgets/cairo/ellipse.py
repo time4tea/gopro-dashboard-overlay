@@ -5,6 +5,7 @@ from typing import Callable
 import cairo
 
 from gopro_overlay.point import Coordinate
+from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.cairo import saved
 from gopro_overlay.widgets.cairo.reading import Reading
 
@@ -67,13 +68,13 @@ class EllipseParameters:
             return self.centre.y + cos_angle * math.sin(self.angle) / self.major_curve + sin_angle * math.cos(
                 self.angle) * self.minor_radius
 
-    def get(self, angle) -> Coordinate:
+    def get(self, angle: float) -> Coordinate:
         return Coordinate(x=self.get_x(angle), y=self.get_y(angle))
 
-    def get_point(self, angle):
+    def get_point(self, angle: float):
         return self.centre + self.get_relative_point(angle)
 
-    def get_relative_point(self, angle) -> Coordinate:
+    def get_relative_point(self, angle: float) -> Coordinate:
         if tiny(self.major_curve):
             beta, cos_gamma = self.cos_gamma(angle)
 
@@ -95,10 +96,15 @@ class EllipseParameters:
 
 
 class Arc:
-    def __init__(self, ellipse: EllipseParameters, start: float = 0.0, length=2 * math.pi, reading: Callable[[], Reading] = lambda: Reading.full()):
+    def __init__(self,
+                 ellipse: EllipseParameters,
+                 start: Angle = Angle(degrees=0),
+                 length: Angle = Angle(degrees=360),
+                 reading: Callable[[], Reading] = lambda: Reading.full()
+                 ):
         self.ellipse = ellipse
-        self.start = start
-        self.length = length
+        self.start = start.radians()
+        self.length = length.radians()
         self.position = reading
 
     def draw(self, context: cairo.Context):

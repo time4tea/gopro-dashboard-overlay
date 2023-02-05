@@ -7,7 +7,7 @@ from .layout_xml_attribute import allow_attributes
 from .widgets.cairo.cairo import CairoAdapter
 from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
-from .widgets.cairo.gauge import CairoGauge270
+from .widgets.cairo.gauge import CairoGaugeMarker
 from .widgets.cairo.reading import Reading
 from .widgets.widgets import Widget
 
@@ -59,7 +59,7 @@ def create_cairo_gauge_270(element, entry, converters, **kwargs) -> Widget:
 
     return CairoAdapter(
         size=Dimension(size,size),
-        widget=CairoGauge270(
+        widget=CairoGaugeMarker(
           reading=as_reading(metric, min_value, max_value)
         )
     )
