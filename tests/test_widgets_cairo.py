@@ -4,7 +4,7 @@ import cairo
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.cairo.cairo import CairoWidgetAdapter, saved, CairoWidget
+from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget, CairoAdapter
 from gopro_overlay.widgets.picwl.bordered import Border, ShadowMode
 from gopro_overlay.widgets.picwl.colours import BLACK, RED
 from gopro_overlay.widgets.picwl.face import ToyFontFace
@@ -41,7 +41,7 @@ def cairo_widget_test(widget, repeat=1):
         name="test_gauge",
         dimensions=Dimension(500, 500),
         widgets=[
-            CairoWidgetAdapter(
+            CairoAdapter(
                 size=Dimension(500, 500),
                 widget=CairoTranslate(by=Coordinate(-0.5, -0.5), widget=widget)
             )
@@ -59,7 +59,7 @@ def test_ellipse():
                 start=0.0, length=math.pi * 2
             ),
             colour=BLACK.alpha(0.6),
-            border=Border(width=0.005, depth=0.005, shadow=ShadowMode.ShadowIn, colour=Colour(0,0,0, 0.6))
+            border=Border(width=0.005, depth=0.005, shadow=ShadowMode.ShadowIn, colour=Colour(0, 0, 0, 0.6))
         )
     )
 
