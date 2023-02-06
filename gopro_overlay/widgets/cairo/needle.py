@@ -5,8 +5,10 @@ from typing import Callable
 import cairo
 
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.cairo.cairo import saved
-from gopro_overlay.widgets.picwl.colours import Colour
+from gopro_overlay.widgets.cairo.angle import Angle
+from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget
+from gopro_overlay.widgets.cairo.reading import Reading
+from gopro_overlay.widgets.cairo.colour import Colour
 
 
 @dataclasses.dataclass(frozen=True)
@@ -20,12 +22,14 @@ class NeedleParameter:
         return self.width / 2.0
 
 
-class Needle:
+class Needle(CairoWidget):
 
     def __init__(self, centre: Coordinate,
-                 value: Callable[[], float],
-                 start: float, length: float,
-                 tip: NeedleParameter, rear: NeedleParameter,
+                 reading: Callable[[], Reading],
+                 start: Angle,
+                 length: Angle,
+                 tip: NeedleParameter,
+                 rear: NeedleParameter,
                  colour: Colour):
         self.centre = centre
         self.colour = colour
@@ -33,13 +37,13 @@ class Needle:
         self.tip = tip
         self.length = length
         self.start = start
-        self.value = value
+        self.reading = reading
 
     def draw(self, context: cairo.Context):
         with saved(context):
             context.new_path()
             context.translate(*self.centre.tuple())
-            context.rotate(self.start + self.value() * self.length)
+            context.rotate((self.start + self.reading().value() * self.length).radians())
 
             tip = self.tip
             rear = self.rear

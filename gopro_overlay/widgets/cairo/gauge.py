@@ -5,8 +5,9 @@ import cairo
 
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
+from gopro_overlay.widgets.cairo.bordered import AbstractBordered, Border
 from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite, saved
-from gopro_overlay.widgets.cairo.colour import Colour
+from gopro_overlay.widgets.cairo.colour import Colour, BLACK
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters, Arc
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.reading import Reading
@@ -14,14 +15,17 @@ from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
 
 
-class CairoSimpleBackground(CairoWidget):
-    def __init__(self, arc: Arc, colour: Colour):
+class CairoEllipticBackground(AbstractBordered):
+    def __init__(self, arc: Arc, colour: Colour = BLACK, border=Border.NONE()):
+        super().__init__(border=border)
         self.arc = arc
         self.colour = colour
 
-    def draw(self, context: cairo.Context):
+    def set_contents_path(self, context: cairo.Context):
         self.arc.draw(context)
-        self.colour.apply_to(context)
+
+    def draw_contents(self, context: cairo.Context):
+        context.set_source_rgba(*self.colour.rgba())
         context.fill()
 
 
@@ -95,8 +99,8 @@ def minimum_reading(m: Reading, r: Callable[[], Reading]) -> Callable[[], Readin
     return f
 
 
-def circle_with_radius(r: float) -> EllipseParameters:
-    return EllipseParameters(Coordinate(0.0, 0.0), major_curve=1.0 / r, minor_radius=r, angle=0)
+def circle_with_radius(r: float, centre=Coordinate(0.0, 0.0)) -> EllipseParameters:
+    return EllipseParameters(centre, major_curve=1.0 / r, minor_radius=r, angle=0)
 
 
 def ifnone(v, d):
@@ -133,7 +137,7 @@ class CairoGaugeMarker(CairoWidget):
         )
 
         self.widget = CairoComposite([
-            CairoSimpleBackground(
+            CairoEllipticBackground(
                 arc=Arc(
                     ellipse=circle_with_radius(0.45),
                     start=start,

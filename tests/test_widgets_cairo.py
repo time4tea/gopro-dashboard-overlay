@@ -4,14 +4,20 @@ import cairo
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget, CairoAdapter
-from gopro_overlay.widgets.picwl.bordered import Border, ShadowMode
-from gopro_overlay.widgets.picwl.colours import BLACK, RED
-from gopro_overlay.widgets.picwl.face import ToyFontFace
+from gopro_overlay.widgets.cairo.angle import Angle
+from gopro_overlay.widgets.cairo.annotation import EllipticAnnotation, AnnotationMode
+from gopro_overlay.widgets.cairo.bordered import Border, ShadowMode
+from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget, CairoAdapter, CairoComposite
+from gopro_overlay.widgets.cairo.colour import BLACK, Colour, WHITE, RED
+from gopro_overlay.widgets.cairo.ellipse import Arc, EllipseParameters
+from gopro_overlay.widgets.cairo.face import ToyFontFace
+from gopro_overlay.widgets.cairo.gauge import CairoEllipticBackground
+from gopro_overlay.widgets.cairo.line import LineParameters
+from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
+from gopro_overlay.widgets.cairo.reading import Reading
+from gopro_overlay.widgets.cairo.scale import CairoScale
+from gopro_overlay.widgets.cairo.tick import TickParameters
 from gopro_overlay.widgets.picwl.gauge_round_254 import GaugeRound254
-from gopro_overlay.widgets.picwl.needle import Needle, NeedleParameter
-from gopro_overlay.widgets.picwl.picwl import EllipseParameters, Colour, Arc, TickParameters, \
-    LineParameters, EllipticScale, EllipticBackground, Cap, AnnotationMode, EllipticAnnotation, WHITE
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 
@@ -25,15 +31,6 @@ class CairoTranslate(CairoWidget):
         with saved(context):
             context.translate(*self.by.tuple())
             self.widget.draw(context)
-
-
-class CairoCompose(CairoWidget):
-    def __init__(self, widgets):
-        self.widgets = widgets
-
-    def draw(self, context: cairo.Context):
-        for w in self.widgets:
-            w.draw(context)
 
 
 def cairo_widget_test(widget, repeat=1):
@@ -53,10 +50,11 @@ def cairo_widget_test(widget, repeat=1):
 @approve_image
 def test_ellipse():
     return cairo_widget_test(
-        widget=EllipticBackground(
+        widget=CairoEllipticBackground(
             arc=Arc(
                 ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
-                start=0.0, length=math.pi * 2
+                start=Angle.zero(),
+                length=Angle.fullcircle()
             ),
             colour=BLACK.alpha(0.6),
             border=Border(width=0.005, depth=0.005, shadow=ShadowMode.ShadowIn, colour=Colour(0, 0, 0, 0.6))
@@ -67,7 +65,7 @@ def test_ellipse():
 @approve_image
 def test_ellipse_with_border():
     return cairo_widget_test(
-        widget=EllipticBackground(
+        widget=CairoEllipticBackground(
             arc=Arc(
                 ellipse=EllipseParameters(
                     Coordinate(x=0.5, y=0.5),
@@ -75,7 +73,8 @@ def test_ellipse_with_border():
                     minor_radius=0.5,
                     angle=0.0
                 ),
-                start=0.0, length=math.tau
+                start=Angle.zero(),
+                length=Angle.fullcircle()
             ),
             border=Border(
                 width=0.01, depth=0.005, shadow=ShadowMode.ShadowEtchedOut, colour=BLACK
@@ -99,34 +98,34 @@ def test_cap():
 
 @approve_image
 def test_scale():
-    start = math.radians(143)
-    length = math.radians(254)
-    step = math.pi / 12
+    start = Angle(degrees=143)
+    length = Angle(degrees=254)
+    step = Angle.fullcircle() / 12
 
     return cairo_widget_test(
-        widget=CairoCompose(
+        widget=CairoComposite(
             widgets=[
-                EllipticScale(
+                CairoScale(
                     inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.43, minor_radius=0.43, angle=0.0),
                     outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-                    tick=TickParameters(step=step, first=1, skipped=1000),
+                    tick=TickParameters(step=step, first=1),
                     length=length,
                     start=start,
-                    line=LineParameters(
+                    lines=[LineParameters(
                         width=6.0 / 400.0,
                         colour=BLACK
-                    )
+                    )]
                 ),
-                EllipticScale(
+                CairoScale(
                     inner=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.46, minor_radius=0.46, angle=0.0),
                     outer=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.49, minor_radius=0.49, angle=0.0),
-                    tick=TickParameters(step=step / 2.0, first=2, skipped=2),
+                    tick=TickParameters(step=step / 2.0, first=0, skipped=3),
                     length=length,
                     start=start,
-                    line=LineParameters(
+                    lines=[LineParameters(
                         width=1.0 / 400.0,
                         colour=BLACK
-                    )
+                    )]
                 ),
             ]
         )
@@ -137,7 +136,7 @@ def test_scale():
 def test_needle():
     return cairo_widget_test(
         widget=Needle(
-            value=lambda: 0.0,
+            reading=lambda: Reading(0.65),
             centre=Coordinate(0.5, 0.5),
             start=math.radians(143),
             length=math.radians(254),
@@ -151,21 +150,23 @@ def test_needle():
 @approve_image
 def test_annotation():
     sectors = 17
-    step = math.radians(254) / sectors
+    step = Angle(degrees=254) / sectors
 
-    return cairo_widget_test(widget=EllipticAnnotation(
-        ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.41, minor_radius=0.41,
-                                  angle=math.tau),
-        tick=TickParameters(step=(math.pi / 12) / 2.0, first=1, skipped=2),
-        colour=BLACK,
-        face=ToyFontFace("arial"),
-        mode=AnnotationMode.MovedInside,
-        texts=[str(x) for x in range(0, 180, 10)],
-        height=0.05,
-        stretch=0.8,
-        start=0.0 + step,
-        length=math.tau - step
-    ), repeat=1)
+    return cairo_widget_test(
+        widget=EllipticAnnotation(
+            ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.41, minor_radius=0.41, angle=0),
+            tick=TickParameters(step=(Angle.semicircle() / 12) / 2.0, first=1, skipped=2),
+            colour=BLACK,
+            face=ToyFontFace("arial"),
+            mode=AnnotationMode.MovedInside,
+            texts=[str(x) for x in range(0, 180, 10)],
+            height=0.05,
+            stretch=0.8,
+            start=Angle.zero() + step,
+            length=Angle.fullcircle() - step
+        ),
+        repeat=1
+    )
 
 
 @approve_image

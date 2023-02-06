@@ -64,3 +64,9 @@ class Colour:
 
     def apply_to(self, context: cairo.Context):
         context.set_source_rgba(*self.rgba())
+
+
+
+BLACK = Colour(0.0, 0.0, 0.0)
+WHITE = Colour(1.0, 1.0, 1.0)
+RED = Colour(1.0, 0.0, 0.0)

@@ -1,13 +1,13 @@
 import dataclasses
+import math
 from enum import Enum, auto
 
 import cairo
 
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.cairo.cairo import saved
-from gopro_overlay.widgets.picwl.box import abox
-from gopro_overlay.widgets.picwl.colours import Colour, BLACK, darkenBy, lightenBy
-from gopro_overlay.widgets.picwl.constants import cos45
+from gopro_overlay.widgets.cairo.box import abox
+from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget
+from gopro_overlay.widgets.cairo.colour import Colour, BLACK
 
 
 class DrawingAction(Enum):
@@ -36,7 +36,12 @@ class Border:
         return Border(width=0.0, depth=0.0, shadow=ShadowMode.ShadowNone, colour=BLACK)
 
 
-class AbstractBordered:
+cos45 = math.sqrt(2.0) * 0.5
+darkenBy = 1.0 / 3
+lightenBy = 1.0 / 3
+
+
+class AbstractBordered(CairoWidget):
     def __init__(self, border: Border = Border.NONE()):
         self.border_width = border.width
         self.border_depth = border.depth
@@ -78,8 +83,6 @@ class AbstractBordered:
 
                 FX = F
                 FY = F
-
-                print(f"F = {F} S={S}")
 
                 context.new_path()
                 context.scale(FX, FY)
