@@ -42,7 +42,6 @@ class AbstractBordered:
         self.border_depth = border.depth
         self.border_shadow = border.shadow
         self.border_colour = border.colour
-        self.scaled = True
 
     def set_contents_path(self, context: cairo.Context):
         pass
@@ -98,25 +97,9 @@ class AbstractBordered:
                 elif action == DrawingAction.Contents:
                     self.draw_contents(context)
 
-            if self.scaled:
-                outer_size = extent
-                inner_size = extent - 2.0 * self.border_width
-                middle_size = outer_size
-            else:
-                inner_size = extent
-                outer_size = extent + 2.0 * self.border_width
-
-                if self.border_shadow == ShadowMode.ShadowNone:
-                    middle_size = outer_size
-                elif self.border_shadow == ShadowMode.ShadowIn:
-                    outer_size = outer_size + 2.0 * shadow_depth
-                    middle_size = outer_size
-                elif self.border_shadow == ShadowMode.ShadowOut:
-                    outer_size = outer_size + shadow_depth
-                    middle_size = outer_size - 2.0 * shadow_depth
-                elif self.border_shadow in [ShadowMode.ShadowEtchedIn, ShadowMode.ShadowEtchedOut]:
-                    outer_size = outer_size + 2.0 * shadow_depth
-                    middle_size = outer_size - 2.0 * shadow_depth
+            outer_size = extent
+            inner_size = extent - 2.0 * self.border_width
+            middle_size = outer_size
 
             def set_normal():
                 context.set_source_rgba(*self.border_colour.rgba())

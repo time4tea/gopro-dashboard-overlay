@@ -58,8 +58,8 @@ def test_ellipse():
                 ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.5, minor_radius=0.5, angle=0.0),
                 start=0.0, length=math.pi * 2
             ),
-            colour=BLACK,
-            border=Border(width=0.005, depth=0.005, shadow=ShadowMode.ShadowIn, colour=Colour(0,0,0))
+            colour=BLACK.alpha(0.6),
+            border=Border(width=0.005, depth=0.005, shadow=ShadowMode.ShadowIn, colour=Colour(0,0,0, 0.6))
         )
     )
 
