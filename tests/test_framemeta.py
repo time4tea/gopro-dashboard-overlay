@@ -160,3 +160,12 @@ def test_skipping_items():
     assert skipped[0].lat == 1.0
     assert skipped[1].lat == 3.0
     assert skipped[2].lat == 6.0
+
+def test_bugfix_timedelta_too_small_infinite():
+    fm = FrameMeta()
+    for i in range(0,60):
+        fm.add(timeunits(seconds=i), Entry(datetime_of(i), lat=i))
+
+    # 30s / 512 < 100ms which was causing hang
+    window = Window(fm, timeunits(seconds=30), samples=512, key=lambda e: e.lat, missing=0)
+    view = window.view(fm.min)

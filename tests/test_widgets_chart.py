@@ -70,7 +70,7 @@ def test_render_chart():
                         widget=SimpleChart(
                             lambda: view,
                             filled=False,
-                            font=font
+                            font=font.font_variant(size=24)
                         )
                     ),
                     Translate(
@@ -79,7 +79,7 @@ def test_render_chart():
                             lambda: view,
                             filled=True,
                             font=font,
-                            fill=(0, 255, 0)
+                            fill=(0, 255, 0, 128)
                         )
                     )
                 )
@@ -92,8 +92,8 @@ def test_render_chart():
                         widget=SimpleChart(
                             lambda: view,
                             filled=True,
-                            font=font,
-                            line=(255, 255, 0)
+                            font=font.font_variant(size=32),
+                            line=(255, 255, 0, 200)
                         )
                     ),
                     Translate(
@@ -103,7 +103,6 @@ def test_render_chart():
                             filled=True,
                             font=font,
                             bg=(0, 0, 0),
-                            alpha=100,
                         )
                     ),
                     Translate(
@@ -137,7 +136,7 @@ def test_render_chart_with_no_data():
     return time_rendering(name="Simple Chart with no valid data", widgets=[
         Translate(
             at=Coordinate(50, 50),
-            widget=SimpleChart(lambda: view, filled=True, font=font)
+            widget=SimpleChart(lambda: view, filled=True, font=font.font_variant(size=64), height=200)
         )
     ])
 
@@ -148,8 +147,8 @@ def test_render_chart_with_no_data():
 def test_render_moving_chart():
     window = Window(
         ts,
-        duration=timeunits(minutes=2),
-        samples=256,
+        duration=timeunits(seconds=30),
+        samples=512,
         key=lambda e: e.alt.magnitude,
     )
 

@@ -129,17 +129,18 @@ Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g
 <kbd>![07-chart-12.png](07-chart-12.png)</kbd>
 
 
-Set alpha/transparency using `alpha`, between 0 and 255.
+## Text Size
+
+Set the text size using `textsize`
 
 
 ```xml
-<component type="chart" alpha="20" />
+<component type="chart" textsize="32" />
 ```
 <kbd>![07-chart-13.png](07-chart-13.png)</kbd>
 
 
-```xml
-<component type="chart" alpha="200" />
-```
-<kbd>![07-chart-14.png](07-chart-14.png)</kbd>
+## History
 
+02/2022 - Removed `alpha` because it stopped the alpha of the other colours working properly. Use alpha in each colour to get
+the desired effect.

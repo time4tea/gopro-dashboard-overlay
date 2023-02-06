@@ -16,21 +16,16 @@ class SimpleChart(Widget):
             fill=(91, 113, 146),
             line=(255, 255, 255),
             text=(255, 255, 255),
-            alpha=int(255 * 0.7)
     ):
         self.value = value
         self.filled = filled
-        if font:
-            self.font = font.font_variant(size=16)
-        else:
-            self.font = None
+        self.font = font
 
         self.height = height
         self.fill = fill
         self.bg = bg
         self.line = line
         self.text = text
-        self.alpha = alpha
 
         self.view = None
         self.image = None
@@ -75,14 +70,12 @@ class SimpleChart(Widget):
 
             if self.font:
                 draw.text((10, 4), f"{max_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
-                          stroke_fill=(0, 0, 0), align="lt")
-                draw.text((10, self.height - 20), f"{min_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
-                          stroke_fill=(0, 0, 0), align="ls")
+                          stroke_fill=(0, 0, 0), anchor="lt")
+                draw.text((10, self.height - 10), f"{min_val:.0f}", font=self.font, fill=self.text, stroke_width=2,
+                          stroke_fill=(0, 0, 0), anchor="lb")
 
             marker_val = data[int(size[0] / 2)]
             if marker_val:
                 draw_marker(draw, (size[0] / 2, y_pos(marker_val)), 4, fill=(255, 0, 0))
-
-            self.image.putalpha(self.alpha)
 
         image.alpha_composite(self.image, (0, 0))

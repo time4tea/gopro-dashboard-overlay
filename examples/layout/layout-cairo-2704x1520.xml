@@ -1,18 +1,31 @@
 <layout>
     <translate x="50" y="1000">
-        <component size="512" type="cairo-gauge-marker" metric="speed" units="kph" max="45" start="90" tick-rgb="255,2555,255,128" background-rgb="0,0,0,0" gauge-rgb="255,0,0,64" dot-inner-rgb="255,0,0,128"/>
-        <translate y="220" x="256">
-            <component type="metric" metric="speed" units="kph" align="centre" dp="0" size="72"/>
-            <component type="text" y="80" size="32" align="centre">kph</component>
+        <component type="text" size="32" y="-32">cairo-gauge-marker</component>
+        <component size="512" type="cairo-gauge-marker" metric="speed" units="kph" max="45" start="90" tick-rgb="255,2555,255,128" background-rgb="0,0,0,64" gauge-rgb="255,0,0,64" dot-inner-rgb="255,0,0,128"/>
+        <translate y="190" x="256">
+            <component type="metric" metric="speed" units="kph" align="centre" dp="0" size="120"/>
+            <component type="text" y="120" size="32" align="centre">kph</component>
         </translate>
     </translate>
 
     <translate x="1850">
         <translate  y="50">
-            <component type="moving-map" size="768" opacity="0.85" zoom="17" corner_radius="30"/>
+            <component type="text" size="32" y="-16">moving-map</component>
+            <translate y="32">
+                <component type="moving-map" size="768" opacity="0.85" zoom="17" corner_radius="30"/>
+            </translate>
         </translate>
         <translate y="900">
-            <component type="cairo-circuit-map" size="512" line-width="0.05" rotate="180"/>
+            <component type="text" size="32">cairo-circuit-map</component>
+            <translate y="32">
+                <component type="cairo-circuit-map" size="512" line-width="0.05" rotate="180" loc-size="0.08" loc-fill="255,0,0,128" loc-outline="0,0,0,0"/>
+            </translate>
         </translate>
+    </translate>
+
+    <translate y="1250" x="600">
+        <component type="text" y="-32" size="32">chart</component>
+        <component type="chart" height="200" seconds="500" samples="1024" bg="0,0,0,0" textsize="48" metric="alt" units="m"/>
+        <component type="text" y="80" size="32" rgb="255,255,255,128">Alt(m)</component>
     </translate>
 </layout>

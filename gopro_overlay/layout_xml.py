@@ -484,8 +484,8 @@ class Widgets:
         return self.create_chart(*args, **kwargs)
 
     @allow_attributes({"x", "y", "metric", "units", "seconds",
-                       "samples", "values", "size_title", "filled",
-                       "height", "bg", "fill", "line", "text", "alpha"})
+                       "samples", "values", "textsize", "filled",
+                       "height", "bg", "fill", "line", "text"})
     def create_chart(self, element, entry, **kwargs) -> Widget:
         accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
         converter = self.converters.converter(attrib(element, "units", d="metres"))
@@ -504,7 +504,7 @@ class Widgets:
             key=value
         )
 
-        title = self.font(iattrib(element, "size_title", d=16))
+        title = self.font(iattrib(element, "textsize", d=16))
         values = battrib(element, "values", d=True)
         if not values:
             title = None
@@ -517,10 +517,9 @@ class Widgets:
                 filled=battrib(element, "filled", d=True),
                 height=iattrib(element, "height", d=64),
                 bg=rgbattr(element, "bg", d=(0, 0, 0, 170)),
-                fill=rgbattr(element, "fill", d=(91, 113, 146)),
-                line=rgbattr(element, "line", d=(255, 255, 255)),
-                text=rgbattr(element, "text", d=(255, 255, 255)),
-                alpha=iattrib(element, "alpha", d=179, r=range(0, 256)),
+                fill=rgbattr(element, "fill", d=(91, 113, 146, 170)),
+                line=rgbattr(element, "line", d=(255, 255, 255, 170)),
+                text=rgbattr(element, "text", d=(255, 255, 255, 170)),
             )
         )
 

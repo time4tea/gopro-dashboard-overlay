@@ -13,7 +13,7 @@ from xml.etree import ElementTree
 from PIL import Image
 from pint import DimensionalityError
 
-from gopro_overlay import fake, geo, ffmpeg
+from gopro_overlay import fake, geo, ffmpeg, timeseries_process
 from gopro_overlay.arguments import default_config_location
 from gopro_overlay.dimensions import dimension_from, Dimension
 from gopro_overlay.ffmpeg import find_streams
@@ -82,6 +82,10 @@ if __name__ == "__main__":
         try:
             timeseries = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
 
+            timeseries.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
+            timeseries.process(timeseries_process.calculate_odo())
+            timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)
+
             video_frame = load_frame(inputpath, stream_info.video.dimension, timeseries.mid)
 
 
@@ -125,6 +129,7 @@ if __name__ == "__main__":
                             frame = Image.alpha_composite(video_frame, frame)
 
                         frame.save("frame.png")
+                        log("Saved Image")
 
                     except IOError as e:
                         log(f"Unable to load {layout_file}: {e}")

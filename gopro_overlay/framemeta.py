@@ -24,13 +24,22 @@ class View:
         self.version = version
 
 
+def find_best_alignment(duration: Timeunit, samples: int):
+    tick = duration / samples
+    if tick < timeunits(millis=1):
+        raise ValueError("Too many samples for that duration")
+    tick_ms = tick.millis()
+    align = list([a for a in [100, 50, 25, 10, 5, 1] if a <= tick_ms])[0]
+    return timeunits(millis=align)
+
 class Window:
 
     def __init__(self, ts, duration: Timeunit, samples, key=lambda e: 1, missing=None):
         self.ts = ts
         self.duration = duration
         self.samples = samples
-        self.tick = (duration / samples).align(timeunits(millis=100))
+        alignment = find_best_alignment(duration, samples)
+        self.tick = (duration / samples).align(alignment)
         self.key = key
         self.missing = missing
 

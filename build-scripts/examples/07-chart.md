@@ -61,7 +61,13 @@ Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g
 
 {{ <component type="chart" bg="255,255,0" fill="0,255,255" line="255,0,255" text="0,0,255" /> }}
 
-Set alpha/transparency using `alpha`, between 0 and 255.
+## Text Size
 
-{{ <component type="chart" alpha="20" /> }}
-{{ <component type="chart" alpha="200" /> }}
+Set the text size using `textsize`
+
+{{ <component type="chart" textsize="32" /> }}
+
+## History
+
+02/2022 - Removed `alpha` because it stopped the alpha of the other colours working properly. Use alpha in each colour to get
+the desired effect.
