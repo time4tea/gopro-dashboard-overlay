@@ -21,6 +21,9 @@ Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-over
 An Example of 'overlay only' mode, which generates movies from GPX files
 ![Example Dashboard Image](examples/2022-11-24-gpx-only-overlay.png)
 
+Example from [examples/layout](examples/layout)
+![Example Dashboard Image](examples/layout/layout-cairo-2704x1520.png)
+
 ## Map Styles
 
 Almost 30 different map styles are supported! - See [map styles](docs/maps/README.md) for more
