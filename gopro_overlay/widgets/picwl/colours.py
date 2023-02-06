@@ -14,7 +14,7 @@ class HLSColour:
         return HLSColour(self.h, min(self.l + by, 1.0), self.s, self.a)
 
     def darken(self, by: float) -> 'HLSColour':
-        return HLSColour(self.h, max(self.l - by, 1.0), self.s, self.a)
+        return HLSColour(self.h, max(self.l - by, 0.0), self.s, self.a)
 
     def rgb(self) -> 'Colour':
         r, g, b = colorsys.hls_to_rgb(self.h, self.l, self.s)
