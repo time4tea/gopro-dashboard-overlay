@@ -56,13 +56,13 @@ The docker image contains all you need to get started, and uses a volume `/work/
 files. Note that the docker version doesn't support nvidia GPU extensions.
 
 ```shell
-docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:<version> <program> [args...]
+docker run -it -v "$(pwd):/work" overlaydash/gopro-dashboard-overlay:<version> <program> [args...]
 ```
 
 e.g.
 
 ```shell
-docker run -v $(pwd):/work overlaydash/gopro-dashboard-overlay:0.81.0 gopro-dashboard.py GH010122.MP4 render/docker.MP4
+docker run -it -v "$(pwd):/work" overlaydash/gopro-dashboard-overlay:0.81.0 gopro-dashboard.py GH010122.MP4 render/docker.MP4
 ```
 
 Files created by the program will be created with the same uid that owns the mapped directory.
