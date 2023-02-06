@@ -6,7 +6,7 @@ from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import gps_framemeta
 from gopro_overlay.geo import CachingRenderer
-from gopro_overlay.gpmd import GoproMeta
+from gopro_overlay.gpmd import GoproMeta, GPSFix
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
 from gopro_overlay.point import Coordinate
@@ -93,7 +93,21 @@ def test_render_journey_map_rounded():
 
 @pytest.mark.gfx
 @approve_image
+def test_render_journey_map_rounded_when_no_data_was_locked_issue_103():
+
+    ts.process(lambda e: {"gpsfix": GPSFix.NO.value})
+
+    with renderer.open() as map_renderer:
+        return time_rendering("journey_map", widgets=[
+            journey_map(at=Coordinate(100, 20), entry=lambda: ts.get(ts.min), size=256, renderer=map_renderer,
+                        timeseries=ts, privacy_zone=NoPrivacyZone(), corner_radius=35)
+        ])
+
+
+@pytest.mark.gfx
+@approve_image
 def test_render_journey_very_transparent():
+
     with renderer.open() as map_renderer:
         return time_rendering("journey_map", widgets=[
             journey_map(at=Coordinate(100, 20), entry=lambda: ts.get(ts.min), size=256, renderer=map_renderer,
@@ -148,6 +162,8 @@ def test_render_moving_map_very_rounded():
             moving_map(at=Coordinate(100, 20), entry=lambda: ts.get(ts.min), size=256, zoom=15, renderer=map_renderer,
                        corner_radius=128)
         ])
+
+
 
 
 @pytest.mark.gfx

@@ -52,6 +52,10 @@ def rdp(points, epsilon):
     """Reduces a series of points to a simplified version that loses detail, but
     maintains the general shape of the series.
     """
+
+    if len(points) <= 2:
+        return points
+
     dmax = 0.0
     index = 0
     for i in range(1, len(points) - 1):
