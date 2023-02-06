@@ -202,8 +202,9 @@ if __name__ == "__main__":
                     )
 
                     if counter.total() > 0:
-                        log(f"Note: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
+                        log(f"\n\nNOTE: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
                         [log(f"* {k} -> {v}") for k, v in counter.items()]
+                        log(f"\n\n")
 
                 except TimeoutExpired:
                     traceback.print_exc()
