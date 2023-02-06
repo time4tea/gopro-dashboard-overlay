@@ -41,7 +41,7 @@ class AbstractBordered:
         self.border_width = border.width
         self.border_depth = border.depth
         self.border_shadow = border.shadow
-        self.colour = border.colour
+        self.border_colour = border.colour
         self.scaled = True
 
     def set_contents_path(self, context: cairo.Context):
@@ -119,13 +119,13 @@ class AbstractBordered:
                     middle_size = outer_size - 2.0 * shadow_depth
 
             def set_normal():
-                context.set_source_rgba(*self.colour.rgba())
+                context.set_source_rgba(*self.border_colour.rgba())
 
             def set_light():
-                context.set_source_rgba(*self.colour.lighten(lightenBy).rgba())
+                context.set_source_rgba(*self.border_colour.lighten(lightenBy).rgba())
 
             def set_dark():
-                context.set_source_rgba(*self.colour.darken(darkenBy).rgba())
+                context.set_source_rgba(*self.border_colour.darken(darkenBy).rgba())
 
             if inner_size > 0:
                 path = context.copy_path()
