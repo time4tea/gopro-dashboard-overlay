@@ -50,7 +50,7 @@ def test_background_full_border_none():
 
 @pytest.mark.cairo
 @approve_image
-def test_background_90_border_none():
+def test_background_sector_top_border_none():
     return cairo_widget_test(
         widget=CairoEllipticBackground(
             arc=Arc(
