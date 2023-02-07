@@ -70,8 +70,6 @@ class AbstractBordered(CairoWidget):
 
             extent = abs(box.x2 - box.x1)
 
-            print(box)
-
             box_centre = Coordinate(
                 x=(box.x2 + box.x1) * 0.5,
                 y=(box.y2 + box.y1) * 0.5

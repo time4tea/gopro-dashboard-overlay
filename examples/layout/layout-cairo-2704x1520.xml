@@ -8,6 +8,15 @@
         </translate>
     </translate>
 
+    <translate x="50" y="100">
+        <component type="text" size="32" y="-32">cairo-gauge-round</component>
+        <component size="512" type="cairo-gauge-round-annotated" metric="speed" units="kph" max="60" start="90" sectors="6"/>
+        <translate y="190" x="256">
+            <component type="metric" metric="speed" units="kph" align="centre" dp="0" size="120"/>
+            <component type="text" y="120" size="32" align="centre">kph</component>
+        </translate>
+    </translate>
+
     <translate x="1850">
         <translate  y="50">
             <component type="text" size="32" y="-16">moving-map</component>
