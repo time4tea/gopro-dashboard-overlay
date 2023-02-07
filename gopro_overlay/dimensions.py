@@ -9,6 +9,11 @@ class Dimension:
     def tuple(self):
         return self.x,self.y
 
+    def __truediv__(self, other):
+        if type(other) == int:
+            return Dimension(int(self.x/other), int(self.y / other))
+        return NotImplemented
+
 def dimension_from(s):
     components = list(map(int, s.split("x")))
     if len(components) != 2:
