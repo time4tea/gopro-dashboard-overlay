@@ -11,7 +11,7 @@ from .widgets.cairo.cairo import CairoAdapter
 from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
 from .widgets.cairo.colour import Colour
-from .widgets.cairo.gauge import CairoGaugeMarker
+from .widgets.cairo.gauge_marker import CairoGaugeMarker
 from .widgets.cairo.reading import Reading
 from .widgets.widgets import Widget
 

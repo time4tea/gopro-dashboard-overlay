@@ -3,10 +3,11 @@ import cairo
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation
-from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED
+from gopro_overlay.widgets.cairo.bordered import Border, ShadowMode
+from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED, Colour
 from gopro_overlay.widgets.cairo.ellipse import Arc, EllipseParameters
 from gopro_overlay.widgets.cairo.face import ToyFontFace
-from gopro_overlay.widgets.cairo.gauge import CairoEllipticBackground, circle_with_radius
+from gopro_overlay.widgets.cairo.gauge_marker import CairoEllipticBackground, circle_with_radius
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
 from gopro_overlay.widgets.cairo.reading import Reading
@@ -33,7 +34,8 @@ class GaugeRound254:
             arc=Arc(
                 circle_with_radius(0.5, centre),
             ),
-            colour=WHITE.alpha(0.7)
+            colour=WHITE.alpha(0.7),
+
         )
 
         major_ticks = CairoScale(

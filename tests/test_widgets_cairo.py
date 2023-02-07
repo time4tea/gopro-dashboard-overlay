@@ -11,13 +11,13 @@ from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget, CairoAdapter, 
 from gopro_overlay.widgets.cairo.colour import BLACK, Colour, WHITE, RED
 from gopro_overlay.widgets.cairo.ellipse import Arc, EllipseParameters
 from gopro_overlay.widgets.cairo.face import ToyFontFace
-from gopro_overlay.widgets.cairo.gauge import CairoEllipticBackground
+from gopro_overlay.widgets.cairo.gauge_marker import CairoEllipticBackground
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
 from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
-from gopro_overlay.widgets.picwl.gauge_round_254 import GaugeRound254
+from gopro_overlay.widgets.cairo.gauge_round_254 import GaugeRound254
 from tests.approval import approve_image
 from tests.test_widgets import time_rendering
 

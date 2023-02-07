@@ -1,14 +1,9 @@
-import math
-
 import cairo
 
 from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.cairo.ellipse import Arc
-from gopro_overlay.widgets.cairo.bordered import Border, AbstractBordered
+from gopro_overlay.widgets.cairo.bordered import AbstractBordered, cos45
 from gopro_overlay.widgets.cairo.box import abox
-from gopro_overlay.widgets.picwl.colours import Colour, BLACK
-from gopro_overlay.widgets.picwl.constants import cos45
-
+from gopro_overlay.widgets.cairo.colour import Colour, BLACK
 
 
 class Cap(AbstractBordered):

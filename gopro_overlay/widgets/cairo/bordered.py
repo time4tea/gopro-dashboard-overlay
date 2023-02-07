@@ -102,7 +102,18 @@ class AbstractBordered(CairoWidget):
 
             outer_size = extent
             inner_size = extent - 2.0 * self.border_width
-            middle_size = outer_size
+
+            if self.border_shadow == ShadowMode.ShadowNone:
+                middle_size = outer_size
+            elif self.border_shadow == ShadowMode.ShadowIn:
+                inner_size = inner_size - 2.0 * shadow_depth
+                middle_size = outer_size
+            elif self.border_shadow == ShadowMode.ShadowOut:
+                inner_size = inner_size - shadow_depth
+                middle_size = outer_size - 2.0 * shadow_depth
+            elif self.border_shadow in [ShadowMode.ShadowEtchedIn, ShadowMode.ShadowEtchedOut]:
+                inner_size = inner_size - 4.0 * shadow_depth
+                middle_size = outer_size - 2.0 * shadow_depth
 
             def set_normal():
                 context.set_source_rgba(*self.border_colour.rgba())

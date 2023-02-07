@@ -6,7 +6,7 @@ import pytest
 
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.colour import Colour
-from gopro_overlay.widgets.cairo.gauge import CairoGaugeMarker, circle_with_radius, CairoEllipseMarker, MarkerCircle
+from gopro_overlay.widgets.cairo.gauge_marker import CairoGaugeMarker, circle_with_radius, CairoEllipseMarker, MarkerCircle
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.scale import CairoScale
