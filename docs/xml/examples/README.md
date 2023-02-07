@@ -23,6 +23,8 @@ Auto Generated File DO NOT EDIT
 
 [06-cairo-gauge-marker](06-cairo-gauge-marker/README.md)
 
+[06-cairo-gauge-round-annotated](06-cairo-gauge-round-annotated/README.md)
+
 [06-circuit-map](06-circuit-map/README.md)
 
 [06-journey-map](06-journey-map/README.md)

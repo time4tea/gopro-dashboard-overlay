@@ -25,6 +25,8 @@ class CairoGaugeRoundAnnotated(CairoWidget):
             length=Angle(degrees=254),
             major_annotation_colour=BLACK,
             minor_annotation_colour=BLACK,
+            major_tick_colour=BLACK,
+            minor_tick_colour=BLACK,
             v_min=0,
             v_max=170,
             sectors=17,
@@ -52,7 +54,7 @@ class CairoGaugeRoundAnnotated(CairoWidget):
             inner=circle_with_radius(0.43, centre),
             outer=circle_with_radius(0.49, centre),
             tick=TickParameters(step, 1, 0),
-            lines=[LineParameters(6.0 / 400, colour=BLACK)],
+            lines=[LineParameters(6.0 / 400, colour=major_tick_colour)],
             start=start,
             length=length
         )
@@ -61,7 +63,7 @@ class CairoGaugeRoundAnnotated(CairoWidget):
             inner=circle_with_radius(0.46, centre),
             outer=circle_with_radius(0.49, centre),
             tick=TickParameters(step / 2.0, 2, 2),
-            lines=[LineParameters(1.0 / 400, colour=BLACK)],
+            lines=[LineParameters(1.0 / 400, colour=minor_tick_colour)],
             start=start,
             length=length
         )

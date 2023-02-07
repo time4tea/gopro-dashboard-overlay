@@ -99,6 +99,13 @@ def create_cairo_gauge_marker(element, entry, converters, **kwargs) -> Widget:
     )
 
 
+@allow_attributes({"size", "min", "max", "metric", "units", "start", "length",
+                   "sectors",
+                   "background-rgb",
+                   "major-ann-rgb", "minor-ann-rgb",
+                   "major-tick-rgb", "minor-tick-rgb",
+                   "needle-rgb",
+                   })
 def create_cairo_gauge_round_annotated(element, entry, converters, **kwargs) -> Widget:
     size = iattrib(element, "size", d=256)
 
@@ -117,14 +124,16 @@ def create_cairo_gauge_round_annotated(element, entry, converters, **kwargs) -> 
         size=Dimension(size, size),
         widget=CairoGaugeRoundAnnotated(
             reading=as_reading(metric, min_value, max_value),
-            start=Angle(degrees=iattrib(element, "start", d=0)),
-            length=Angle(degrees=iattrib(element, "length", d=270)),
+            start=Angle(degrees=iattrib(element, "start", d=143)),
+            length=Angle(degrees=iattrib(element, "length", d=254)),
             sectors=iattrib(element, "sectors", d=5),
             background_colour=cairo_colour(rgbattr(element, "background-rgb", d=(255, 255, 255, 150))),
             major_annotation_colour=cairo_colour(rgbattr(element, "major-ann-rgb", d=(0, 0, 0))),
             minor_annotation_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(0, 0, 0))),
+            major_tick_colour=cairo_colour(rgbattr(element, "major-tick-rgb", d=(0, 0, 0))),
+            minor_tick_colour=cairo_colour(rgbattr(element, "minor-tick-rgb", d=(0, 0, 0))),
             v_min=min_value,
             v_max=max_value,
-            needle_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(255, 0, 0)))
+            needle_colour=cairo_colour(rgbattr(element, "needle-rgb", d=(255, 0, 0)))
         )
     )
