@@ -3,9 +3,8 @@ import cairo
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation
-from gopro_overlay.widgets.cairo.bordered import Border, ShadowMode
-from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED, Colour
-from gopro_overlay.widgets.cairo.ellipse import Arc, EllipseParameters
+from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED
+from gopro_overlay.widgets.cairo.ellipse import Arc
 from gopro_overlay.widgets.cairo.face import ToyFontFace
 from gopro_overlay.widgets.cairo.gauge_marker import CairoEllipticBackground, circle_with_radius
 from gopro_overlay.widgets.cairo.line import LineParameters
@@ -13,21 +12,6 @@ from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
 from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
-
-
-def create_texts(v_min, v_max, sectors):
-    v_range = v_max - v_min
-    each = v_range / sectors
-
-    current = v_min
-    values = []
-    while current <= v_max:
-        values.append(f"{current}")
-        current += each
-
-    return values
-
-
 
 
 class GaugeRound254:

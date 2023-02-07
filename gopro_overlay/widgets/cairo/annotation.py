@@ -99,3 +99,16 @@ class EllipticAnnotation:
                     )
 
                     self.face.show(context, text)
+
+
+def create_texts(v_min, v_max, sectors):
+    v_range = v_max - v_min
+    each = v_range / sectors
+
+    current = v_min
+    values = []
+    while current <= v_max:
+        values.append(f"{int(current)}")
+        current += each
+
+    return values
