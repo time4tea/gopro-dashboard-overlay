@@ -29,6 +29,7 @@ class GaugeRoundNeedleAnnotated:
             v_max=170,
             sectors=17,
             background_colour: Colour = WHITE.alpha(0.7),
+            needle_colour = RED,
             reading: Callable[[], Reading] = lambda: Reading.full(),
     ):
 
@@ -100,7 +101,7 @@ class GaugeRoundNeedleAnnotated:
             length=length,
             tip=NeedleParameter(width=0.0175, length=0.46),
             rear=NeedleParameter(width=0.03, length=0.135),
-            colour=RED
+            colour=needle_colour,
         )
 
         self.widgets = [

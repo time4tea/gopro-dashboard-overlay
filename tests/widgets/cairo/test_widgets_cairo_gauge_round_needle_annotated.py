@@ -1,6 +1,7 @@
 import pytest
 
 from gopro_overlay.widgets.cairo.angle import Angle
+from gopro_overlay.widgets.cairo.colour import RED, Colour, WHITE
 from gopro_overlay.widgets.cairo.gauge_round_254 import GaugeRoundNeedleAnnotated
 from gopro_overlay.widgets.cairo.reading import Reading
 from tests.approval import approve_image
@@ -27,6 +28,10 @@ def test_gauge_round_254_slower_speeds():
             length=Angle(degrees=270),
             v_max=40,
             sectors=8,
+            minor_annotation_colour=RED,
+            major_annotation_colour=Colour(0,1,0),
+            background_colour=Colour(0,0,1,0.6),
+            needle_colour=WHITE,
             reading=lambda: Reading(3.0 / 17)
         ),
         repeat=10
