@@ -50,13 +50,20 @@ No tests are run in this project with pillow-simd, so output may vary (but their
 
 ### Things to look at
 
-![Flamegraph](examples/perfetto-capture.png)
+![Flamegraph](examples/perfetto-capture-2022-28-11.png)
+
+![Flamegraph](examples/perfetto-capture-2023-02-07-ffmpeg-wait.png)
+
+![Flamegraph](examples/perfetto-capture-2023-02-07-map-images-new-map.png)
+
 
 A few thoughts - timing dominated by:
  - Creating a new image on each frame
  - Font rendering
  - Encoding
  - Writing to ffmpeg
+ - Loading images for map
+ - Recalculating chart view (known issue)
 
 Perhaps can somehow move encoding and writing of frame to ffmpeg to another thread/process so can start rendering next frame while that is happening? (e.g. Double Buffer)
 need to think about python GIL - so perhaps shared memory? 
