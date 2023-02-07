@@ -337,6 +337,7 @@ def format_uppercase(unit, registry, **options):
 def format_uppercase(unit, registry, **options):
     return format_unit(unit, "D", registry).upper()
 
+
 @dataclasses.dataclass(frozen=True)
 class FloatRange:
     start: float
@@ -437,7 +438,7 @@ class Widgets:
             zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
             renderer=self.renderer,
             corner_radius=iattrib(element, "corner_radius", 0),
-            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0,1.0)),
+            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
             rotate=battrib(element, "rotate", d=True)
         )
 
@@ -623,6 +624,18 @@ class Widgets:
             rotate=iattrib(element, "rotate", d=0),
         )
 
+    @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
+    def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
+        at = Coordinate(0, 0)
+        size = iattrib(element, "size", d=64)
+        return GPSLock(
+            fix=lambda: entry().gpsfix,
+            lock_no=simple_icon(at, attrib(element, "lock_none", d="gps_lock_none.png"), size),
+            lock_unknown=simple_icon(at, attrib(element, "lock_unknown", d="gps_lock_unknown.png"), size),
+            lock_2d=simple_icon(at, attrib(element, "lock_2d", d="gps_lock_2d.png"), size),
+            lock_3d=simple_icon(at, attrib(element, "lock_3d", d="gps_lock_3d.png"), size),
+        )
+
     def create_cairo_circuit_map(self, element, entry, **kwargs):
         try:
             import gopro_overlay.layout_xml_cairo
@@ -637,14 +650,10 @@ class Widgets:
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
 
-    @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
-    def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
-        at = Coordinate(0, 0)
-        size = iattrib(element, "size", d=64)
-        return GPSLock(
-            fix=lambda: entry().gpsfix,
-            lock_no=simple_icon(at, attrib(element, "lock_none", d="gps_lock_none.png"), size),
-            lock_unknown=simple_icon(at, attrib(element, "lock_unknown", d="gps_lock_unknown.png"), size),
-            lock_2d=simple_icon(at, attrib(element, "lock_2d", d="gps_lock_2d.png"), size),
-            lock_3d=simple_icon(at, attrib(element, "lock_3d", d="gps_lock_3d.png"), size),
-        )
+    def create_cairo_gauge_round_annotated(self, element, entry, **kwargs):
+        try:
+            import gopro_overlay.layout_xml_cairo
+            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_round_annotated(element, entry, self.converters, **kwargs)
+        except ModuleNotFoundError:
+            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+

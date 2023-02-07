@@ -12,6 +12,7 @@ from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
 from .widgets.cairo.colour import Colour
 from .widgets.cairo.gauge_marker import CairoGaugeMarker
+from .widgets.cairo.gauge_round_254 import CairoGaugeRoundAnnotated
 from .widgets.cairo.reading import Reading
 from .widgets.widgets import Widget
 
@@ -94,5 +95,36 @@ def create_cairo_gauge_marker(element, entry, converters, **kwargs) -> Widget:
             marker_outer=cairo_colour(rgbattr(element, "dot-outer-rgb", d=None)),
             marker_inner=cairo_colour(rgbattr(element, "dot-inner-rgb", d=None)),
             cap=cap_from(attrib(element, "cap", d="square")),
+        )
+    )
+
+
+def create_cairo_gauge_round_annotated(element, entry, converters, **kwargs) -> Widget:
+    size = iattrib(element, "size", d=256)
+
+    min_value = iattrib(element, "min", d=0)
+    max_value = iattrib(element, "max", d=50)
+
+    metric = metric_value(
+        entry,
+        accessor=metric_accessor_from(attrib(element, "metric")),
+        converter=converters.converter(attrib(element, "units", d=None)),
+        formatter=lambda q: q.m,
+        default=0
+    )
+
+    return CairoAdapter(
+        size=Dimension(size, size),
+        widget=CairoGaugeRoundAnnotated(
+            reading=as_reading(metric, min_value, max_value),
+            start=Angle(degrees=iattrib(element, "start", d=0)),
+            length=Angle(degrees=iattrib(element, "length", d=270)),
+            sectors=iattrib(element, "sectors", d=5),
+            background_colour=cairo_colour(rgbattr(element, "background-rgb", d=(255, 255, 255, 150))),
+            major_annotation_colour=cairo_colour(rgbattr(element, "major-ann-rgb", d=(0, 0, 0))),
+            minor_annotation_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(0, 0, 0))),
+            v_min=min_value,
+            v_max=max_value,
+            needle_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(255, 0, 0)))
         )
     )

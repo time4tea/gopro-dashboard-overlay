@@ -23,7 +23,13 @@
         <translate x="150" y="150">
             <component type="metric" metric="speed" units="mph" size="60" dp="0" rgb="255,255,255,160" outline="0,0,0,160"/>
         </translate>
-        <component type="cairo-gauge-marker" metric="speed" units="mph" />
+        <component type="cairo-gauge-marker" metric="speed" units="mph" start="90"/>
     </translate>
 
+    <translate x="400" y="600">
+        <component type="cairo-gauge-round-annotated" metric="speed" units="mph" start="90"/>
+        <translate x="150" y="150">
+            <component type="metric" metric="speed" units="mph" size="60" dp="0" rgb="255,255,255,160" outline="0,0,0,160"/>
+        </translate>
+    </translate>
 </layout>

@@ -6,7 +6,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation, create_texts, distribute
 from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
-from gopro_overlay.widgets.cairo.cairo import CairoCache, CairoComposite
+from gopro_overlay.widgets.cairo.cairo import CairoCache, CairoComposite, CairoWidget
 from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED, Colour
 from gopro_overlay.widgets.cairo.ellipse import Arc
 from gopro_overlay.widgets.cairo.face import ToyFontFace
@@ -18,7 +18,7 @@ from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
 
 
-class GaugeRoundNeedleAnnotated:
+class CairoGaugeRoundAnnotated(CairoWidget):
     def __init__(
             self,
             start=Angle(degrees=143),
