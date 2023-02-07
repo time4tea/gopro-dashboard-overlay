@@ -107,9 +107,9 @@ class GaugeRound254:
             background,
             major_ticks,
             minor_ticks,
-            needle,
             major_annotation,
             minor_annotation,
+            needle,
         ]
 
     def draw(self, context: cairo.Context):
