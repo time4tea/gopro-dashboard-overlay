@@ -16,10 +16,10 @@ from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.map import MovingJourneyMap, view_window
 from gopro_overlay.widgets.widgets import Translate, Frame
-from tests import test_widgets_setup
+from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
-from tests.test_widgets import time_rendering
-from tests.test_widgets_setup import rng
+from tests.widgets.test_widgets import time_rendering
+from tests.widgets.test_widgets_setup import rng
 from tests.testenvironment import is_make
 
 font = test_widgets_setup.font
@@ -30,7 +30,7 @@ renderer = CachingRenderer(cache_dir=arguments.default_config_location)
 
 
 def a_real_journey(name, dimension, f_scene):
-    with open("meta/gopro-meta.gpmd", "rb") as f:
+    with open("../meta/gopro-meta.gpmd", "rb") as f:
         data = f.read()
 
     framemeta = gps_framemeta(meta=GoproMeta.parse(data), units=units)

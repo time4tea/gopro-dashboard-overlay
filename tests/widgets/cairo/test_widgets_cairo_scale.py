@@ -9,7 +9,7 @@ from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
 from tests.approval import approve_image
-from tests.test_widgets_cairo import cairo_widget_test
+from tests.widgets.cairo.test_widgets_cairo import cairo_widget_test
 
 
 @pytest.mark.cairo

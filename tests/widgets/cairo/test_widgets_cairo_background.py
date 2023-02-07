@@ -7,7 +7,7 @@ from gopro_overlay.widgets.cairo.colour import BLACK, Colour, WHITE
 from gopro_overlay.widgets.cairo.ellipse import Arc, EllipseParameters
 from gopro_overlay.widgets.cairo.gauge_marker import CairoEllipticBackground
 from tests.approval import approve_image
-from tests.test_widgets_cairo import cairo_widget_test
+from tests.widgets.cairo.test_widgets_cairo import cairo_widget_test
 
 
 @pytest.mark.cairo

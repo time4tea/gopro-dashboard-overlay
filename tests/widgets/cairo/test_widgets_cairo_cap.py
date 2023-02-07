@@ -4,7 +4,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.cap import Cap
 from gopro_overlay.widgets.cairo.colour import Colour
 from tests.approval import approve_image
-from tests.test_widgets_cairo import cairo_widget_test
+from tests.widgets.cairo.test_widgets_cairo import cairo_widget_test
 
 
 @pytest.mark.cairo

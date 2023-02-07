@@ -12,9 +12,9 @@ from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 from gopro_overlay.widgets.chart import SimpleChart
 from gopro_overlay.widgets.widgets import Translate, Composite
-from tests import test_widgets_setup
+from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
-from tests.test_widgets import time_rendering
+from tests.widgets.test_widgets import time_rendering
 
 font = test_widgets_setup.font
 title_font = test_widgets_setup.title_font
@@ -180,7 +180,7 @@ def load_test_file(inputpath):
 
 @pytest.mark.gfx
 def test_example_chart():
-    test_file = Path("/home/richja/dev/gopro-graphics/render/contrib/poor-gps/GX010303.MP4")
+    test_file = Path("/render/contrib/poor-gps/GX010303.MP4")
 
     ts = load_test_file(test_file)
 

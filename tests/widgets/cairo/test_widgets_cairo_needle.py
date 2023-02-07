@@ -6,7 +6,7 @@ from gopro_overlay.widgets.cairo.colour import RED
 from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
 from gopro_overlay.widgets.cairo.reading import Reading
 from tests.approval import approve_image
-from tests.test_widgets_cairo import cairo_widget_test
+from tests.widgets.cairo.test_widgets_cairo import cairo_widget_test
 
 
 @pytest.mark.cairo

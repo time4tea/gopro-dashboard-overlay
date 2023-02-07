@@ -11,9 +11,9 @@ from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
-from tests import test_widgets_setup
+from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
-from tests.test_widgets_circuit import cairo_widget_test
+from tests.widgets.test_widgets_circuit import cairo_widget_test
 
 ts = test_widgets_setup.ts
 

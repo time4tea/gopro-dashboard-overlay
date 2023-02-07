@@ -1,18 +1,13 @@
-import random
-from datetime import timedelta
-
 import pytest
-from PIL import ImageFont
 
-from gopro_overlay import fake
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.widgets import Composite, Translate
 from gopro_overlay.widgets.text import CachingText
 from gopro_overlay.widgets.compass import Compass
-from tests import test_widgets_setup
+from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
-from tests.test_widgets import time_rendering
+from tests.widgets.test_widgets import time_rendering
 
 font = test_widgets_setup.font
 ts = test_widgets_setup.ts
