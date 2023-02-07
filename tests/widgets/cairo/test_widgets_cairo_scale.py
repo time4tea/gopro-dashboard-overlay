@@ -19,7 +19,7 @@ def test_scale():
     length = Angle(degrees=254)
     step = Angle.fullcircle() / 12
 
-    centre = Coordinate(0.5, 0.5)
+    centre = Coordinate(0.0, 0.0)
 
     inner = circle_with_radius(0.43, centre)
     mid = circle_with_radius(0.46, centre)

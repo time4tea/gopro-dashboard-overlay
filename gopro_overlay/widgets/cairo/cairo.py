@@ -1,6 +1,6 @@
 import contextlib
 import math
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import cairo
 from PIL import Image, ImageDraw
@@ -37,21 +37,28 @@ class CairoComposite(CairoWidget):
 
 
 class CairoCache(CairoWidget):
-    def __init__(self):
-        self.surface = None
+    def __init__(self, widget: CairoWidget):
+        self.surface: Optional[cairo.Surface] = None
+        self.widget = widget
 
-    def store(self, context: cairo.Context):
+    def copy(self, context: cairo.Context):
         target: cairo.ImageSurface = context.get_target()
-        self.surface = cairo.Surface.create_similar(
-            content=target,
-            width=target.get_width(),
-            height=target.get_height()
-        )
+        surface = target.create_similar(cairo.Content.COLOR_ALPHA, target.get_width(), target.get_height())
+        cachecontext = cairo.Context(surface)
+        cachecontext.set_operator(cairo.OPERATOR_SOURCE)
+        cachecontext.set_source_surface(target)
+        cachecontext.paint()
+        return surface
 
     def draw(self, context: cairo.Context):
-        context.set_operator(cairo.OPERATOR_SOURCE)
-        context.set_source_surface(self.surface)
-        context.paint()
+        if self.surface is None:
+            self.widget.draw(context)
+            self.surface = self.copy(context)
+        else:
+            new_context = cairo.Context(context.get_target())
+            new_context.set_operator(cairo.OPERATOR_SOURCE)
+            new_context.set_source_surface(self.surface)
+            new_context.paint()
 
 
 @contextlib.contextmanager

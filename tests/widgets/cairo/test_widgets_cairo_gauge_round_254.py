@@ -12,5 +12,6 @@ def test_gauge_round_254_defaults():
     return cairo_widget_test(
         widget=GaugeRound254(
             reading=lambda: Reading(3.0 / 17)
-        )
+        ),
+        repeat=10
     )

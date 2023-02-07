@@ -19,7 +19,7 @@ def test_annotation():
 
     return cairo_widget_test(
         widget=EllipticAnnotation(
-            ellipse=EllipseParameters(Coordinate(x=0.5, y=0.5), major_curve=1.0 / 0.41, minor_radius=0.41, angle=0),
+            ellipse=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.41, minor_radius=0.41, angle=0),
             tick=TickParameters(step=step, first=1, skipped=2),
             colour=BLACK,
             face=ToyFontFace("arial"),

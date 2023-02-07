@@ -6,6 +6,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation, create_texts, distribute
 from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
+from gopro_overlay.widgets.cairo.cairo import CairoCache, CairoComposite
 from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED, Colour
 from gopro_overlay.widgets.cairo.ellipse import Arc
 from gopro_overlay.widgets.cairo.face import ToyFontFace
@@ -39,13 +40,15 @@ class GaugeRound254:
 
         step = length / sectors
 
-        centre = Coordinate(x=0.5, y=0.5)
+        centre = Coordinate(x=0.0, y=0.0)
         background = CairoEllipticBackground(
             arc=Arc(
                 circle_with_radius(0.5, centre),
             ),
             colour=background_colour,
         )
+
+
 
         major_ticks = CairoScale(
             inner=circle_with_radius(0.43, centre),
@@ -63,16 +66,6 @@ class GaugeRound254:
             lines=[LineParameters(1.0 / 400, colour=BLACK)],
             start=start,
             length=length
-        )
-
-        needle = Needle(
-            centre=centre,
-            reading=reading,
-            start=start,
-            length=length,
-            tip=NeedleParameter(width=0.0175, length=0.46),
-            rear=NeedleParameter(width=0.03, length=0.135),
-            colour=RED
         )
 
         text_radius = 0.41
@@ -103,12 +96,26 @@ class GaugeRound254:
             length=length
         )
 
+        needle = Needle(
+            centre=centre,
+            reading=reading,
+            start=start,
+            length=length,
+            tip=NeedleParameter(width=0.0175, length=0.46),
+            rear=NeedleParameter(width=0.03, length=0.135),
+            colour=RED
+        )
+
         self.widgets = [
-            background,
-            major_ticks,
-            minor_ticks,
-            major_annotation,
-            minor_annotation,
+            CairoCache(
+                CairoComposite(
+                    [background,
+                    major_ticks,
+                    minor_ticks,
+                    major_annotation,
+                    minor_annotation,]
+                )
+            ),
             needle,
         ]
 

@@ -15,7 +15,7 @@ def test_needle():
     return cairo_widget_test(
         widget=Needle(
             reading=lambda: Reading(0.65),
-            centre=Coordinate(0.5, 0.5),
+            centre=Coordinate(0.0, 0.0),
             start=Angle(degrees=143),
             length=Angle(degrees=254),
             tip=NeedleParameter(width=0.0175, length=0.46),
