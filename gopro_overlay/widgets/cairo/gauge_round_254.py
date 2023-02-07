@@ -4,7 +4,7 @@ import cairo
 
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
-from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation
+from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation, create_texts, distribute
 from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
 from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED, Colour
 from gopro_overlay.widgets.cairo.ellipse import Arc
@@ -23,14 +23,19 @@ class GaugeRound254:
             self,
             start=Angle(degrees=143),
             length=Angle(degrees=254),
+            major_annotation_colour=BLACK,
+            minor_annotation_colour=BLACK,
+            v_min=0,
+            v_max=170,
+            sectors=17,
             background_colour: Colour = WHITE.alpha(0.7),
             reading: Callable[[], Reading] = lambda: Reading.full(),
     ):
-        minor_texts = [str(x) for x in range(0, 180, 20)]
-        major_texts = [str(x) for x in range(10, 190, 20)]
+
+        texts = create_texts(v_min, v_max, sectors)
+        minor_texts, major_texts = distribute(texts, 2)
 
         stretch = 0.8
-        sectors = 17
 
         step = length / sectors
 
@@ -71,10 +76,11 @@ class GaugeRound254:
         )
 
         text_radius = 0.41
+
         major_annotation = EllipticAnnotation(
             ellipse=circle_with_radius(text_radius, centre),
             tick=TickParameters(step * 2.0, 1, 0),
-            colour=BLACK,
+            colour=major_annotation_colour,
             face=ToyFontFace("arial"),
             mode=AnnotationMode.MovedInside,
             texts=major_texts,
@@ -87,7 +93,7 @@ class GaugeRound254:
         minor_annotation = EllipticAnnotation(
             ellipse=circle_with_radius(text_radius, centre),
             tick=TickParameters(step * 2.0, 1, 0),
-            colour=BLACK,
+            colour=minor_annotation_colour,
             face=ToyFontFace("Roboto-Medium"),
             mode=AnnotationMode.MovedInside,
             texts=minor_texts,

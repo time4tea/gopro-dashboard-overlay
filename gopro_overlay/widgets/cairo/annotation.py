@@ -112,3 +112,7 @@ def create_texts(v_min, v_max, sectors):
         current += each
 
     return values
+
+
+def distribute(l, n):
+    return [l[i::n] for i in range(n)]

@@ -2,7 +2,7 @@ import pytest
 
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
-from gopro_overlay.widgets.cairo.annotation import EllipticAnnotation, AnnotationMode, create_texts
+from gopro_overlay.widgets.cairo.annotation import EllipticAnnotation, AnnotationMode, create_texts, distribute
 from gopro_overlay.widgets.cairo.colour import BLACK
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters
 from gopro_overlay.widgets.cairo.face import ToyFontFace
@@ -37,3 +37,9 @@ def test_annotation():
 def test_create_texts():
     assert create_texts(0, 170, 17) == ["0", "10", "20", "30", "40", "50", "60", "70", "80",
                                         "90", "100", "110", "120", "130", "140", "150", "160", "170"]
+
+def test_distribute_texts():
+    t = create_texts(0, 170, 17)
+    a,b = distribute(t, 2)
+    assert a == ["0", "20", "40", "60", "80", "100", "120", "140", "160"]
+    assert b == ["10", "30", "50", "70", "90", "110", "130", "150", "170"]
