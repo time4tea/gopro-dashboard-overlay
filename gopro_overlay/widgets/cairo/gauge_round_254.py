@@ -6,7 +6,8 @@ from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnot
 from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED
 from gopro_overlay.widgets.cairo.ellipse import Arc
 from gopro_overlay.widgets.cairo.face import ToyFontFace
-from gopro_overlay.widgets.cairo.gauge_marker import CairoEllipticBackground, circle_with_radius
+from gopro_overlay.widgets.cairo.gauge_marker import circle_with_radius
+from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
 from gopro_overlay.widgets.cairo.reading import Reading

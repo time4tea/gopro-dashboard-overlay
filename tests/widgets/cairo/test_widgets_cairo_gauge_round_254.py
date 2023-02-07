@@ -7,5 +7,5 @@ from tests.widgets.cairo.test_widgets_cairo import cairo_widget_test
 
 @pytest.mark.cairo
 @approve_image
-def test_gauge_round_254():
+def test_gauge_round_254_defaults():
     return cairo_widget_test(widget=GaugeRound254(), repeat=1)

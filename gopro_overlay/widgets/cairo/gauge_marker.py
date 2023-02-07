@@ -5,28 +5,14 @@ import cairo
 
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
-from gopro_overlay.widgets.cairo.bordered import AbstractBordered, Border
+from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
 from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite, saved
-from gopro_overlay.widgets.cairo.colour import Colour, BLACK
+from gopro_overlay.widgets.cairo.colour import Colour
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters, Arc
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
-
-
-class CairoEllipticBackground(AbstractBordered):
-    def __init__(self, arc: Arc, colour: Colour = BLACK, border=Border.NONE()):
-        super().__init__(border=border)
-        self.arc = arc
-        self.colour = colour
-
-    def set_contents_path(self, context: cairo.Context):
-        self.arc.draw(context)
-
-    def draw_contents(self, context: cairo.Context):
-        context.set_source_rgba(*self.colour.rgba())
-        context.fill()
 
 
 class CairoSimpleGauge(CairoWidget):
