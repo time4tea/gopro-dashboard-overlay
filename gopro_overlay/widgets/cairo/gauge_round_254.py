@@ -15,6 +15,21 @@ from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
 
 
+def create_texts(v_min, v_max, sectors):
+    v_range = v_max - v_min
+    each = v_range / sectors
+
+    current = v_min
+    values = []
+    while current <= v_max:
+        values.append(f"{current}")
+        current += each
+
+    return values
+
+
+
+
 class GaugeRound254:
 
     def __init__(self):
@@ -99,7 +114,7 @@ class GaugeRound254:
             minor_ticks,
             needle,
             major_annotation,
-            minor_annotation,
+            # minor_annotation,
         ]
 
     def draw(self, context: cairo.Context):

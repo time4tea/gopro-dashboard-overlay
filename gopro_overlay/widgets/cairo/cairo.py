@@ -7,12 +7,24 @@ from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.exceptions import Defect
+from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.widgets import Widget
 
 
 class CairoWidget:
     def draw(self, context: cairo.Context):
         raise NotImplemented()
+
+
+class CairoTranslate(CairoWidget):
+    def __init__(self, by: Coordinate, widget: CairoWidget):
+        self.by = by
+        self.widget = widget
+
+    def draw(self, context: cairo.Context):
+        with saved(context):
+            context.translate(*self.by.tuple())
+            self.widget.draw(context)
 
 
 class CairoComposite(CairoWidget):
@@ -65,7 +77,7 @@ def to_pillow(surface: cairo.ImageSurface) -> Image:
 
 class CairoAdapter(Widget):
 
-    def __init__(self, size: Dimension, widget:CairoWidget, rotation=0):
+    def __init__(self, size: Dimension, widget: CairoWidget, rotation=0):
         self.size = size
         self.rotation = rotation
         self.widget = widget

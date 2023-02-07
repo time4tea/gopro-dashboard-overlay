@@ -36,7 +36,7 @@ class Gradient:
         yield
 
 
-@pytest.mark.gfx
+@pytest.mark.cairo
 @approve_image
 def test_cairo_simple_scale():
     return cairo_widget_test(CairoScale(
@@ -51,7 +51,7 @@ def test_cairo_simple_scale():
     ))
 
 
-@pytest.mark.gfx
+@pytest.mark.cairo
 @approve_image
 def test_cairo_gauge_marker():
     return cairo_widget_test(
@@ -61,7 +61,7 @@ def test_cairo_gauge_marker():
     )
 
 
-@pytest.mark.gfx
+@pytest.mark.cairo
 @approve_image
 def test_cairo_ellipse_marker():
     return cairo_widget_test(
