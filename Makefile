@@ -23,10 +23,13 @@ ci:
 check:
 	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all -m "not gfx"  tests
 
-.PHONY: gfx
-gfx:
+.PHONY: check-gfx
+check-gfx:
 	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all -m "gfx"  tests
 
+.PHONY: check-cairo
+check-cairo:
+	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all -m "cairo"  tests
 
 
 .PHONY: flake

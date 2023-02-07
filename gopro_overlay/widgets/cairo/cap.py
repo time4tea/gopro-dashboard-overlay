@@ -1,3 +1,5 @@
+import math
+
 import cairo
 
 from gopro_overlay.point import Coordinate
@@ -32,14 +34,6 @@ class Cap(AbstractBordered):
 
         self.pattern = pattern
         self.mask = mask
-
-    # def draw(self, context: cairo.Context):
-    #     with saved(context):
-    #         context.new_path()
-    #         context.set_line_width(0.01)
-    # self.set_contents_path(context)
-    # context.close_path()
-    # self.draw_contents(context)
 
     def set_contents_path(self, context: cairo.Context):
         context.arc(self.centre.x, self.centre.y, self.radius, 0.0, math.tau)
