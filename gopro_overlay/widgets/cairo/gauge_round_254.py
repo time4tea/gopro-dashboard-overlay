@@ -1,13 +1,15 @@
+from typing import Callable
+
 import cairo
 
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.annotation import AnnotationMode, EllipticAnnotation
+from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
 from gopro_overlay.widgets.cairo.colour import BLACK, WHITE, RED
 from gopro_overlay.widgets.cairo.ellipse import Arc
 from gopro_overlay.widgets.cairo.face import ToyFontFace
 from gopro_overlay.widgets.cairo.gauge_marker import circle_with_radius
-from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
 from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.needle import Needle, NeedleParameter
 from gopro_overlay.widgets.cairo.reading import Reading
@@ -17,8 +19,10 @@ from gopro_overlay.widgets.cairo.tick import TickParameters
 
 class GaugeRound254:
 
-    def __init__(self):
-        value = lambda: Reading(3.0 / 17)
+    def __init__(
+            self,
+            reading: Callable[[], Reading] = lambda: Reading.full()
+    ):
         minor_texts = [str(x) for x in range(0, 180, 20)]
         major_texts = [str(x) for x in range(10, 190, 20)]
 
@@ -58,7 +62,7 @@ class GaugeRound254:
 
         needle = Needle(
             centre=centre,
-            reading=value,
+            reading=reading,
             start=start,
             length=length,
             tip=NeedleParameter(width=0.0175, length=0.46),
