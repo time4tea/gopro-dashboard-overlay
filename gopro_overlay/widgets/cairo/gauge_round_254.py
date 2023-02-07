@@ -18,8 +18,7 @@ from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
 
 
-class GaugeRound254:
-
+class GaugeRoundNeedleAnnotated:
     def __init__(
             self,
             start=Angle(degrees=143),
@@ -47,8 +46,6 @@ class GaugeRound254:
             ),
             colour=background_colour,
         )
-
-
 
         major_ticks = CairoScale(
             inner=circle_with_radius(0.43, centre),
