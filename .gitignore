@@ -23,9 +23,9 @@ frame.png
 result.json
 
 # Ignore actuals / diffs from approvals
-tests/approvals/*.actual.png
-tests/approvals/*.diff.png
-tests/approvals/*.diff_over_approved.png
+tests/**/*.actual.png
+tests/**/*.diff.png
+tests/**/*.diff_over_approved.png
 
 **/__pycache__/
 

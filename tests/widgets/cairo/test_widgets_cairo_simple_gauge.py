@@ -11,8 +11,8 @@ from gopro_overlay.widgets.cairo.line import LineParameters
 from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.scale import CairoScale
 from gopro_overlay.widgets.cairo.tick import TickParameters
-from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
+from tests.widgets import test_widgets_setup
 from tests.widgets.test_widgets_circuit import cairo_widget_test
 
 ts = test_widgets_setup.ts
@@ -38,32 +38,35 @@ class Gradient:
 
 @pytest.mark.cairo
 @approve_image
-def test_cairo_simple_scale():
-    return cairo_widget_test(CairoScale(
-        outer=circle_with_radius(0.45),
-        inner=circle_with_radius(0.40),
-        tick=TickParameters(step=Angle(degrees=45)),
-        lines=[
-            LineParameters(0.02, Colour(1.0, 1.0, 1.0), cap=cairo.LINE_CAP_SQUARE)
-        ],
-        start=Angle(degrees=90),
-        length=Angle(degrees=270)
-    ))
-
-
-@pytest.mark.cairo
-@approve_image
-def test_cairo_gauge_marker():
+def test_cairo_scale_circle_90_270_45():
     return cairo_widget_test(
-        CairoGaugeMarker(
-            reading=lambda: Reading(1.000)
+        CairoScale(
+            outer=circle_with_radius(0.45),
+            inner=circle_with_radius(0.40),
+            tick=TickParameters(step=Angle(degrees=45)),
+            lines=[
+                LineParameters(0.02, Colour(1.0, 1.0, 1.0), cap=cairo.LINE_CAP_SQUARE)
+            ],
+            start=Angle(degrees=90),
+            length=Angle(degrees=270)
         )
     )
 
 
 @pytest.mark.cairo
 @approve_image
-def test_cairo_ellipse_marker():
+def test_cairo_gauge_marker_defaults_100():
+    return cairo_widget_test(CairoGaugeMarker(reading=lambda: Reading(1.000)))
+
+@pytest.mark.cairo
+@approve_image
+def test_cairo_gauge_marker_defaults_40():
+    return cairo_widget_test(CairoGaugeMarker(reading=lambda: Reading(0.40)))
+
+
+@pytest.mark.cairo
+@approve_image
+def test_cairo_ellipse_marker_90_270_100():
     return cairo_widget_test(
         CairoEllipseMarker(
             ellipse=circle_with_radius(0.45),
