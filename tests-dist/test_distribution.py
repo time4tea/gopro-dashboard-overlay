@@ -81,6 +81,11 @@ def test_maybe_renders_something_kph():
     run([prog, "--overlay-size", "1920x1080", "--units-speed", "kph", "--units-altitude", "inch", clip, "/tmp/render-clip-kph.MP4"])
 
 
+def test_maybe_renders_something_example_layout():
+    prog = distribution / "bin" / "gopro-dashboard.py"
+    run([prog, "--layout-xml", top / "examples/layout/layout-cairo-2704x1520.xml", clip , "/tmp/render-clip-example.MP4"])
+
+
 @approve_text
 def test_maybe_makes_a_csv():
     r = invoke([(distribution / "bin" / "gopro-to-csv.py"), clip, "-"])

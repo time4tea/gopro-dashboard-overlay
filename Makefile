@@ -68,6 +68,7 @@ test-distribution-install: dist
 	rm -rf $(DIST_TEST)
 	python3 -m venv $(DIST_TEST)/venv
 	$(DIST_TEST)/venv/bin/pip install wheel dist/gopro-overlay-$(CURRENT_VERSION).tar.gz
+	$(DIST_TEST)/venv/bin/pip install pycairo==1.23.0
 
 .PHONY: test-distribution-test
 test-distribution-test:
