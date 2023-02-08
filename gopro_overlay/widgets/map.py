@@ -16,10 +16,16 @@ from gopro_overlay.widgets.widgets import Widget
 
 class PerceptibleMovementCheck:
 
-    def __init__(self):
+    def __init__(self, always=False):
+        self.always = always
         self.last_location = None
 
+
     def moved(self, map, location):
+
+        if self.always:
+            return True
+
         location_of_centre_pixel = map.geocode((map.size[0] / 2, map.size[1] / 2))
         location_of_one_pixel_away = map.geocode(((map.size[0] / 2) + 1, (map.size[1] / 2) + 1))
 
@@ -140,7 +146,7 @@ def draw_marker(draw, position, size, fill=None):
 
 class MovingMap(Widget):
     def __init__(self, at, location, azimuth, renderer,
-                 rotate=True, size=256, zoom=17, corner_radius=None, opacity=0.7):
+                 rotate=True, size=256, zoom=17, corner_radius=None, opacity=0.7, always_redraw=False):
         self.at = at
         self.rotate = rotate
         self.azimuth = azimuth
@@ -158,7 +164,7 @@ class MovingMap(Widget):
             self.half_width_height + (self.size / 2),
             self.half_width_height + (self.size / 2)
         )
-        self.perceptible = PerceptibleMovementCheck()
+        self.perceptible = PerceptibleMovementCheck(always_redraw)
         self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
         self.cached = None
 

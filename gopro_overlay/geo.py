@@ -11,6 +11,8 @@ from geotiler.cache import caching_downloader
 from geotiler.provider import MapProvider
 from geotiler.tile.io import fetch_tiles
 
+from gopro_overlay.geo_render import my_render_map
+
 # most of the "stamen" maps in geotiler don't seem to work.
 map_styles = list(itertools.chain(
     ["osm"],
@@ -106,7 +108,8 @@ def dbm_downloader(dbm_file):
 def dbm_caching_renderer(provider, dbm_file):
     def render(map, tiles=None, **kwargs):
         map.provider = provider
-        return geotiler.render_map(map, tiles, downloader=dbm_downloader(dbm_file), **kwargs)
+        # return geotiler.render_map(map, tiles, downloader=dbm_downloader(dbm_file), **kwargs)
+        return my_render_map(map, tiles, downloader=dbm_downloader(dbm_file), **kwargs)
 
     return render
 

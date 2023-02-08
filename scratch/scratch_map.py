@@ -42,15 +42,14 @@ if __name__ == "__main__":
                         azimuth=lambda: 0,
                         renderer=renderer,
                         rotate=False,
-                        zoom=lambda: 16,
-                        size=512
+                        zoom=16,
+                        size=512,
+                        always_redraw=True
                     )
                 ]
             )
 
             while current < length:
                 image = scene.draw()
-                if current.millis() == 0:
-                    image.show()
                 writer.write(image.tobytes())
                 current = current + timeunits(seconds=0.1)
