@@ -62,8 +62,18 @@ A few thoughts - timing dominated by:
  - Font rendering
  - Encoding
  - Writing to ffmpeg
- - Loading images for map
  - Recalculating chart view (known issue)
 
 Perhaps can somehow move encoding and writing of frame to ffmpeg to another thread/process so can start rendering next frame while that is happening? (e.g. Double Buffer)
 need to think about python GIL - so perhaps shared memory? 
+
+### Things done
+
+#### Cache map tile images in memory
+
+Before 
+
+![Before](examples/perfetto-capture-map-before.png)
+![After](examples/perfetto-capture-map-after.png)
+
+

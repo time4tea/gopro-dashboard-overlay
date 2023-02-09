@@ -10,10 +10,6 @@ from geotiler.tile.img import _error_image
 
 
 # Attempt at re-implementing the rendering part of geotiler with a view on performance
-# Things:
-# 1) Don't jump in and out of async - no real point as its all sequential
-# 2) Keep an LRU queue of PIL Images so that don't have to continually re-evaluate image data
-
 # Use downloader as per geotiler
 
 class ImageTileCache:
