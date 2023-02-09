@@ -1,7 +1,7 @@
 import asyncio
 import io
 import itertools
-from typing import List, Callable
+from typing import List
 
 import PIL
 from PIL.Image import Image
@@ -33,7 +33,7 @@ class ImageTileCache:
         f = io.BytesIO(data)
         return PIL.Image.open(f).convert('RGBA')
 
-    def populate(self, downloader, tiles: List[Tile], error_image_f: Callable[[], Image]):
+    def populate(self, downloader, tiles: List[Tile], error_image):
 
         # Populate image directly for those we know already
         def c(t):
@@ -53,7 +53,7 @@ class ImageTileCache:
 
         for d in downloaded:
             if d.img is None:
-                img = error_image_f()
+                img = error_image
             else:
                 img = self.as_image(d.img)
 
@@ -77,7 +77,7 @@ def my_render_map(map, tiles, downloader, **kwargs):
 
     provider = map.provider
 
-    tiles = cache.populate(downloader, tiles, lambda: _error_image(provider.tile_width, provider.tile_height))
+    tiles = cache.populate(downloader, tiles, _error_image(provider.tile_width, provider.tile_height))
 
     image = PIL.Image.new('RGBA', tuple(map.size))
 
