@@ -7,7 +7,7 @@ from gopro_overlay.geo import api_key_finder, CachingRenderer
 from gopro_overlay.point import Coordinate, Point
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.widgets.map import MovingMap
-from gopro_overlay.widgets.widgets import Scene
+from gopro_overlay.widgets.widgets import Scene, SimpleFrameSupplier
 
 if __name__ == "__main__":
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
                 api_key_finder=key_finder).open() as renderer:
 
             scene = Scene(
-                dimension,
+                SimpleFrameSupplier(dimension),
                 widgets=[
                     MovingMap(
                         at=Coordinate(0, 0),

@@ -34,6 +34,7 @@ from gopro_overlay.timeunits import timeunits, Timeunit
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.profile import WidgetProfiler
+from gopro_overlay.widgets.widgets import SimpleFrameSupplier
 
 
 def accepter_from_args(include, exclude):
@@ -307,8 +308,10 @@ if __name__ == "__main__":
                 temperature_unit=args.units_temperature,
             )
 
+            frame_supplier = SimpleFrameSupplier(dimensions=dimensions)
+
             overlay = Overlay(
-                dimensions=dimensions,
+                frame=frame_supplier,
                 framemeta=frame_meta,
                 create_widgets=create_desired_layout(
                     layout=args.layout, layout_xml=args.layout_xml,
