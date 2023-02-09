@@ -2,7 +2,23 @@
 # Changelog
 
 Newest changes are always in [README.md](README.md)
-
+- 0.80.0 [Fix] Use speeds from GPX file, in preference to GoPro file, when using GPX and GoPro together.
+  - [Change] Bump Required python version to 3.10
+- 0.79.0 [Fix] Changed GPS filtering reporting, it was a bit off.
+- 0.78.0 [Fix] Gradient calculation had become disabled.
+  - [Feature] Can now filter GPS points by max DOP `--gps-dop-max`
+  - [Feature] Can now filter GPS points by max Speed `--gps-speed-max` `--gps-speed-max-units`
+  - [Feature] Can now filter GPS points by bounding box - Useful if a few points claim to be locked, but are far away. Load GPX file into mapping software to see bounding box easily, for now. `--gps-bbox-lon-lat`
+  - [Change] Outputs except for generated files are now to stderr rather than stdout
+  - [Feature] `gopro-to-csv.py` and `gopro-to-gpx.py` now support `--only-locked` and `--every` to limit number of points (also GPS point filters, as above)
+  - [Change] Change in the way chart handles missing values - stops chart going to 0.
+  - Updated various library dependency versions.
+- 0.77.0 [Change] Disable speed and other calculations when GPS is not locked - stops unbelievable values
+  - [Change] changes to GPS parsing, should make detection of GPS lock more accurate (some 'not locked' values used to be included) still not perfect h/t [@falumas](https://github.com/falumas)
+  - [Change] add new widget "gps-lock-icon" at top of screen to show GPS lock - hopefully not too intrusive - can switch off with `--exclude`
+  - [Change] interpolate GPX/FIT tracks so they update every 0.1s - h/t [@0x10](https://github.com/0x10)
+- 0.76.0 [New Feature] New widget - "cairo_circuit_map" - Much nicer looking circuit map, and first widget that uses new optional "cairo" library.
+  - See examples [Cairo Circuit Map](docs/xml/examples/06-cairo-circuit-map/README.md)
 - 0.75.0 Fixing some issues with True values in use of supplied or calculated values
   - Thanks to [@Timmy-485](https://github.com/Timmy-485) for data files showing the issue.
 - 0.74.0 Experimental Support for speed from GPX files - using Garmin Extension h/t [@Timmy-485](https://github.com/Timmy-485) 
