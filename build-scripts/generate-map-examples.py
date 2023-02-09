@@ -12,6 +12,7 @@ from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.units import units
+from gopro_overlay.widgets.widgets import SimpleFrameSupplier
 
 mydir = os.path.dirname(__file__)
 
@@ -74,7 +75,7 @@ if __name__ == "__main__":
                 privacy=NoPrivacyZone()
             )
 
-            overlay = Overlay(Dimension(256, 256), framemeta=framemeta, create_widgets=layout)
+            overlay = Overlay(SimpleFrameSupplier(Dimension(256, 256)), framemeta=framemeta, create_widgets=layout)
             image = overlay.draw(framemeta.min + (framemeta.max - framemeta.min))
 
             imagename = f"map_style_{style}.png"

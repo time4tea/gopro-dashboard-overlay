@@ -10,6 +10,7 @@ from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
+from gopro_overlay.widgets.widgets import SimpleFrameSupplier
 from tests.approval import approve_image
 from tests.testenvironment import is_make
 
@@ -148,7 +149,7 @@ def test_render_xml_component_with_exclusions():
 
 
 def time_layout(name, layout, repeat=20, dimensions=Dimension(1920, 1080)):
-    overlay = Overlay(dimensions, framemeta=framemeta, create_widgets=layout)
+    overlay = Overlay(SimpleFrameSupplier(dimensions), framemeta=framemeta, create_widgets=layout)
 
     timer = PoorTimer(name)
 

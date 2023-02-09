@@ -15,7 +15,7 @@ from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
 from gopro_overlay.widgets.map import MovingJourneyMap, view_window
-from gopro_overlay.widgets.widgets import Translate, Frame
+from gopro_overlay.widgets.widgets import Translate, Frame, SimpleFrameSupplier
 from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
 from tests.widgets.test_widgets import time_rendering
@@ -36,7 +36,7 @@ def a_real_journey(name, dimension, f_scene):
     framemeta = gps_framemeta(meta=GoproMeta.parse(data), units=units)
 
     overlay = Overlay(
-        dimensions=dimension,
+        frame=SimpleFrameSupplier(dimension),
         framemeta=framemeta,
         create_widgets=f_scene
     )

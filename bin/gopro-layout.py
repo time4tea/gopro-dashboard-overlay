@@ -26,6 +26,7 @@ from gopro_overlay.log import log
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
+from gopro_overlay.widgets.widgets import SimpleFrameSupplier
 
 
 def load_frame(filepath: pathlib.Path, size: Dimension, at_time=timeunits(seconds=2)):
@@ -118,7 +119,7 @@ if __name__ == "__main__":
                         layout = layout_from_xml(load_xml_layout(args.file), renderer, timeseries, font, NoPrivacyZone())
 
                         overlay = Overlay(
-                            dimensions=dimension_from(args.overlay_size),
+                            frame=SimpleFrameSupplier(dimension_from(args.overlay_size)),
                             framemeta=timeseries,
                             create_widgets=layout
                         )

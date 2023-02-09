@@ -238,9 +238,9 @@ class SimpleFrameSupplier(FrameSupplier):
 
 class Scene:
 
-    def __init__(self, dimensions: Dimension, widgets: List[Widget]):
+    def __init__(self, frame: FrameSupplier, widgets: List[Widget]):
         self._widgets = widgets
-        self.frame = SimpleFrameSupplier(dimensions)
+        self.frame = frame
 
     def draw(self) -> Image.Image:
         image = self.frame.drawing_frame()

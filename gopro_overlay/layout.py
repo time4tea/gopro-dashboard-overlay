@@ -2,14 +2,13 @@ from typing import Callable
 
 from PIL import ImageFont, Image, ImageDraw
 
-from .dimensions import Dimension
+from gopro_overlay.widgets.info import ComparativeEnergy
 from .framemeta import FrameMeta
 from .layout_components import moving_map
 from .point import Coordinate
 from .units import units
-from .widgets.widgets import Scene, Translate, Composite, Widget
 from .widgets.text import CachingText, Text
-from gopro_overlay.widgets.info import ComparativeEnergy
+from .widgets.widgets import Scene, Translate, Composite, Widget, FrameSupplier
 
 
 def gps_info(at, entry, font):
@@ -93,8 +92,8 @@ def speed_awareness_layout(renderer, font: ImageFont):
 
 class Overlay:
 
-    def __init__(self, dimensions: Dimension, framemeta: FrameMeta, create_widgets: Callable):
-        self.scene = Scene(dimensions, create_widgets(self.entry))
+    def __init__(self, frame: FrameSupplier, framemeta: FrameMeta, create_widgets: Callable):
+        self.scene = Scene(frame, create_widgets(self.entry))
         self.framemeta = framemeta
         self._entry = None
 
