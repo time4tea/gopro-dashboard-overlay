@@ -215,6 +215,8 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.90.8 [Change] `cairo-circuit` now draws much more quickly. 
+- [Change] Map rendering caches tile images more efficiently, so draws more quickly.
 - 0.89.0 [Feature] New component `cairo-gauge-round-annotated` - A bit like a car speedometer - See docs [docs/xml/examples/06-cairo-gauge-round-annotated](docs/xml/examples/06-cairo-gauge-round-annotated)
 - 0.88.0 [Fix] Journey Map broke when no there were no locked GPS points in the movie.
   - Thanks [@shahargli](https://github.com/shahargli) for reporting
