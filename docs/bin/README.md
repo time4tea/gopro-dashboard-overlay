@@ -46,6 +46,14 @@ venv/bin/gopro-dashboard.py --layout xml --layout-xml ~/layouts/my-layout.xml ~/
 venv/bin/gopro-dashboard.py --map-style tf-cycle --map-api-key my-api-key ~/layouts/my-layout.xml ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
 
+*Create a transparent overlay without video, for using it in external software*
+
+You'll need to create an overlay profile (with alpha channel) - see [Create a movie with alpha channel](#create-a-movie-with-alpha-channel-using-only-gpx-file-without-any-video-at-all)
+
+```shell
+venv/bin/gopro-dashboard.py --generate overlay ~/gopro/GH020073.MP4 GH020073-dashboard.mov
+```
+
 *Create a movie, using GPU encoding and decoding*
 
 You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
