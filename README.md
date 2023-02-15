@@ -40,6 +40,7 @@ Almost 30 different map styles are supported! - See [map styles](docs/maps/READM
 
 - Python3.10
 - ffmpeg (you'll need the ffmpeg program installed)
+- libraqm (needed by [Pillow](https://pypi.org/project/Pillow/))
 - Unixy machine (probably, untested on Windows)
 
 ## Installation
