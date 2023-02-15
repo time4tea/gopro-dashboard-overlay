@@ -152,6 +152,22 @@ then execute (NOTE: extension is `webm`)
 venv/bin/gopro-dashboard.py --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.webm
 ```
 
+You could also use HW-accelerated `h264` on macOS ([more info on -q:v](https://trac.ffmpeg.org/wiki/HWAccelIntro#VideoToolbox)):
+```json
+{
+    "overlay-mac": {
+    "input": [],
+    "output": ["-vcodec", "h264_videotoolbox", "-q:v", "65"]
+  }
+}
+```
+
+
+then execute (**NOTE**: extension is `mp4`)
+```shell
+venv/bin/gopro-dashboard.py --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay-mac --overlay-size 1920x1080 GH020073-dashboard.mp4
+```
+
 ### Create a movie from GPX and video not created with GoPro
 
 This is currently quite hard to align things properly!
