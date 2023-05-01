@@ -53,8 +53,9 @@ def load_timeseries(filepath: Path, units):
                 del (items["lat"])
                 del (items["lon"])
 
-            entry.update(**items)
-
-            ts.add(entry)
+            # only use fit data items that have lat/lon
+            if "point" in items:
+                entry.update(**items)
+                ts.add(entry)
 
     return ts
