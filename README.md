@@ -185,7 +185,7 @@ You can cut a section of the gopro file, with metadata.
 
 ## Known Bugs / Issues
 
-- Only tested on a GoPro Hero 9, that's all I have. Sample files for other devices are welcomed.
+- Only tested on a GoPro Hero 9/11, that's all I have. Sample files for other devices are welcomed.
 
 ## Icons
 
