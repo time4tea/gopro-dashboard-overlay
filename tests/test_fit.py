@@ -8,7 +8,8 @@ from tests.test_gpx import file_path_of_test_asset
 def test_converting_fit_without_power_to_timeseries():
     ts = fit.load_timeseries(file_path_of_test_asset("fit-file-no-power.fit", in_dir="fit"), units)
 
-    assert len(ts) == 8600
+    # 3 are filtered out due to no la/lon
+    assert len(ts) == 8597
 
     item = ts.items()[26]
 
