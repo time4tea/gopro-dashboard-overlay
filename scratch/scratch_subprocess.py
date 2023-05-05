@@ -31,8 +31,6 @@ def p_writer(shm, buffer_size, frame, quit, writer, condition_can_write: multipr
         with condition_can_write:
             while True:
                 if not condition_can_write.wait_for(lambda : (frame.value == expected_frame) or quit.value == True, timeout=0.1):
-                    # print("Waiting longer")
-                    # print(f"{quit.value}")
                     if quit.value == 1:
                         print("Exiting")
                         exit()
@@ -43,8 +41,8 @@ def p_writer(shm, buffer_size, frame, quit, writer, condition_can_write: multipr
             print("Exiting")
             exit()
 
-        print("Writing.....")
         writer.write(shm.buf[:buffer_size])
+        writer.flush()
         clear_buffer(ctypes_buffer, buffer_size)
 
         expected_frame += 1
@@ -102,7 +100,7 @@ if __name__ == "__main__":
                 worker = multiprocessing.Process(target=p_writer, args=(shm, buffer_size, frame, quit, writer, condition_can_write, condition_can_draw))
                 worker.start()
 
-                for i in range(25):
+                for i in range(200):
 
                     if not worker.is_alive():
                         print("Worked died")
