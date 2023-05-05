@@ -10,7 +10,7 @@ from typing import Callable
 from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay
+from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGOptions
 from gopro_overlay.font import load_font
 from gopro_overlay.widgets.text import Text
 
@@ -41,16 +41,23 @@ cond_timeout = 1.0
 
 
 class Frame:
-
-    def __init__(self, shm: SharedMemory, size: int, count: int):
+    def __init__(self, shm: SharedMemory, writer_lock: multiprocessing.Lock, size: Dimension, count: int):
         self.shm = shm
         self.size = size
         self.count = count
+        self.writer_lock = writer_lock
+
+        self.buffer_size = (dimensions.x * dimensions.y * 4)
+
+        self.memory = shm.buf[self.buffer_size * self.count:self.buffer_size * (self.count + 1)]
+
+        self.image = raw_image(dimensions, self.memory)
+
         self.active = multiprocessing.Lock()
         self.can_draw = multiprocessing.Condition(self.active)
         self.can_write = multiprocessing.Condition(self.active)
 
-        self.ctypes_buffer = ctypes.c_char.from_buffer(shm.buf)
+        self.ctypes_buffer = ctypes.c_char.from_buffer(self.memory)
 
         self.drawn_frame_number = multiprocessing.Value(ctypes.c_long)
         self.drawn_frame_number.value = -1
@@ -64,10 +71,10 @@ class Frame:
     def draw(self, quit: multiprocessing.Value, f: Callable):
         with self.can_draw:
             while not self.can_draw.wait_for(predicate=lambda: quit.value == 1 or self.written_frame_number.value == self.drawn_frame_number.value, timeout=cond_timeout):
-                print("Waiting to draw")
+                print(f"Frame {self.count}: Waiting to draw")
 
         if self.drawn_frame_number.value == self.written_frame_number.value:
-            f()
+            f(self.image)
 
         self.drawn_frame_number.value += 1
         with self.can_write:
@@ -82,16 +89,17 @@ class Frame:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         del self.ctypes_buffer
-        pass
+        self.image.close()
 
     def write(self, writer: BytesIO, quit: multiprocessing.Value) -> bool:
         with self.can_write:
             while not self.can_write.wait_for(predicate=lambda: quit.value == 1 or self.drawn_frame_number.value > self.written_frame_number.value, timeout=cond_timeout):
-                print("waiting to write")
+                print(f"Frame {self.count}: waiting to write")
 
         if self.drawn_frame_number.value > self.written_frame_number.value:
-            writer.write(shm.buf[self.size * self.count:self.size * (self.count + 1)])
-            writer.flush()
+            with writer_lock:
+                writer.write(self.memory)
+                writer.flush()
             self.clear()
             self.written_frame_number.value += 1
 
@@ -121,20 +129,13 @@ if __name__ == "__main__":
 
     font = load_font("Roboto-Medium.ttf")
 
-    drawn_frame_number = multiprocessing.Value(ctypes.c_long)
-    written_frame_number = multiprocessing.Value(ctypes.c_long)
     quit = multiprocessing.Value(ctypes.c_int)
-
-    drawn_frame_number.value = -1
-    written_frame_number.value = -1
+    writer_lock = multiprocessing.Lock()
 
     try:
 
-        with Frame(shm, buffer_size, 0) as frame:
-
-            image = raw_image(dimensions, shm.buf)
-            try:
-
+        with Frame(shm, writer_lock, dimensions, 0) as frame0:
+            with Frame(shm, writer_lock, dimensions, 1) as frame1:
                 counter = 0
 
                 scene = Scene(
@@ -143,28 +144,35 @@ if __name__ == "__main__":
                     ]
                 )
 
-                ffmpeg = FFMPEGOverlay(output=Path("file.MP4"), overlay_size=dimensions)
+                ffmpeg_options = FFMPEGOptions(
+                    input=["-hwaccel", "nvdec"],
+                    output=["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "50000k", "-bf:v", "3", "-profile:v", "high", "-spatial-aq", "true", "-movflags", "faststart"]
+                )
+
+                ffmpeg = FFMPEGOverlay(output=Path("file.MP4"), overlay_size=dimensions, options=ffmpeg_options)
 
                 with ffmpeg.generate() as writer:
 
-                    worker = multiprocessing.Process(target=p_writer, args=(frame, quit, writer))
+                    worker = multiprocessing.Process(target=p_writer, args=(frame0, quit, writer))
+                    worker.start()
+                    worker = multiprocessing.Process(target=p_writer, args=(frame1, quit, writer))
                     worker.start()
 
                     try:
-                        for i in range(100):
+                        for i in range(1000):
                             if not worker.is_alive():
                                 print("Worked died")
                                 break
 
-                            frame.draw(quit, lambda: scene.draw(image))
+                            current_frame = frame0 if i %2 == 0 else frame1
+                            current_frame.draw(quit, lambda image: scene.draw(image))
+
                             counter += 1
 
                         print("done")
                         quit.value = 1
                     finally:
                         worker.join(timeout=0.5)
-            finally:
-                image.close()
 
     finally:
         shm.close()
