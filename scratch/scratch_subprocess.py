@@ -153,15 +153,15 @@ if __name__ == "__main__":
 
                 with ffmpeg.generate() as writer:
 
-                    worker = multiprocessing.Process(target=p_writer, args=(frame0, quit, writer))
-                    worker.start()
-                    worker = multiprocessing.Process(target=p_writer, args=(frame1, quit, writer))
-                    worker.start()
+                    worker1 = multiprocessing.Process(target=p_writer, args=(frame0, quit, writer))
+                    worker1.start()
+                    worker2 = multiprocessing.Process(target=p_writer, args=(frame1, quit, writer))
+                    worker2.start()
 
                     try:
                         for i in range(1000):
-                            if not worker.is_alive():
-                                print("Worked died")
+                            if not worker1.is_alive() and worker2.is_alive():
+                                print("Worker died")
                                 break
 
                             current_frame = frame0 if i %2 == 0 else frame1
@@ -172,7 +172,8 @@ if __name__ == "__main__":
                         print("done")
                         quit.value = 1
                     finally:
-                        worker.join(timeout=0.5)
+                        worker1.join(timeout=0.5)
+                        worker2.join(timeout=0.5)
 
     finally:
         shm.close()
