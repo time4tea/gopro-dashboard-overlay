@@ -1,6 +1,7 @@
 import ctypes
 import multiprocessing
 import os
+from io import BytesIO
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
@@ -83,7 +84,7 @@ class Frame:
         del self.ctypes_buffer
         pass
 
-    def write(self, writer, quit: multiprocessing.Value) -> bool:
+    def write(self, writer: BytesIO, quit: multiprocessing.Value) -> bool:
         with self.can_write:
             while not self.can_write.wait_for(predicate=lambda: quit.value == 1 or self.drawn_frame_number.value > self.written_frame_number.value, timeout=cond_timeout):
                 print("waiting to write")
@@ -102,7 +103,7 @@ class Frame:
         return True
 
 
-def p_writer(frame: Frame, quit, writer):
+def p_writer(frame: Frame, quit:multiprocessing.Value, writer: BytesIO):
     while True:
         if not frame.write(writer, quit):
             break
@@ -150,7 +151,7 @@ if __name__ == "__main__":
                     worker.start()
 
                     try:
-                        for i in range(25):
+                        for i in range(100):
                             if not worker.is_alive():
                                 print("Worked died")
                                 break
