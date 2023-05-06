@@ -90,6 +90,7 @@ class Frame:
     def __exit__(self, exc_type, exc_val, exc_tb):
         del self.ctypes_buffer
         self.image.close()
+        self.memory = None
 
     def write(self, writer: BytesIO, quit: multiprocessing.Value) -> bool:
         with self.can_write:
@@ -159,7 +160,7 @@ if __name__ == "__main__":
                     worker2.start()
 
                     try:
-                        for i in range(1000):
+                        for i in range(30):
                             if not worker1.is_alive() and worker2.is_alive():
                                 print("Worker died")
                                 break
