@@ -281,8 +281,6 @@ if __name__ == "__main__":
                 ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options,
                                             vsize=args.output_size, overlay_size=dimensions, execution=execution)
 
-            write_timer = PoorTimer("writing to ffmpeg")
-            byte_timer = PoorTimer("image to bytes")
             draw_timer = PoorTimer("drawing frames")
 
             # Draw an overlay frame every 0.1 seconds of video
@@ -326,7 +324,7 @@ if __name__ == "__main__":
                     with buffer:
                         for index, dt in enumerate(stepper.steps()):
                             progress.update(index)
-                            buffer.draw(lambda frame: overlay.draw(dt, frame))
+                            draw_timer.time(lambda: buffer.draw(lambda frame: overlay.draw(dt, frame)))
 
                 log("Finished drawing frames. waiting for ffmpeg to catch up")
                 progress.finish()
@@ -335,7 +333,7 @@ if __name__ == "__main__":
                 log("...Stopping...")
                 pass
             finally:
-                for t in [byte_timer, write_timer, draw_timer]:
+                for t in [draw_timer]:
                     log(t)
 
                 if profiler:
