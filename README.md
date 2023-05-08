@@ -7,7 +7,7 @@
 Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 
 - Overlaying exciting graphics onto GoPro videos with super-exact synchronization
-- *NEW & EXPERIMENTAL* Create videos from any GPX file - no GoPro required
+- Create videos from any GPX file - no GoPro required
 - Support multiple resolutions, most GoPro models, normal, timelapse & timewarp modes
 - Convert GoPro movie metadata to GPX or CSV files
 - Cut sections from GoPro movies (including metadata)
