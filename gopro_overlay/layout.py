@@ -92,14 +92,14 @@ def speed_awareness_layout(renderer, font: ImageFont):
 
 class Overlay:
 
-    def __init__(self, frame: FrameSupplier, framemeta: FrameMeta, create_widgets: Callable):
-        self.scene = Scene(frame, create_widgets(self.entry))
+    def __init__(self, framemeta: FrameMeta, create_widgets: Callable):
+        self.scene = Scene(create_widgets(self.entry))
         self.framemeta = framemeta
         self._entry = None
 
     def entry(self):
         return self._entry
 
-    def draw(self, pts) -> Image.Image:
+    def draw(self, pts, image: Image.Image) -> Image.Image:
         self._entry = self.framemeta.get(pts)
-        return self.scene.draw()
+        return self.scene.draw(image)

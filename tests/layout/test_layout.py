@@ -149,12 +149,13 @@ def test_render_xml_component_with_exclusions():
 
 
 def time_layout(name, layout, repeat=20, dimensions=Dimension(1920, 1080)):
-    overlay = Overlay(SimpleFrameSupplier(dimensions), framemeta=framemeta, create_widgets=layout)
+    supplier =SimpleFrameSupplier(dimensions)
+    overlay = Overlay(framemeta=framemeta, create_widgets=layout)
 
     timer = PoorTimer(name)
 
     for i in range(0, repeat):
-        draw = timer.time(lambda: overlay.draw(framemeta.mid))
+        draw = timer.time(lambda: overlay.draw(framemeta.mid, supplier.drawing_frame()))
 
     print(timer)
 

@@ -35,8 +35,9 @@ def a_real_journey(name, dimension, f_scene):
 
     framemeta = gps_framemeta(meta=GoproMeta.parse(data), units=units)
 
+    supplier = SimpleFrameSupplier(dimension)
+
     overlay = Overlay(
-        frame=SimpleFrameSupplier(dimension),
         framemeta=framemeta,
         create_widgets=f_scene
     )
@@ -48,7 +49,7 @@ def a_real_journey(name, dimension, f_scene):
     image = None
 
     for index, dt in enumerate(stepper.steps()):
-        image = timer.time(lambda: overlay.draw(dt))
+        image = timer.time(lambda: overlay.draw(dt, supplier.drawing_frame()))
 
     if not is_make():
         image.show()

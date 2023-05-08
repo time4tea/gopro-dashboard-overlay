@@ -75,8 +75,9 @@ if __name__ == "__main__":
                 privacy=NoPrivacyZone()
             )
 
-            overlay = Overlay(SimpleFrameSupplier(Dimension(256, 256)), framemeta=framemeta, create_widgets=layout)
-            image = overlay.draw(framemeta.min + (framemeta.max - framemeta.min))
+            overlay = Overlay(framemeta=framemeta, create_widgets=layout)
+            supplier = SimpleFrameSupplier(Dimension(256, 256))
+            image = overlay.draw(framemeta.min + (framemeta.max - framemeta.min), supplier.drawing_frame())
 
             imagename = f"map_style_{style}.png"
 

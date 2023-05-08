@@ -26,14 +26,15 @@ def test_overlay_only():
             return str(count[0])
 
         scene = Scene(
-            SimpleFrameSupplier(dimension),
             widgets=[
                 CachingText(at=Coordinate(800, 400), value=nextval, font=font.font_variant(size=160))
             ])
 
+        supplier = SimpleFrameSupplier(dimension)
+
         with ffmpeg.generate() as mp4:
             for i in range(1, 50):
-                image = scene.draw()
+                image = scene.draw(supplier.drawing_frame())
                 mp4.write(image.tobytes())
 
         pass  # breakpoint here to view the file...

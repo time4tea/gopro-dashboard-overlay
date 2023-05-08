@@ -34,7 +34,6 @@ if __name__ == "__main__":
                 api_key_finder=key_finder).open() as renderer:
 
             scene = Scene(
-                SimpleFrameSupplier(dimension),
                 widgets=[
                     MovingMap(
                         at=Coordinate(0, 0),

@@ -124,6 +124,10 @@ def test_include():
     assert do_args("--include", "something").include == ["something"]
     assert do_args("--include", "something", "else").include == ["something", "else"]
 
+def test_buffers():
+    assert not do_args().double_buffer
+    assert do_args("--double-buffer").double_buffer
+
 
 def test_exclude():
     assert do_args().exclude is None

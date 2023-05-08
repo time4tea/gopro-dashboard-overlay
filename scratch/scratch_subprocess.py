@@ -1,4 +1,5 @@
 import ctypes
+import io
 import multiprocessing
 import os
 from io import BytesIO
@@ -40,12 +41,25 @@ class Scene:
 cond_timeout = 1.0
 
 
+class SerialisedBytesIO(io.BufferedWriter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lock = multiprocessing.Lock()
+
+    def write(self, __buffer) -> int:
+        with self.lock:
+            try:
+                return super().write(__buffer)
+            finally:
+                super().flush()
+
+
 class Frame:
-    def __init__(self, shm: SharedMemory, writer_lock: multiprocessing.Lock, size: Dimension, count: int):
+    def __init__(self, shm: SharedMemory, quit: multiprocessing.Value, size: Dimension, count: int):
         self.shm = shm
         self.size = size
         self.count = count
-        self.writer_lock = writer_lock
+        self.quit = quit
 
         self.buffer_size = (dimensions.x * dimensions.y * 4)
 
@@ -68,9 +82,9 @@ class Frame:
     def clear(self):
         clear_buffer(self.ctypes_buffer, buffer_size)
 
-    def draw(self, quit: multiprocessing.Value, f: Callable):
+    def draw(self, f: Callable[[Image.Image], None]):
         with self.can_draw:
-            while not self.can_draw.wait_for(predicate=lambda: quit.value == 1 or self.written_frame_number.value == self.drawn_frame_number.value, timeout=cond_timeout):
+            while not self.can_draw.wait_for(predicate=lambda: self.quit.value == 1 or self.written_frame_number.value == self.drawn_frame_number.value, timeout=cond_timeout):
                 print(f"Frame {self.count}: Waiting to draw")
 
         if self.drawn_frame_number.value == self.written_frame_number.value:
@@ -80,7 +94,7 @@ class Frame:
         with self.can_write:
             self.can_write.notify()
 
-        if quit.value == 1:
+        if self.quit.value == 1:
             return False
         return True
 
@@ -92,29 +106,27 @@ class Frame:
         self.image.close()
         self.memory = None
 
-    def write(self, writer: BytesIO, quit: multiprocessing.Value) -> bool:
+    def write(self, writer: BytesIO) -> bool:
         with self.can_write:
-            while not self.can_write.wait_for(predicate=lambda: quit.value == 1 or self.drawn_frame_number.value > self.written_frame_number.value, timeout=cond_timeout):
+            while not self.can_write.wait_for(predicate=lambda: self.quit.value == 1 or self.drawn_frame_number.value > self.written_frame_number.value, timeout=cond_timeout):
                 print(f"Frame {self.count}: waiting to write")
 
         if self.drawn_frame_number.value > self.written_frame_number.value:
-            with writer_lock:
-                writer.write(self.memory)
-                writer.flush()
+            writer.write(self.memory)
             self.clear()
             self.written_frame_number.value += 1
 
             with self.can_draw:
                 self.can_draw.notify()
 
-        if quit.value == 1:
+        if self.quit.value == 1:
             return False
         return True
 
 
-def p_writer(frame: Frame, quit:multiprocessing.Value, writer: BytesIO):
+def p_writer(frame: Frame, writer: BytesIO):
     while True:
-        if not frame.write(writer, quit):
+        if not frame.write(writer):
             break
     print("Writer exiting")
 
@@ -131,12 +143,11 @@ if __name__ == "__main__":
     font = load_font("Roboto-Medium.ttf")
 
     quit = multiprocessing.Value(ctypes.c_int)
-    writer_lock = multiprocessing.Lock()
 
     try:
 
-        with Frame(shm, writer_lock, dimensions, 0) as frame0:
-            with Frame(shm, writer_lock, dimensions, 1) as frame1:
+        with Frame(shm, quit, dimensions, 0) as frame0:
+            with Frame(shm, quit, dimensions, 1) as frame1:
                 counter = 0
 
                 scene = Scene(
@@ -153,10 +164,11 @@ if __name__ == "__main__":
                 ffmpeg = FFMPEGOverlay(output=Path("file.MP4"), overlay_size=dimensions, options=ffmpeg_options)
 
                 with ffmpeg.generate() as writer:
+                    serialised = SerialisedBytesIO(writer)
 
-                    worker1 = multiprocessing.Process(target=p_writer, args=(frame0, quit, writer))
+                    worker1 = multiprocessing.Process(target=p_writer, args=(frame0, serialised))
                     worker1.start()
-                    worker2 = multiprocessing.Process(target=p_writer, args=(frame1, quit, writer))
+                    worker2 = multiprocessing.Process(target=p_writer, args=(frame1, serialised))
                     worker2.start()
 
                     try:
@@ -165,8 +177,8 @@ if __name__ == "__main__":
                                 print("Worker died")
                                 break
 
-                            current_frame = frame0 if i %2 == 0 else frame1
-                            current_frame.draw(quit, lambda image: scene.draw(image))
+                            current_frame = frame0 if i % 2 == 0 else frame1
+                            current_frame.draw(lambda image: scene.draw(image))
 
                             counter += 1
 

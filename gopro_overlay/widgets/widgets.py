@@ -238,12 +238,10 @@ class SimpleFrameSupplier(FrameSupplier):
 
 class Scene:
 
-    def __init__(self, frame: FrameSupplier, widgets: List[Widget]):
+    def __init__(self, widgets: List[Widget]):
         self._widgets = widgets
-        self.frame = frame
 
-    def draw(self) -> Image.Image:
-        image = self.frame.drawing_frame()
+    def draw(self, image: Image.Image) -> Image.Image:
         draw = ImageDraw.Draw(image)
 
         for w in self._widgets:

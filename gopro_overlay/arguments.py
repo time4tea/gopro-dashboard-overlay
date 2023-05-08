@@ -59,6 +59,8 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--cache-dir", help="Location of caches (map tiles, ...)", type=pathlib.Path,
                         default=default_config_location)
 
+    parser.add_argument("--double-buffer", action="store_true", help="Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all")
+
     only = parser.add_argument_group("GPX Only", "Creating Movies from GPX File only")
 
     only.add_argument("--use-gpx-only", "--use-fit-only", action="store_true",

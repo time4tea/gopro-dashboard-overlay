@@ -210,10 +210,11 @@ def test_gps_lock():
 def time_rendering(name, widgets, dimensions: Dimension = Dimension(x=600, y=300), repeat=1):
     timer = PoorTimer(name)
 
-    scene = Scene(SimpleFrameSupplier(dimensions), widgets)
+    supplier = SimpleFrameSupplier(dimensions)
+    scene = Scene(widgets)
     draw = None
     for i in range(0, repeat):
-        draw = timer.time(lambda: scene.draw())
+        draw = timer.time(lambda: scene.draw(supplier.drawing_frame()))
 
     if not is_make():
         draw.show()

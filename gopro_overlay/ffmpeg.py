@@ -244,9 +244,12 @@ class DiscardingBytesIO(BytesIO):
 
 class FFMPEGNull:
 
+    def __init__(self):
+        self.execution = InProcessExecution(redirect="/dev/null")
+
     @contextlib.contextmanager
     def generate(self):
-        yield DiscardingBytesIO()
+        yield from self.execution.execute(["cat"])
 
 
 class FFMPEGOverlay:

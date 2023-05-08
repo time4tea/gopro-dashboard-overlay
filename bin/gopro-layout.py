@@ -119,12 +119,12 @@ if __name__ == "__main__":
                         layout = layout_from_xml(load_xml_layout(args.file), renderer, timeseries, font, NoPrivacyZone())
 
                         overlay = Overlay(
-                            frame=SimpleFrameSupplier(dimension_from(args.overlay_size)),
                             framemeta=timeseries,
                             create_widgets=layout
                         )
 
-                        frame = overlay.draw(timeseries.mid)
+                        supplier = SimpleFrameSupplier(dimension_from(args.overlay_size))
+                        frame = overlay.draw(timeseries.mid, supplier.drawing_frame())
 
                         if video_frame is not None:
                             frame = Image.alpha_composite(video_frame, frame)

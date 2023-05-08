@@ -23,7 +23,8 @@ class InProcessExecution:
             try:
                 yield process.stdin
             finally:
-                process.stdin.flush()
+                if not process.stdin.closed:
+                    process.stdin.flush()
             process.stdin.close()
             # really long wait as FFMPEG processes all the mpeg input file - not sure how to prevent this atm
             process.wait(5 * 60)

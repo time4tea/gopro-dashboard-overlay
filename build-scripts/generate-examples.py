@@ -114,8 +114,9 @@ if __name__ == "__main__":
                     privacy=NoPrivacyZone()
                 )
 
-                overlay = Overlay(frame=SimpleFrameSupplier(dimensions_for(filepath)), framemeta=timeseries, create_widgets=layout)
-                image = overlay.draw(timeseries.mid)
+                overlay = Overlay(framemeta=timeseries, create_widgets=layout)
+                supplier = SimpleFrameSupplier(dimensions_for(filepath))
+                image = overlay.draw(timeseries.mid, supplier.drawing_frame())
 
                 os.makedirs(example_dest, exist_ok=True)
 
