@@ -8,25 +8,24 @@ For better performance, both the source and target files should be on a fast dis
 The dashboard is updated every 0.1 seconds, regardless of the frame rate of the video, so 10 frames/s in this chart 
 means 1 second of video is processed in 1 second.
 
-These indicative figures are from Ubuntu on Intel Core i7-6700K CPU @ 4.00GHz with NVIDIA GeForce GTX 750 Ti
+There are a few levers to pull on to improve performance....
 
-Here nvtop shows ENC is 100% in use.
+- Python Version - Later versions are getting some serious attention in performance. Use 3.11
+- GPU - ffpmeg can use GPU for decoding and encoding. We have example settings for nvidia cards.
+- Overlay mode - Processing "just" the dashboard is much faster than dashboard + movie, so if you just want to see how an overlay will look, this might be a good option.
+- Double buffer mode - This new experimental mode can give great performance boost.
 
-| Performance Option    | Frames/s "null" | Frames/s normal | Frames/s --profile nvgpu |
-|-----------------------|-----------------|-----------------|--------------------------|
-| Default (python 3.8)  | ~30             | ~10             | ~21                      | 
-| PyPy                  | ~27             |                 |                          |
-| Default + Pillow SIMD | ~60             | ~10             | ~25                      |
+These indicative figures are from Ubuntu on Intel Core i7-6700K CPU @ 4.00GHz with NVIDIA GeForce GTX 3060, generating
+the default overlay on 1920x1080 movie.
 
-These indicative figures are from Ubuntu on Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz with NVIDIA GeForce GTX 1650
 
-Here nvtop shows that the ENC is only 25% in use, so further optimization would give benefit.
+| Performance Option    | Frames/s "null"<br/>single/double | Frames/s normal<br/>single/double | Frames/s --profile nvgpu<br/>single/double |
+|-----------------------|-----------------------------------|-----------------------------------|--------------------------------------------|
+| Default (python 3.11) | ~29   /  ~36                      | ~18 / ~20                         | ~25  / ~33                                 | 
+| Default + Pillow SIMD | ~66  / ~130                       | ~20 / ~21                         | ~44  / ~47                                 |
 
-| Performance Option    | Frames/s "null" | Frames/s normal | Frames/s --profile nvgpu |
-|-----------------------|-----------------|-----------------|--------------------------|
-| Default (python 3.8)  | ~30             | ~18             | ~22                      | 
-
-Using newer GPUs, the GPU is pretty much chilling, so perhaps using Pillow-SIMD will give a big boost.
+Using Pillow SIMD here, can see that double buffer mode doesn't make a huge difference, we are waiting for ffmpeg. On this
+computer it takes 23ms to read a frame from stdin.. but that frame was generated in only 10ms so potentially with faster GPU this can be improved?
 
 ### GPU
 
@@ -48,7 +47,11 @@ The frame drawing rate is quite a bit faster, but won't make a huge difference u
 
 No tests are run in this project with pillow-simd, so output may vary (but their tests are good, so I wouldn't expect any huge differences, if any)
 
-### Things to look at
+### Current Frame Timings
+
+![Flamegraph](examples/perfetto-capture-2023-05-15.png)
+
+### Older Timings
 
 ![Flamegraph](examples/perfetto-capture-2022-28-11.png)
 
@@ -57,17 +60,15 @@ No tests are run in this project with pillow-simd, so output may vary (but their
 ![Flamegraph](examples/perfetto-capture-2023-02-07-map-images-new-map.png)
 
 
-A few thoughts - timing dominated by:
- - Creating a new image on each frame
- - Font rendering
- - Encoding
- - Writing to ffmpeg
- - Recalculating chart view (known issue)
-
-Perhaps can somehow move encoding and writing of frame to ffmpeg to another thread/process so can start rendering next frame while that is happening? (e.g. Double Buffer)
-need to think about python GIL - so perhaps shared memory? 
-
 ### Things done
+
+#### Double Buffer Mode
+
+Use shared memory area for backing image, and use python subprocess to write this to ffmpeg.
+
+#### Chart Performance Improvement
+
+Recalculate this better...
 
 #### Cache map tile images in memory
 

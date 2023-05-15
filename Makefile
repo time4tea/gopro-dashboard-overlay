@@ -38,11 +38,14 @@ flake:
 	$(BIN)/flake8 gopro_overlay/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 .PHONY: venv
-venv:
-	python -m venv venv
+venv: venv/.installed
+
+venv/.installed:
+	python3.11 -m venv venv
+	touch $@
 
 .PHONY: req
-req:
+req: venv/.installed
 	$(BIN)/python -m pip install --upgrade pip
 	$(BIN)/pip install -r requirements-dev.txt
 
