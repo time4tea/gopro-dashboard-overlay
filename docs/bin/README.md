@@ -99,20 +99,43 @@ Please consider contributing useful settings, particularly those that control GP
 }
 ```
 
+You can also provide a custom setting for the "filter_complex" argument in `ffmpeg`. Mostly you'll not need to do this, but to get certain GPU accelerations, you might need this.
+
+```json
+{
+  "profile-name": {
+    "input": ["list", "of", "input", "options"],
+    "filter": "[0:v][1:v]custom_filter",
+    "output": ["list", "of", "output", "options"]
+  }
+}
+```
+
+
 Example:
 
 ```json
 {
   "nvgpu": {
     "input": ["-hwaccel", "nvdec"],
-    "output": ["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "50000k", "-bf:v", "3", "-profile:v", "high", "-spatial-aq", "true"]
+    "output": ["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "50M", "-bf:v", "3", "-profile:v", "high", "-spatial-aq", "true"]
   },
+  "nnvgpu": {
+    "input": ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda" ],
+    "filter": "[0:v]scale_cuda=format=yuv420p[mp4_stream];[1:v]format=yuva420p,hwupload[overlay_stream];[mp4_stream][overlay_stream]overlay_cuda",
+    "output": ["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "40M", "-bf:v", "3", "-profile:v", "main", "-spatial-aq", "true", "-movflags", "faststart"]
+  },
+
   "low-fr": {
     "input": [],
     "output": ["-r", "10"]
   }
 }
 ```
+
+## Creating smaller filesize movies
+
+You can vary the output bitrate with the `-b:v` argument, as shown above - by reducing to `20M` or `30M` you might find that videos are acceptably small. This is a complex art, and you'll need to balance other settings when making smaller files.   
 
 ## Creating Videos using only GPX File
 
