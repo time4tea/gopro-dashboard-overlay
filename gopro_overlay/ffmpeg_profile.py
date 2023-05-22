@@ -26,4 +26,12 @@ def load_ffmpeg_profile(dir: pathlib.Path, profile: str):
     else:
         raise ValueError(f"Can't find output option list for key {profile} in {profile_file}")
 
-    return FFMPEGOptions(input=input_options, output=output_options)
+    filter_spec = None
+
+    if "filter" in selected:
+        if type(selected["filter"]) == str:
+            filter_spec = selected["filter"]
+        else:
+            raise ValueError("'filter' specified, but wasn't a string")
+
+    return FFMPEGOptions(input=input_options, output=output_options, filter_spec=filter_spec)

@@ -278,8 +278,7 @@ if __name__ == "__main__":
                 ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions,
                                        execution=execution)
             else:
-                ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options,
-                                            vsize=args.output_size, overlay_size=dimensions, execution=execution)
+                ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
 
             draw_timer = PoorTimer("drawing frames")
 

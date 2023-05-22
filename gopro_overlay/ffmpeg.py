@@ -282,9 +282,10 @@ class FFMPEGOverlay:
 
 class FFMPEGOptions:
 
-    def __init__(self, input=None, output=None):
+    def __init__(self, input=None, output=None, filter_spec=None):
         self.input = input if input is not None else []
         self.output = output if output is not None else ["-vcodec", "libx264", "-preset", "veryfast"]
+        self.filter_complex = filter_spec if filter_spec is not None else "[0:v][1:v]overlay"
         self.general = ["-hide_banner", "-loglevel", "info"]
 
     def set_input_options(self, options):
@@ -296,20 +297,15 @@ class FFMPEGOptions:
 
 class FFMPEGOverlayVideo:
 
-    def __init__(self, input: Path, output: Path, overlay_size: Dimension, options: FFMPEGOptions = None, vsize=1080, execution=None):
+    def __init__(self, input: Path, output: Path, overlay_size: Dimension, options: FFMPEGOptions = None, execution=None):
         self.output = output
         self.input = input
         self.options = options if options else FFMPEGOptions()
         self.overlay_size = overlay_size
-        self.vsize = vsize
         self.execution = execution if execution else InProcessExecution()
 
     @contextlib.contextmanager
     def generate(self):
-        if self.vsize == 1080:
-            filter_extra = ""
-        else:
-            filter_extra = f",scale=-1:{self.vsize}"
         cmd = flatten([
             "ffmpeg",
             "-y",
@@ -321,7 +317,7 @@ class FFMPEGOverlayVideo:
             "-s", f"{self.overlay_size.x}x{self.overlay_size.y}",
             "-pix_fmt", "rgba",
             "-i", "-",
-            "-filter_complex", f"[0:v][1:v]overlay{filter_extra}",
+            "-filter_complex", self.options.filter_complex,
             self.options.output,
             str(self.output)
         ])
