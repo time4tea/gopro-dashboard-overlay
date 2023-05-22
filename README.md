@@ -231,14 +231,6 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
 - 0.85.0 [Feature/Breaking Possibly] Add validation to attributes in layout files. This may cause some custom layouts to break! - But they wouldn't have been working as intended.
   - [Change/Breaking] Change some `zone-bar` attribute names, aiming for standardisation
   - [Change/Breaking] Change some `cairo-circuit-map` attribute names, aiming for standardisation
-- 0.84.0 [Feature] New component `zone-bar` - a 3-zone bar control that can be used for HR/Cadence/Power zones. See docs in [docs/xml/examples/07-zone-bar](docs/xml/examples/07-zone-bar)
-  - Many thanks to [@jchinte](https://github.com/jchinte) for contributing!
-- 0.83.0 [Change] No longer require --overlay-size when using --use-gpx-only, but supplying input video
-  - [Fix] Give better error message when video and GPX don't overlap in time, but told to sync 
-  - Thanks to [@mfloryan](https://github.com/mfloryan) for reporting both of these
-- 0.82.0 [Change] Support for changing units in layouts from the command line. Use `--units-speed` etc to control. Examples are in [docs/bin](docs/bin)
-  - Thanks to [@matzeruegge](https://github.com/matzeruegge) for the suggestion.
-- 0.81.0 [Fix] gopro-rename was broken when using `--dirs` - added tests so hopefully won't reoccur. Thanks to [matzeruegge](https://github.com/matzeruegge) for reporting 
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
