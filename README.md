@@ -151,7 +151,7 @@ FFMPEG has **a lot** of options! This program comes with some mostly sensible de
 output much more carefully, including framerates and bitrates, you can use a JSON file containing a number of 'profiles'
 and select the profile you want when running the program.
 
-For more details on how to select these, and an example of Nvidia GPU, please see [docs/bin](docs/bin)
+For more details on how to select these, and an example of Nvidia GPU, please see [docs/bin/PERFORMANCE_GUIDE.md](docs/bin/PERFORMANCE_GUIDE.md)
 
 Please also see [PERFORMANCE.md](PERFORMANCE.md)
 
@@ -216,6 +216,8 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.93.0 [Feature] Support for *fully gpu* decoding/overlay/encoding. Huge performance increase now possible. It takes a bit of work, but now can render at 12x realtime. See [docs/bin/PERFORMANCE_GUIDE.md](docs/bin/PERFORMANCE_GUIDE.md)
+  - [Breaking] Remove support for `--output-size` as it didn't really work properly anyway. 
 - 0.92.0 [Feature] `--double-buffer` - EXPERIMENTAL double-buffering. Potentially much faster rendering, but may not work on all architectures. Speed improvements highly dependent on `ffmpeg` performance. Likely much faster when using `--generate overlay`. Feedback welcomed.
 - 0.91.0 [Fix] Ignore FIT data items that don't have a GPS location. [#122](https://github.com/time4tea/gopro-dashboard-overlay/issues/122) Thanks [@patkoscsaba](https://github.com/patkoscsaba) for raising.
 - 0.90.0 [Change] `cairo-circuit` now draws much more quickly. 
