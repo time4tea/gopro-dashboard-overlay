@@ -3,6 +3,8 @@ BIN=venv/bin
 
 default: test
 
+PYTHON=python3.11
+
 .PHONY: clean
 clean:
 	rm -rf dist
@@ -41,7 +43,7 @@ flake:
 venv: venv/.installed
 
 venv/.installed:
-	python3.11 -m venv venv
+	$(PYTHON) -m venv venv
 	touch $@
 
 .PHONY: req
@@ -69,7 +71,7 @@ version:
 test-distribution-install: dist
 	@echo "Current Version is $(CURRENT_VERSION)"
 	rm -rf $(DIST_TEST)
-	python3 -m venv $(DIST_TEST)/venv
+	$(PYTHON) -m venv $(DIST_TEST)/venv
 	$(DIST_TEST)/venv/bin/pip install wheel dist/gopro-overlay-$(CURRENT_VERSION).tar.gz
 	$(DIST_TEST)/venv/bin/pip install pycairo==1.23.0
 
