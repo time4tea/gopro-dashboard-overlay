@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import datetime
+import sys
 import traceback
 from importlib import metadata
 from pathlib import Path
@@ -17,7 +18,7 @@ from gopro_overlay.date_overlap import DateRange
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
-    find_streams, FFMPEGNull
+    find_streams, FFMPEGNull, ffmpeg_version
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
@@ -96,6 +97,9 @@ if __name__ == "__main__":
 
     args = gopro_dashboard_arguments()
 
+    version = metadata.version("gopro_overlay")
+    log(f"Starting gopro-dashboard version {version}")
+
     if not ffmpeg_is_installed():
         log("Can't start ffmpeg - is it installed?")
         exit(1)
@@ -103,6 +107,16 @@ if __name__ == "__main__":
         log("ffmpeg doesn't seem to handle libx264 files - it needs to be compiled with support for this, "
             "check your installation")
         exit(1)
+    try:
+        log(f"ffmpeg version is {ffmpeg_version()}")
+    except ValueError:
+        log("ffmpeg version is unknown")
+        pass
+
+    log(f"Using Python version {sys.version}")
+    if sys.version_info < (3, 10):
+        log("*** Python version below 3.10 is not supported, please use supported version of Python")
+
 
     font = load_font(args.font)
 
@@ -115,9 +129,6 @@ if __name__ == "__main__":
 
     cache_dir = args.cache_dir
     cache_dir.mkdir(exist_ok=True)
-
-    version = metadata.version("gopro_overlay")
-    log(f"Starting gopro-dashboard version {version}")
 
     with PoorTimer("program").timing():
 

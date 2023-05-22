@@ -5,6 +5,7 @@ import datetime
 import itertools
 import json
 import os
+import re
 import subprocess
 from array import array
 from dataclasses import dataclass
@@ -107,6 +108,14 @@ def join_files(filepaths, output):
         log(f"Running {args}")
         run(args)
 
+
+def ffmpeg_version(invoke=invoke):
+    ffmpeg_output = str(invoke(["ffmpeg", "-version"]).stdout)
+    version_line = ffmpeg_output.split("\n")[0]
+    match = re.search(r"ffmpeg version ([\w.+-]+)", version_line)
+    if match is None:
+        raise ValueError(f"Unable to determine ffmpeg version from: {version_line}")
+    return match.group(1)
 
 def find_frame_duration(filepath, data_stream_number, invoke=invoke):
     ffprobe_output = str(invoke(
@@ -327,3 +336,4 @@ class FFMPEGOverlayVideo:
 
 if __name__ == "__main__":
     print(ffmpeg_libx264_is_installed())
+
