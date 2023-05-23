@@ -21,6 +21,7 @@ if __name__ == "__main__":
     parser.add_argument("--geo", action="store_true", help="[EXPERIMENTAL] Use Geocode.xyz to add description for you (city-state) - see https://geocode.xyz/pricing for terms")
     parser.add_argument("-y", "--yes", action="store_true", help="Rename the files, don't just print what would be done")
     parser.add_argument("--dirs", action="store_true", help="Allow directory")
+    parser.add_argument("--geocode-key", help="geocode.xyz api key")
 
     args = parser.parse_args()
 
@@ -42,6 +43,8 @@ if __name__ == "__main__":
     should_touch = args.touch or args.touch_only
     should_rename = not args.touch_only
 
+    geocoder = geocode.GeoCode(key=args.geocode_key)
+
     for file in file_list:
         meta = GoproMeta.parse(ffmpeg.load_gpmd_from(file))
         found = meta.accept(DetermineFirstLockedGPSUVisitor())
@@ -55,7 +58,7 @@ if __name__ == "__main__":
         if args.desc:
             new_name = f"{formatted_datetime}-{args.desc}.MP4"
         elif args.geo:
-            geojson = geocode.geocode_location(found.point.lat, found.point.lon)
+            geojson = geocoder.geocode_location(found.point.lat, found.point.lon)
             city = geojson["city"].lower()
             if "state" in geojson:
                 state = geojson["state"].lower()
