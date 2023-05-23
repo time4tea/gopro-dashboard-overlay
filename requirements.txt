@@ -11,6 +11,6 @@ fitdecode==0.10.0
 # for lat/lon/speed calcs
 geographiclib==1.52
 progressbar2==4.2.0
-requests==2.28.2
+requests==2.31.0
 pycairo==1.23.0
 pytest
