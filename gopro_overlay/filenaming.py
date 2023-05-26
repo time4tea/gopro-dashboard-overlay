@@ -13,7 +13,7 @@ class Encoding(Enum):
 
     @staticmethod
     def from_letter(letter):
-        if letter == "H":
+        if letter == "H" or letter == "P" or letter == "OPR":
             return Encoding.AVC
         elif letter == "X":
             return Encoding.HEVC
@@ -44,15 +44,17 @@ class GoProFile:
         self.encoding = Encoding.from_letter(match.group(1))
         self.letter = match.group(1)
         self.recording = int(match.group(3))
-        self.sequence = int(match.group(2))
+        self.sequence = int(match.group(2)) if match.group(2) is not None else 0
+        self.extension = match.group(4)
 
     @staticmethod
     def is_valid_filepath(f: Path):
-        return re.search(r"^G([HX])(\d{2})(\d{4}).MP4", f.name)
+        return re.search(r"^G([HXP]|OPR)(\d{2})?(\d{4}).(MP4|mp4)", f.name)
 
     def related_files(self, d: Path, listdir=os.listdir):
-        find = re.compile(r"G{l}\d\d{n}\.MP4".format(
+        find = re.compile(r"G{l}\d\d{n}\.{e}".format(
             l=self.letter,
+            e=self.extension,
             n=f"{self.recording:04}"
         ))
 
