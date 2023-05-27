@@ -1,5 +1,4 @@
 import os
-import pathlib
 import re
 from pathlib import Path
 
@@ -8,7 +7,7 @@ from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from_datafile
-from gopro_overlay.geo import CachingRenderer
+from gopro_overlay.geo import CachingRenderer, MapStyleProvider
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.privacy import NoPrivacyZone
@@ -60,7 +59,7 @@ if __name__ == "__main__":
 
     examples = [os.path.join(example_dir, it) for it in examples]
 
-    renderer = CachingRenderer(cache_dir=arguments.default_config_location)
+    renderer = CachingRenderer(cache_dir=arguments.default_config_location, provider=MapStyleProvider().provide())
 
     datapath = os.path.join(mydir, "..", "tests/meta/gopro-meta.gpmd")
     timeseries = framemeta_from_datafile(

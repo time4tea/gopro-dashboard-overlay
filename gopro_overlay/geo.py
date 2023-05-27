@@ -11,6 +11,7 @@ from geotiler.cache import caching_downloader
 from geotiler.provider import MapProvider
 from geotiler.tile.io import fetch_tiles
 
+from gopro_overlay.config import Config
 from gopro_overlay.geo_render import my_render_map
 
 # most of the "stamen" maps in geotiler don't seem to work.
@@ -85,7 +86,7 @@ def attrs_for_style(name):
         raise KeyError(f"Unknown map provider: {name}")
 
 
-def provider_for_style(name, api_key_finder):
+def provider_for_style(name, api_key_finder) -> MapProvider:
     attrs = attrs_for_style(name)
     if "api-key-ref" in attrs:
         api_key = api_key_finder.find_api_key(attrs["api-key-ref"])
@@ -140,18 +141,17 @@ class ArgsKeyFinder:
 
 
 class ConfigKeyFinder:
-    def __init__(self, config_dir: pathlib.Path):
-        self.config_dir = config_dir
+    def __init__(self, loader: Config):
+        self.loader = loader
 
     def find_api_key(self, name):
-        config_file = self.config_dir / "map-api-keys.json"
-        if config_file.exists():
-            config = json.loads(config_file.read_text())
+        config = self.loader.maybe("map-api-keys.json")
 
-            if name in config:
-                return config[name]
+        if config.exists():
+            if name in config.content:
+                return config.content[name]
 
-        raise ValueError(f"No api key for {name} in {config_file}")
+        raise ValueError(f"No api key for {name} in {config.location}")
 
 
 class CompositeKeyFinder:
@@ -175,22 +175,25 @@ class SingleKeyFinder:
         return self.key
 
 
-def api_key_finder(args, config_dir: pathlib.Path):
+def api_key_finder(loader: Config, args):
     return CompositeKeyFinder(
         ArgsKeyFinder(args),
         EnvKeyFinder(),
-        ConfigKeyFinder(config_dir)
+        ConfigKeyFinder(loader)
     )
 
+class MapStyleProvider:
+    def __init__(self, api_key_finder = NullKeyFinder()):
+        self.api_key_finder = api_key_finder
+
+    def provide(self, style:str = "osm") -> MapProvider:
+        return provider_for_style(style, self.api_key_finder)
 
 class CachingRenderer:
 
-    def __init__(self, cache_dir: pathlib.Path, style="osm", api_key_finder=None):
-        if api_key_finder is None:
-            api_key_finder = NullKeyFinder()
-
+    def __init__(self, cache_dir: pathlib.Path, provider: MapProvider):
         self.cache_dir = cache_dir
-        self.provider = provider_for_style(style, api_key_finder)
+        self.provider = provider
 
     @contextlib.contextmanager
     def open(self):

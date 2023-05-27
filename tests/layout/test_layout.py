@@ -5,7 +5,7 @@ from pathlib import Path
 from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.font import load_font
-from gopro_overlay.geo import CachingRenderer
+from gopro_overlay.geo import CachingRenderer, MapStyleProvider
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
 from gopro_overlay.privacy import NoPrivacyZone
@@ -20,7 +20,7 @@ rng.seed(12345)
 
 framemeta = fake.fake_framemeta(length=timedelta(minutes=10), step=timedelta(seconds=1), rng=rng)
 
-renderer = CachingRenderer(cache_dir=arguments.default_config_location)
+renderer = CachingRenderer(cache_dir=arguments.default_config_location, provider=MapStyleProvider().provide())
 
 font = load_font("Roboto-Medium.ttf")
 

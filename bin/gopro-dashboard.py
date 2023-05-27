@@ -13,6 +13,7 @@ from gopro_overlay import timeseries_process, progress_frames, gpx, fit
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.buffering import SingleBuffer, DoubleBuffer
 from gopro_overlay.common import temp_file_name
+from gopro_overlay.config import Config
 from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.date_overlap import DateRange
 from gopro_overlay.dimensions import dimension_from
@@ -23,7 +24,7 @@ from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
-from gopro_overlay.geo import CachingRenderer, api_key_finder
+from gopro_overlay.geo import CachingRenderer, api_key_finder, MapStyleProvider
 from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter, GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
@@ -126,6 +127,8 @@ if __name__ == "__main__":
 
     config_dir = args.config_dir
     config_dir.mkdir(exist_ok=True)
+
+    config_loader = Config(config_dir)
 
     cache_dir = args.cache_dir
     cache_dir.mkdir(exist_ok=True)
@@ -258,12 +261,12 @@ if __name__ == "__main__":
         else:
             privacy_zone = NoPrivacyZone()
 
-        key_finder = api_key_finder(args, args.config_dir)
+        map_style_provider = MapStyleProvider(api_key_finder=api_key_finder(config_loader, args))
 
         with CachingRenderer(
                 cache_dir=cache_dir,
-                style=args.map_style,
-                api_key_finder=key_finder).open() as renderer:
+                provider=map_style_provider.provide(args.map_style)
+                ).open() as renderer:
 
             if args.profiler:
                 profiler = WidgetProfiler()
@@ -271,7 +274,7 @@ if __name__ == "__main__":
                 profiler = None
 
             if args.profile:
-                ffmpeg_options = load_ffmpeg_profile(config_dir, args.profile)
+                ffmpeg_options = load_ffmpeg_profile(config_loader, args.profile)
             else:
                 ffmpeg_options = None
 

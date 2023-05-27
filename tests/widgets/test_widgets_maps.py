@@ -5,7 +5,7 @@ import pytest
 from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import gps_framemeta
-from gopro_overlay.geo import CachingRenderer
+from gopro_overlay.geo import CachingRenderer, MapStyleProvider
 from gopro_overlay.gpmd import GoproMeta, GPSFix
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
@@ -26,7 +26,7 @@ font = test_widgets_setup.font
 ts = test_widgets_setup.ts
 
 arguments.default_config_location.mkdir(parents=True, exist_ok=True)
-renderer = CachingRenderer(cache_dir=arguments.default_config_location)
+renderer = CachingRenderer(cache_dir=arguments.default_config_location, provider=MapStyleProvider().provide())
 
 
 def a_real_journey(name, dimension, f_scene):

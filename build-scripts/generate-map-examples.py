@@ -3,11 +3,12 @@ from itertools import zip_longest
 from pathlib import Path
 
 from gopro_overlay import geo, arguments
+from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from_datafile
-from gopro_overlay.geo import CachingRenderer, ConfigKeyFinder, attrs_for_style
+from gopro_overlay.geo import CachingRenderer, ConfigKeyFinder, attrs_for_style, MapStyleProvider
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.privacy import NoPrivacyZone
@@ -20,7 +21,7 @@ AUTO_HEADER = "<!-- \n\nAuto Generated File DO NOT EDIT \n\n-->\n"
 
 
 def grouper(iterable, n, *, incomplete='fill', fillvalue=None):
-    "Collect data into non-overlapping fixed-length chunks or blocks"
+    """Collect data into non-overlapping fixed-length chunks or blocks"""
     # https://docs.python.org/3/library/itertools.html#itertools-recipes
     # grouper('ABCDEFG', 3, fillvalue='x') --> ABC DEF Gxx
     # grouper('ABCDEFG', 3, incomplete='strict') --> ABC DEF ValueError
@@ -48,13 +49,16 @@ if __name__ == "__main__":
 
     font = load_font("Roboto-Medium.ttf")
 
+    config_loader = Config(arguments.default_config_location)
+
     for style in geo.map_styles:
         print(style)
 
+        map_style_provider = MapStyleProvider(api_key_finder=ConfigKeyFinder(loader=config_loader))
+
         renderer = CachingRenderer(
             cache_dir=arguments.default_config_location,
-            style=style,
-            api_key_finder=ConfigKeyFinder(config_dir=arguments.default_config_location)
+            provider=map_style_provider.provide(style)
         )
 
         with renderer.open() as map_renderer:

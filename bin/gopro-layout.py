@@ -15,11 +15,12 @@ from pint import DimensionalityError
 
 from gopro_overlay import fake, geo, ffmpeg, timeseries_process
 from gopro_overlay.arguments import default_config_location
+from gopro_overlay.config import Config
 from gopro_overlay.dimensions import dimension_from, Dimension
 from gopro_overlay.ffmpeg import find_streams
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
-from gopro_overlay.geo import CachingRenderer, api_key_finder
+from gopro_overlay.geo import CachingRenderer, api_key_finder, MapStyleProvider
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.log import log
@@ -48,7 +49,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
     parser.add_argument("--overlay-size", default="1920x1080", help="Size of frame, XxY, e.g. 1920x1080")
-    parser.add_argument("--gopro", type=pathlib.Path,  help="Use gopro video to supply a background image / journey")
+    parser.add_argument("--gopro", type=pathlib.Path, help="Use gopro video to supply a background image / journey")
 
     args = parser.parse_args()
 
@@ -60,7 +61,8 @@ if __name__ == "__main__":
 
     font = load_font(args.font)
 
-    key_finder = api_key_finder(args, config_dir=config_dir)
+    config_loader = Config(config_dir)
+    key_finder = api_key_finder(config_loader, args)
 
     font = font.font_variant(size=16)
 
@@ -98,10 +100,12 @@ if __name__ == "__main__":
     else:
         timeseries = fake.fake_framemeta(timedelta(minutes=5), step=timedelta(seconds=1), rng=rng, point_step=0.0001)
 
+    map_style_provider = MapStyleProvider(api_key_finder=key_finder)
+
     with CachingRenderer(
             cache_dir=cache_dir,
-            style=args.map_style,
-            api_key_finder=key_finder).open() as renderer:
+            provider=map_style_provider.provide(args.map_style)
+    ).open() as renderer:
 
         last_updated = None
 

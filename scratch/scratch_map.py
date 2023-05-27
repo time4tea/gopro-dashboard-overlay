@@ -1,9 +1,10 @@
 import argparse
 import pathlib
 
+from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGOverlay
-from gopro_overlay.geo import api_key_finder, CachingRenderer
+from gopro_overlay.geo import api_key_finder, CachingRenderer, MapStyleProvider
 from gopro_overlay.point import Coordinate, Point
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.widgets.map import MovingMap
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config_dir = pathlib.Path.home() / ".gopro-graphics"
 
-    key_finder = api_key_finder(args, config_dir)
+    key_finder = api_key_finder(Config(config_dir), args)
 
     dimension = Dimension(512, 512)
     ffmpeg = FFMPEGOverlay(output=pathlib.Path("render/test.MP4"), overlay_size=dimension)
@@ -28,10 +29,14 @@ if __name__ == "__main__":
 
     current = timeunits(seconds=0)
 
+    map_style_provider = MapStyleProvider(api_key_finder=key_finder)
+
+    frame_supplier = SimpleFrameSupplier(dimension)
+
     with ffmpeg.generate() as writer:
         with CachingRenderer(
                 cache_dir=config_dir,
-                api_key_finder=key_finder).open() as renderer:
+                provider=map_style_provider.provide()).open() as renderer:
 
             scene = Scene(
                 widgets=[
@@ -49,6 +54,6 @@ if __name__ == "__main__":
             )
 
             while current < length:
-                image = scene.draw()
+                image = scene.draw(frame_supplier.drawing_frame())
                 writer.write(image.tobytes())
                 current = current + timeunits(seconds=0.1)
