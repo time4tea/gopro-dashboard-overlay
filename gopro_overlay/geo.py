@@ -70,6 +70,7 @@ def thunderforest_attrs(style):
 
 def local_attrs(style):
     return {
+        "attribution": "Custom",
         "name": "Local",
         "url": "http://localhost:8000/{z}/{x}/{y}.{ext}",
         "cache": False,
