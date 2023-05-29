@@ -229,11 +229,12 @@ class FrameSupplier:
 
 class SimpleFrameSupplier(FrameSupplier):
 
-    def __init__(self, dimensions: Dimension):
+    def __init__(self, dimensions: Dimension, background: Tuple = (0,0,0,0)):
         self._dimensions = dimensions
+        self._background = background
 
     def drawing_frame(self) -> Image:
-        return Image.new("RGBA", (self._dimensions.x, self._dimensions.y), (0, 0, 0, 0))
+        return Image.new("RGBA", (self._dimensions.x, self._dimensions.y), self._background)
 
 
 class Scene:

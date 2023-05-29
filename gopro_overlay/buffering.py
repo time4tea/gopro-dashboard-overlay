@@ -4,9 +4,9 @@ import multiprocessing
 import os
 from io import BufferedWriter
 from multiprocessing.shared_memory import SharedMemory
-from typing import Callable, Any
+from typing import Callable, Any, Tuple
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.widgets.widgets import SimpleFrameSupplier
@@ -18,8 +18,8 @@ class DrawBuffer:
 
 
 class SingleBuffer(DrawBuffer):
-    def __init__(self, size: Dimension, writer: BufferedWriter):
-        self.supplier = SimpleFrameSupplier(size)
+    def __init__(self, size: Dimension, background: Tuple, writer: BufferedWriter):
+        self.supplier = SimpleFrameSupplier(size, background)
         self.writer = writer
 
     def draw(self, f: Callable[[Image.Image], Any]):
@@ -32,6 +32,7 @@ class SingleBuffer(DrawBuffer):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
 
 class SerialisedWriter(io.BufferedWriter):
     def __init__(self, *args, **kwargs):
@@ -55,22 +56,19 @@ def raw_image(dimensions: Dimension, buffer) -> Image.Image:
     return image
 
 
-def clear_buffer(buffer, l):
-    ctypes.memset(ctypes.byref(buffer), 0x00, l)
-
-
 class Frame:
-    def __init__(self, shm: SharedMemory, quit: multiprocessing.Value, size: Dimension, count: int):
+    def __init__(self, shm: SharedMemory, quit: multiprocessing.Value, size: Dimension, background: Tuple, count: int):
         self.shm = shm
         self.size = size
         self.count = count
         self.quit = quit
-
+        self.background = background
         self.buffer_size = (size.x * size.y * 4)
 
         self.memory = shm.buf[self.buffer_size * self.count:self.buffer_size * (self.count + 1)]
 
         self.image = raw_image(size, self.memory)
+        self.im_draw = ImageDraw.ImageDraw(self.image)
 
         self.active = multiprocessing.Lock()
         self.can_draw = multiprocessing.Condition(self.active)
@@ -84,6 +82,8 @@ class Frame:
         self.written_frame_number = multiprocessing.Value(ctypes.c_long)
         self.written_frame_number.value = -1
 
+        self.clear()
+
     def wake(self):
         with self.can_draw:
             self.can_draw.notify()
@@ -91,9 +91,11 @@ class Frame:
             self.can_write.notify()
 
     def clear(self):
-        clear_buffer(self.ctypes_buffer, self.buffer_size)
+        ctypes.memset(ctypes.byref(self.ctypes_buffer), 0x00, self.buffer_size)
+        if self.background != (0, 0, 0, 0):
+            self.im_draw.rectangle((0, 0, self.size.x, self.size.y), self.background)
 
-    def draw(self, f: Callable[[Image.Image], None]):
+    def draw(self, f: Callable[[Image.Image], None]) -> bool:
         with self.can_draw:
             while not self.can_draw.wait_for(predicate=lambda: self.quit.value == 1 or self.written_frame_number.value == self.drawn_frame_number.value, timeout=cond_timeout):
                 pass
@@ -108,6 +110,12 @@ class Frame:
         if self.quit.value == 1:
             return False
         return True
+
+    def copy(self) -> Image.Image:
+        """Return a copy of this image, not from shared memory"""
+        c = Image.new("RGBA", self.size.tuple())
+        c.paste(self.image)
+        return c
 
     def __enter__(self):
         return self
@@ -143,15 +151,15 @@ def p_writer(frame: Frame, writer: io.BytesIO):
 
 
 class DoubleBuffer(DrawBuffer):
-    def __init__(self, size: Dimension, writer: BufferedWriter):
+    def __init__(self, size: Dimension, background: Tuple, writer: BufferedWriter):
         shm_name = f"gopro.{os.getpid()}"
         buffer_size = (size.x * size.y * 4)
         shm_size = buffer_size * 2
         self.shm = SharedMemory(create=True, name=shm_name, size=shm_size)
         self.quit = multiprocessing.Value(ctypes.c_int)
 
-        self.frame0 = Frame(self.shm, self.quit, size, 0)
-        self.frame1 = Frame(self.shm, self.quit, size, 1)
+        self.frame0 = Frame(self.shm, self.quit, size, background, 0)
+        self.frame1 = Frame(self.shm, self.quit, size, background, 1)
 
         writer = SerialisedWriter(writer)
 

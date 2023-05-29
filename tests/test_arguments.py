@@ -102,6 +102,13 @@ def test_profiler():
     assert do_args("--profiler").profiler is True
 
 
+def test_bg():
+    assert do_args("--bg", "1,2,3,4").bg == (1,2,3,4)
+    assert do_args().bg == (0,0,0,0)
+    with pytest.raises(ValueError):
+        do_args("--bg", "1,2,3")
+
+
 def test_overlay_size():
     assert do_args("--overlay-size", "320x256").overlay_size == "320x256"
 

@@ -328,9 +328,9 @@ if __name__ == "__main__":
 
                     if args.double_buffer:
                         log("*** NOTE: Double Buffer mode is experimental. It is believed to work fine on Linux. Please raise issues if you see it working or not-working. Thanks ***")
-                        buffer = DoubleBuffer(dimensions, writer)
+                        buffer = DoubleBuffer(dimensions, args.bg, writer)
                     else:
-                        buffer = SingleBuffer(dimensions, writer)
+                        buffer = SingleBuffer(dimensions, args.bg, writer)
 
                     with buffer:
                         for index, dt in enumerate(stepper.steps()):

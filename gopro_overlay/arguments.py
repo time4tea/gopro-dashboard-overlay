@@ -27,6 +27,14 @@ class BBoxArgs(argparse.Action):
         setattr(namespace, self.dest, BoundingBox(min=extent_min, max=extent_max))
 
 
+class ColourArgs(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        colour = tuple(map(int, values.split(",")))
+        if len(colour) != 4:
+            raise ValueError("Colour Requires 4 values - r,g,b,a")
+        setattr(namespace, self.dest, colour)
+
+
 default_config_location = pathlib.Path.home() / ".gopro-graphics"
 
 
@@ -50,6 +58,8 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--overlay-size",
                         help="<XxY> e.g. 1920x1080 Force size of overlay. "
                              "Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160), Required if --use-gpx-only")
+    parser.add_argument("--bg", help="Background Colour - R,G,B,A - each 0-255", default=(0, 0, 0, 0), action=ColourArgs)
+
     parser.add_argument("--profile",
                         help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
 
