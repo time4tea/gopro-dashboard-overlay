@@ -8,7 +8,7 @@ from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from_datafile
-from gopro_overlay.geo import CachingRenderer, ConfigKeyFinder, attrs_for_style, MapStyleProvider
+from gopro_overlay.geo import MapRenderer, ConfigKeyFinder, attrs_for_style, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
 from gopro_overlay.privacy import NoPrivacyZone
@@ -54,14 +54,12 @@ if __name__ == "__main__":
     for style in geo.map_styles:
         print(style)
 
-        map_style_provider = MapStyleProvider(api_key_finder=ConfigKeyFinder(loader=config_loader))
-
-        renderer = CachingRenderer(
+        renderer = MapRenderer(
             cache_dir=arguments.default_config_location,
-            provider=map_style_provider.provide(style)
+            styler=MapStyler(api_key_finder=ConfigKeyFinder(loader=config_loader))
         )
 
-        with renderer.open() as map_renderer:
+        with renderer.open(style) as map_renderer:
             xml = """
                 <layout>
                     <frame width="256" height="256" outline="0,0,0" cr="30">

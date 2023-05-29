@@ -20,7 +20,7 @@ from gopro_overlay.dimensions import dimension_from, Dimension
 from gopro_overlay.ffmpeg import find_streams
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
-from gopro_overlay.geo import CachingRenderer, api_key_finder, MapStyleProvider
+from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
 from gopro_overlay.log import log
@@ -100,12 +100,10 @@ if __name__ == "__main__":
     else:
         timeseries = fake.fake_framemeta(timedelta(minutes=5), step=timedelta(seconds=1), rng=rng, point_step=0.0001)
 
-    map_style_provider = MapStyleProvider(api_key_finder=key_finder)
-
-    with CachingRenderer(
+    with MapRenderer(
             cache_dir=cache_dir,
-            provider=map_style_provider.provide(args.map_style)
-    ).open() as renderer:
+            styler=MapStyler(api_key_finder=key_finder)
+    ).open(args.map_style) as renderer:
 
         last_updated = None
 

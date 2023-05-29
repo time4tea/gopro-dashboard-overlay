@@ -24,7 +24,7 @@ from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
-from gopro_overlay.geo import CachingRenderer, api_key_finder, MapStyleProvider
+from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter, GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
@@ -261,12 +261,10 @@ if __name__ == "__main__":
         else:
             privacy_zone = NoPrivacyZone()
 
-        map_style_provider = MapStyleProvider(api_key_finder=api_key_finder(config_loader, args))
-
-        with CachingRenderer(
+        with MapRenderer(
                 cache_dir=cache_dir,
-                provider=map_style_provider.provide(args.map_style)
-                ).open() as renderer:
+                styler=MapStyler(api_key_finder=api_key_finder(config_loader, args))
+                ).open(args.map_style) as renderer:
 
             if args.profiler:
                 profiler = WidgetProfiler()

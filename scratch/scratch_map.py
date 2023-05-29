@@ -4,7 +4,7 @@ import pathlib
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEGOverlay
-from gopro_overlay.geo import api_key_finder, CachingRenderer, MapStyleProvider
+from gopro_overlay.geo import api_key_finder, MapRenderer, MapStyler
 from gopro_overlay.point import Coordinate, Point
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.widgets.map import MovingMap
@@ -29,14 +29,12 @@ if __name__ == "__main__":
 
     current = timeunits(seconds=0)
 
-    map_style_provider = MapStyleProvider(api_key_finder=key_finder)
-
     frame_supplier = SimpleFrameSupplier(dimension)
 
     with ffmpeg.generate() as writer:
-        with CachingRenderer(
+        with MapRenderer(
                 cache_dir=config_dir,
-                provider=map_style_provider.provide()).open() as renderer:
+                styler=MapStyler(api_key_finder=key_finder)).open("local") as renderer:
 
             scene = Scene(
                 widgets=[

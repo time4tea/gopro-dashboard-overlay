@@ -1,10 +1,10 @@
 import contextlib
 import dbm.ndbm
 import itertools
-import json
 import os
 import pathlib
 from functools import partial
+from typing import Optional, Tuple
 
 import geotiler
 from geotiler.cache import caching_downloader
@@ -29,6 +29,7 @@ map_styles = list(itertools.chain(
         "positron-blue", "positron-red", "dark-matter", "dark-matter-brown", "dark-matter-dark-grey",
         "dark-matter-dark-purple", "dark-matter-purple-roads", "dark-matter-yellow-roads"
     ]],
+    ["local"],
 ))
 
 
@@ -67,32 +68,50 @@ def thunderforest_attrs(style):
     }
 
 
+def local_attrs(style):
+    return {
+        "name": "Local",
+        "url": "http://localhost:8000/{z}/{x}/{y}.{ext}",
+        "cache": False,
+        "limit": 2
+    }
+
+
 prefix_to_attrs = {
     "osm": osm_attrs,
     "tf": thunderforest_attrs,
-    "geo": geoapify_attrs
+    "geo": geoapify_attrs,
+    "local": local_attrs,
 }
+
+
+def configured_style(loader: Config, name: str) -> Optional[dict]:
+    config_file = loader.maybe("map-styles.json")
+    if config_file.exists():
+
+        if name in config_file.content:
+            attrs = config_file.content[name]
+
+            if not "url" in attrs:
+                raise ValueError(f"Required key 'url' not found for {name} in {config_file.location}")
+
+            return attrs
+    return None
 
 
 def attrs_for_style(name):
     if name == "osm":
         return osm_attrs()
 
-    prefix, style = name.split("-", 1)
+    if "-" in name:
+        prefix, style = name.split("-", 1)
+    else:
+        prefix = style = name
 
     if prefix in prefix_to_attrs:
         return prefix_to_attrs[prefix](style)
     else:
         raise KeyError(f"Unknown map provider: {name}")
-
-
-def provider_for_style(name, api_key_finder) -> MapProvider:
-    attrs = attrs_for_style(name)
-    if "api-key-ref" in attrs:
-        api_key = api_key_finder.find_api_key(attrs["api-key-ref"])
-    else:
-        api_key = None
-    return MapProvider(attrs, api_key)
 
 
 def dbm_downloader(dbm_file):
@@ -106,11 +125,19 @@ def dbm_downloader(dbm_file):
     return partial(caching_downloader, get_key, set_key, fetch_tiles)
 
 
-def dbm_caching_renderer(provider, dbm_file):
+def dbm_caching_renderer(provider: MapProvider, dbm_file):
     def render(map, tiles=None, **kwargs):
         map.provider = provider
-        # return geotiler.render_map(map, tiles, downloader=dbm_downloader(dbm_file), **kwargs)
         return my_render_map(map, tiles, downloader=dbm_downloader(dbm_file), **kwargs)
+
+    return render
+
+
+def no_caching_renderer(provider: MapProvider):
+    def render(map, tiles=None, **kwargs):
+        map.provider = provider
+
+        return geotiler.map.render_map(map, tiles, **kwargs)
 
     return render
 
@@ -182,20 +209,38 @@ def api_key_finder(loader: Config, args):
         ConfigKeyFinder(loader)
     )
 
-class MapStyleProvider:
-    def __init__(self, api_key_finder = NullKeyFinder()):
+
+class MapStyler:
+    def __init__(self, api_key_finder=NullKeyFinder()):
         self.api_key_finder = api_key_finder
 
-    def provide(self, style:str = "osm") -> MapProvider:
-        return provider_for_style(style, self.api_key_finder)
+    def provide(self, style: str = "osm") -> Tuple[dict, str]:
+        return self.provider_for_style(style, self.api_key_finder)
 
-class CachingRenderer:
+    def provider_for_style(self, name, api_key_finder) -> Tuple[dict, str]:
+        attrs = attrs_for_style(name)
+        if "api-key-ref" in attrs:
+            api_key = api_key_finder.find_api_key(attrs["api-key-ref"])
+        else:
+            api_key = None
+        return attrs, api_key
 
-    def __init__(self, cache_dir: pathlib.Path, provider: MapProvider):
+
+class MapRenderer:
+
+    def __init__(self, cache_dir: pathlib.Path, styler: MapStyler):
         self.cache_dir = cache_dir
-        self.provider = provider
+        self.styler = styler
 
     @contextlib.contextmanager
-    def open(self):
-        with dbm.ndbm.open(str(self.cache_dir.joinpath("tilecache.ndbm")), "c") as db:
-            yield dbm_caching_renderer(self.provider, db)
+    def open(self, style: str = "osm"):
+
+        attrs, key = self.styler.provide(style)
+
+        map = MapProvider(attrs, key)
+
+        if attrs.get("cache", True):
+            with dbm.ndbm.open(str(self.cache_dir.joinpath("tilecache.ndbm")), "c") as db:
+                yield dbm_caching_renderer(map, db)
+        else:
+            yield no_caching_renderer(map)
