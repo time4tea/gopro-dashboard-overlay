@@ -58,7 +58,7 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--overlay-size",
                         help="<XxY> e.g. 1920x1080 Force size of overlay. "
                              "Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160), Required if --use-gpx-only")
-    parser.add_argument("--bg", help="Background Colour - R,G,B,A - each 0-255", default=(0, 0, 0, 0), action=ColourArgs)
+    parser.add_argument("--bg", help="Background Colour - R,G,B,A - each 0-255, no spaces!", default=(0, 0, 0, 0), action=ColourArgs)
 
     parser.add_argument("--profile",
                         help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
