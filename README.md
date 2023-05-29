@@ -217,9 +217,9 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
-- 0.98.0 [Feature] Add configurable background colour with `--bg rgba` thanks to https://github.com/mishuha in discussion https://github.com/time4tea/gopro-dashboard-overlay/discussions/120 for the concept. 
+- 0.98.0 [Feature] Add configurable background colour with `--bg rgba` thanks to [@mishuha](https://github.com/mishuha) in discussion https://github.com/time4tea/gopro-dashboard-overlay/discussions/120 for the concept. 
 - 0.97.0 [Feature] Add new map style "local" - which will connect to a tileserver running locally on port 8000. This may be useful if you want to use a completely custom map - like a hand drawn one.
-  - For more details see: https://github.com/time4tea/gopro-dashboard-overlay/discussions/132 Thanks to @mattghub1 for the concept. 
+  - For more details see: https://github.com/time4tea/gopro-dashboard-overlay/discussions/132 Thanks to [@mattghub1](https://github.com/mattghub1) for the concept. 
 - 0.96.0 [Feature] Hopefully add support for older gopro files when joining. [#129](https://github.com/time4tea/gopro-dashboard-overlay/issues/129) Thanks [@FFMbyBicycle](https://github.com/FFMbyBicycle) for raising and some example code. 
 - 0.95.0 [Feature] Add api key support for geocode.xyz - [#117](https://github.com/time4tea/gopro-dashboard-overlay/issues/117) Thanks [@mishuha](https://github.com/mishuha) for raising.
 - 0.94.0 [Change] Update docker image to python3.11/ffmpeg 6.0 
