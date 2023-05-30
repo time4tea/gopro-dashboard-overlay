@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 import datetime
 import sys
-import traceback
 from importlib import metadata
 from pathlib import Path
-from subprocess import TimeoutExpired
 from typing import Optional
 
 import progressbar
 
-from gopro_overlay import timeseries_process, progress_frames, gpx, fit
+from gopro_overlay import timeseries_process, progress_frames, gpmd_filters, loading
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.buffering import SingleBuffer, DoubleBuffer
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.config import Config
-from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.date_overlap import DateRange
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution
@@ -22,17 +19,15 @@ from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_in
     find_streams, FFMPEGNull, ffmpeg_version
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta import framemeta_from
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
-from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter, GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
+from gopro_overlay.loading import load_external
 from gopro_overlay.log import log, fatal
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
-from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeunits import timeunits, Timeunit
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.units import units
@@ -80,16 +75,6 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
         raise ValueError(f"Unsupported layout {args.layout_creator}")
 
 
-def load_external(filepath: Path, units) -> Timeseries:
-    suffix = filepath.suffix.lower()
-    if suffix == ".gpx":
-        return gpx.load_timeseries(filepath, units)
-    elif suffix == ".fit":
-        return fit.load_timeseries(filepath, units)
-    else:
-        fatal(f"Don't recognise filetype from {filepath} - support .gpx and .fit")
-
-
 def fmtdt(dt: datetime.datetime):
     return dt.replace(microsecond=0).isoformat()
 
@@ -117,7 +102,6 @@ if __name__ == "__main__":
     log(f"Using Python version {sys.version}")
     if sys.version_info < (3, 10):
         log("*** Python version below 3.10 is not supported, please use supported version of Python")
-
 
     font = load_font(args.font)
 
@@ -186,44 +170,23 @@ if __name__ == "__main__":
                 video_duration = frame_meta.duration()
                 packets_per_second = 10
             else:
-                if args.gps_bbox_lon_lat:
-                    bbox_filter = GPSBBoxFilter(bbox=args.gps_bbox_lon_lat)
-                else:
-                    bbox_filter = NullGPSLockFilter()
-
                 inputpath = args.input
-                stream_info = find_streams(inputpath)
 
-                if not stream_info.meta:
-                    raise IOError(f"Unable to locate metadata stream in '{inputpath}' - is it a GoPro file")
-
-                dimensions = stream_info.video.dimension
-                video_duration = stream_info.video.duration
-                packets_per_second = 18
-
-                counter = ReasonCounter()
-
-                try:
-                    frame_meta = framemeta_from(
-                        inputpath,
-                        metameta=stream_info.meta,
-                        units=units,
-                        gps_lock_filter=WorstOfGPSLockFilter(
-                            GPSReportingFilter(GPSLockTracker(), rejected=counter.inc("Heuristics")),
-                            GPSReportingFilter(bbox_filter, rejected=counter.inc("Outside BBox")),
-                            GPSReportingFilter(GPSDOPFilter(args.gps_dop_max), rejected=counter.inc(f"DOP > {args.gps_dop_max}")),
-                            GPSReportingFilter(GPSMaxSpeedFilter(units.Quantity(args.gps_speed_max, args.gps_speed_max_units).to("mps").m), rejected=counter.inc(f"Speed > {args.gps_speed_max} {args.gps_speed_max_units}"))
-                        )
+                gopro = loading.load_gopro(
+                    inputpath,
+                    units,
+                    filter=gpmd_filters.standard(
+                        dop_max=args.gps_dop_max,
+                        speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
+                        bbox=args.gps_bbox_lon_lat,
                     )
+                )
 
-                    if counter.total() > 0:
-                        log(f"\n\nNOTE: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
-                        [log(f"* {k} -> {v}") for k, v in counter.items()]
-                        log(f"\n\n")
+                frame_meta = gopro.framemeta
 
-                except TimeoutExpired:
-                    traceback.print_exc()
-                    fatal(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
+                dimensions = gopro.streams.video.dimension
+                video_duration = gopro.streams.video.duration
+                packets_per_second = frame_meta.packets_per_second()
 
                 if args.gpx:
                     external_file: Path = args.gpx
@@ -264,7 +227,7 @@ if __name__ == "__main__":
         with MapRenderer(
                 cache_dir=cache_dir,
                 styler=MapStyler(api_key_finder=api_key_finder(config_loader, args))
-                ).open(args.map_style) as renderer:
+        ).open(args.map_style) as renderer:
 
             if args.profiler:
                 profiler = WidgetProfiler()

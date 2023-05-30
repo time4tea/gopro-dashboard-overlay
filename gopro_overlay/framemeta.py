@@ -108,14 +108,18 @@ max_distance = timeunits(seconds=6)
 
 
 class FrameMeta:
-    def __init__(self):
+    def __init__(self, packets_per_second = 18):
         self.modified = False
+        self.pps = packets_per_second
         self.framelist: List[Timeunit] = []
         self.frames: MutableMapping[Timeunit, Entry] = {}
 
     def __len__(self):
         self.check_modified()
         return len(self.framelist)
+
+    def packets_per_second(self):
+        return self.pps
 
     def stepper(self, step: Timeunit):
         self.check_modified()
