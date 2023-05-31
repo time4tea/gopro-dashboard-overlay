@@ -8,7 +8,7 @@ from typing import Tuple
 import pytest
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.ffmpeg import StreamInfo
+from gopro_overlay.ffmpeg import GoproRecording
 from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
@@ -268,14 +268,14 @@ def test_load_gravity_meta():
     meta.accept(GRAVisitor(process_gravities))
 
 
-def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[StreamInfo, GoproMeta]:
+def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[GoproRecording, GoproMeta]:
     filepath = path_of_meta(test_file_name)
 
     if not os.path.exists(filepath):
         if missing_ok:
             pytest.xfail(f"Missing file {filepath} and this is OK")
 
-    return ffmpeg.find_streams(filepath), load_file(filepath)
+    return ffmpeg.find_recording(filepath), load_file(filepath)
 
 
 # TODO - get time-lapse and time-warp for inclusion

@@ -51,7 +51,8 @@ class AudioMeta:
 
 
 @dataclass(frozen=True)
-class StreamInfo:
+class GoproRecording:
+    location: Path
     file: FileMeta
     audio: Optional[AudioMeta]
     video: VideoMeta
@@ -59,7 +60,7 @@ class StreamInfo:
 
 
 def cut_file(input, output, start, duration):
-    streams = find_streams(input)
+    streams = find_recording(input)
 
     maps = list(itertools.chain.from_iterable(
         [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.meta] if it is not None]))
@@ -84,7 +85,7 @@ def cut_file(input, output, start, duration):
 def join_files(filepaths, output):
     """only for joining parts of same trip"""
 
-    streams = find_streams(filepaths[0])
+    streams = find_recording(filepaths[0])
 
     maps = list(itertools.chain.from_iterable(
         [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.meta] if it is not None]))
@@ -136,7 +137,7 @@ def find_frame_duration(filepath, data_stream_number, invoke=invoke):
     return duration
 
 
-def find_streams(filepath: Path, invoke=invoke, find_frame_duration=find_frame_duration, stat=os.stat) -> StreamInfo:
+def find_recording(filepath: Path, invoke=invoke, find_frame_duration=find_frame_duration, stat=os.stat) -> GoproRecording:
     ffprobe_output = str(invoke(["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", filepath]).stdout)
 
     ffprobe_json = json.loads(ffprobe_output)
@@ -186,7 +187,8 @@ def find_streams(filepath: Path, invoke=invoke, find_frame_duration=find_frame_d
     else:
         meta_meta = None
 
-    return StreamInfo(
+    return GoproRecording(
+        location = filepath,
         file=file_meta(filepath, stat=stat),
         audio=audio_meta,
         video=video_meta,
@@ -205,11 +207,10 @@ def file_meta(filepath: Path, stat=os.stat) -> FileMeta:
     )
 
 
-def load_gpmd_from(filepath: Path):
-    track = find_streams(filepath).meta.stream
+def load_gpmd_from(recording: GoproRecording):
+    track = recording.meta.stream
     if track:
-        cmd = ["ffmpeg", "-hide_banner", '-y', '-i', filepath, '-codec', 'copy', '-map', '0:%d' % track, '-f',
-               'rawvideo', "-"]
+        cmd = ["ffmpeg", "-hide_banner", '-y', '-i', recording.location, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
         result = run(cmd, capture_output=True, timeout=10)
         if result.returncode != 0:
             raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")

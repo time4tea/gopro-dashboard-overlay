@@ -90,7 +90,7 @@ def test_parsing_stream_information():
     def stat(file):
         return stat_result([000, 1234, 123, 1, 1000, 1000, 9876, 10, 20, 30])
 
-    streams = ffmpeg.find_streams(
+    streams = ffmpeg.find_recording(
         "whatever",
         invoke=fake_invoke(
             expected=["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", "whatever"],
@@ -228,7 +228,7 @@ def test_extract_frame():
     if not clip.exists():
         pytest.xfail("Clip doesn't exist - should locally!")
 
-    dimension = ffmpeg.find_streams(clip).video.dimension
+    dimension = ffmpeg.find_recording(clip).video.dimension
     Image.frombytes(mode="RGBA", size=dimension.tuple(), data=ffmpeg.load_frame(clip, timeunits(seconds=2)))
 
 

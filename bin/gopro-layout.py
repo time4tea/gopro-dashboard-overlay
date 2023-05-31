@@ -13,13 +13,13 @@ from xml.etree import ElementTree
 from PIL import Image
 from pint import DimensionalityError
 
-from gopro_overlay import fake, geo, ffmpeg, timeseries_process
+from gopro_overlay import fake, geo, ffmpeg, timeseries_process, loading
 from gopro_overlay.arguments import default_config_location
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import dimension_from, Dimension
-from gopro_overlay.ffmpeg import find_streams
+from gopro_overlay.ffmpeg import find_recording
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta import framemeta_from
+from gopro_overlay.loading import framemeta_from
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
@@ -76,26 +76,17 @@ if __name__ == "__main__":
 
     if args.gopro:
         inputpath = args.gopro
-        stream_info = find_streams(inputpath)
 
-        if not stream_info.meta:
-            raise IOError(f"Unable to locate metadata stream in '{inputpath}' - is it a GoPro file")
+        gopro = loading.load_gopro(inputpath, units)
 
-        dimensions = stream_info.video.dimension
-        try:
-            timeseries = framemeta_from(inputpath, metameta=stream_info.meta, units=units)
+        dimensions = gopro.recording.video.dimension
+        timeseries = gopro.framemeta
 
-            timeseries.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
-            timeseries.process(timeseries_process.calculate_odo())
-            timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)
+        timeseries.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
+        timeseries.process(timeseries_process.calculate_odo())
+        timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)
 
-            video_frame = load_frame(inputpath, stream_info.video.dimension, timeseries.mid)
-
-
-        except TimeoutExpired:
-            traceback.print_exc()
-            log(f"{inputpath} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
-            exit(1)
+        video_frame = load_frame(inputpath, gopro.recording.video.dimension, timeseries.mid)
 
     else:
         timeseries = fake.fake_framemeta(timedelta(minutes=5), step=timedelta(seconds=1), rng=rng, point_step=0.0001)

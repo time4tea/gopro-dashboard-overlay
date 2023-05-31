@@ -46,7 +46,8 @@ if __name__ == "__main__":
     geocoder = geocode.GeoCode(key=args.geocode_key)
 
     for file in file_list:
-        meta = GoproMeta.parse(ffmpeg.load_gpmd_from(file))
+        recording = ffmpeg.find_recording(file)
+        meta = GoproMeta.parse(ffmpeg.load_gpmd_from(recording))
         found = meta.accept(DetermineFirstLockedGPSUVisitor())
         gps_datetime = found.packet_time
         if gps_datetime is None:

@@ -3,10 +3,12 @@ from pathlib import Path
 
 import pytest
 
+from gopro_overlay import loading
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import find_streams
-from gopro_overlay.framemeta import View, Window, framemeta_from
-from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter
+from gopro_overlay.ffmpeg import find_recording
+from gopro_overlay.framemeta import View, Window
+from gopro_overlay.gpmd_filters import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter
+from gopro_overlay.loading import framemeta_from
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
@@ -169,18 +171,18 @@ def load_test_file(inputpath):
     if not inputpath.exists():
         pytest.xfail("contrib file not exist")
 
-    stream_info = find_streams(inputpath)
-    return framemeta_from(
+    gopro = loading.load_gopro(
         inputpath,
-        metameta=stream_info.meta,
-        units=units,
-        gps_lock_filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
+        units,
+        filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
     )
+
+    return gopro.framemeta
 
 
 @pytest.mark.gfx
 def test_example_chart():
-    test_file = Path("/render/contrib/poor-gps/GX010303.MP4")
+    test_file = Path("render/contrib/poor-gps/GX010303.MP4")
 
     ts = load_test_file(test_file)
 

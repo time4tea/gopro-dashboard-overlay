@@ -4,9 +4,9 @@ from pathlib import Path
 from subprocess import TimeoutExpired
 
 from gopro_overlay import gpx, fit
-from gopro_overlay.ffmpeg import StreamInfo, find_streams
-from gopro_overlay.framemeta import framemeta_from, FrameMeta
-from gopro_overlay.gpmd_filters import GPSLockFilter
+from gopro_overlay.ffmpeg import GoproRecording, find_recording, MetaMeta, load_gpmd_from
+from gopro_overlay.framemeta import FrameMeta, parse_gopro
+from gopro_overlay.gpmd_filters import GPSLockFilter, NullGPSLockFilter
 from gopro_overlay.log import fatal
 from gopro_overlay.timeseries import Timeseries
 
@@ -25,26 +25,40 @@ def load_external(filepath: Path, units) -> Timeseries:
 
 @dataclasses.dataclass
 class GoPro:
-    streams: StreamInfo
+    recording: GoproRecording
     framemeta: FrameMeta
 
 
-def load_gopro(file: Path, units, filter: GPSLockFilter) -> GoPro:
-    stream_info = find_streams(file)
+def load_gopro(file: Path, units, filter: GPSLockFilter = NullGPSLockFilter()) -> GoPro:
+    recording = find_recording(file)
 
-    if not stream_info.meta:
+    if not recording.meta:
         raise IOError(f"Unable to locate metadata stream in '{file}' - is it a GoPro file")
 
     try:
         frame_meta = framemeta_from(
-            file,
-            metameta=stream_info.meta,
+            recording,
             units=units,
             gps_lock_filter=filter
         )
 
-        return GoPro(streams=stream_info, framemeta=frame_meta)
+        return GoPro(recording=recording, framemeta=frame_meta)
 
     except TimeoutExpired:
         traceback.print_exc()
         fatal(f"{file} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
+
+
+class GoproLoader:
+
+    def __init__(self, units, gps_lock_filter: GPSLockFilter = NullGPSLockFilter()):
+        pass
+
+
+    def load(self, recording: GoproRecording):
+        pass
+
+
+def framemeta_from(recording: GoproRecording, units, gps_lock_filter:GPSLockFilter=NullGPSLockFilter()) -> FrameMeta:
+    gpmd_from = load_gpmd_from(recording)
+    return parse_gopro(gpmd_from, units, recording.meta, gps_lock_filter=gps_lock_filter)

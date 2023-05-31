@@ -8,6 +8,8 @@ from PIL.Image import Image
 from geotiler.map import _find_top_left_tile, _tile_coords, _tile_offsets, Tile
 from geotiler.tile.img import _error_image
 
+from gopro_overlay.log import log
+
 
 # Attempt at re-implementing the rendering part of geotiler with a view on performance
 # Use downloader as per geotiler
@@ -55,7 +57,12 @@ class ImageTileCache:
             if d.img is None:
                 img = error_image
             else:
-                img = self.as_image(d.img)
+                try:
+                    img = self.as_image(d.img)
+                except OSError as e:
+                    # somehow the image data is invalid...
+                    log(f"Unable to load image data from {d.url} - {e}")
+                    img = error_image
 
             self.cache[d.url] = img
             converted.append(d._replace(img=img))

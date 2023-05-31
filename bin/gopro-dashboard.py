@@ -12,11 +12,12 @@ from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.buffering import SingleBuffer, DoubleBuffer
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.config import Config
+from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.date_overlap import DateRange
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution
 from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
-    find_streams, FFMPEGNull, ffmpeg_version
+    find_recording, FFMPEGNull, ffmpeg_version
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
@@ -24,7 +25,7 @@ from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
-from gopro_overlay.loading import load_external
+from gopro_overlay.loading import load_external, GoproLoader
 from gopro_overlay.log import log, fatal
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
@@ -129,10 +130,11 @@ if __name__ == "__main__":
 
                 if args.input:
                     inputpath = args.input
-                    stream_info = find_streams(inputpath)
-                    dimensions = stream_info.video.dimension
 
-                    duration = stream_info.video.duration
+                    recording = find_recording(inputpath)
+                    dimensions = recording.video.dimension
+
+                    duration = recording.video.duration
 
                     fns = {
                         "file-created": lambda f: f.ctime,
@@ -141,11 +143,11 @@ if __name__ == "__main__":
                     }
 
                     if args.video_time_start:
-                        start_date = fns[args.video_time_start](stream_info.file)
+                        start_date = fns[args.video_time_start](recording.file)
                         end_date = start_date + duration.timedelta()
 
                     if args.video_time_end:
-                        start_date = fns[args.video_time_end](stream_info.file) - duration.timedelta()
+                        start_date = fns[args.video_time_end](recording.file) - duration.timedelta()
                         end_date = start_date + duration.timedelta()
 
                 else:
@@ -172,6 +174,8 @@ if __name__ == "__main__":
             else:
                 inputpath = args.input
 
+                counter = ReasonCounter()
+
                 gopro = loading.load_gopro(
                     inputpath,
                     units,
@@ -179,13 +183,16 @@ if __name__ == "__main__":
                         dop_max=args.gps_dop_max,
                         speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
                         bbox=args.gps_bbox_lon_lat,
+                        report=counter.because
                     )
                 )
 
+                gpmd_filters.poor_report(counter)
+
                 frame_meta = gopro.framemeta
 
-                dimensions = gopro.streams.video.dimension
-                video_duration = gopro.streams.video.duration
+                dimensions = gopro.recording.video.dimension
+                video_duration = gopro.recording.video.duration
                 packets_per_second = frame_meta.packets_per_second()
 
                 if args.gpx:

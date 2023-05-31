@@ -6,11 +6,11 @@ import pathlib
 from pathlib import Path
 from typing import Optional
 
-from gopro_overlay import ffmpeg
+from gopro_overlay import ffmpeg, loading, gpmd_filters
 from gopro_overlay.arguments import BBoxArgs
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
-from gopro_overlay.framemeta import framemeta_from
+from gopro_overlay.loading import framemeta_from
 from gopro_overlay.framemeta_gpx import framemeta_to_gpx
 from gopro_overlay.gpmd import GPS_FIXED_VALUES
 from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSReportingFilter, GPSDOPFilter, GPSMaxSpeedFilter, GPSBBoxFilter, NullGPSLockFilter
@@ -48,22 +48,19 @@ if __name__ == "__main__":
 
     counter = ReasonCounter()
 
-    stream_info = ffmpeg.find_streams(source)
-    fm = framemeta_from(
+    gopro = loading.load_gopro(
         source,
-        metameta=stream_info.meta,
-        units=units,
-        gps_lock_filter=WorstOfGPSLockFilter(
-            GPSReportingFilter(GPSLockTracker(), rejected=counter.inc("Heuristics")),
-            GPSReportingFilter(bbox_filter, rejected=counter.inc("Outside BBox")),
-            GPSReportingFilter(GPSDOPFilter(args.gps_dop_max), rejected=counter.inc(f"DOP > {args.gps_dop_max}")),
-            GPSReportingFilter(GPSMaxSpeedFilter(units.Quantity(args.gps_speed_max, args.gps_speed_max_units).to("mps").m), rejected=counter.inc(f"Speed > {args.gps_speed_max} {args.gps_speed_max_units}"))
+        units,
+        filter=gpmd_filters.standard(
+            dop_max=args.gps_dop_max,
+            speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
+            bbox=args.gps_bbox_lon_lat,
         )
     )
 
-    if counter.total() > 0:
-        log(f"Note: {counter.total()} GoPro GPS readings were mapped to 'NO_LOCK', for the following reasons:")
-        [log(f"* {k} -> {v}") for k, v in counter.items()]
+    gpmd_filters.poor_report(counter)
+
+    fm = gopro.framemeta
 
     log("Generating GPX")
 

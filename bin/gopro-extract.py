@@ -3,7 +3,7 @@
 import argparse
 import pathlib
 
-from gopro_overlay.ffmpeg import load_gpmd_from
+from gopro_overlay.ffmpeg import load_gpmd_from, find_recording
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract GoPro metadata to data file")
@@ -16,5 +16,7 @@ if __name__ == "__main__":
     dest: pathlib.Path = args.output
     source: pathlib.Path = args.input
 
+    recording = find_recording(source)
+
     with dest.open("wb") as output:
-        output.write(load_gpmd_from(source))
+        output.write(load_gpmd_from(recording))

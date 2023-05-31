@@ -2,8 +2,10 @@
 
 import argparse
 import json
+import pathlib
 
-from gopro_overlay.ffmpeg import load_gpmd_from
+from gopro_overlay import ffmpeg
+from gopro_overlay.ffmpeg import load_gpmd_from, GoproRecording
 from gopro_overlay.gpmd import GoproMeta, interpret_item
 
 
@@ -90,9 +92,8 @@ class DumpAggregateConverter:
                 self.queue.append(data)
 
 
-def dump(input_file, fourcc, output_file):
-    gpmd_from = load_gpmd_from(input_file)
-    meta = GoproMeta.parse(gpmd_from)
+def dump(recording: GoproRecording, fourcc, output_file):
+    meta = GoproMeta.parse(load_gpmd_from(recording))
 
     with open(output_file, 'wt', encoding='utf-8') as file:
         converter = DumpAggregateConverter(file)
@@ -101,9 +102,12 @@ def dump(input_file, fourcc, output_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract GoPro metadata - Contributed by https://github.com/gregbaker")
-    parser.add_argument("input", help="Input file")
-    parser.add_argument("output", help="Output NDJSON file")
+    parser.add_argument("input", help="Input file", type=pathlib.Path)
+    parser.add_argument("output", help="Output NDJSON file", type=pathlib.Path)
     parser.add_argument("--fourcc", "-f", action="store", default='ACCL', help='GPMD fourcc field to extract')
 
     args = parser.parse_args()
-    dump(args.input, args.fourcc, args.output)
+
+    recording = ffmpeg.find_recording(args.input)
+
+    dump(recording, args.fourcc, args.output)

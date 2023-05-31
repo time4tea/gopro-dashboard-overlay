@@ -1,5 +1,4 @@
 import inspect
-import os
 from pathlib import Path
 
 import pytest
@@ -10,8 +9,9 @@ from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.units import units
 
 
-def load_file(path) -> GoproMeta:
-    return GoproMeta.parse(ffmpeg.load_gpmd_from(path))
+def load_file(path: Path) -> GoproMeta:
+    recording = ffmpeg.find_recording(path)
+    return GoproMeta.parse(ffmpeg.load_gpmd_from(recording))
 
 
 def file_path_of_test_asset(name, missing_ok=False) -> Path:
@@ -34,7 +34,7 @@ def test_loading_data_by_frame():
     filepath = file_path_of_test_asset("hero7.mp4")
     meta = load_file(filepath)
 
-    metameta = ffmpeg.find_streams(filepath).meta
+    metameta = ffmpeg.find_recording(filepath).meta
 
     gps_framemeta(
         meta,
@@ -46,7 +46,7 @@ def test_loading_data_by_frame():
 def test_loading_accl():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_streams(filepath)
+    stream_info = ffmpeg.find_recording(filepath)
 
     framemeta = accl_framemeta(meta, units, stream_info.meta)
 
@@ -59,7 +59,7 @@ def test_loading_accl():
 def test_loading_grav():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_streams(filepath)
+    stream_info = ffmpeg.find_recording(filepath)
 
     framemeta = grav_framemeta(meta, units, stream_info.meta)
 
@@ -73,7 +73,7 @@ def test_loading_grav():
 def test_loading_cori():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_streams(filepath)
+    stream_info = ffmpeg.find_recording(filepath)
 
     framemeta = cori_framemeta(meta, units, stream_info.meta)
 
@@ -87,7 +87,7 @@ def test_loading_cori():
 def test_loading_gps_and_accl():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_streams(filepath)
+    stream_info = ffmpeg.find_recording(filepath)
 
     gps_frame_meta = gps_framemeta(meta, units, stream_info.meta)
     accl_frame_meta = accl_framemeta(meta, units, stream_info.meta)
