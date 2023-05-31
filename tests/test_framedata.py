@@ -11,7 +11,7 @@ from gopro_overlay.units import units
 
 def load_file(path: Path) -> GoproMeta:
     recording = ffmpeg.find_recording(path)
-    return GoproMeta.parse(ffmpeg.load_gpmd_from(recording))
+    return GoproMeta.parse(recording.load_gpmd())
 
 
 def file_path_of_test_asset(name, missing_ok=False) -> Path:

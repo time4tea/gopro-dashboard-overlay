@@ -7,7 +7,7 @@ from typing import Optional
 
 import progressbar
 
-from gopro_overlay import timeseries_process, progress_frames, gpmd_filters, loading
+from gopro_overlay import timeseries_process, progress_frames, gpmd_filters
 from gopro_overlay.arguments import gopro_dashboard_arguments
 from gopro_overlay.buffering import SingleBuffer, DoubleBuffer
 from gopro_overlay.common import temp_file_name
@@ -176,16 +176,17 @@ if __name__ == "__main__":
 
                 counter = ReasonCounter()
 
-                gopro = loading.load_gopro(
-                    inputpath,
-                    units,
-                    filter=gpmd_filters.standard(
+                loader = GoproLoader(
+                    units=units,
+                    gps_lock_filter=gpmd_filters.standard(
                         dop_max=args.gps_dop_max,
                         speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
                         bbox=args.gps_bbox_lon_lat,
                         report=counter.because
                     )
                 )
+
+                gopro = loader.load(inputpath)
 
                 gpmd_filters.poor_report(counter)
 

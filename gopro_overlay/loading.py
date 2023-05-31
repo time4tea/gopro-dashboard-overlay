@@ -4,7 +4,7 @@ from pathlib import Path
 from subprocess import TimeoutExpired
 
 from gopro_overlay import gpx, fit
-from gopro_overlay.ffmpeg import GoproRecording, find_recording, MetaMeta, load_gpmd_from
+from gopro_overlay.ffmpeg import GoproRecording, find_recording
 from gopro_overlay.framemeta import FrameMeta, parse_gopro
 from gopro_overlay.gpmd_filters import GPSLockFilter, NullGPSLockFilter
 from gopro_overlay.log import fatal
@@ -21,8 +21,6 @@ def load_external(filepath: Path, units) -> Timeseries:
         fatal(f"Don't recognise filetype from {filepath} - support .gpx and .fit")
 
 
-
-
 @dataclasses.dataclass
 class GoPro:
     recording: GoproRecording
@@ -36,10 +34,12 @@ def load_gopro(file: Path, units, filter: GPSLockFilter = NullGPSLockFilter()) -
         raise IOError(f"Unable to locate metadata stream in '{file}' - is it a GoPro file")
 
     try:
-
-        gpmd_from = load_gpmd_from(recording)
-
-        frame_meta = parse_gopro(gpmd_from, units, recording.meta, gps_lock_filter=filter)
+        frame_meta = parse_gopro(
+            recording.load_gpmd(),
+            units,
+            recording.meta,
+            gps_lock_filter=filter
+        )
 
         return GoPro(recording=recording, framemeta=frame_meta)
 
@@ -51,8 +51,8 @@ def load_gopro(file: Path, units, filter: GPSLockFilter = NullGPSLockFilter()) -
 class GoproLoader:
 
     def __init__(self, units, gps_lock_filter: GPSLockFilter = NullGPSLockFilter()):
-        pass
+        self.units = units
+        self.filter = gps_lock_filter
 
-
-    def load(self, recording: GoproRecording):
-        pass
+    def load(self, file: Path) -> GoPro:
+        return load_gopro(file, self.units, self.filter)

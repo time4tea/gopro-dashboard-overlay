@@ -11,7 +11,7 @@ from xml.etree import ElementTree
 from PIL import Image
 from pint import DimensionalityError
 
-from gopro_overlay import fake, geo, ffmpeg, timeseries_process, loading
+from gopro_overlay import fake, geo, ffmpeg, timeseries_process
 from gopro_overlay.arguments import default_config_location
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import dimension_from, Dimension
@@ -19,6 +19,7 @@ from gopro_overlay.font import load_font
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
+from gopro_overlay.loading import GoproLoader
 from gopro_overlay.log import log
 from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timeunits import timeunits
@@ -73,7 +74,11 @@ if __name__ == "__main__":
     if args.gopro:
         inputpath = args.gopro
 
-        gopro = loading.load_gopro(inputpath, units)
+        loader = GoproLoader(
+            units=units,
+        )
+
+        gopro = loader.load(inputpath)
 
         dimensions = gopro.recording.video.dimension
         timeseries = gopro.framemeta

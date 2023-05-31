@@ -7,12 +7,13 @@ import pathlib
 from pathlib import Path
 from typing import Optional
 
-from gopro_overlay import timeseries_process, loading, gpmd_filters
+from gopro_overlay import timeseries_process, gpmd_filters
 from gopro_overlay.arguments import BBoxArgs
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
 from gopro_overlay.gpx import load_timeseries
+from gopro_overlay.loading import GoproLoader
 from gopro_overlay.log import fatal
 from gopro_overlay.units import units
 
@@ -45,16 +46,17 @@ if __name__ == "__main__":
     else:
         counter = ReasonCounter()
 
-        gopro = loading.load_gopro(
-            source,
-            units,
-            filter=gpmd_filters.standard(
+        loader = GoproLoader(
+            units=units,
+            gps_lock_filter=gpmd_filters.standard(
                 dop_max=args.gps_dop_max,
                 speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
                 bbox=args.gps_bbox_lon_lat,
                 report=counter.because
             )
         )
+
+        gopro = loader.load(source)
 
         gpmd_filters.poor_report(counter)
 

@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     for file in file_list:
         recording = ffmpeg.find_recording(file)
-        meta = GoproMeta.parse(ffmpeg.load_gpmd_from(recording))
+        meta = GoproMeta.parse(recording.load_gpmd())
         found = meta.accept(DetermineFirstLockedGPSUVisitor())
         gps_datetime = found.packet_time
         if gps_datetime is None:

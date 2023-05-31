@@ -4,9 +4,10 @@ from zoneinfo import ZoneInfo
 import gpxpy
 import matplotlib.pyplot as plot
 
-from gopro_overlay import gpx, timeseries_process, loading
+from gopro_overlay import gpx, timeseries_process
 from gopro_overlay.framemeta_gpx import timeseries_to_framemeta, merge_gpx_with_gopro
 from gopro_overlay.gpmd import GPS_FIXED_VALUES
+from gopro_overlay.loading import GoproLoader
 from gopro_overlay.units import units
 
 
@@ -62,10 +63,9 @@ if __name__ == "__main__":
     gpx_speeds = [p.speed for p in points_in(gpx_with_speeds)]
 
     # Calculate speeds from GoPro File
-    gopro = loading.load_gopro(
-        gopro_movie_path,
-        units
-    )
+    loader = GoproLoader(units=units)
+
+    gopro = loader.load(gopro_movie_path)
 
     gopro_file_fm = gopro.framemeta
 

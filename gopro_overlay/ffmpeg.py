@@ -58,6 +58,17 @@ class GoproRecording:
     video: VideoMeta
     meta: Optional[MetaMeta]
 
+    def load_gpmd(self):
+        track = self.meta.stream
+        if track:
+            cmd = ["ffmpeg", "-hide_banner", '-y', '-i', self.location, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
+            result = run(cmd, capture_output=True, timeout=10)
+            if result.returncode != 0:
+                raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")
+            arr = array("b")
+            arr.frombytes(result.stdout)
+            return arr
+
 
 def cut_file(input, output, start, duration):
     streams = find_recording(input)
@@ -117,6 +128,7 @@ def ffmpeg_version(invoke=invoke):
     if match is None:
         raise ValueError(f"Unable to determine ffmpeg version from: {version_line}")
     return match.group(1)
+
 
 def find_frame_duration(filepath, data_stream_number, invoke=invoke):
     ffprobe_output = str(invoke(
@@ -188,7 +200,7 @@ def find_recording(filepath: Path, invoke=invoke, find_frame_duration=find_frame
         meta_meta = None
 
     return GoproRecording(
-        location = filepath,
+        location=filepath,
         file=file_meta(filepath, stat=stat),
         audio=audio_meta,
         video=video_meta,
@@ -205,18 +217,6 @@ def file_meta(filepath: Path, stat=os.stat) -> FileMeta:
         atime=datetime.datetime.fromtimestamp(sr.st_atime, tz=datetime.timezone.utc),
         mtime=datetime.datetime.fromtimestamp(sr.st_mtime, tz=datetime.timezone.utc)
     )
-
-
-def load_gpmd_from(recording: GoproRecording):
-    track = recording.meta.stream
-    if track:
-        cmd = ["ffmpeg", "-hide_banner", '-y', '-i', recording.location, '-codec', 'copy', '-map', '0:%d' % track, '-f', 'rawvideo', "-"]
-        result = run(cmd, capture_output=True, timeout=10)
-        if result.returncode != 0:
-            raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")
-        arr = array("b")
-        arr.frombytes(result.stdout)
-        return arr
 
 
 def ffmpeg_is_installed():
@@ -337,4 +337,3 @@ class FFMPEGOverlayVideo:
 
 if __name__ == "__main__":
     print(ffmpeg_libx264_is_installed())
-

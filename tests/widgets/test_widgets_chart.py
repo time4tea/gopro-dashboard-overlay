@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from gopro_overlay import loading
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import View, Window
 from gopro_overlay.gpmd_filters import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter
+from gopro_overlay.loading import GoproLoader
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
@@ -169,11 +169,12 @@ def load_test_file(inputpath):
     if not inputpath.exists():
         pytest.xfail("contrib file not exist")
 
-    gopro = loading.load_gopro(
-        inputpath,
-        units,
-        filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
+    loader = GoproLoader(
+        units=units,
+        gps_lock_filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
     )
+
+    gopro = loader.load(inputpath)
 
     return gopro.framemeta
 

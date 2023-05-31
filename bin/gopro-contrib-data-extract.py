@@ -5,7 +5,7 @@ import json
 import pathlib
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.ffmpeg import load_gpmd_from, GoproRecording
+from gopro_overlay.ffmpeg import GoproRecording
 from gopro_overlay.gpmd import GoproMeta, interpret_item
 
 
@@ -20,7 +20,7 @@ class DataDumpVisitor:
 
     def vic_STRM(self, item, contents):
         return DataDumpStreamVisitor(
-            fourcc = self._fourcc,
+            fourcc=self._fourcc,
             visit=lambda fourcc, c: self._converter(self._counter, fourcc, c)
         )
 
@@ -44,6 +44,7 @@ class DataDumpStreamVisitor:
                 data = interpret_item(item, self._scale)
                 self._visit(item.fourcc, data)
                 return data
+
             return vi
         else:
             raise AttributeError(attr)
@@ -65,7 +66,7 @@ class DumpAggregateConverter:
         # assume uniform distribution of values between two timestamps
         delta = (end - start) / len(queue)
         for i, item in enumerate(queue):
-            t = start + delta*i
+            t = start + delta * i
             d = {'timestamp': t.isoformat()}
 
             if hasattr(item, '_asdict'):
@@ -93,7 +94,7 @@ class DumpAggregateConverter:
 
 
 def dump(recording: GoproRecording, fourcc, output_file):
-    meta = GoproMeta.parse(load_gpmd_from(recording))
+    meta = GoproMeta.parse(recording.load_gpmd())
 
     with open(output_file, 'wt', encoding='utf-8') as file:
         converter = DumpAggregateConverter(file)
