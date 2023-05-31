@@ -12,7 +12,6 @@ from gopro_overlay.arguments import BBoxArgs
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
-from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSBBoxFilter
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.log import fatal
 from gopro_overlay.units import units
@@ -44,11 +43,6 @@ if __name__ == "__main__":
     if args.gpx:
         ts = load_timeseries(source, units)
     else:
-        if args.gps_bbox_lon_lat:
-            bbox_filter = GPSBBoxFilter(args.gps_bbox_lon_lat)
-        else:
-            bbox_filter = NullGPSLockFilter()
-
         counter = ReasonCounter()
 
         gopro = loading.load_gopro(

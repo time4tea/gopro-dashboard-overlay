@@ -117,7 +117,7 @@ def standard(
         bbox: Optional[BoundingBox] = None,
         report: Callable[[str],None] = lambda x: None
 ) -> GPSLockFilter:
-    if bbox:
+    if bbox is not None:
         bbox_filter = GPSBBoxFilter(bbox=bbox)
     else:
         bbox_filter = NullGPSLockFilter()

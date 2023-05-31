@@ -12,7 +12,6 @@ from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.framemeta_gpx import framemeta_to_gpx
 from gopro_overlay.gpmd import GPS_FIXED_VALUES
-from gopro_overlay.gpmd_filters import GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.log import log, fatal
 from gopro_overlay.units import units
 
@@ -39,11 +38,6 @@ if __name__ == "__main__":
         fatal(f"{source}: No such file or directory")
 
     log(f"Loading GoPro {source}")
-
-    if args.gps_bbox_lon_lat:
-        bbox_filter = GPSBBoxFilter(args.gps_bbox_lon_lat)
-    else:
-        bbox_filter = NullGPSLockFilter()
 
     counter = ReasonCounter()
 
