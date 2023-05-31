@@ -5,17 +5,15 @@ import pytest
 
 from gopro_overlay import loading
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import find_recording
 from gopro_overlay.framemeta import View, Window
 from gopro_overlay.gpmd_filters import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter
-from gopro_overlay.loading import framemeta_from
 from gopro_overlay.point import Coordinate
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 from gopro_overlay.widgets.chart import SimpleChart
 from gopro_overlay.widgets.widgets import Translate, Composite
-from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
+from tests.widgets import test_widgets_setup
 from tests.widgets.test_widgets import time_rendering
 
 font = test_widgets_setup.font

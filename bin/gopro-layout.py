@@ -4,9 +4,7 @@ import argparse
 import os
 import pathlib
 import random
-import traceback
 from datetime import timedelta
-from subprocess import TimeoutExpired
 from time import sleep
 from xml.etree import ElementTree
 
@@ -17,9 +15,7 @@ from gopro_overlay import fake, geo, ffmpeg, timeseries_process, loading
 from gopro_overlay.arguments import default_config_location
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import dimension_from, Dimension
-from gopro_overlay.ffmpeg import find_recording
 from gopro_overlay.font import load_font
-from gopro_overlay.loading import framemeta_from
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout

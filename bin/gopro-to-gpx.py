@@ -6,14 +6,13 @@ import pathlib
 from pathlib import Path
 from typing import Optional
 
-from gopro_overlay import ffmpeg, loading, gpmd_filters
+from gopro_overlay import loading, gpmd_filters
 from gopro_overlay.arguments import BBoxArgs
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
-from gopro_overlay.loading import framemeta_from
 from gopro_overlay.framemeta_gpx import framemeta_to_gpx
 from gopro_overlay.gpmd import GPS_FIXED_VALUES
-from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSReportingFilter, GPSDOPFilter, GPSMaxSpeedFilter, GPSBBoxFilter, NullGPSLockFilter
+from gopro_overlay.gpmd_filters import GPSBBoxFilter, NullGPSLockFilter
 from gopro_overlay.log import log, fatal
 from gopro_overlay.units import units
 

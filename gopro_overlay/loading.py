@@ -36,11 +36,10 @@ def load_gopro(file: Path, units, filter: GPSLockFilter = NullGPSLockFilter()) -
         raise IOError(f"Unable to locate metadata stream in '{file}' - is it a GoPro file")
 
     try:
-        frame_meta = framemeta_from(
-            recording,
-            units=units,
-            gps_lock_filter=filter
-        )
+
+        gpmd_from = load_gpmd_from(recording)
+
+        frame_meta = parse_gopro(gpmd_from, units, recording.meta, gps_lock_filter=filter)
 
         return GoPro(recording=recording, framemeta=frame_meta)
 
@@ -57,8 +56,3 @@ class GoproLoader:
 
     def load(self, recording: GoproRecording):
         pass
-
-
-def framemeta_from(recording: GoproRecording, units, gps_lock_filter:GPSLockFilter=NullGPSLockFilter()) -> FrameMeta:
-    gpmd_from = load_gpmd_from(recording)
-    return parse_gopro(gpmd_from, units, recording.meta, gps_lock_filter=gps_lock_filter)

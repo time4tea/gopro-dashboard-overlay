@@ -11,12 +11,10 @@ from gopro_overlay import timeseries_process, loading, gpmd_filters
 from gopro_overlay.arguments import BBoxArgs
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
-from gopro_overlay.ffmpeg import find_recording
-from gopro_overlay.loading import framemeta_from
 from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
-from gopro_overlay.gpmd_visitors_gps import WorstOfGPSLockFilter, GPSLockTracker, GPSReportingFilter, GPSDOPFilter, GPSMaxSpeedFilter, NullGPSLockFilter, GPSBBoxFilter
+from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSBBoxFilter
 from gopro_overlay.gpx import load_timeseries
-from gopro_overlay.log import log, fatal
+from gopro_overlay.log import fatal
 from gopro_overlay.units import units
 
 if __name__ == "__main__":

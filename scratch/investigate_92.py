@@ -5,8 +5,6 @@ import gpxpy
 import matplotlib.pyplot as plot
 
 from gopro_overlay import gpx, timeseries_process, loading
-from gopro_overlay.ffmpeg import find_recording
-from gopro_overlay.loading import framemeta_from
 from gopro_overlay.framemeta_gpx import timeseries_to_framemeta, merge_gpx_with_gopro
 from gopro_overlay.gpmd import GPS_FIXED_VALUES
 from gopro_overlay.units import units
