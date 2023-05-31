@@ -58,6 +58,7 @@ if __name__ == "__main__":
                 dop_max=args.gps_dop_max,
                 speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
                 bbox=args.gps_bbox_lon_lat,
+                report=counter.because
             )
         )
 
