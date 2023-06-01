@@ -16,6 +16,7 @@ from gopro_overlay.arguments import default_config_location
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import dimension_from, Dimension
 from gopro_overlay.font import load_font
+from gopro_overlay.framemeta import LoadFlag
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout
@@ -76,6 +77,7 @@ if __name__ == "__main__":
 
         loader = GoproLoader(
             units=units,
+            flags={LoadFlag.ACCL, LoadFlag.CORI, LoadFlag.GRAV},
         )
 
         gopro = loader.load(inputpath)
