@@ -217,6 +217,8 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.100.0 [Breaking] Don't load GRAV/ACCL/CORI by default - its slow
+  - [Breaking] Use EXTEND mode for GPX, so only add in additional data items. Use `--gpx-merge OVERWRITE` to restore previous behaviour. Previously it was all-or-none for GPX, now can choose to add hr/cad/power to GPX track from GoPro.
 - 0.99.0 [Internal Changes Only] No user-visible changes expected.
 - 0.98.0 [Feature] Add configurable background colour with `--bg rgba` thanks to [@mishuha](https://github.com/mishuha) in discussion https://github.com/time4tea/gopro-dashboard-overlay/discussions/120 for the concept. 
 - 0.97.0 [Feature] Add new map style "local" - which will connect to a tileserver running locally on port 8000. This may be useful if you want to use a completely custom map - like a hand drawn one.
