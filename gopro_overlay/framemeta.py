@@ -1,7 +1,8 @@
 import bisect
 import datetime
 from datetime import timedelta
-from typing import Callable, List, MutableMapping
+from enum import Enum
+from typing import Callable, List, MutableMapping, Set
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.entry import Entry
@@ -116,6 +117,9 @@ class FrameMeta:
     def __len__(self):
         self.check_modified()
         return len(self.framelist)
+
+    def __getitem__(self, item):
+        return self.frames[self.framelist[item]]
 
     def packets_per_second(self):
         return self.pps
@@ -306,7 +310,18 @@ def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMe
             item.update(**update(closest_previous))
 
 
-def parse_gopro(gpmd_from, units, metameta: MetaMeta, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
+
+class LoadFlag(Enum):
+    ACCL = 1
+    GRAV = 2
+    CORI = 3
+
+
+def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = None, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
+
+    if flags is None:
+        flags = set(list(LoadFlag))
+
     with PoorTimer("parsing").timing():
         with PoorTimer("GPMD", 1).timing():
             gopro_meta = GoproMeta.parse(gpmd_from)
@@ -314,30 +329,33 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta, gps_lock_filter=NullGPSLoc
         with PoorTimer("extract GPS", 1).timing():
             gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta, gps_lock_filter=gps_lock_filter)
 
-        with PoorTimer("extract ACCL", 1).timing():
-            merge_frame_meta(
-                gps_frame_meta,
-                accl_framemeta(gopro_meta, units, metameta=metameta),
-                lambda a: {"accl": a.accl}
-            )
+        if LoadFlag.ACCL in flags:
+            with PoorTimer("extract ACCL", 1).timing():
+                merge_frame_meta(
+                    gps_frame_meta,
+                    accl_framemeta(gopro_meta, units, metameta=metameta),
+                    lambda a: {"accl": a.accl}
+                )
 
-        with PoorTimer("extract GRAV", 1).timing():
-            merge_frame_meta(
-                gps_frame_meta,
-                grav_framemeta(gopro_meta, units, metameta=metameta),
-                lambda a: {"grav": a.grav}
-            )
+        if LoadFlag.GRAV in flags:
+            with PoorTimer("extract GRAV", 1).timing():
+                merge_frame_meta(
+                    gps_frame_meta,
+                    grav_framemeta(gopro_meta, units, metameta=metameta),
+                    lambda a: {"grav": a.grav}
+                )
 
-        with PoorTimer("extract CORI", 1).timing():
-            merge_frame_meta(
-                gps_frame_meta,
-                cori_framemeta(gopro_meta, units, metameta=metameta),
-                lambda a: {"cori": a.cori, "ori": a.ori}
-            )
+        if LoadFlag.CORI in flags:
+            with PoorTimer("extract CORI", 1).timing():
+                merge_frame_meta(
+                    gps_frame_meta,
+                    cori_framemeta(gopro_meta, units, metameta=metameta),
+                    lambda a: {"cori": a.cori, "ori": a.ori}
+                )
 
         return gps_frame_meta
 
 
-def framemeta_from_datafile(datapath, units, metameta: MetaMeta):
+def framemeta_from_datafile(datapath, units, metameta: MetaMeta, flags: Set[LoadFlag] = None):
     with open(datapath, "rb") as data:
-        return parse_gopro(data.read(), units, metameta)
+        return parse_gopro(data.read(), units, metameta, flags)

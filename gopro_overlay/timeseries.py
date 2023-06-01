@@ -53,7 +53,7 @@ class Timeseries:
             self.entries[e.dt] = e
         self.modified = True
 
-    def get(self, dt, interpolate=True):
+    def get(self, dt: datetime.datetime, interpolate=True) -> Entry:
         self.check_modified()
         if not self.dates or dt < self.dates[0]:
             raise ValueError("Date is before start")

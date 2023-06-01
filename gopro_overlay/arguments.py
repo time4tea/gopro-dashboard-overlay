@@ -1,8 +1,11 @@
 import argparse
+import enum
 import pathlib
 import sys
 
 from gopro_overlay import geo
+from gopro_overlay.framemeta import LoadFlag
+from gopro_overlay.framemeta_gpx import MergeMode
 from gopro_overlay.log import fatal
 from gopro_overlay.point import Point, BoundingBox
 
@@ -35,6 +38,41 @@ class ColourArgs(argparse.Action):
         setattr(namespace, self.dest, colour)
 
 
+class EnumNameAction(argparse.Action):
+    """
+    Argparse action for handling Enums
+    """
+
+    def __init__(self, **kwargs):
+        # Pop off the type value
+        enum_type = kwargs.pop("type", None)
+
+        # Ensure an Enum subclass is provided
+        if enum_type is None:
+            raise ValueError("type must be assigned an Enum when using EnumAction")
+        if not issubclass(enum_type, enum.Enum):
+            raise TypeError("type must be an Enum when using EnumAction")
+
+        # Generate choices from the Enum
+        kwargs.setdefault("choices", tuple(e.name for e in enum_type))
+
+        super(EnumNameAction, self).__init__(**kwargs)
+
+        self._enum = enum_type
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        # Convert value back into an Enum
+
+        if isinstance(values, str):
+            value = self._enum[values]
+        elif isinstance(values, list):
+            value = set([self._enum[v] for v in values])
+        else:
+            raise ValueError(f"Cannot parse a {values}")
+
+        setattr(namespace, self.dest, value)
+
+
 default_config_location = pathlib.Path.home() / ".gopro-graphics"
 
 
@@ -49,8 +87,6 @@ def gopro_dashboard_arguments(args=None):
                         help="Output Video File - MP4/MOV/WEBM all supported, see Profiles documentation")
 
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
-    parser.add_argument("--gpx", "--fit", type=pathlib.Path,
-                        help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
     parser.add_argument("--generate", choices=["default", "overlay", "none"], default="default",
@@ -60,15 +96,23 @@ def gopro_dashboard_arguments(args=None):
                              "Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160), Required if --use-gpx-only")
     parser.add_argument("--bg", help="Background Colour - R,G,B,A - each 0-255, no spaces!", default=(0, 0, 0, 0), action=ColourArgs)
 
-    parser.add_argument("--profile",
-                        help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
-
     parser.add_argument("--config-dir", help="Location of config files (api keys, profiles, ...)", type=pathlib.Path,
                         default=default_config_location)
     parser.add_argument("--cache-dir", help="Location of caches (map tiles, ...)", type=pathlib.Path,
                         default=default_config_location)
 
-    parser.add_argument("--double-buffer", action="store_true", help="Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all")
+    render = parser.add_argument_group("Render", "Controlling rendering performance")
+    render.add_argument("--profile", help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
+    render.add_argument("--double-buffer", action="store_true", help="Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all")
+
+    loading = parser.add_argument_group("Loading", "Loading data from GoPro")
+    loading.add_argument("--load", nargs="+", type=LoadFlag, action=EnumNameAction, default=set())
+
+    gpx = parser.add_argument_group("GPX", "Using GPX & Fit Files")
+
+    gpx.add_argument("--gpx", "--fit", type=pathlib.Path, help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
+    gpx.add_argument("--gpx-merge", type=MergeMode, action=EnumNameAction, default=MergeMode.EXTEND,
+                     help="When using GPX/FIT file - OVERWRITE=replace GPS/alt from GoPro with GPX values, EXTEND=just use additional values from GPX/FIT file e.g. hr/cad/power")
 
     only = parser.add_argument_group("GPX Only", "Creating Movies from GPX File only")
 

@@ -6,7 +6,7 @@ import gpxpy
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg import MetaMeta
 from gopro_overlay.framemeta import FrameMeta
-from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
+from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta, MergeMode
 from gopro_overlay.gpmd import GPSFix
 from gopro_overlay.gpx import gpx_to_timeseries
 from gopro_overlay.journey import Journey
@@ -163,7 +163,6 @@ def test_discussion_85_speed_elevation_from_gpx():
     assert entries[2].speed == units.Quantity(0.0, units.mps)
 
 
-
 def file_path_of_test_asset(name, in_dir="gpx") -> Path:
     sourcefile = Path(inspect.getfile(file_path_of_test_asset))
 
@@ -222,16 +221,48 @@ def test_merge_gpx_with_gopro():
     gopro_framemeta = framemeta.framemeta_from_datafile(
         file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
         units,
-        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001)
+        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
+        flags=set()
+    )
+
+    assert gpx_timeseries.min < gopro_framemeta.get(gopro_framemeta.min).dt
+    assert gpx_timeseries.max > gopro_framemeta.get(gopro_framemeta.max).dt
+
+    assert gopro_framemeta[0].alt == units.Quantity(171.843, units.m)
+    assert gopro_framemeta[0].hr is None
+    first_point = gopro_framemeta[0].point
+
+    merge_gpx_with_gopro(gpx_timeseries, gopro_framemeta)
+
+    assert gopro_framemeta[0].point != first_point                # point replaced
+    assert gopro_framemeta[0].alt == units.Quantity(160.2104, units.m)  # alt replaced
+    assert gopro_framemeta[0].hr == units.Quantity(103.0, units.bpm) # hr added
+
+
+def test_merge_gpx_with_gopro_extend_mode():
+    # the two files should be of the same trip
+    gpx_timeseries = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
+    gopro_framemeta = framemeta.framemeta_from_datafile(
+        file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
+        units,
+        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
+        flags=set()
     )
     assert gpx_timeseries.min < gopro_framemeta.get(gopro_framemeta.min).dt
     assert gpx_timeseries.max > gopro_framemeta.get(gopro_framemeta.max).dt
 
-    merge_gpx_with_gopro(gpx_timeseries, gopro_framemeta)
+    assert gopro_framemeta[0].alt == units.Quantity(171.843, units.m)
+    assert gopro_framemeta[0].hr is None
+    first_point = gopro_framemeta[0].point
+
+    merge_gpx_with_gopro(gpx_timeseries, gopro_framemeta, mode=MergeMode.EXTEND)
+
+    assert gopro_framemeta[0].point == first_point                        # point remains
+    assert gopro_framemeta[0].alt == units.Quantity(171.843, units.m)     # alt remains
+    assert gopro_framemeta[0].hr == units.Quantity(103.0, units.bpm)      # hr added
 
 
 def test_merge_gpx_with_gopro_gpx_gps_location_and_speed_takes_priority():
-
     dt = datetime_of(1)
 
     gopro_data = FrameMeta()
@@ -247,8 +278,8 @@ def test_merge_gpx_with_gopro_gpx_gps_location_and_speed_takes_priority():
     assert gopro_data.get(t).point == Point(lat=2, lon=2)
     assert gopro_data.get(t).speed == units.Quantity(2, units.mps)
 
-def test_merge_gpx_with_gopro_gpx_dop_and_gpsfix_are_corrected():
 
+def test_merge_gpx_with_gopro_gpx_dop_and_gpsfix_are_corrected():
     dt = datetime_of(1)
 
     gopro_data = FrameMeta()
@@ -267,7 +298,6 @@ def test_merge_gpx_with_gopro_gpx_dop_and_gpsfix_are_corrected():
 
 
 def test_merge_gpx_with_gopro_speed_is_removed_if_not_present_in_gpx():
-
     dt = datetime_of(1)
 
     gopro_data = FrameMeta()
@@ -281,7 +311,6 @@ def test_merge_gpx_with_gopro_speed_is_removed_if_not_present_in_gpx():
 
     assert gopro_data.get(t).dt == dt
     assert gopro_data.get(t).speed is None
-
 
 
 def test_converting_gpx_to_timeseries_to_framemeta():

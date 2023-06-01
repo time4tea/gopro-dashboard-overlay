@@ -1,5 +1,6 @@
 import datetime
 from datetime import timedelta
+from enum import Enum
 
 import gpxpy
 
@@ -33,7 +34,12 @@ def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0), filt
     return gpx
 
 
-def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta):
+class MergeMode(Enum):
+    EXTEND = 0
+    OVERWRITE = 1
+
+
+def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta, mode: MergeMode = MergeMode.OVERWRITE):
     # pretty hacky merge
     # assume that the GPS timestamps in gopro are basically correct.
     # overwrite the location with the interpolated location from GPX
@@ -55,7 +61,16 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta)
                 "dop": None,
             }
 
-            updates.update(**gpx_entry.items)
+            gpx_items = gpx_entry.items
+
+            if mode == MergeMode.EXTEND:
+                for k in gopro_entry.items.keys():
+                    gpx_items.pop(k, None)
+
+            elif mode == MergeMode.OVERWRITE:
+                pass
+
+            updates.update(gpx_items)
 
             return updates
         except ValueError:

@@ -5,6 +5,8 @@ from typing import Optional
 import pytest
 
 from gopro_overlay.arguments import gopro_dashboard_arguments
+from gopro_overlay.framemeta import LoadFlag
+from gopro_overlay.framemeta_gpx import MergeMode
 from gopro_overlay.geo import ArgsKeyFinder
 from gopro_overlay.point import Point, BoundingBox
 
@@ -103,8 +105,8 @@ def test_profiler():
 
 
 def test_bg():
-    assert do_args("--bg", "1,2,3,4").bg == (1,2,3,4)
-    assert do_args().bg == (0,0,0,0)
+    assert do_args("--bg", "1,2,3,4").bg == (1, 2, 3, 4)
+    assert do_args().bg == (0, 0, 0, 0)
     with pytest.raises(ValueError):
         do_args("--bg", "1,2,3")
 
@@ -130,6 +132,7 @@ def test_include():
     assert do_args().include is None
     assert do_args("--include", "something").include == ["something"]
     assert do_args("--include", "something", "else").include == ["something", "else"]
+
 
 def test_buffers():
     assert not do_args().double_buffer
@@ -163,10 +166,29 @@ def test_cache_dir():
     assert do_args("--cache-dir", "xx-cache-xx").cache_dir == pathlib.Path("xx-cache-xx")
 
 
+def test_load():
+    assert do_args().load == set()
+    assert do_args("--load", "ACCL").load == {LoadFlag.ACCL}
+    assert do_args("--load", "CORI").load == {LoadFlag.CORI}
+    assert do_args("--load", "GRAV").load == {LoadFlag.GRAV}
+    assert do_args("--load", "ACCL", "GRAV").load == {LoadFlag.GRAV, LoadFlag.ACCL}
+
+
 def test_gps_dop():
     assert do_args().gps_dop_max == 10
     assert do_args().gps_speed_max == 60
     assert do_args().gps_speed_max_units == "kph"
+
+
+def test_gpx_merge_mode():
+    assert do_args().gpx_merge == MergeMode.EXTEND
+    assert do_args("--gpx-merge", "EXTEND").gpx_merge == MergeMode.EXTEND
+    assert do_args("--gpx-merge", "OVERWRITE").gpx_merge == MergeMode.OVERWRITE
+
+
+def test_gpx_merge_mode_invalid():
+    with pytest.raises(SystemExit):
+        assert do_args("--gpx-merge", "BOB")
 
 
 def test_gps_bbox():

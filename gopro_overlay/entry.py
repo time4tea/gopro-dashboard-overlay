@@ -1,3 +1,4 @@
+import datetime
 from datetime import timedelta
 
 from gopro_overlay.log import log
@@ -5,7 +6,7 @@ from gopro_overlay.log import log
 
 class Entry:
 
-    def __init__(self, dt, **kwargs):
+    def __init__(self, dt: datetime.datetime, **kwargs):
         self.dt = dt
         self.items = {k: v for k, v in dict(**kwargs).items() if v is not None}
 
@@ -18,7 +19,7 @@ class Entry:
     def __str__(self):
         return f"Entry: {self.dt} - {self.items}"
 
-    def interpolate(self, other, dt):
+    def interpolate(self, other: 'Entry', dt: datetime.datetime):
         if self.dt == other.dt:
             return other
         if self.dt > other.dt:

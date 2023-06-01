@@ -178,6 +178,7 @@ if __name__ == "__main__":
 
                 loader = GoproLoader(
                     units=units,
+                    flags=args.load,
                     gps_lock_filter=gpmd_filters.standard(
                         dop_max=args.gps_dop_max,
                         speed_max=units.Quantity(args.gps_speed_max, args.gps_speed_max_units),
