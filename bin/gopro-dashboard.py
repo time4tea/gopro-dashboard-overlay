@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import datetime
 import sys
+import os
 from importlib import metadata
 from pathlib import Path
 from typing import Optional
