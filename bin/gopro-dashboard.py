@@ -316,6 +316,9 @@ if __name__ == "__main__":
                 log("...Stopping...")
                 pass
             finally:
+                if redirect:
+                    os.remove(redirect)
+
                 for t in [draw_timer]:
                     log(t)
 
