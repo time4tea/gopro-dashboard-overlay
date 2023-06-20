@@ -202,7 +202,7 @@ You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
 then execute (NOTE: extension is `mov`)
 
 ```shell
-venv/bin/gopro-dashboard.py --gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.mov
+venv/bin/gopro-dashboard.py --use-gpx-only --gpx ~/Downloads/Morning_Ride.gpx --profile overlay --overlay-size 1920x1080 GH020073-dashboard.mov
 ```
 if you use `-vcodec rawvideo` file will be really huge
 
