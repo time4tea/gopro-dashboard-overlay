@@ -18,6 +18,8 @@ Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-over
 ![Example Dashboard Image](examples/2022-05-15-example.png)
 ![Example Dashboard Image](examples/2022-06-11-contrib-example.png)
 ![Example Dashboard Image](examples/2022-07-19-contrib-example-plane.jpg)
+![Example Dashboard Image](examples/2023-07-23-contrib-example-ski-pov.png)
+![Example Dashboard Image](examples/2023-07-23-contrib-example-ski-drone.png)
 
 An Example of 'overlay only' mode, which generates movies from GPX files
 ![Example Dashboard Image](examples/2022-11-24-gpx-only-overlay.png)
