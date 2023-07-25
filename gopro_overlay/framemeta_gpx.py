@@ -110,8 +110,7 @@ def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datet
             Entry(
                 dt=point_datetime,
                 timestamp=units.Quantity(offset.millis(), units.number),
-                dop=units.Quantity(10, units.number),
-                **entry.items
+                ** { 'dop': units.Quantity(10, units.number), **entry.items }
             )
         )
 
