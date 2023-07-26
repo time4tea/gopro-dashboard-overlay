@@ -219,6 +219,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.101.0 [Fix] Fix error when loading FIT files that had GPS Accuracy information. Thanks [@rpellerin](https://github.com/rpellerin) 
 - 0.100.0 [Breaking] Don't load GRAV/ACCL/CORI by default - its slow
   - [Breaking] Use EXTEND mode for GPX, so only add in additional data items. Use `--gpx-merge OVERWRITE` to restore previous behaviour. Previously it was all-or-none for GPX, now can choose to add hr/cad/power to GPX track from GoPro.
 - 0.99.0 [Internal Changes Only] No user-visible changes expected.
