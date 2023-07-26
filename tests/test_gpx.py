@@ -322,3 +322,26 @@ def test_converting_gpx_to_timeseries_to_framemeta():
     fm_len = len(gpx_framemeta)
 
     assert fm_len > 11 * ts_len
+
+def test_converting_fit_without_dop_to_framemeta():
+    ts = Timeseries()
+    ts.add(Entry(
+        dt=datetime_of(1),
+    ))
+
+    fm = timeseries_to_framemeta(ts, units)
+
+    assert fm.frames[timeunits(seconds=0)].dop == units.Quantity(10)
+
+
+def test_converting_fit_with_dop_to_framemeta():
+    ts = Timeseries()
+    ts.add(Entry(
+        dt=datetime_of(1),
+        dop=units.Quantity(1)
+    ))
+
+    fm = timeseries_to_framemeta(ts, units)
+
+    assert fm.frames[timeunits(seconds=0)].dop == units.Quantity(1)
+
