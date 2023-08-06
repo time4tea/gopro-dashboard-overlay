@@ -13,8 +13,8 @@ def test_converting_initial_xyz_to_actual_with_orin_hero_9():
     reordered = apply_orin(orin, original)
 
     assert reordered.x == 2
-    assert reordered.z == 1
     assert reordered.y == 3
+    assert reordered.z == 1
 
 
 def test_converting_initial_xyz_to_actual_with_orin_hero_6():
@@ -24,8 +24,8 @@ def test_converting_initial_xyz_to_actual_with_orin_hero_6():
     reordered = apply_orin(orin, original)
 
     assert reordered.x == -2
-    assert reordered.z == 3
     assert reordered.y == 1
+    assert reordered.z == 3
 
 
 def test_converting_initial_xyz_to_actual_with_orin_fusion():
@@ -35,8 +35,8 @@ def test_converting_initial_xyz_to_actual_with_orin_fusion():
     reordered = apply_orin(orin, original)
 
     assert reordered.x == 2
-    assert reordered.z == 3
     assert reordered.y == -1
+    assert reordered.z == 3
 
 
 def test_converting_initial_xyz_to_actual_with_orin_hero8():
@@ -46,5 +46,16 @@ def test_converting_initial_xyz_to_actual_with_orin_hero8():
     reordered = apply_orin(orin, original)
 
     assert reordered.x == -2
-    assert reordered.z == -1
     assert reordered.y == 3
+    assert reordered.z == -1
+
+
+def test_converting_initial_xyz_to_actual_with_orin_max():
+    orin = "XzY"
+    original = XYZ._make([1, 2, 3])
+
+    reordered = apply_orin(orin, original)
+
+    assert reordered.x == 1
+    assert reordered.y == 3
+    assert reordered.z == -2
