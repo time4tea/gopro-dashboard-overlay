@@ -197,11 +197,24 @@ if __name__ == "__main__":
                 video_duration = gopro.recording.video.duration
                 packets_per_second = frame_meta.packets_per_second()
 
+                if len(frame_meta) == 0:
+                    log("No GPS Information found in the Video - Was GPS Recording enabled?")
+                    log("If you have a GPX File, See https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
+                    exit(1)
+
                 if args.gpx:
                     external_file: Path = args.gpx
-                    gpx_timeseries = load_external(external_file, units)
-                    log(f"GPX/FIT Timeseries has {len(gpx_timeseries)} data points.. merging...")
-                    merge_gpx_with_gopro(gpx_timeseries, frame_meta)
+                    fit_or_gpx_timeseries = load_external(external_file, units)
+                    log(f"GPX/FIT file:     {fmtdt(fit_or_gpx_timeseries.min)} -> {fmtdt(fit_or_gpx_timeseries.max)}")
+                    overlap = DateRange(start=frame_meta.min, end=frame_meta.max).overlap_seconds(
+                        DateRange(start=fit_or_gpx_timeseries.min, end=fit_or_gpx_timeseries.max)
+                    )
+
+                    if overlap == 0:
+                        fatal("Video file and GPX/FIT file don't overlap in time -  See https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
+
+                    log(f"GPX/FIT Timeseries has {len(fit_or_gpx_timeseries)} data points.. merging...")
+                    merge_gpx_with_gopro(fit_or_gpx_timeseries, frame_meta)
 
             if args.overlay_size:
                 dimensions = dimension_from(args.overlay_size)
@@ -259,8 +272,7 @@ if __name__ == "__main__":
             if generate == "none":
                 ffmpeg = FFMPEGNull()
             elif generate == "overlay":
-                ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions,
-                                       execution=execution)
+                ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
             else:
                 ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
 
