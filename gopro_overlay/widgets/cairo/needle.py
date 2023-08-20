@@ -74,7 +74,7 @@ class Needle(CairoWidget):
             if rear.cap == cairo.LINE_CAP_BUTT:
                 context.line_to(-rear.length, rear.radius)
                 context.line_to(-rear.length, -rear.radius)
-            elif tip.cap == cairo.LINE_CAP_ROUND:
+            elif rear.cap == cairo.LINE_CAP_ROUND:
                 angle = math.atan2(
                     rear.radius - tip.radius,
                     tip.length + rear.length
@@ -86,7 +86,7 @@ class Needle(CairoWidget):
                 context.arc(-rear.length, 0.0, rear.radius, math.pi / 2.0 - angle, angle - math.pi / 2.0)
                 context.line_to(-rear.length - rear.radius * sin_angle, -rear.radius * cos_angle)
 
-            elif tip.cap == cairo.LINE_CAP_SQUARE:
+            elif rear.cap == cairo.LINE_CAP_SQUARE:
                 context.line_to(-rear.length, rear.radius)
                 context.line_to(-rear.length - rear.radius * math.sqrt(2.0), 0.0)
                 context.line_to(-rear.length, -rear.radius)
