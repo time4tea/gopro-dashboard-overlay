@@ -40,24 +40,24 @@ class FFMPEG:
         libx264s = [x for x in output.split('\n') if "libx264" in x]
         return len(libx264s) > 0
 
-    def path(self):
+    def _path(self):
         if self.location is not None:
             return self.location / self.binary
         else:
             return self.binary
 
     def run(self, args, **kwargs):
-        args_ = [self.path(), *args]
+        args_ = [self._path(), *args]
         log(f"Running {args_}")
         return run(args_, **kwargs)
 
     def invoke(self, args, **kwargs):
-        args_ = [self.path(), *args]
+        args_ = [self._path(), *args]
         log(f"Running {args_}")
         return invoke(args_, **kwargs)
 
     def execute(self, execution: InProcessExecution, args):
-        yield from execution.execute([self.path(), *args])
+        yield from execution.execute([self._path(), *args])
 
 
 if __name__ == "__main__":
