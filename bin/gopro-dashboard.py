@@ -290,7 +290,7 @@ if __name__ == "__main__":
             if args.show_ffmpeg:
                 redirect = None
             else:
-                redirect = temp_file_name()
+                redirect = temp_file_name(suffix=".txt")
                 log(f"FFMPEG Output is in {redirect}")
 
             execution = InProcessExecution(redirect=redirect)

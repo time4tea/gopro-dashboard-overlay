@@ -14,9 +14,6 @@ class FFMPEG:
         self.location = location
         self.binary = binary
 
-    def ffmpeg_location(self):
-        return "ffmpeg"
-
     def ffmpeg(self):
         return FFMPEG(self.location, "ffmpeg")
 

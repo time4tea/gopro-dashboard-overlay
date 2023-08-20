@@ -32,7 +32,6 @@ class FFMPEGOverlay:
     @contextlib.contextmanager
     def generate(self):
         cmd = flatten([
-            self.exe.ffmpeg_location(),
             "-hide_banner",
             "-y",
             self.options.general,
@@ -79,7 +78,6 @@ class FFMPEGOverlayVideo:
     @contextlib.contextmanager
     def generate(self):
         cmd = flatten([
-            self.exe.ffmpeg_location(),
             "-y",
             self.options.general,
             self.options.input,
