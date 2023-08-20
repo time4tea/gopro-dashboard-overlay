@@ -36,8 +36,14 @@ class FFMPEGNull:
 
 class FFMPEGOverlay:
 
-    def __init__(self, ffmpeg: FFMPEG, output: Path, overlay_size: Dimension, options: FFMPEGOptions = None,
-                 execution=None):
+    def __init__(
+            self,
+            ffmpeg: FFMPEG,
+            output: Path,
+            overlay_size: Dimension,
+            options: FFMPEGOptions = None,
+            execution=None
+    ):
         self.exe = ffmpeg
         self.output = output
         self.overlay_size = overlay_size
@@ -65,9 +71,15 @@ class FFMPEGOverlay:
 
 class FFMPEGOverlayVideo:
 
-    def __init__(self, ffmpeg: FFMPEG, input: Path, output: Path, overlay_size: Dimension,
-                 options: FFMPEGOptions = None,
-                 execution=None):
+    def __init__(
+            self,
+            ffmpeg: FFMPEG,
+            input: Path,
+            output: Path,
+            overlay_size: Dimension,
+            options: FFMPEGOptions = None,
+            execution=None
+    ):
         self.exe = ffmpeg
         self.output = output
         self.input = input
