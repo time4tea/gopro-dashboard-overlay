@@ -1,7 +1,7 @@
 from typing import Optional, Any
 
 from gopro_overlay.exceptions import Defect
-from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.ffmpeg_gopro import MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
     CalculateCorrectionFactorsVisitor

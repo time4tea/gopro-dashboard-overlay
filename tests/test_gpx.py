@@ -4,7 +4,7 @@ from pathlib import Path
 import gpxpy
 
 from gopro_overlay import gpx, framemeta
-from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.ffmpeg_gopro import MetaMeta
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta, MergeMode
 from gopro_overlay.gpmd import GPSFix

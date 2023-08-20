@@ -4,7 +4,6 @@ from pathlib import Path
 
 from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.font import load_font
 from gopro_overlay.geo import MapRenderer, MapStyler
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
@@ -12,6 +11,7 @@ from gopro_overlay.privacy import NoPrivacyZone
 from gopro_overlay.timing import PoorTimer
 from gopro_overlay.widgets.widgets import SimpleFrameSupplier
 from tests.approval import approve_image
+from tests.font import load_test_font
 from tests.testenvironment import is_make
 
 # Need reproducible results for approval tests
@@ -22,7 +22,7 @@ framemeta = fake.fake_framemeta(length=timedelta(minutes=10), step=timedelta(sec
 
 renderer = MapRenderer(cache_dir=arguments.default_config_location, styler=MapStyler())
 
-font = load_font("Roboto-Medium.ttf")
+font = load_test_font()
 
 
 @approve_image

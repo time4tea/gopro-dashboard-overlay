@@ -139,6 +139,11 @@ def test_buffers():
     assert do_args("--double-buffer").double_buffer
 
 
+def test_ffmpeg():
+    assert do_args().ffmpeg_dir is None
+    assert do_args("--ffmpeg-dir", "c:/blah/blah").ffmpeg_dir == Path("c:/blah/blah")
+
+
 def test_exclude():
     assert do_args().exclude is None
     assert do_args("--exclude", "something").exclude == ["something"]

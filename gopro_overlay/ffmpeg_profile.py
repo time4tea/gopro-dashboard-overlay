@@ -2,7 +2,7 @@ import json
 import pathlib
 
 from gopro_overlay.config import Config
-from gopro_overlay.ffmpeg import FFMPEGOptions
+from gopro_overlay.ffmpeg_overlay import FFMPEGOptions
 
 
 def load_ffmpeg_profile(config: Config, profile: str):

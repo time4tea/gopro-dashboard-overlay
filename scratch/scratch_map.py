@@ -3,7 +3,7 @@ import pathlib
 
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay
+from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay
 from gopro_overlay.geo import api_key_finder, MapRenderer, MapStyler
 from gopro_overlay.point import Coordinate, Point
 from gopro_overlay.timeunits import timeunits

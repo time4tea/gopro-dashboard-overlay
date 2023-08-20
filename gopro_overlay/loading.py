@@ -5,7 +5,7 @@ from subprocess import TimeoutExpired
 from typing import Set, Optional
 
 from gopro_overlay import gpx, fit
-from gopro_overlay.ffmpeg import GoproRecording, find_recording
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro, GoproRecording
 from gopro_overlay.framemeta import FrameMeta, parse_gopro, LoadFlag
 from gopro_overlay.gpmd_filters import GPSLockFilter, NullGPSLockFilter
 from gopro_overlay.log import fatal
@@ -30,13 +30,15 @@ class GoPro:
 
 class GoproLoader:
 
-    def __init__(self, units, flags: Optional[Set[LoadFlag]] = None, gps_lock_filter: GPSLockFilter = NullGPSLockFilter()):
+    def __init__(self, ffmpeg_gopro: FFMPEGGoPro, units, flags: Optional[Set[LoadFlag]] = None,
+                 gps_lock_filter: GPSLockFilter = NullGPSLockFilter()):
+        self.ffmpeg_gopro = ffmpeg_gopro
         self.units = units
         self.filter = gps_lock_filter
         self.flags = flags if flags is not None else None
 
     def load(self, file: Path) -> GoPro:
-        recording = find_recording(file)
+        recording = self.ffmpeg_gopro.find_recording(file)
 
         if not recording.meta:
             raise IOError(f"Unable to locate metadata stream in '{file}' - is it a GoPro file")
@@ -54,4 +56,6 @@ class GoproLoader:
 
         except TimeoutExpired:
             traceback.print_exc()
-            fatal(f"{file} appears to be located on a slow device. Please ensure both input and output files are on fast disks")
+            fatal(
+                f"{file} appears to be located on a slow device. Please ensure both input and output files are on "
+                f"fast disks")

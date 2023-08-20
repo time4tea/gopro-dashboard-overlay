@@ -2,6 +2,7 @@
 import datetime
 import sys
 from importlib import metadata
+from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from typing import Optional
 
@@ -16,8 +17,9 @@ from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.date_overlap import DateRange
 from gopro_overlay.dimensions import dimension_from
 from gopro_overlay.execution import InProcessExecution
-from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay, ffmpeg_is_installed, ffmpeg_libx264_is_installed, \
-    find_recording, FFMPEGNull, ffmpeg_version
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
+from gopro_overlay.ffmpeg_overlay import FFMPEGNull, FFMPEGOverlay, FFMPEGOverlayVideo
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
@@ -84,27 +86,38 @@ if __name__ == "__main__":
 
     args = gopro_dashboard_arguments()
 
-    version = metadata.version("gopro_overlay")
+    try:
+        version = metadata.version("gopro_overlay")
+    except PackageNotFoundError:
+        version = "local"
+
     log(f"Starting gopro-dashboard version {version}")
 
-    if not ffmpeg_is_installed():
+    ffmpeg_exe = FFMPEG(location=args.ffmpeg_dir)
+
+    if not ffmpeg_exe.is_installed():
         log("Can't start ffmpeg - is it installed?")
         exit(1)
-    if not ffmpeg_libx264_is_installed():
+    if not ffmpeg_exe.libx264_is_installed():
         log("ffmpeg doesn't seem to handle libx264 files - it needs to be compiled with support for this, "
             "check your installation")
         exit(1)
+
     try:
-        log(f"ffmpeg version is {ffmpeg_version()}")
+        log(f"ffmpeg version is {ffmpeg_exe.version()}")
     except ValueError:
         log("ffmpeg version is unknown")
-        pass
 
     log(f"Using Python version {sys.version}")
     if sys.version_info < (3, 10):
         log("*** Python version below 3.10 is not supported, please use supported version of Python")
 
-    font = load_font(args.font)
+    try:
+        font = load_font(args.font)
+    except OSError:
+        fatal(f"Unable to load font '{args.font}' - use --font to choose a font that is installed.")
+
+    ffmpeg_gopro = FFMPEGGoPro(ffmpeg_exe)
 
     # need in this scope for now
     inputpath: Optional[Path] = None
@@ -131,7 +144,7 @@ if __name__ == "__main__":
                 if args.input:
                     inputpath = args.input
 
-                    recording = find_recording(inputpath)
+                    recording = ffmpeg_gopro.find_recording(inputpath)
                     dimensions = recording.video.dimension
 
                     duration = recording.video.duration
@@ -166,9 +179,14 @@ if __name__ == "__main__":
                         DateRange(start=fit_or_gpx_timeseries.min, end=fit_or_gpx_timeseries.max))
 
                     if overlap == 0:
-                        fatal("Video file and GPX/FIT file don't overlap in time -  See https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
+                        fatal(
+                            "Video file and GPX/FIT file don't overlap in time -  See "
+                            "https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie"
+                            "-from-gpx-and-video-not-created-with-gopro"
+                        )
 
-                frame_meta = timeseries_to_framemeta(fit_or_gpx_timeseries, units, start_date=start_date, duration=duration)
+                frame_meta = timeseries_to_framemeta(fit_or_gpx_timeseries, units, start_date=start_date,
+                                                     duration=duration)
                 video_duration = frame_meta.duration()
                 packets_per_second = 10
             else:
@@ -177,6 +195,7 @@ if __name__ == "__main__":
                 counter = ReasonCounter()
 
                 loader = GoproLoader(
+                    ffmpeg_gopro=ffmpeg_gopro,
                     units=units,
                     flags=args.load,
                     gps_lock_filter=gpmd_filters.standard(
@@ -199,7 +218,8 @@ if __name__ == "__main__":
 
                 if len(frame_meta) == 0:
                     log("No GPS Information found in the Video - Was GPS Recording enabled?")
-                    log("If you have a GPX File, See https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
+                    log("If you have a GPX File, See https://github.com/time4tea/gopro-dashboard-overlay/tree/main"
+                        "/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
                     exit(1)
 
                 if args.gpx:
@@ -211,7 +231,10 @@ if __name__ == "__main__":
                     )
 
                     if overlap == 0:
-                        fatal("Video file and GPX/FIT file don't overlap in time -  See https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie-from-gpx-and-video-not-created-with-gopro")
+                        fatal(
+                            "Video file and GPX/FIT file don't overlap in time -  See "
+                            "https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie"
+                            "-from-gpx-and-video-not-created-with-gopro")
 
                     log(f"GPX/FIT Timeseries has {len(fit_or_gpx_timeseries)} data points.. merging...")
                     merge_gpx_with_gopro(fit_or_gpx_timeseries, frame_meta)
@@ -230,10 +253,13 @@ if __name__ == "__main__":
             locked_2d = lambda e: e.gpsfix in GPS_FIXED_VALUES
             locked_3d = lambda e: e.gpsfix == GPSFix.LOCK_3D.value
 
-            frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45), filter_fn=locked_2d)
-            frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3, filter_fn=locked_2d)
+            frame_meta.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45),
+                               filter_fn=locked_2d)
+            frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3,
+                                      filter_fn=locked_2d)
             frame_meta.process(timeseries_process.calculate_odo(), filter_fn=locked_2d)
-            frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3, filter_fn=locked_3d)  # hack
+            frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3,
+                                      filter_fn=locked_3d)  # hack
             frame_meta.process(timeseries_process.filter_locked())
 
         # privacy zone applies everywhere, not just at start, so might not always be suitable...
@@ -272,9 +298,22 @@ if __name__ == "__main__":
             if generate == "none":
                 ffmpeg = FFMPEGNull()
             elif generate == "overlay":
-                ffmpeg = FFMPEGOverlay(output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
+                ffmpeg = FFMPEGOverlay(
+                    ffmpeg=ffmpeg_exe,
+                    output=args.output,
+                    options=ffmpeg_options,
+                    overlay_size=dimensions,
+                    execution=execution
+                )
             else:
-                ffmpeg = FFMPEGOverlayVideo(input=inputpath, output=args.output, options=ffmpeg_options, overlay_size=dimensions, execution=execution)
+                ffmpeg = FFMPEGOverlayVideo(
+                    ffmpeg=ffmpeg_exe,
+                    input=inputpath,
+                    output=args.output,
+                    options=ffmpeg_options,
+                    overlay_size=dimensions,
+                    execution=execution
+                )
 
             draw_timer = PoorTimer("drawing frames")
 
@@ -301,7 +340,9 @@ if __name__ == "__main__":
                 temperature_unit=args.units_temperature,
             )
 
-            layout_creator = create_desired_layout(layout=args.layout, layout_xml=args.layout_xml, dimensions=dimensions, include=args.include, exclude=args.exclude, renderer=renderer, timeseries=frame_meta, font=font,
+            layout_creator = create_desired_layout(layout=args.layout, layout_xml=args.layout_xml,
+                                                   dimensions=dimensions, include=args.include, exclude=args.exclude,
+                                                   renderer=renderer, timeseries=frame_meta, font=font,
                                                    privacy_zone=privacy_zone,
                                                    profiler=profiler, converters=unit_converters)
 
@@ -311,7 +352,8 @@ if __name__ == "__main__":
                 with ffmpeg.generate() as writer:
 
                     if args.double_buffer:
-                        log("*** NOTE: Double Buffer mode is experimental. It is believed to work fine on Linux. Please raise issues if you see it working or not-working. Thanks ***")
+                        log("*** NOTE: Double Buffer mode is experimental. It is believed to work fine on Linux. "
+                            "Please raise issues if you see it working or not-working. Thanks ***")
                         buffer = DoubleBuffer(dimensions, args.bg, writer)
                     else:
                         buffer = SingleBuffer(dimensions, args.bg, writer)

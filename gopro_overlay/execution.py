@@ -13,7 +13,7 @@ class InProcessExecution:
 
     def execute(self, cmd):
         try:
-            log(f"Executing '{' '.join(cmd)}'")
+            log(f"Executing {cmd}")
             if self.redirect:
                 with open(self.redirect, "w") as std:
                     process = self.popen(cmd, stdin=subprocess.PIPE, stdout=std, stderr=std)

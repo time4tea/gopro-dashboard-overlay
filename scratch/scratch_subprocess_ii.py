@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay
+from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay
 from gopro_overlay.font import load_font
 from gopro_overlay.widgets.text import Text
 

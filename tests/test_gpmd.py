@@ -8,7 +8,7 @@ from typing import Tuple
 import pytest
 
 from gopro_overlay import ffmpeg
-from gopro_overlay.ffmpeg import GoproRecording
+from gopro_overlay.ffmpeg_gopro import GoproRecording
 from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \

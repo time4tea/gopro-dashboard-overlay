@@ -1,5 +1,4 @@
 import contextlib
-import dbm.ndbm
 import itertools
 import os
 import pathlib
@@ -10,6 +9,7 @@ import geotiler
 from geotiler.cache import caching_downloader
 from geotiler.provider import MapProvider
 from geotiler.tile.io import fetch_tiles
+from sqlitedict import SqliteDict
 
 from gopro_overlay.config import Config
 from gopro_overlay.geo_render import my_render_map
@@ -115,21 +115,21 @@ def attrs_for_style(name):
         raise KeyError(f"Unknown map provider: {name}")
 
 
-def dbm_downloader(dbm_file):
+def sqlite_downloader(db: SqliteDict):
     def get_key(key):
-        return dbm_file.get(key, None)
+        return db.get(key, None)
 
     def set_key(key, value):
         if value:
-            dbm_file.setdefault(key, value)
+            db.setdefault(key, value)
 
     return partial(caching_downloader, get_key, set_key, fetch_tiles)
 
 
-def dbm_caching_renderer(provider: MapProvider, dbm_file):
+def sqlite_caching_renderer(provider: MapProvider, db: SqliteDict):
     def render(map, tiles=None, **kwargs):
         map.provider = provider
-        return my_render_map(map, tiles, downloader=dbm_downloader(dbm_file), **kwargs)
+        return my_render_map(map, tiles, downloader=sqlite_downloader(db), **kwargs)
 
     return render
 
@@ -241,7 +241,10 @@ class MapRenderer:
         map = MapProvider(attrs, key)
 
         if attrs.get("cache", True):
-            with dbm.ndbm.open(str(self.cache_dir.joinpath("tilecache.ndbm")), "c") as db:
-                yield dbm_caching_renderer(map, db)
+            with SqliteDict(
+                    filename=str(self.cache_dir.joinpath("tilecache.sqlite")),
+                    autocommit=True
+            ) as db:
+                yield sqlite_caching_renderer(map, db)
         else:
             yield no_caching_renderer(map)

@@ -3,7 +3,7 @@ import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlayVideo, FFMPEGOverlay
+from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay, FFMPEGOverlayVideo
 
 if __name__ == "__main__":
 

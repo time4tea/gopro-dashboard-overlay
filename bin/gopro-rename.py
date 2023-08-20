@@ -6,20 +6,30 @@ import pathlib
 import re
 from typing import List
 
-from gopro_overlay import functional, filenaming, ffmpeg, geocode
+from gopro_overlay import functional, filenaming, geocode
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_visitors_gps import DetermineFirstLockedGPSUVisitor
 from gopro_overlay.log import log
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Rename a series of GoPro files by date. Does nothing (so its safe) by default.")
+    parser = argparse.ArgumentParser(
+        description="Rename a series of GoPro files by date. Does nothing (so its safe) by default.")
+    parser.add_argument("--ffmpeg-dir", type=pathlib.Path,
+                        help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
-    parser.add_argument("file", type=pathlib.Path, nargs="+", help="The files to rename, or directory/ies containing files")
+    parser.add_argument("file", type=pathlib.Path, nargs="+",
+                        help="The files to rename, or directory/ies containing files")
     parser.add_argument("-t", "--touch", action="store_true", help="change the modification time of the file")
-    parser.add_argument("-to", "--touch-only", action="store_true", help="change the modification time of the file only - don't rename")
-    parser.add_argument("--desc", help="a descriptive name to add to the filename - the filename will be yyyymmdd-hhmmss-{desc}.MP4")
-    parser.add_argument("--geo", action="store_true", help="[EXPERIMENTAL] Use Geocode.xyz to add description for you (city-state) - see https://geocode.xyz/pricing for terms")
-    parser.add_argument("-y", "--yes", action="store_true", help="Rename the files, don't just print what would be done")
+    parser.add_argument("-to", "--touch-only", action="store_true",
+                        help="change the modification time of the file only - don't rename")
+    parser.add_argument("--desc",
+                        help="a descriptive name to add to the filename - the filename will be yyyymmdd-hhmmss-{desc}.MP4")
+    parser.add_argument("--geo", action="store_true",
+                        help="[EXPERIMENTAL] Use Geocode.xyz to add description for you (city-state) - see https://geocode.xyz/pricing for terms")
+    parser.add_argument("-y", "--yes", action="store_true",
+                        help="Rename the files, don't just print what would be done")
     parser.add_argument("--dirs", action="store_true", help="Allow directory")
     parser.add_argument("--geocode-key", help="geocode.xyz api key")
 
@@ -45,8 +55,10 @@ if __name__ == "__main__":
 
     geocoder = geocode.GeoCode(key=args.geocode_key)
 
+    ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
+
     for file in file_list:
-        recording = ffmpeg.find_recording(file)
+        recording = ffmpeg_gopro.find_recording(file)
         meta = GoproMeta.parse(recording.load_gpmd())
         found = meta.accept(DetermineFirstLockedGPSUVisitor())
         gps_datetime = found.packet_time

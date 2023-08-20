@@ -5,7 +5,7 @@ from pathlib import Path
 from gopro_overlay import geo, arguments
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.ffmpeg_gopro import MetaMeta
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from_datafile
 from gopro_overlay.geo import MapRenderer, ConfigKeyFinder, attrs_for_style, MapStyler

@@ -8,7 +8,7 @@ from PIL import Image
 
 from gopro_overlay import ffmpeg
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGOverlayVideo, FFMPEGOptions
+from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay, FFMPEGOptions, FFMPEGOverlayVideo
 from gopro_overlay.timeunits import timeunits
 
 ffprobe_output = (Path(__file__).parent / "test_ffmpeg_ffprobe_output.json").read_text()

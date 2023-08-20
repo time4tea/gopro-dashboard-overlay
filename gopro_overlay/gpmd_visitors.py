@@ -1,6 +1,6 @@
 import collections
 
-from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.ffmpeg_gopro import MetaMeta
 from gopro_overlay.gpmd import interpret_item
 from gopro_overlay.timeunits import timeunits
 

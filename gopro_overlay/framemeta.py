@@ -6,7 +6,7 @@ from typing import Callable, List, MutableMapping, Set
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.entry import Entry
-from gopro_overlay.ffmpeg import MetaMeta
+from gopro_overlay.ffmpeg_gopro import MetaMeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
 from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter

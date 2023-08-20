@@ -1,12 +1,12 @@
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay
-from gopro_overlay.font import load_font
+from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.text import CachingText
 from gopro_overlay.widgets.widgets import Scene, SimpleFrameSupplier
+from tests.font import load_test_font
 
-font = load_font("Roboto-Medium.ttf")
+font = load_test_font()
 
 
 def test_overlay_only():

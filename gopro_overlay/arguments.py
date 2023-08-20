@@ -104,6 +104,7 @@ def gopro_dashboard_arguments(args=None):
     render = parser.add_argument_group("Render", "Controlling rendering performance")
     render.add_argument("--profile", help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
     render.add_argument("--double-buffer", action="store_true", help="Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all")
+    render.add_argument("--ffmpeg-dir", type=pathlib.Path, help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
     loading = parser.add_argument_group("Loading", "Loading data from GoPro")
     loading.add_argument("--load", nargs="+", type=LoadFlag, action=EnumNameAction, default=set())

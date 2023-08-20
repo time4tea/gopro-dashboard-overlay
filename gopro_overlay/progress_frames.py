@@ -13,7 +13,10 @@ class Rate(FormatWidgetMixin, TimeSensitiveWidgetBase):
         TimeSensitiveWidgetBase.__init__(self, **kwargs)
 
     def _speed(self, value, elapsed):
-        return float(value) / elapsed
+        if elapsed == 0.0:
+            return float(value)
+        else:
+            return float(value) / elapsed
 
     def __call__(self, progress, data, value=None, total_seconds_elapsed=None):
         if value is None:

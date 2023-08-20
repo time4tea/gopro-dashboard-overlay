@@ -11,6 +11,8 @@ from gopro_overlay import timeseries_process, gpmd_filters
 from gopro_overlay.arguments import BBoxArgs
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta import LoadFlag
 from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
 from gopro_overlay.gpx import load_timeseries
@@ -21,14 +23,20 @@ from gopro_overlay.units import units
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Convert GoPro MP4 file / GPX File to CSV")
+    parser.add_argument("--ffmpeg-dir", type=pathlib.Path,
+                        help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
-    parser.add_argument("--every", default=0, type=int, help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
+    parser.add_argument("--every", default=0, type=int,
+                        help="Output a point every 'n' seconds. Default is output all points (usually 20/s)")
     parser.add_argument("--only-locked", action="store_true", help="Only output points where GPS is locked")
 
-    parser.add_argument("--gps-dop-max", type=float, default=10, help="Max DOP - Points with greater DOP will be considered 'Not Locked'")
-    parser.add_argument("--gps-speed-max", type=float, default=60, help="Max GPS Speed - Points with greater speed will be considered 'Not Locked'")
+    parser.add_argument("--gps-dop-max", type=float, default=10,
+                        help="Max DOP - Points with greater DOP will be considered 'Not Locked'")
+    parser.add_argument("--gps-speed-max", type=float, default=60,
+                        help="Max GPS Speed - Points with greater speed will be considered 'Not Locked'")
     parser.add_argument("--gps-speed-max-units", default="kph", help="Units for --gps-speed-max")
-    parser.add_argument("--gps-bbox-lon-lat", action=BBoxArgs, help="Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat")
+    parser.add_argument("--gps-bbox-lon-lat", action=BBoxArgs,
+                        help="Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat")
 
     parser.add_argument("input", type=pathlib.Path, help="Input file")
     parser.add_argument("output", type=pathlib.Path, nargs="?", default="-", help="Output CSV file (default stdout)")
@@ -42,12 +50,15 @@ if __name__ == "__main__":
     if not source.exists():
         fatal(f"{source}: No such file or directory")
 
+    ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
+
     if args.gpx:
         ts = load_timeseries(source, units)
     else:
         counter = ReasonCounter()
 
         loader = GoproLoader(
+            ffmpeg_gopro=ffmpeg_gopro,
             units=units,
             flags={LoadFlag.ACCL, LoadFlag.CORI, LoadFlag.GRAV},
             gps_lock_filter=gpmd_filters.standard(

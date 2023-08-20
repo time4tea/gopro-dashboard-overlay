@@ -33,12 +33,11 @@ class CachingText(Widget):
         cached = self.cache.get(text, None)
 
         if cached is None:
-
             x0, y0, x1, y1 = self.font.getbbox(
                 text=text,
                 stroke_width=self.stroke_width,
                 anchor=self.anchor,
-                direction=self.direction
+                direction=None if self.direction == "ltr" else self.direction
             )
 
             if x0 < 0:
@@ -53,7 +52,7 @@ class CachingText(Widget):
                 (abs(x0), 0),
                 text,
                 anchor=self.anchor,
-                direction=self.direction,
+                direction=None if self.direction == "ltr" else self.direction,
                 font=self.font,
                 fill=self.fill,
                 stroke_width=self.stroke_width,
@@ -92,7 +91,7 @@ class Text(Widget):
             self.at.tuple(),
             self.value(),
             anchor=self.anchor,
-            direction=self.direction,
+            direction=None if self.direction == "ltr" else self.direction,
             font=self.font,
             fill=self.fill,
             stroke_width=self.stroke_width,

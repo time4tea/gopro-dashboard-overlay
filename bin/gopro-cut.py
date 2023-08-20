@@ -3,7 +3,8 @@
 import argparse
 import os.path
 
-from gopro_overlay.ffmpeg import cut_file
+from gopro_overlay.ffmpeg import cut_file, FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.parsing import parse_time
 
 
@@ -17,6 +18,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract section of GoPro Files")
 
     parser.add_argument("input", help="A single MP4 file ")
+    parser.add_argument("--ffmpeg-dir", type=pathlib.Path, help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
     parser.add_argument("--start", help="Time to start (hh:mm:ss.SSSSSS)")
     parser.add_argument("--end", help="Time to end (hh:mm:ss.SSSSSS)")
@@ -48,4 +50,6 @@ if __name__ == "__main__":
     if duration == 0:
         raise ValueError("Duration should be more than zero")
 
-    cut_file(args.input, args.output, from_seconds, duration)
+    ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
+
+    ffmpeg_gopro.cut_file(args.input, args.output, from_seconds, duration)

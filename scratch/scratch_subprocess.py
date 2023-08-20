@@ -11,7 +11,7 @@ from typing import Callable
 from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg import FFMPEGOverlay, FFMPEGOptions
+from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay, FFMPEGOptions
 from gopro_overlay.font import load_font
 from gopro_overlay.widgets.text import Text
 

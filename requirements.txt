@@ -13,4 +13,5 @@ geographiclib==1.52
 progressbar2==4.2.0
 requests==2.28.2
 pycairo==1.23.0
+sqlitedict==2.1.0
 pytest

@@ -4,8 +4,8 @@ import argparse
 import json
 import pathlib
 
-from gopro_overlay import ffmpeg
-from gopro_overlay.ffmpeg import GoproRecording
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
 from gopro_overlay.gpmd import GoproMeta, interpret_item
 
 
@@ -103,12 +103,15 @@ def dump(recording: GoproRecording, fourcc, output_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract GoPro metadata - Contributed by https://github.com/gregbaker")
+    parser.add_argument("--ffmpeg-dir", type=pathlib.Path, help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
     parser.add_argument("input", help="Input file", type=pathlib.Path)
     parser.add_argument("output", help="Output NDJSON file", type=pathlib.Path)
     parser.add_argument("--fourcc", "-f", action="store", default='ACCL', help='GPMD fourcc field to extract')
 
     args = parser.parse_args()
 
-    recording = ffmpeg.find_recording(args.input)
+    ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
+
+    recording = ffmpeg_gopro.find_recording(args.input)
 
     dump(recording, args.fourcc, args.output)
