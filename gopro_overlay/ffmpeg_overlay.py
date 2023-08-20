@@ -9,6 +9,21 @@ from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.functional import flatten
 
 
+class FFMPEGOptions:
+
+    def __init__(self, input=None, output=None, filter_spec=None):
+        self.input = input if input is not None else []
+        self.output = output if output is not None else ["-vcodec", "libx264", "-preset", "veryfast"]
+        self.filter_complex = filter_spec if filter_spec is not None else "[0:v][1:v]overlay"
+        self.general = ["-hide_banner", "-loglevel", "info"]
+
+    def set_input_options(self, options):
+        self.input = options
+
+    def set_output_options(self, options):
+        self.output = options
+
+
 class FFMPEGNull:
 
     def __init__(self):
@@ -46,21 +61,6 @@ class FFMPEGOverlay:
         ])
 
         yield from self.exe.execute(self.execution, cmd)
-
-
-class FFMPEGOptions:
-
-    def __init__(self, input=None, output=None, filter_spec=None):
-        self.input = input if input is not None else []
-        self.output = output if output is not None else ["-vcodec", "libx264", "-preset", "veryfast"]
-        self.filter_complex = filter_spec if filter_spec is not None else "[0:v][1:v]overlay"
-        self.general = ["-hide_banner", "-loglevel", "info"]
-
-    def set_input_options(self, options):
-        self.input = options
-
-    def set_output_options(self, options):
-        self.output = options
 
 
 class FFMPEGOverlayVideo:
