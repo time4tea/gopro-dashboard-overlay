@@ -49,7 +49,7 @@ class FFMPEGGoPro:
                  output]
             )
 
-    def find_frame_duration(self, filepath, data_stream_number, invoke=invoke):
+    def find_frame_duration(self, filepath, data_stream_number):
         ffprobe_output = str(self.exe.ffprobe().invoke(
             ["-hide_banner",
              "-print_format", "json",
@@ -118,7 +118,7 @@ class FFMPEGGoPro:
                 stream=data_stream_number,
                 frame_count=int(meta["nb_frames"]),
                 timebase=int(meta["time_base"].split("/")[1]),
-                frame_duration=self.find_frame_duration(filepath, data_stream_number, invoke)
+                frame_duration=self.find_frame_duration(filepath, data_stream_number)
             )
         else:
             meta_meta = None

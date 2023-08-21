@@ -7,8 +7,8 @@ from typing import Tuple
 
 import pytest
 
-from gopro_overlay import ffmpeg
-from gopro_overlay.ffmpeg_gopro import GoproRecording
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
 from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
@@ -22,12 +22,12 @@ from gopro_overlay.units import units
 from tests.test_framedata import load_file
 
 
-def path_of_meta(name):
+def path_of_meta(name) -> Path:
     sourcefile = Path(inspect.getfile(path_of_meta))
 
     meta_dir = sourcefile.parents[0].joinpath("meta")
 
-    return os.path.join(meta_dir, name)
+    return meta_dir / name
 
 
 def load_meta(name):
@@ -275,7 +275,9 @@ def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[GoproRecording, Gop
         if missing_ok:
             pytest.xfail(f"Missing file {filepath} and this is OK")
 
-    return ffmpeg.find_recording(filepath), load_file(filepath)
+    g = FFMPEGGoPro(FFMPEG())
+
+    return g.find_recording(filepath), load_file(filepath)
 
 
 # TODO - get time-lapse and time-warp for inclusion

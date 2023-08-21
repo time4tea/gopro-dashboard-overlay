@@ -4,6 +4,8 @@ from pathlib import Path
 import pytest
 
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta import View, Window
 from gopro_overlay.gpmd_filters import WorstOfGPSLockFilter, GPSLockTracker, GPSDOPFilter, GPSMaxSpeedFilter
 from gopro_overlay.loading import GoproLoader
@@ -170,6 +172,7 @@ def load_test_file(inputpath):
         pytest.xfail("contrib file not exist")
 
     loader = GoproLoader(
+        ffmpeg_gopro=FFMPEGGoPro(FFMPEG()),
         units=units,
         gps_lock_filter=WorstOfGPSLockFilter(GPSLockTracker(), GPSDOPFilter(10), GPSMaxSpeedFilter(20))
     )

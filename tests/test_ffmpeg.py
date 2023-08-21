@@ -1,17 +1,28 @@
+import dataclasses
 import os
 from io import BytesIO
 from os import stat_result
 from pathlib import Path
+from typing import List, Optional
 
 import pytest
 from PIL import Image
 
-from gopro_overlay import ffmpeg
+from gopro_overlay import functional
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay, FFMPEGOptions, FFMPEGOverlayVideo
 from gopro_overlay.timeunits import timeunits
 
 ffprobe_output = (Path(__file__).parent / "test_ffmpeg_ffprobe_output.json").read_text()
+
+
+@dataclasses.dataclass(frozen=True)
+class Invocation:
+    args: List[str]
+    stderr: Optional[str] = None
+    stdout: Optional[str] = None
 
 
 class objectview(object):
@@ -19,23 +30,23 @@ class objectview(object):
         self.__dict__ = d
 
 
-def fake_invoke(stderr="", stdout="", expected=None):
-    def invoked(commands):
-        if expected is not None:
-            assert commands == expected
+def fake_invoke(*responses: Invocation):
+    def invoked(given_args: List[str]):
+        stringified = [str(x) for x in given_args]
+        found = next(x for x in responses if x.args == stringified)
 
         return objectview({
-            "stderr": stderr,
-            "stdout": stdout,
+            "stderr": found.stderr,
+            "stdout": found.stdout,
         })
 
     return invoked
 
 
 def test_finding_ffmpeg_version():
-    version = ffmpeg.ffmpeg_version(
-        invoke=fake_invoke(
-            expected=["ffmpeg", "-version"],
+    version = FFMPEG(invoke_fn=fake_invoke(
+        Invocation(
+            args=["ffmpeg", "-version"],
             stdout="""ffmpeg version 4.4.2-0ubuntu0.22.04.1 Copyright (c) 2000-2021 the FFmpeg developers
 built with gcc 11 (Ubuntu 11.2.0-19ubuntu1)
 configuration: --prefix=/usr --extra-version=0ubuntu0.22.04.1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librabbitmq --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opencl --enable-opengl --enable-sdl2 --enable-pocketsphinx --enable-librsvg --enable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-shared
@@ -47,19 +58,17 @@ libavfilter     7.110.100 /  7.110.100
 libswscale      5.  9.100 /  5.  9.100
 libswresample   3.  9.100 /  3.  9.100
 libpostproc    55.  9.100 / 55.  9.100
-"""
-        )
+""")
     )
+    ).version()
     assert version == "4.4.2-0ubuntu0.22.04.1"
 
 
 def test_finding_frame_duration():
-    duration = ffmpeg.find_frame_duration(
-        "whatever-file",
-        data_stream_number=306,
-        invoke=fake_invoke(
-            expected=['ffprobe', '-hide_banner', '-print_format', 'json', '-show_packets', '-select_streams', "306",
-                      '-read_intervals', '%+#1', 'whatever-file'],
+    exe = FFMPEG(invoke_fn=fake_invoke(
+        Invocation(
+            args=['ffprobe', '-hide_banner', '-print_format', 'json', '-show_packets', '-select_streams', "306",
+                  '-read_intervals', '%+#1', 'whatever-file'],
             stdout="""{    "packets": [
         {
             "codec_type": "data",
@@ -75,30 +84,46 @@ def test_finding_frame_duration():
             "flags": "K_"
         }
     ]
-}"""
-        )
-    )
+}""")))
+
+    duration = FFMPEGGoPro(exe).find_frame_duration("whatever-file", data_stream_number=306)
     assert duration == 500
 
 
 def test_parsing_stream_information():
-    def find_frame(filepath, data_stream, *args):
-        assert filepath == "whatever"
-        assert data_stream == 3
-        return 1001
-
     def stat(file):
         return stat_result([000, 1234, 123, 1, 1000, 1000, 9876, 10, 20, 30])
 
-    streams = ffmpeg.find_recording(
-        "whatever",
-        invoke=fake_invoke(
-            expected=["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", "whatever"],
+    exe = FFMPEG(invoke_fn=fake_invoke(
+        Invocation(
+            args=["ffprobe", "-hide_banner", "-print_format", "json", "-show_streams", "whatever"],
             stdout=ffprobe_output
         ),
-        find_frame_duration=find_frame,
-        stat=stat
-    )
+        Invocation(
+            args=['ffprobe', '-hide_banner', '-print_format', 'json', '-show_packets', '-select_streams', '3',
+                  '-read_intervals', '%+#1', 'whatever'],
+            stdout="""{
+    "packets": [
+        {
+            "codec_type": "data",
+            "stream_index": 3,
+            "pts": 0,
+            "pts_time": "0.000000",
+            "dts": 0,
+            "dts_time": "0.000000",
+            "duration": 1001,
+            "duration_time": "1.001000",
+            "size": "6856",
+            "pos": "2842057",
+            "flags": "K_"
+        }
+    ]
+}
+"""
+        )
+    ))
+
+    streams = FFMPEGGoPro(exe).find_recording(Path("whatever"), stat=stat)
 
     assert streams.video.stream == 0
     assert streams.video.dimension == Dimension(1920, 1080)
@@ -141,6 +166,7 @@ def test_ffmpeg_generate_execute():
     fake = FakeExecution()
 
     ffmpeg = FFMPEGOverlay(
+        ffmpeg=FFMPEG(),
         output=Path("output"),
         overlay_size=Dimension(100, 200),
         execution=fake
@@ -170,7 +196,13 @@ def test_ffmpeg_generate_execute():
 def test_ffmpeg_overlay_execute_default():
     fake = FakeExecution()
 
-    ffmpeg = FFMPEGOverlayVideo(input=Path("input"), output=Path("output"), overlay_size=Dimension(3, 4), execution=fake)
+    ffmpeg = FFMPEGOverlayVideo(
+        ffmpeg=FFMPEG(),
+        input=Path("input"),
+        output=Path("output"),
+        overlay_size=Dimension(3, 4),
+        execution=fake
+    )
 
     with ffmpeg.generate():
         pass
@@ -196,9 +228,14 @@ def test_ffmpeg_overlay_execute_default():
 def test_ffmpeg_overlay_execute_options():
     fake = FakeExecution()
 
-    ffmpeg = FFMPEGOverlayVideo(input="input", output="output",
-                                options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
-                                overlay_size=Dimension(3, 4), execution=fake)
+    ffmpeg = FFMPEGOverlayVideo(
+        ffmpeg=FFMPEG(),
+        input="input",
+        output="output",
+        options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
+        overlay_size=Dimension(3, 4),
+        execution=fake
+    )
 
     with ffmpeg.generate():
         pass
@@ -220,20 +257,22 @@ def test_ffmpeg_overlay_execute_options():
         "output"
     ]
 
+
 mydir = Path(os.path.dirname(__file__))
 top = mydir.parent
 clip = top / "render" / "clip.MP4"
+
 
 def test_extract_frame():
     if not clip.exists():
         pytest.xfail("Clip doesn't exist - should locally!")
 
-    dimension = ffmpeg.find_recording(clip).video.dimension
-    Image.frombytes(mode="RGBA", size=dimension.tuple(), data=ffmpeg.load_frame(clip, timeunits(seconds=2)))
+    g = FFMPEGGoPro(FFMPEG())
 
-
+    dimension = g.find_recording(clip).video.dimension
+    Image.frombytes(mode="RGBA", size=dimension.tuple(), data=g.load_frame(clip, timeunits(seconds=2)))
 
 
 def test_flatten():
     l = ["a", ["b", "c"], "d", ["e", "f", "g"]]
-    assert ffmpeg.flatten(l) == ["a", "b", "c", "d", "e", "f", "g"]
+    assert functional.flatten(l) == ["a", "b", "c", "d", "e", "f", "g"]

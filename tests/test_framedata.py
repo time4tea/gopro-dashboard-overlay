@@ -3,14 +3,17 @@ from pathlib import Path
 
 import pytest
 
-from gopro_overlay import ffmpeg
+from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta, cori_framemeta
 from gopro_overlay.gpmd import GoproMeta
 from gopro_overlay.units import units
 
+g = FFMPEGGoPro(FFMPEG())
+
 
 def load_file(path: Path) -> GoproMeta:
-    recording = ffmpeg.find_recording(path)
+    recording = g.find_recording(path)
     return GoproMeta.parse(recording.load_gpmd())
 
 
@@ -34,7 +37,7 @@ def test_loading_data_by_frame():
     filepath = file_path_of_test_asset("hero7.mp4")
     meta = load_file(filepath)
 
-    metameta = ffmpeg.find_recording(filepath).meta
+    metameta = g.find_recording(filepath).meta
 
     gps_framemeta(
         meta,
@@ -46,7 +49,7 @@ def test_loading_data_by_frame():
 def test_loading_accl():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_recording(filepath)
+    stream_info = g.find_recording(filepath)
 
     framemeta = accl_framemeta(meta, units, stream_info.meta)
 
@@ -59,7 +62,7 @@ def test_loading_accl():
 def test_loading_grav():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_recording(filepath)
+    stream_info = g.find_recording(filepath)
 
     framemeta = grav_framemeta(meta, units, stream_info.meta)
 
@@ -73,7 +76,7 @@ def test_loading_grav():
 def test_loading_cori():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_recording(filepath)
+    stream_info = g.find_recording(filepath)
 
     framemeta = cori_framemeta(meta, units, stream_info.meta)
 
@@ -87,7 +90,7 @@ def test_loading_cori():
 def test_loading_gps_and_accl():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
     meta = load_file(filepath)
-    stream_info = ffmpeg.find_recording(filepath)
+    stream_info = g.find_recording(filepath)
 
     gps_frame_meta = gps_framemeta(meta, units, stream_info.meta)
     accl_frame_meta = accl_framemeta(meta, units, stream_info.meta)

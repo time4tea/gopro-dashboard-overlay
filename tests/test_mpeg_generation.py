@@ -1,5 +1,6 @@
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
+from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.text import CachingText
@@ -15,6 +16,7 @@ def test_overlay_only():
 
         dimension = Dimension(1920, 1080)
         ffmpeg = FFMPEGOverlay(
+            ffmpeg=FFMPEG(),
             output=output,
             overlay_size=dimension
         )
