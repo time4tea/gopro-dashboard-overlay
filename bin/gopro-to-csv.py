@@ -18,7 +18,6 @@ from gopro_overlay.framemeta import LoadFlag
 from gopro_overlay.gpmd import GPSFix, GPS_FIXED_VALUES
 from gopro_overlay.gpx import load_timeseries
 from gopro_overlay.loading import GoproLoader
-from gopro_overlay.log import fatal
 from gopro_overlay.units import units
 
 if __name__ == "__main__":

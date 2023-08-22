@@ -1,6 +1,3 @@
-import json
-import pathlib
-
 from gopro_overlay.config import Config
 from gopro_overlay.ffmpeg_overlay import FFMPEGOptions
 

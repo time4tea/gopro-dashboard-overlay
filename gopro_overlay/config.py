@@ -2,7 +2,7 @@ import dataclasses
 import json
 import pathlib
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any
 
 
 @dataclasses.dataclass(frozen=True)

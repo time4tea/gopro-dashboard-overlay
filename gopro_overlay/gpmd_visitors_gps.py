@@ -77,7 +77,7 @@ class GPS5StreamVisitor:
         self._on_end = on_end
         self._samples: Optional[int] = None
         self._basetime: Optional[datetime.datetime] = None
-        self._fix: Optional[int] = None
+        self._fix: Optional[GPSFix] = None
         self._scale: Optional[int] = None
         self._points: Optional[List[GPS5]] = None
         self._timestamp: Optional[int] = None

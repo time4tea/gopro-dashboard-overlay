@@ -6,7 +6,7 @@ import cairo
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.background import CairoEllipticBackground
-from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite, saved, CairoCache
+from gopro_overlay.widgets.cairo.cairo import CairoWidget, CairoComposite, saved
 from gopro_overlay.widgets.cairo.colour import Colour
 from gopro_overlay.widgets.cairo.ellipse import EllipseParameters, Arc
 from gopro_overlay.widgets.cairo.line import LineParameters

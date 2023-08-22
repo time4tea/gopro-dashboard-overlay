@@ -3,7 +3,7 @@ import datetime
 import itertools
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.timeunits import Timeunit, timeunits
+from gopro_overlay.timeunits import Timeunit
 
 
 def pairwise(iterable):  # Added in itertools v3.10

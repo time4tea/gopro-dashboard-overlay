@@ -16,7 +16,7 @@ from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta_gpx import framemeta_to_gpx
 from gopro_overlay.gpmd import GPS_FIXED_VALUES
 from gopro_overlay.loading import GoproLoader
-from gopro_overlay.log import log, fatal
+from gopro_overlay.log import log
 from gopro_overlay.units import units
 
 if __name__ == "__main__":

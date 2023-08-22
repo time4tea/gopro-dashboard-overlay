@@ -8,7 +8,7 @@ from .layout_components import moving_map
 from .point import Coordinate
 from .units import units
 from .widgets.text import CachingText, Text
-from .widgets.widgets import Scene, Translate, Composite, Widget, FrameSupplier
+from .widgets.widgets import Scene, Translate, Composite, Widget
 
 
 def gps_info(at, entry, font):
