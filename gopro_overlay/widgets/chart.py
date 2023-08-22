@@ -42,8 +42,9 @@ class SimpleChart(Widget):
             self.image = Image.new("RGBA", size, self.bg)
             draw = ImageDraw.Draw(self.image)
 
-            max_val = max(filter(None.__ne__, data), default=0)
-            min_val = min(filter(None.__ne__, data), default=0)
+            values = [i for i in data if i is not None]
+            max_val = max(values, default=0)
+            min_val = min(values, default=0)
 
             range_val = max_val - min_val
 
