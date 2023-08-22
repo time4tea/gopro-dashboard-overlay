@@ -13,6 +13,7 @@ from pint import DimensionalityError
 
 from gopro_overlay import fake, geo, timeseries_process
 from gopro_overlay.arguments import default_config_location
+from gopro_overlay.assertion import assert_file_exists
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import dimension_from, Dimension
 from gopro_overlay.ffmpeg import FFMPEG
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
 
     if args.gopro:
-        inputpath = args.gopro
+        inputpath = assert_file_exists(args.gopro)
 
         loader = GoproLoader(
             ffmpeg_gopro=ffmpeg_gopro,

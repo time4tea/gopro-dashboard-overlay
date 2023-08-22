@@ -10,8 +10,9 @@ from gopro_overlay.process import run, invoke
 
 
 class FFMPEG:
-    def __init__(self, location: Optional[Path] = None, binary="ffmpeg", invoke_fn=invoke):
+    def __init__(self, location: Optional[Path] = None, binary="ffmpeg", print_cmds=False, invoke_fn=invoke):
         self.invoke_fn = invoke_fn
+        self.print_cmds = print_cmds
         self.location = location
         self.binary = binary
 
@@ -49,12 +50,14 @@ class FFMPEG:
 
     def run(self, args, **kwargs):
         args_ = [self._path(), *args]
-        log(f"Running {args_}")
+        if self.print_cmds:
+            log(f"Running {args_}")
         return run(args_, **kwargs)
 
     def invoke(self, args, **kwargs):
         args_ = [self._path(), *args]
-        log(f"Running {args_}")
+        if self.print_cmds:
+            log(f"Running {args_}")
         return self.invoke_fn(args_, **kwargs)
 
     def execute(self, execution: InProcessExecution, args):

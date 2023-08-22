@@ -32,6 +32,7 @@ def find_best_alignment(duration: Timeunit, samples: int):
     align = list([a for a in [100, 50, 25, 10, 5, 1] if a <= tick_ms])[0]
     return timeunits(millis=align)
 
+
 class Window:
 
     def __init__(self, ts, duration: Timeunit, samples, key=lambda e: 1, missing=None):
@@ -70,7 +71,8 @@ class Window:
             if current < self.ts.min or current > self.ts.max:
                 data.append(self.missing)
             else:
-                entry = self.cache[current] if current in self.cache else self.cache.setdefault(current, self.ts.get(current))
+                entry = self.cache[current] if current in self.cache else self.cache.setdefault(current,
+                                                                                                self.ts.get(current))
                 value = self.key(entry)
                 if value is not None:
                     data.append(value)
@@ -108,7 +110,7 @@ max_distance = timeunits(seconds=6)
 
 
 class FrameMeta:
-    def __init__(self, packets_per_second = 18):
+    def __init__(self, packets_per_second=18):
         self.modified = False
         self.pps = packets_per_second
         self.framelist: List[Timeunit] = []
@@ -134,7 +136,7 @@ class FrameMeta:
 
     def clone(self) -> 'FrameMeta':
         fm = FrameMeta()
-        [fm.add(t,e) for t,e in self.frames.items()]
+        [fm.add(t, e) for t, e in self.frames.items()]
         return fm
 
     @property
@@ -207,7 +209,7 @@ class FrameMeta:
 
                 yield entry
 
-    def process_deltas(self, processor, skip=1, filter_fn: Callable[[Entry], bool]=lambda e: True):
+    def process_deltas(self, processor, skip=1, filter_fn: Callable[[Entry], bool] = lambda e: True):
         self.check_modified()
         diffs = list(zip(self.framelist, self.framelist[skip:]))
 
@@ -219,7 +221,7 @@ class FrameMeta:
                 if updates:
                     entry_a.update(**updates)
 
-    def process(self, processor, filter_fn:Callable[[Entry], bool]=lambda e: True):
+    def process(self, processor, filter_fn: Callable[[Entry], bool] = lambda e: True):
         self.check_modified()
         for pts in self.framelist:
             entry = self.frames[pts]
@@ -233,7 +235,7 @@ class FrameMeta:
         return self.framelist[-1]
 
 
-def gps_framemeta(meta: GoproMeta, units, metameta=None, gps_lock_filter=NullGPSLockFilter())  -> FrameMeta:
+def gps_framemeta(meta: GoproMeta, units, metameta=None, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
     frame_meta = FrameMeta()
 
     meta.accept(
@@ -310,27 +312,26 @@ def merge_frame_meta(gps: FrameMeta, other: FrameMeta, update: Callable[[FrameMe
             item.update(**update(closest_previous))
 
 
-
 class LoadFlag(Enum):
     ACCL = 1
     GRAV = 2
     CORI = 3
 
 
-def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = None, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
-
+def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = None,
+                gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
     if flags is None:
         flags = set(list(LoadFlag))
 
     with PoorTimer("parsing").timing():
-        with PoorTimer("GPMD", 1).timing():
+        with PoorTimer("GPMD", indent=1).timing():
             gopro_meta = GoproMeta.parse(gpmd_from)
 
-        with PoorTimer("extract GPS", 1).timing():
+        with PoorTimer("extract GPS", indent=1).timing():
             gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta, gps_lock_filter=gps_lock_filter)
 
         if LoadFlag.ACCL in flags:
-            with PoorTimer("extract ACCL", 1).timing():
+            with PoorTimer("extract ACCL", indent=1).timing():
                 merge_frame_meta(
                     gps_frame_meta,
                     accl_framemeta(gopro_meta, units, metameta=metameta),
@@ -338,7 +339,7 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = Non
                 )
 
         if LoadFlag.GRAV in flags:
-            with PoorTimer("extract GRAV", 1).timing():
+            with PoorTimer("extract GRAV", indent=1).timing():
                 merge_frame_meta(
                     gps_frame_meta,
                     grav_framemeta(gopro_meta, units, metameta=metameta),
@@ -346,7 +347,7 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = Non
                 )
 
         if LoadFlag.CORI in flags:
-            with PoorTimer("extract CORI", 1).timing():
+            with PoorTimer("extract CORI", indent=1).timing():
                 merge_frame_meta(
                     gps_frame_meta,
                     cori_framemeta(gopro_meta, units, metameta=metameta),

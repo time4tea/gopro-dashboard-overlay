@@ -10,6 +10,7 @@ import progressbar
 
 from gopro_overlay import timeseries_process, progress_frames, gpmd_filters
 from gopro_overlay.arguments import gopro_dashboard_arguments
+from gopro_overlay.assertion import assert_file_exists
 from gopro_overlay.buffering import SingleBuffer, DoubleBuffer
 from gopro_overlay.common import temp_file_name
 from gopro_overlay.config import Config
@@ -32,7 +33,7 @@ from gopro_overlay.log import log, fatal
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.timeunits import timeunits, Timeunit
-from gopro_overlay.timing import PoorTimer
+from gopro_overlay.timing import PoorTimer, Timers
 from gopro_overlay.units import units
 from gopro_overlay.widgets.profile import WidgetProfiler
 
@@ -131,9 +132,10 @@ if __name__ == "__main__":
     cache_dir = args.cache_dir
     cache_dir.mkdir(exist_ok=True)
 
-    with PoorTimer("program").timing():
+    timers = Timers(printing=args.print_timings)
 
-        with PoorTimer("loading timeseries").timing():
+    with timers.timer("program"):
+        with timers.timer("loading timeseries"):
 
             if args.use_gpx_only:
 
@@ -142,7 +144,7 @@ if __name__ == "__main__":
                 duration: Optional[Timeunit] = None
 
                 if args.input:
-                    inputpath = args.input
+                    inputpath = assert_file_exists(args.input)
 
                     recording = ffmpeg_gopro.find_recording(inputpath)
                     dimensions = recording.video.dimension
@@ -166,7 +168,7 @@ if __name__ == "__main__":
                 else:
                     generate = "overlay"
 
-                external_file: Path = args.gpx
+                external_file: Path = assert_file_exists(args.gpx)
                 fit_or_gpx_timeseries = load_external(external_file, units)
 
                 log(f"GPX/FIT file:     {fmtdt(fit_or_gpx_timeseries.min)} -> {fmtdt(fit_or_gpx_timeseries.max)}")
@@ -176,7 +178,8 @@ if __name__ == "__main__":
                     log(f"Video File Dates: {fmtdt(start_date)} -> {fmtdt(end_date)}")
 
                     overlap = DateRange(start=start_date, end=end_date).overlap_seconds(
-                        DateRange(start=fit_or_gpx_timeseries.min, end=fit_or_gpx_timeseries.max))
+                        DateRange(start=fit_or_gpx_timeseries.min, end=fit_or_gpx_timeseries.max)
+                    )
 
                     if overlap == 0:
                         fatal(
@@ -185,12 +188,16 @@ if __name__ == "__main__":
                             "-from-gpx-and-video-not-created-with-gopro"
                         )
 
-                frame_meta = timeseries_to_framemeta(fit_or_gpx_timeseries, units, start_date=start_date,
-                                                     duration=duration)
+                frame_meta = timeseries_to_framemeta(
+                    fit_or_gpx_timeseries,
+                    units,
+                    start_date=start_date,
+                    duration=duration
+                )
                 video_duration = frame_meta.duration()
                 packets_per_second = 10
             else:
-                inputpath = args.input
+                inputpath = assert_file_exists(args.input)
 
                 counter = ReasonCounter()
 
@@ -249,7 +256,7 @@ if __name__ == "__main__":
         log(f"Timeseries has {len(frame_meta)} data points")
         log("Processing....")
 
-        with PoorTimer("processing").timing():
+        with timers.timer("processing"):
             locked_2d = lambda e: e.gpsfix in GPS_FIXED_VALUES
             locked_3d = lambda e: e.gpsfix == GPSFix.LOCK_3D.value
 
@@ -274,7 +281,9 @@ if __name__ == "__main__":
 
         with MapRenderer(
                 cache_dir=cache_dir,
-                styler=MapStyler(api_key_finder=api_key_finder(config_loader, args))
+                styler=MapStyler(
+                    api_key_finder=api_key_finder(config_loader, args)
+                )
         ).open(args.map_style) as renderer:
 
             if args.profiler:
@@ -340,11 +349,19 @@ if __name__ == "__main__":
                 temperature_unit=args.units_temperature,
             )
 
-            layout_creator = create_desired_layout(layout=args.layout, layout_xml=args.layout_xml,
-                                                   dimensions=dimensions, include=args.include, exclude=args.exclude,
-                                                   renderer=renderer, timeseries=frame_meta, font=font,
-                                                   privacy_zone=privacy_zone,
-                                                   profiler=profiler, converters=unit_converters)
+            layout_creator = create_desired_layout(
+                layout=args.layout,
+                layout_xml=args.layout_xml,
+                dimensions=dimensions,
+                include=args.include,
+                exclude=args.exclude,
+                renderer=renderer,
+                timeseries=frame_meta,
+                font=font,
+                privacy_zone=privacy_zone,
+                profiler=profiler,
+                converters=unit_converters
+            )
 
             overlay = Overlay(framemeta=frame_meta, create_widgets=layout_creator)
 

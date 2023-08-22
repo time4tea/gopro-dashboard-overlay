@@ -123,6 +123,11 @@ def test_layout():
         assert do_args("--layout", "bob").layout == "xml"
 
 
+def test_print_timings():
+    assert not do_args().print_timings
+    assert do_args("--print-timings").print_timings
+
+
 def test_font():
     assert do_args().font == "Roboto-Medium.ttf"
     assert do_args("--font", "Bob.ttf").font == "Bob.ttf"
@@ -198,7 +203,8 @@ def test_gpx_merge_mode_invalid():
 
 def test_gps_bbox():
     assert do_args().gps_bbox_lon_lat is None
-    assert do_args("--gps-bbox-lon-lat", "1,2,3,4").gps_bbox_lon_lat == BoundingBox(min=Point(lon=1, lat=2), max=Point(lon=3, lat=4))
+    assert do_args("--gps-bbox-lon-lat", "1,2,3,4").gps_bbox_lon_lat == BoundingBox(min=Point(lon=1, lat=2),
+                                                                                    max=Point(lon=3, lat=4))
 
 
 def test_units_default():

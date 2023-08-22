@@ -14,7 +14,6 @@ from typing import Optional
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEG
-from gopro_overlay.process import invoke, run
 from gopro_overlay.timeunits import timeunits, Timeunit
 
 
@@ -198,7 +197,7 @@ class GoproRecording:
     video: VideoMeta
     meta: Optional[MetaMeta]
 
-    def load_gpmd(self):
+    def load_gpmd(self) -> array:
         track = self.meta.stream
         if track:
             cmd = [

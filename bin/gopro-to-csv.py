@@ -9,6 +9,7 @@ from typing import Optional
 
 from gopro_overlay import timeseries_process, gpmd_filters
 from gopro_overlay.arguments import BBoxArgs
+from gopro_overlay.assertion import assert_file_exists
 from gopro_overlay.common import smart_open
 from gopro_overlay.counter import ReasonCounter
 from gopro_overlay.ffmpeg import FFMPEG
@@ -45,10 +46,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    source = args.input
-
-    if not source.exists():
-        fatal(f"{source}: No such file or directory")
+    source = assert_file_exists(args.input)
 
     ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
 

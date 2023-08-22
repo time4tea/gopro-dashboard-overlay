@@ -3,6 +3,7 @@
 import argparse
 import pathlib
 
+from gopro_overlay.assertion import assert_file_exists
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.gpmd import GoproMeta
@@ -17,11 +18,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    source: pathlib.Path = args.input
-
-    if not source.exists():
-        log(f"{source}: File not  found")
-        exit(1)
+    source = assert_file_exists(args.input)
 
     ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
 

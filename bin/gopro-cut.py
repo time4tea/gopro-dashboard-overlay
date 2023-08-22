@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import os.path
+import pathlib
 
-from gopro_overlay.ffmpeg import cut_file, FFMPEG
+from gopro_overlay.assertion import assert_file_exists
+from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.parsing import parse_time
 
@@ -18,7 +19,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract section of GoPro Files")
 
     parser.add_argument("input", help="A single MP4 file ")
-    parser.add_argument("--ffmpeg-dir", type=pathlib.Path, help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
+    parser.add_argument("--ffmpeg-dir", type=pathlib.Path,
+                        help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
     parser.add_argument("--start", help="Time to start (hh:mm:ss.SSSSSS)")
     parser.add_argument("--end", help="Time to end (hh:mm:ss.SSSSSS)")
@@ -27,9 +29,6 @@ if __name__ == "__main__":
     parser.add_argument("output", help="Output MP4 file")
 
     args = parser.parse_args()
-
-    if not os.path.exists(args.input):
-        raise IOError(f"File not found {args.input}")
 
     from_seconds = as_seconds(args.start)
     duration = None
@@ -52,4 +51,9 @@ if __name__ == "__main__":
 
     ffmpeg_gopro = FFMPEGGoPro(FFMPEG(args.ffmpeg_dir))
 
-    ffmpeg_gopro.cut_file(args.input, args.output, from_seconds, duration)
+    ffmpeg_gopro.cut_file(
+        assert_file_exists(args.input),
+        args.output,
+        from_seconds,
+        duration
+    )

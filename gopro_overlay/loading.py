@@ -30,7 +30,10 @@ class GoPro:
 
 class GoproLoader:
 
-    def __init__(self, ffmpeg_gopro: FFMPEGGoPro, units, flags: Optional[Set[LoadFlag]] = None,
+    def __init__(self,
+                 ffmpeg_gopro: FFMPEGGoPro,
+                 units,
+                 flags: Optional[Set[LoadFlag]] = None,
                  gps_lock_filter: GPSLockFilter = NullGPSLockFilter()):
         self.ffmpeg_gopro = ffmpeg_gopro
         self.units = units

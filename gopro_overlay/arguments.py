@@ -156,6 +156,7 @@ def gopro_dashboard_arguments(args=None):
     debugging = parser.add_argument_group("Debugging", "Controlling debugging outputs")
 
     debugging.add_argument("--show-ffmpeg", action="store_true", help="Show FFMPEG output (not usually useful)")
+    debugging.add_argument("--print-timings", action="store_true", default=False, help="Print timings")
     debugging.add_argument("--debug-metadata", action="store_true", default=False,
                            help="Show detailed information when parsing GoPro Metadata")
     debugging.add_argument("--profiler", action="store_true",

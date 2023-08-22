@@ -7,6 +7,16 @@ from gopro_overlay.log import log
 T = TypeVar("T")
 
 
+class Timers:
+    def __init__(self, printing: bool = True):
+        self.printing = printing
+
+    @contextlib.contextmanager
+    def timer(self, name, indent=0):
+        with PoorTimer(name, indent=indent).timing(self.printing):
+            yield
+
+
 class PoorTimer:
 
     def __init__(self, name, indent=0):
