@@ -12,6 +12,7 @@ Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-over
 - Support GPUs to create movies at up to 17x realtime
 - Convert GoPro movie metadata to GPX or CSV files
 - Cut sections from GoPro movies (including metadata)
+- Linux, Mac, Windows!
 
 ## Examples
 
@@ -40,13 +41,13 @@ Almost 30 different map styles are supported! - See [map styles](docs/maps/READM
 
 ## Requirements
 
-
 - Python3.10 (development is done on Python3.11)
 - ffmpeg (you'll need the ffmpeg program installed)
 - libraqm (needed by [Pillow](https://pypi.org/project/Pillow/))
-- Unixy machine (probably, untested on Windows)
 
 ## Installation
+
+See below for Windows instructions.
 
 Install locally using `pip`, or use the provided Docker image
 
@@ -110,7 +111,7 @@ macOS/Homebrew: `brew install cairo pkg-config`
 
 ## Installation on Windows
 
-I don't know very mich about windows, so corrections to these instructions are welcomed.
+I don't know very much about windows, so corrections to these instructions are welcomed.
 
 ### Installing Python
 
@@ -128,10 +129,11 @@ Unzip this somewhere. The default might be something like: C:\Users\james\Downlo
 
 Windows might not have Roboto Font, so start with a standard windows font - on my Windows 11 box, Trebuchet is installed. 
 
+In PowerShell...
 ```shell
 Set-ExecutionPolicy Unrestricted -Scope Process
 .\venv\Scripts\activate.ps1
-python .\venv\Scripts\gopro-dashboard.py --font trebuc.ttf --ffmpeg C:\Users\james\Downloads\ffmpeg-6.0-essentials_build\ffmpeg-6.0-essentials_build\bin 
+python .\venv\Scripts\gopro-dashboard.py --font trebuc.ttf --ffmpeg C:\Users\james\Downloads\ffmpeg-6.0-essentials_build\ffmpeg-6.0-essentials_build\bin input.mp4 output.mp4
 ```
 
 Configuration files will go into %UserProfile%\.gopro-graphics
@@ -146,11 +148,6 @@ I did get two errors running with GPU:
 
 `--double-buffer` DOES NOT WORK on Windows - shame - I don't really know how to implement this on Windows.
 
-## Overlaying a dashboard
-
-```shell
-venv/bin/gopro-dashboard.py
-```
 
 ### Example
 
@@ -268,23 +265,6 @@ If you find any issues with new releases, please discuss in [GitHub Discussions]
 - 0.98.0 [Feature] Add configurable background colour with `--bg rgba` thanks to [@mishuha](https://github.com/mishuha) in discussion https://github.com/time4tea/gopro-dashboard-overlay/discussions/120 for the concept. 
 - 0.97.0 [Feature] Add new map style "local" - which will connect to a tileserver running locally on port 8000. This may be useful if you want to use a completely custom map - like a hand drawn one.
   - For more details see: https://github.com/time4tea/gopro-dashboard-overlay/discussions/132 Thanks to [@mattghub1](https://github.com/mattghub1) for the concept. 
-- 0.96.0 [Feature] Hopefully add support for older gopro files when joining. [#129](https://github.com/time4tea/gopro-dashboard-overlay/issues/129) Thanks [@FFMbyBicycle](https://github.com/FFMbyBicycle) for raising and some example code. 
-- 0.95.0 [Feature] Add api key support for geocode.xyz - [#117](https://github.com/time4tea/gopro-dashboard-overlay/issues/117) Thanks [@mishuha](https://github.com/mishuha) for raising.
-- 0.94.0 [Change] Update docker image to python3.11/ffmpeg 6.0 
-- 0.93.0 [Feature] Support for *fully gpu* decoding/overlay/encoding. Huge performance increase now possible. It takes a bit of work, but now can render at 12x realtime. See [docs/bin/PERFORMANCE_GUIDE.md](docs/bin/PERFORMANCE_GUIDE.md)
-  - [Breaking] Remove support for `--output-size` as it didn't really work properly anyway. 
-- 0.92.0 [Feature] `--double-buffer` - EXPERIMENTAL double-buffering. Potentially much faster rendering, but may not work on all architectures. Speed improvements highly dependent on `ffmpeg` performance. Likely much faster when using `--generate overlay`. Feedback welcomed.
-- 0.91.0 [Fix] Ignore FIT data items that don't have a GPS location. [#122](https://github.com/time4tea/gopro-dashboard-overlay/issues/122) Thanks [@patkoscsaba](https://github.com/patkoscsaba) for raising.
-- 0.90.0 [Change] `cairo-circuit` now draws much more quickly. 
-- [Change] Map rendering caches tile images more efficiently, so draws more quickly.
-- 0.89.0 [Feature] New component `cairo-gauge-round-annotated` - A bit like a car speedometer - See docs [docs/xml/examples/06-cairo-gauge-round-annotated](docs/xml/examples/06-cairo-gauge-round-annotated)
-- 0.88.0 [Fix] Journey Map broke when no there were no locked GPS points in the movie.
-  - Thanks [@shahargli](https://github.com/shahargli) for reporting
-- 0.87.0 [Fix/Breaking Possibly] `chart` - discovered a few bugs, now fixed. Removed `alpha`, instead use alpha of each colour.
-- 0.86.0 [Feature] New component `cairo-gauge-marker` - a nice clean gauge component, with a marker for the current value.. See docs [docs/xml/examples/06-cairo-gauge-marker](docs/xml/examples/06-cairo-gauge-marker)
-- 0.85.0 [Feature/Breaking Possibly] Add validation to attributes in layout files. This may cause some custom layouts to break! - But they wouldn't have been working as intended.
-  - [Change/Breaking] Change some `zone-bar` attribute names, aiming for standardisation
-  - [Change/Breaking] Change some `cairo-circuit-map` attribute names, aiming for standardisation
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 

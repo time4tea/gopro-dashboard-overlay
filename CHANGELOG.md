@@ -2,7 +2,24 @@
 # Changelog
 
 Newest changes are always in [README.md](README.md)
-- - 0.84.0 [Feature] New component `zone-bar` - a 3-zone bar control that can be used for HR/Cadence/Power zones. See docs in [docs/xml/examples/07-zone-bar](docs/xml/examples/07-zone-bar)
+- 0.96.0 [Feature] Hopefully add support for older gopro files when joining. [#129](https://github.com/time4tea/gopro-dashboard-overlay/issues/129) Thanks [@FFMbyBicycle](https://github.com/FFMbyBicycle) for raising and some example code. 
+- 0.95.0 [Feature] Add api key support for geocode.xyz - [#117](https://github.com/time4tea/gopro-dashboard-overlay/issues/117) Thanks [@mishuha](https://github.com/mishuha) for raising.
+- 0.94.0 [Change] Update docker image to python3.11/ffmpeg 6.0 
+- 0.93.0 [Feature] Support for *fully gpu* decoding/overlay/encoding. Huge performance increase now possible. It takes a bit of work, but now can render at 12x realtime. See [docs/bin/PERFORMANCE_GUIDE.md](docs/bin/PERFORMANCE_GUIDE.md)
+  - [Breaking] Remove support for `--output-size` as it didn't really work properly anyway. 
+- 0.92.0 [Feature] `--double-buffer` - EXPERIMENTAL double-buffering. Potentially much faster rendering, but may not work on all architectures. Speed improvements highly dependent on `ffmpeg` performance. Likely much faster when using `--generate overlay`. Feedback welcomed.
+- 0.91.0 [Fix] Ignore FIT data items that don't have a GPS location. [#122](https://github.com/time4tea/gopro-dashboard-overlay/issues/122) Thanks [@patkoscsaba](https://github.com/patkoscsaba) for raising.
+- 0.90.0 [Change] `cairo-circuit` now draws much more quickly. 
+- [Change] Map rendering caches tile images more efficiently, so draws more quickly.
+- 0.89.0 [Feature] New component `cairo-gauge-round-annotated` - A bit like a car speedometer - See docs [docs/xml/examples/06-cairo-gauge-round-annotated](docs/xml/examples/06-cairo-gauge-round-annotated)
+- 0.88.0 [Fix] Journey Map broke when no there were no locked GPS points in the movie.
+  - Thanks [@shahargli](https://github.com/shahargli) for reporting
+- 0.87.0 [Fix/Breaking Possibly] `chart` - discovered a few bugs, now fixed. Removed `alpha`, instead use alpha of each colour.
+- 0.86.0 [Feature] New component `cairo-gauge-marker` - a nice clean gauge component, with a marker for the current value.. See docs [docs/xml/examples/06-cairo-gauge-marker](docs/xml/examples/06-cairo-gauge-marker)
+- 0.85.0 [Feature/Breaking Possibly] Add validation to attributes in layout files. This may cause some custom layouts to break! - But they wouldn't have been working as intended.
+  - [Change/Breaking] Change some `zone-bar` attribute names, aiming for standardisation
+  - [Change/Breaking] Change some `cairo-circuit-map` attribute names, aiming for standardisation
+- 0.84.0 [Feature] New component `zone-bar` - a 3-zone bar control that can be used for HR/Cadence/Power zones. See docs in [docs/xml/examples/07-zone-bar](docs/xml/examples/07-zone-bar)
   - Many thanks to [@jchinte](https://github.com/jchinte) for contributing!
 - 0.83.0 [Change] No longer require --overlay-size when using --use-gpx-only, but supplying input video
   - [Fix] Give better error message when video and GPX don't overlap in time, but told to sync 
