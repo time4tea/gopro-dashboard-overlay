@@ -134,6 +134,17 @@ Set-ExecutionPolicy Unrestricted -Scope Process
 python .\venv\Scripts\gopro-dashboard.py --font trebuc.ttf --ffmpeg C:\Users\james\Downloads\ffmpeg-6.0-essentials_build\ffmpeg-6.0-essentials_build\bin 
 ```
 
+Configuration files will go into %UserProfile%\.gopro-graphics
+
+On my (pretty quick) Windows 11 Box, I get 35 fps (=3.5x realtime) on 2.7k with CPU only, and about the same with GPU. 
+
+I did get two errors running with GPU:
+-   decoder->cvdl->cuvidCreateDecoder(&decoder->decoder, params) failed -> CUDA_ERROR_INVALID_VALUE: invalid argument
+    - This was fixed by following insttructions in docs/bin/README.md (adding -threads parameter) 
+-   The minimum required Nvidia driver for nvenc is 522.25 or newer
+    - Needed to upgrade nvidia driver.
+
+`--double-buffer` DOES NOT WORK on Windows - shame - I don't really know how to implement this on Windows.
 
 ## Overlaying a dashboard
 
