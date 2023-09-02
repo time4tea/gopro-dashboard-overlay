@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     log(f"Starting gopro-dashboard version {version}")
 
-    ffmpeg_exe = FFMPEG(location=args.ffmpeg_dir)
+    ffmpeg_exe = FFMPEG(location=args.ffmpeg_dir, print_cmds=args.show_ffmpeg)
 
     if not ffmpeg_exe.is_installed():
         log("Can't start ffmpeg - is it installed?")
