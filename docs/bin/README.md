@@ -305,17 +305,21 @@ I don't know the formula for calculating the correct number of threads... this w
 ### Usage
 
 ```
-usage: gopro-dashboard.py [-h] [--font FONT] [--privacy PRIVACY] [--generate {default,overlay,none}] [--overlay-size OVERLAY_SIZE]
-                          [--bg BG] [--config-dir CONFIG_DIR] [--cache-dir CACHE_DIR] [--profile PROFILE] [--double-buffer]
-                          [--load {ACCL,GRAV,CORI} [{ACCL,GRAV,CORI} ...]] [--gpx GPX] [--gpx-merge {EXTEND,OVERWRITE}]
-                          [--use-gpx-only] [--video-time-start {file-created,file-modified,file-accessed}]
+usage: gopro-dashboard.py [-h] [--font FONT] [--privacy PRIVACY] [--generate {default,overlay,none}]
+                          [--overlay-size OVERLAY_SIZE] [--bg BG] [--config-dir CONFIG_DIR]
+                          [--cache-dir CACHE_DIR] [--profile PROFILE] [--double-buffer] [--ffmpeg-dir FFMPEG_DIR]
+                          [--load {ACCL,GRAV,CORI} [{ACCL,GRAV,CORI} ...]] [--gpx GPX]
+                          [--gpx-merge {EXTEND,OVERWRITE}] [--use-gpx-only]
+                          [--video-time-start {file-created,file-modified,file-accessed}]
                           [--video-time-end {file-created,file-modified,file-accessed}]
                           [--map-style {osm,tf-cycle,tf-transport,tf-landscape,tf-outdoors,tf-transport-dark,tf-spinal-map,tf-pioneer,tf-mobile-atlas,tf-neighbourhood,tf-atlas,geo-osm-carto,geo-osm-bright,geo-osm-bright-grey,geo-osm-bright-smooth,geo-klokantech-basic,geo-osm-liberty,geo-maptiler-3d,geo-toner,geo-toner-grey,geo-positron,geo-positron-blue,geo-positron-red,geo-dark-matter,geo-dark-matter-brown,geo-dark-matter-dark-grey,geo-dark-matter-dark-purple,geo-dark-matter-purple-roads,geo-dark-matter-yellow-roads,local}]
-                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}] [--layout-xml LAYOUT_XML]
-                          [--exclude EXCLUDE [EXCLUDE ...]] [--include INCLUDE [INCLUDE ...]] [--units-speed UNITS_SPEED]
+                          [--map-api-key MAP_API_KEY] [--layout {default,speed-awareness,xml}]
+                          [--layout-xml LAYOUT_XML] [--exclude EXCLUDE [EXCLUDE ...]]
+                          [--include INCLUDE [INCLUDE ...]] [--units-speed UNITS_SPEED]
                           [--units-altitude UNITS_ALTITUDE] [--units-distance UNITS_DISTANCE]
-                          [--units-temperature {kelvin,degC,degF}] [--gps-dop-max GPS_DOP_MAX] [--gps-speed-max GPS_SPEED_MAX]
-                          [--gps-speed-max-units GPS_SPEED_MAX_UNITS] [--gps-bbox-lon-lat GPS_BBOX_LON_LAT] [--show-ffmpeg]
+                          [--units-temperature {kelvin,degC,degF}] [--gps-dop-max GPS_DOP_MAX]
+                          [--gps-speed-max GPS_SPEED_MAX] [--gps-speed-max-units GPS_SPEED_MAX_UNITS]
+                          [--gps-bbox-lon-lat GPS_BBOX_LON_LAT] [--show-ffmpeg] [--print-timings]
                           [--debug-metadata] [--profiler]
                           [input] output
 
@@ -332,8 +336,8 @@ options:
   --generate {default,overlay,none}
                         Type of output to generate (default: default)
   --overlay-size OVERLAY_SIZE
-                        <XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled overlay sizes
-                        (1920x1080, 3840x2160), Required if --use-gpx-only (default: None)
+                        <XxY> e.g. 1920x1080 Force size of overlay. Use if video differs from supported bundled
+                        overlay sizes (1920x1080, 3840x2160), Required if --use-gpx-only (default: None)
   --bg BG               Background Colour - R,G,B,A - each 0-255, no spaces! (default: (0, 0, 0, 0))
   --config-dir CONFIG_DIR
                         Location of config files (api keys, profiles, ...) (default: /home/richja/.gopro-graphics)
@@ -343,9 +347,12 @@ options:
 Render:
   Controlling rendering performance
 
-  --profile PROFILE     Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json (default: None)
-  --double-buffer       Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all (default:
-                        False)
+  --profile PROFILE     Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json (default:
+                        None)
+  --double-buffer       Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all
+                        (default: False)
+  --ffmpeg-dir FFMPEG_DIR
+                        Directory where ffmpeg/ffprobe located, default=Look in PATH (default: None)
 
 Loading:
   Loading data from GoPro
@@ -357,8 +364,9 @@ GPX:
 
   --gpx GPX, --fit GPX  Use GPX/FIT file for location / alt / hr / cadence / temp ... (default: None)
   --gpx-merge {EXTEND,OVERWRITE}
-                        When using GPX/FIT file - OVERWRITE=replace GPS/alt from GoPro with GPX values, EXTEND=just use additional
-                        values from GPX/FIT file e.g. hr/cad/power (default: MergeMode.EXTEND)
+                        When using GPX/FIT file - OVERWRITE=replace GPS/alt from GoPro with GPX values,
+                        EXTEND=just use additional values from GPX/FIT file e.g. hr/cad/power (default:
+                        MergeMode.EXTEND)
 
 GPX Only:
   Creating Movies from GPX File only
@@ -366,11 +374,11 @@ GPX Only:
   --use-gpx-only, --use-fit-only
                         Use only the GPX/FIT file - no GoPro location data (default: False)
   --video-time-start {file-created,file-modified,file-accessed}
-                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be
-                        changed/removed (default: None)
+                        Use file dates for aligning video and GPS information, only when --use-gpx-only -
+                        EXPERIMENTAL! - may be changed/removed (default: None)
   --video-time-end {file-created,file-modified,file-accessed}
-                        Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be
-                        changed/removed (default: None)
+                        Use file dates for aligning video and GPS information, only when --use-gpx-only -
+                        EXPERIMENTAL! - may be changed/removed (default: None)
 
 Mapping:
   Display of Maps
@@ -398,11 +406,11 @@ Units:
   --units-speed UNITS_SPEED
                         Default unit for speed. Many units supported: mph, mps, kph, kph, knot, ... (default: mph)
   --units-altitude UNITS_ALTITUDE
-                        Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec, angstrom, ... (default:
-                        metre)
+                        Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec,
+                        angstrom, ... (default: metre)
   --units-distance UNITS_DISTANCE
-                        Default unit for distance. Many units supported: mile, km, foot, nmi, meter, metre, parsec, ... (default:
-                        mile)
+                        Default unit for distance. Many units supported: mile, km, foot, nmi, meter, metre,
+                        parsec, ... (default: mile)
   --units-temperature {kelvin,degC,degF}
                         Default unit for temperature (default: degC)
 
@@ -416,16 +424,16 @@ GPS:
   --gps-speed-max-units GPS_SPEED_MAX_UNITS
                         Units for --gps-speed-max (default: kph)
   --gps-bbox-lon-lat GPS_BBOX_LON_LAT
-                        Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat
-                        (default: None)
+                        Define GPS Bounding Box, anything outside will be considered 'Not Locked' -
+                        minlon,minlat,maxlon,maxlat (default: None)
 
 Debugging:
   Controlling debugging outputs
 
   --show-ffmpeg         Show FFMPEG output (not usually useful) (default: False)
+  --print-timings       Print timings (default: False)
   --debug-metadata      Show detailed information when parsing GoPro Metadata (default: False)
   --profiler            Do some basic profiling of the widgets to find ones that may be slow (default: False)
-
 ```
 
 # gopro-extract.py

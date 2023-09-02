@@ -18,7 +18,7 @@ def as_seconds(timey):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract section of GoPro Files")
 
-    parser.add_argument("input", help="A single MP4 file ")
+    parser.add_argument("input", type=pathlib.Path, help="A single MP4 file ")
     parser.add_argument("--ffmpeg-dir", type=pathlib.Path,
                         help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument("--end", help="Time to end (hh:mm:ss.SSSSSS)")
     parser.add_argument("--duration", help="Duration of clip (hh:mm:ss.SSSSSS)")
 
-    parser.add_argument("output", help="Output MP4 file")
+    parser.add_argument("output", type=pathlib.Path, help="Output MP4 file")
 
     args = parser.parse_args()
 

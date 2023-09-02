@@ -108,22 +108,28 @@ Ubuntu/Debian: `sudo apt install libcairo2-dev pkg-config python3-dev`
 macOS/Homebrew: `brew install cairo pkg-config`
 
 
+## Installation on Windows
+
+This should work very similarly to Linux. Install Python Version 3.10 or greater (3.11 recommended)
+
+```shell
+python3 -mvenv venv
+venv/bin/pip install gopro-overlay
+```
+
+You'll also need to install ffmpeg, if you don't have it already. You can download this from https://www.gyan.dev/ffmpeg/builds/ - The "essential version" is OK.
+Unzip this somewhere.
+
+```shell
+venv/bin/gopro-dashboard.py --ffmpeg C:/path/to/ffmpeg/bin
+```
+
 
 ## Overlaying a dashboard
 
 ```shell
 venv/bin/gopro-dashboard.py
 ```
-
-The GPS track in Hero 9 (at least) seems to be very poor. If you supply a GPX file from a Garmin or whatever, the
-program will use this instead for the GPS.
-
-Privacy allows you to set a privacy zone. Various widgets will not draw points within that zone.
-
-The data recorded in the GoPro video will uses GPS time, which (broadly) is UTC. The renderer will use your local
-timezone to interpret this, and use the local timezone. This may produce strange results if you go on holiday somewhere,
-but then render the files when you get back home! On linux you can use the TZ variable to change the timezone that's
-used.
 
 ### Example
 
@@ -132,6 +138,18 @@ For full instructions on all command lines see [docs/bin](docs/bin)
 ```shell
 venv/bin/gopro-dashboard.py --gpx ~/Downloads/Morning_Ride.gpx --privacy 52.000,-0.40000,0.50 ~/gopro/GH020073.MP4 GH020073-dashboard.MP4
 ```
+
+## Caveats
+
+The GPS track in Hero 9 seems to be very poor. If you supply a GPX file from a Garmin or whatever, the
+program will use this instead for the GPS. Hero 11 GPS is much improved.
+
+Privacy allows you to set a privacy zone. Various widgets will not draw points within that zone.
+
+The data recorded in the GoPro video will uses GPS time, which (broadly) is UTC. The renderer will use your local
+timezone to interpret this, and use the local timezone. This may produce strange results if you go on holiday somewhere,
+but then render the files when you get back home! On linux you can use the TZ variable to change the timezone that's
+used.
 
 ## Writeups
 
@@ -219,6 +237,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.103.0 [Feature] Initial Windows Support! See Windows Installation Instructions.
 - 0.102.0 [Feature] Support for alternate GoPro Max ORIN. Indicate when no GPS information found in file. Thanks [@xiaoxin01](https://github.com/xiaoxin01), [@ilisparrow](https://github.com/ilisparrow)  
 - 0.101.0 [Fix] Fix error when loading FIT files that had GPS Accuracy information. Thanks [@rpellerin](https://github.com/rpellerin) 
 - 0.100.0 [Breaking] Don't load GRAV/ACCL/CORI by default - its slow

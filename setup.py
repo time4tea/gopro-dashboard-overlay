@@ -15,6 +15,7 @@ requires = [
     "progressbar2==4.2.0",
     "requests==2.28.2",
     "fitdecode==0.10.0",
+    "sqlitedict==2.1.0",
 ]
 
 test_requirements = [
@@ -23,7 +24,7 @@ test_requirements = [
 
 setup(
     name="gopro-overlay",
-    version="0.102.0",
+    version="0.103.0",
     description="Overlay graphics dashboards onto GoPro footage",
     long_description=README,
     long_description_content_type="text/markdown",
