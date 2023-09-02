@@ -110,18 +110,28 @@ macOS/Homebrew: `brew install cairo pkg-config`
 
 ## Installation on Windows
 
-This should work very similarly to Linux. Install Python Version 3.10 or greater (3.11 recommended)
+I don't know very mich about windows, so corrections to these instructions are welcomed.
+
+### Installing Python
+
+Get the Windows installer from https://www.python.org/downloads/windows/ - Install it. Suggest "add to PATH". 
+
+## Installation
 
 ```shell
 python3 -mvenv venv
-venv/bin/pip install gopro-overlay
+venv/Scripts/pip install gopro-overlay
 ```
 
 You'll also need to install ffmpeg, if you don't have it already. You can download this from https://www.gyan.dev/ffmpeg/builds/ - The "essential version" is OK.
-Unzip this somewhere.
+Unzip this somewhere. The default might be something like: C:\Users\james\Downloads\ffmpeg-6.0-essentials_build
+
+Windows might not have Roboto Font, so start with a standard windows font - on my Windows 11 box, Trebuchet is installed. 
 
 ```shell
-venv/bin/gopro-dashboard.py --ffmpeg C:/path/to/ffmpeg/bin
+Set-ExecutionPolicy Unrestricted -Scope Process
+.\venv\Scripts\activate.ps1
+python .\venv\Scripts\gopro-dashboard.py --font trebuc.ttf --ffmpeg C:\Users\james\Downloads\ffmpeg-6.0-essentials_build\ffmpeg-6.0-essentials_build\bin 
 ```
 
 
