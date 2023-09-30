@@ -195,7 +195,7 @@ def test_example_chart():
         key=lambda e: e.alt.magnitude,
     )
 
-    return time_rendering(name="Moving Chart", repeat=1, widgets=[
+    time_rendering(name="Moving Chart", repeat=1, widgets=[
         Translate(
             at=Coordinate(50, 50),
             widget=SimpleChart(lambda: window.view(at=timeunits(seconds=(4 * 60) + 27)), filled=True, font=font)
