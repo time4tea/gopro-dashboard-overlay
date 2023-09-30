@@ -103,27 +103,21 @@ The following are available to change: `background-rgb`, `major-ann-rgb`, `minor
 
 
 ```xml
-<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  needle-rgb="255,0,255"/>
+<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  major-tick-rgb="255,0,0"/>
 ```
 <kbd>![06-cairo-gauge-round-annotated-10.png](06-cairo-gauge-round-annotated-10.png)</kbd>
 
 
 ```xml
-<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  needle-rgb="255,0,255"/>
+<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  minor-tick-rgb="255,0,0"/>
 ```
 <kbd>![06-cairo-gauge-round-annotated-11.png](06-cairo-gauge-round-annotated-11.png)</kbd>
 
 
 ```xml
-<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  major-tick-rgb="255,0,0"/>
+<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  needle-rgb="255,0,255"/>
 ```
 <kbd>![06-cairo-gauge-round-annotated-12.png](06-cairo-gauge-round-annotated-12.png)</kbd>
-
-
-```xml
-<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  minor-tick-rgb="255,0,0"/>
-```
-<kbd>![06-cairo-gauge-round-annotated-13.png](06-cairo-gauge-round-annotated-13.png)</kbd>
 
 
 # Transparency
@@ -134,36 +128,36 @@ Any colour that is completely transparent will disappear... this can be used to 
 ```xml
 <component type="cairo-gauge-round-annotated" metric="speed" units="mph"  background-rgb="255,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-round-annotated-14.png](06-cairo-gauge-round-annotated-14.png)</kbd>
+<kbd>![06-cairo-gauge-round-annotated-13.png](06-cairo-gauge-round-annotated-13.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-round-annotated" metric="speed" units="mph"  major-ann-rgb="255,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-round-annotated-15.png](06-cairo-gauge-round-annotated-15.png)</kbd>
+<kbd>![06-cairo-gauge-round-annotated-14.png](06-cairo-gauge-round-annotated-14.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-round-annotated" metric="speed" units="mph"  minor-ann-rgb="255,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-round-annotated-16.png](06-cairo-gauge-round-annotated-16.png)</kbd>
-
-
-```xml
-<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  needle-rgb="255,0,255,40"/>
-```
-<kbd>![06-cairo-gauge-round-annotated-17.png](06-cairo-gauge-round-annotated-17.png)</kbd>
+<kbd>![06-cairo-gauge-round-annotated-15.png](06-cairo-gauge-round-annotated-15.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-round-annotated" metric="speed" units="mph"  major-tick-rgb="255,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-round-annotated-18.png](06-cairo-gauge-round-annotated-18.png)</kbd>
+<kbd>![06-cairo-gauge-round-annotated-16.png](06-cairo-gauge-round-annotated-16.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-round-annotated" metric="speed" units="mph"  minor-tick-rgb="255,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-round-annotated-19.png](06-cairo-gauge-round-annotated-19.png)</kbd>
+<kbd>![06-cairo-gauge-round-annotated-17.png](06-cairo-gauge-round-annotated-17.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-round-annotated" metric="speed" units="mph"  needle-rgb="255,0,255,40"/>
+```
+<kbd>![06-cairo-gauge-round-annotated-18.png](06-cairo-gauge-round-annotated-18.png)</kbd>
 
 

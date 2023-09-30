@@ -124,7 +124,9 @@ class CairoCircuit(CairoWidget):
             self._journey = Journey()
             self.framemeta.process(self._journey.accept)
             bbox = self._journey.bounding_box
-            self._size = bbox.size() * 1.1
+            size = bbox.size() * 1.1
+
+            self._size = max(size.x, size.y)
 
             self._mid = Coordinate(
                 x=((bbox.max.lat - bbox.min.lat) / 2) + bbox.min.lat,
@@ -133,8 +135,8 @@ class CairoCircuit(CairoWidget):
         return self._journey
 
     def scale(self, point):
-        x = ((point.lat - self._mid.x) / self._size.x)
-        y = ((point.lon - self._mid.y) / self._size.y)
+        x = ((point.lat - self._mid.x) / self._size)
+        y = ((point.lon - self._mid.y) / self._size)
         return x, y
 
     def draw(self, context: cairo.Context):

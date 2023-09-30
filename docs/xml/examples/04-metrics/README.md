@@ -63,7 +63,7 @@ Conversions that don't make sense for a given metric will fail with a suitable m
 
 ## Controllable units
 
-Some units can be controlled by the command line, so instead of using a particular unit, you can also use one of the following
+Some units can be controlled by the command line, so instead of using a particular unit, you can also use on eof the following
 
 | Unit          | Meaning                            |
 |---------------|------------------------------------|
