@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     config_loader = Config(arguments.default_config_location)
 
-    for style in geo.map_styles:
+    for style in geo.available_map_styles():
         print(style)
 
         renderer = MapRenderer(
@@ -89,13 +89,13 @@ if __name__ == "__main__":
 
     attributions = {}
 
-    for style in geo.map_styles:
+    for style in geo.available_map_styles():
         attrs = attrs_for_style(style)
         attributions[attrs["name"]] = attrs["attribution"]
 
     attribution = "\n\n".join([f"### {k} \n {v}" for k, v in attributions.items()])
 
-    links = [f"![{style}](map_style_{style}.png)" for style in geo.map_styles]
+    links = [f"![{style}](map_style_{style}.png)" for style in geo.available_map_styles()]
     lines = grouper(links, 4, fillvalue="")
     cells = [f"| {l[0]} | {l[1]} | {l[2]} | {l[3]} |" for l in lines]
 

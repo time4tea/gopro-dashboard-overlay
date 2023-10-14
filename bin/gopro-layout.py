@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     parser.add_argument("file", type=pathlib.Path, help="Input layout file")
 
-    parser.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
+    parser.add_argument("--map-style", choices=geo.available_map_styles(), default="osm", help="Style of map to render")
     parser.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
     parser.add_argument("--config-dir", help="Location of config files (api keys, profiles, ...)", type=pathlib.Path,
                         default=default_config_location)
