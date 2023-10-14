@@ -255,6 +255,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.105.0 [Behaviour Change]  Fix [#150](https://github.com/time4tea/gopro-dashboard-overlay/issues/150) cairo circuit map aspect raio is wrong. Thanks [@yuanduopeng](https://github.com/yuanduopeng) for raising.
 - 0.104.0 [Fix] Honour cmdline arg `--show-ffmpeg`
 - 0.103.0 [Feature] Initial Windows Support! See Windows Installation Instructions.
 - 0.102.0 [Feature] Support for alternate GoPro Max ORIN. Indicate when no GPS information found in file. Thanks [@xiaoxin01](https://github.com/xiaoxin01), [@ilisparrow](https://github.com/ilisparrow)  
