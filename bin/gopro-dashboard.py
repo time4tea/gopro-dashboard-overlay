@@ -304,21 +304,25 @@ if __name__ == "__main__":
 
             execution = InProcessExecution(redirect=redirect)
 
+            output: Path = args.output
+
             if generate == "none":
                 ffmpeg = FFMPEGNull()
             elif generate == "overlay":
+                output.unlink(missing_ok=True)
                 ffmpeg = FFMPEGOverlay(
                     ffmpeg=ffmpeg_exe,
-                    output=args.output,
+                    output=output,
                     options=ffmpeg_options,
                     overlay_size=dimensions,
                     execution=execution
                 )
             else:
+                output.unlink(missing_ok=True)
                 ffmpeg = FFMPEGOverlayVideo(
                     ffmpeg=ffmpeg_exe,
                     input=inputpath,
-                    output=args.output,
+                    output=output,
                     options=ffmpeg_options,
                     overlay_size=dimensions,
                     execution=execution
