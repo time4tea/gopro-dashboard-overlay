@@ -3,7 +3,7 @@ import itertools
 import os
 import pathlib
 from functools import partial
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List, Dict
 
 import geotiler
 from geotiler.cache import caching_downloader
@@ -14,76 +14,139 @@ from sqlitedict import SqliteDict
 from gopro_overlay.config import Config
 from gopro_overlay.geo_render import my_render_map
 
-# most of the "stamen" maps in geotiler don't seem to work.
-map_styles = list(itertools.chain(
-    ["osm"],
-    [f"tf-{style}" for style in [
-        "cycle", "transport", "landscape",
-        "outdoors", "transport-dark", "spinal-map",
-        "pioneer", "mobile-atlas", "neighbourhood",
-        "atlas"]
-     ],
-    [f"geo-{style}" for style in [
-        "osm-carto", "osm-bright", "osm-bright-grey", "osm-bright-smooth",
-        "klokantech-basic", "osm-liberty", "maptiler-3d", "toner", "toner-grey", "positron",
-        "positron-blue", "positron-red", "dark-matter", "dark-matter-brown", "dark-matter-dark-grey",
-        "dark-matter-dark-purple", "dark-matter-purple-roads", "dark-matter-yellow-roads"
-    ]],
-    ["local"],
-))
+
+class PrefixMapStyleConfig:
+
+    def __init__(self, prefix):
+        self.prefix = prefix
+
+    def styles(self) -> List[str]:
+        if self.prefix:
+            return [f"{self.prefix}-{s}" for s in self._styles()]
+        else:
+            return self._styles()
+
+    def attributes(self, style: str) -> Dict:
+        if self.prefix:
+            return self._attributes(style[len(self.prefix)+1:])
+        else:
+            return self._attributes(style)
+
+    def _attributes(self, style) -> Dict:
+        raise NotImplementedError()
+
+    def _styles(self) -> List[str]:
+        raise NotImplementedError()
 
 
-def osm_attrs():
-    return {
-        "name": "OpenStreetMap",
-        "attribution": "© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
-        "url": "http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}",
-        "subdomains": ["a", "b", "c"],
-        "limit": 2
-    }
+class OSMStyleConfig(PrefixMapStyleConfig):
+
+    def __init__(self):
+        super().__init__("")
+
+    def _styles(self) -> List[str]:
+        return ["osm"]
+
+    def _attributes(self, style: str) -> Dict:
+        assert style in self._styles()
+        return {
+            "name": "OpenStreetMap",
+            "attribution": "© OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
+            "url": "http://{subdomain}.tile.openstreetmap.org/{z}/{x}/{y}.{ext}",
+            "subdomains": ["a", "b", "c"],
+            "limit": 2
+        }
 
 
-def geoapify_attrs(style):
-    return {
-        "name": "Geoapify Map",
-        "attribution": "Maps © Geoapify\nhttps://www.geoapify.com/\nData © OpenStreetMap "
-                       "contributors\nhttp://www.openstreetmap.org/copyright",
-        "url": "https://maps.geoapify.com/v1/tile/$MAPSTYLE$/{z}/{x}/{y}.png?apiKey={api_key}".replace(
-            "$MAPSTYLE$", style),
-        "api-key-ref": "geoapify",
-        "limit": 2,
-    }
+class CyclOSMStyleConfig(PrefixMapStyleConfig):
+
+    def __init__(self):
+        super().__init__("")
+
+    def _styles(self) -> List[str]:
+        return ["cyclosm"]
+
+    def _attributes(self, style: str) -> Dict:
+        assert style in self._styles()
+        return {
+            "name": "CyclOSM",
+            "attribution": "Maps © CyclOSM\nhttps://www.cyclosm.org/ Data © OpenStreetMap contributors\nhttp://www.openstreetmap.org/copyright",
+            "url": "https://{subdomain}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+            "subdomains": ["a", "b", "c"],
+            "limit": 2
+        }
 
 
-def thunderforest_attrs(style):
-    return {
-        "name": "Thunderforest Map",
-        "attribution": "Maps © Thunderforest\nhttp://www.thunderforest.com/\nData © OpenStreetMap "
-                       "contributors\nhttp://www.openstreetmap.org/copyright",
-        "url": "https://{subdomain}.tile.thunderforest.com/$MAPSTYLE$/{z}/{x}/{y}.{ext}?apikey={api_key}".replace(
-            "$MAPSTYLE$", style),
-        "subdomains": ["a", "b", "c"],
-        "api-key-ref": "thunderforest",
-        "limit": 2,
-    }
+class GeoapifyStyleConfig(PrefixMapStyleConfig):
+
+    def __init__(self):
+        super().__init__("geo")
+
+    def _styles(self) -> List[str]:
+        return [
+            "osm-carto", "osm-bright", "osm-bright-grey", "osm-bright-smooth",
+            "klokantech-basic", "osm-liberty", "maptiler-3d", "toner", "toner-grey", "positron",
+            "positron-blue", "positron-red", "dark-matter", "dark-matter-brown", "dark-matter-dark-grey",
+            "dark-matter-dark-purple", "dark-matter-purple-roads", "dark-matter-yellow-roads"
+        ]
+
+    def _attributes(self, style: str) -> Dict:
+        assert style in self._styles()
+        return {
+            "name": "Geoapify Map",
+            "attribution": "Maps © Geoapify\nhttps://www.geoapify.com/\nData © OpenStreetMap "
+                           "contributors\nhttp://www.openstreetmap.org/copyright",
+            "url": "https://maps.geoapify.com/v1/tile/$MAPSTYLE$/{z}/{x}/{y}.png?apiKey={api_key}".replace(
+                "$MAPSTYLE$", style),
+            "api-key-ref": "geoapify",
+            "limit": 2,
+        }
 
 
-def local_attrs(style):
-    return {
-        "attribution": "Custom",
-        "name": "Local",
-        "url": "http://localhost:8000/{z}/{x}/{y}.{ext}",
-        "cache": False,
-        "limit": 2
-    }
+class ThunderforestStyleConfig(PrefixMapStyleConfig):
+
+    def __init__(self):
+        super().__init__("tf")
+
+    def _styles(self) -> List[str]:
+        return [
+            "cycle", "transport", "landscape",
+            "outdoors", "transport-dark", "spinal-map",
+            "pioneer", "mobile-atlas", "neighbourhood",
+            "atlas"
+        ]
+
+    def _attributes(self, style: str) -> Dict:
+        assert style in self._styles()
+        return {
+            "name": "Thunderforest Map",
+            "attribution": "Maps © Thunderforest\nhttp://www.thunderforest.com/\nData © OpenStreetMap "
+                           "contributors\nhttp://www.openstreetmap.org/copyright",
+            "url": "https://{subdomain}.tile.thunderforest.com/$MAPSTYLE$/{z}/{x}/{y}.{ext}?apikey={api_key}".replace(
+                "$MAPSTYLE$", style),
+            "subdomains": ["a", "b", "c"],
+            "api-key-ref": "thunderforest",
+            "limit": 2,
+        }
 
 
-prefix_to_attrs = {
-    "osm": osm_attrs,
-    "tf": thunderforest_attrs,
-    "geo": geoapify_attrs,
-    "local": local_attrs,
-}
+class LocalStyleConfig(PrefixMapStyleConfig):
+
+    def __init__(self):
+        super().__init__("")
+
+    def _styles(self) -> List[str]:
+        return ["local"]
+
+    def _attributes(self, style: str) -> Dict:
+        assert style in self._styles()
+        return {
+            "attribution": "Custom",
+            "name": "Local",
+            "url": "http://localhost:8000/{z}/{x}/{y}.{ext}",
+            "cache": False,
+            "limit": 2
+        }
 
 
 def configured_style(loader: Config, name: str) -> Optional[dict]:
@@ -100,19 +163,21 @@ def configured_style(loader: Config, name: str) -> Optional[dict]:
     return None
 
 
+configurations = [OSMStyleConfig(), CyclOSMStyleConfig(), ThunderforestStyleConfig(), GeoapifyStyleConfig(), LocalStyleConfig()]
+
+
+def available_map_styles() -> List[str]:
+    return sorted(list(itertools.chain.from_iterable(
+        [p.styles() for p in configurations]
+    )))
+
+
 def attrs_for_style(name):
-    if name == "osm":
-        return osm_attrs()
+    for config in configurations:
+        if name in config.styles():
+            return config.attributes(name)
 
-    if "-" in name:
-        prefix, style = name.split("-", 1)
-    else:
-        prefix = style = name
-
-    if prefix in prefix_to_attrs:
-        return prefix_to_attrs[prefix](style)
-    else:
-        raise KeyError(f"Unknown map provider: {name}")
+    raise KeyError(f"Unknown map style: {name}")
 
 
 def sqlite_downloader(db: SqliteDict):

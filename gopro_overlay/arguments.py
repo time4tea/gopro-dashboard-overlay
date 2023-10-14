@@ -126,7 +126,7 @@ def gopro_dashboard_arguments(args=None):
 
     maps = parser.add_argument_group("Mapping", "Display of Maps")
 
-    maps.add_argument("--map-style", choices=geo.map_styles, default="osm", help="Style of map to render")
+    maps.add_argument("--map-style", choices=geo.available_map_styles(), default="osm", help="Style of map to render")
     maps.add_argument("--map-api-key", help="API Key for map provider, if required (default OSM doesn't need one)")
 
     layout = parser.add_argument_group("Layout", "Controlling layout")
