@@ -42,29 +42,31 @@ def load_xml_layout(filepath: Path):
 class Converters:
 
     def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m", temperature_unit="degC"):
-        self.speed_unit = speed_unit
-        self.distance_unit = distance_unit
-        self.altitude_unit = altitude_unit
-        self.temperature_unit = temperature_unit
 
-    def converter(self, name):
-        if name is None:
-            return lambda x: x
-        converters = {
+        pace_unit = "pace_mile" if distance_unit == "mile" else "pace_km"
+
+        self.converters = {
             # speed
             "mph": lambda u: u.to("MPH"),
             "kph": lambda u: u.to("KPH"),
             "knots": lambda u: u.to("knot"),
 
+            "pace": lambda u: (1/u).to(pace_unit),
+            "pace_mile": lambda u: (1/u).to("pace_mile"),
+            "pace_km": lambda u: (1/u).to("pace_km"),
+            "pace_kt": lambda u: (1/u).to("pace_kt"),
+
+            "spm": lambda u: u.to("spm"),
+
             # User selectable
-            "speed": lambda u: u.to(self.speed_unit),
-            "distance": lambda u: u.to(self.distance_unit),
+            "speed": lambda u: u.to(speed_unit),
+            "distance": lambda u: u.to(distance_unit),
 
-            "altitude": lambda u: u.to(self.altitude_unit),
-            "alt": lambda u: u.to(self.altitude_unit),
+            "altitude": lambda u: u.to(altitude_unit),
+            "alt": lambda u: u.to(altitude_unit),
 
-            "temp": lambda u: u.to(self.temperature_unit),
-            "temperature": lambda u: u.to(self.temperature_unit),
+            "temp": lambda u: u.to(temperature_unit),
+            "temperature": lambda u: u.to(temperature_unit),
 
             # accel
             "G": lambda u: u.to("gravity"),
@@ -75,8 +77,12 @@ class Converters:
             "metres": lambda u: u.to("m"),
             "nautical_miles": lambda u: u.to("nautical_mile"),
         }
-        if name in converters:
-            return converters[name]
+
+    def converter(self, name):
+        if name is None:
+            return lambda x: x
+        if name in self.converters:
+            return self.converters[name]
 
         # Try to see if specified unit is recognised by pint... if so allow it - this only means its a valid
         # unit, but actual metric might be different... if unconvertible it will blow up later...
@@ -656,4 +662,3 @@ class Widgets:
             return gopro_overlay.layout_xml_cairo.create_cairo_gauge_round_annotated(element, entry, self.converters, **kwargs)
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
-

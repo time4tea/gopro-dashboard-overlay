@@ -16,16 +16,20 @@ for each metric.
 {{ <component type="metric" metric="speed" units="mph" /> }}
 {{ <component type="metric" metric="speed" units="knots" /> }}
 
+{{ <component type="metric" metric="speed" units="pace_km" /> }}
+
+
 The following units are supported:
 
-| Dimension    | Units                                                                               |
-|--------------|-------------------------------------------------------------------------------------|
-| Speed        | mph, kph, mps (metres-per-second), fps (feet-per-second), knots, knot,              |
-| Temperature  | degreeF, degreeC, degreeK                                                           |
-| Distance     | mile, miles, m, metres, km, nmi (nautical mile), foot, yard, hand, angstrom, parsec |
-| Acceleration | gravity, G, m/s^2, m/s²                                                             |
-| Power        | W, kW, watt, hp (UK horsepower)                                                     |
-| Rotation | degrees, radians |
+| Dimension                        | Units                                                                               |
+|----------------------------------|-------------------------------------------------------------------------------------|
+| Speed                            | mph, kph, mps (metres-per-second), fps (feet-per-second), knots, knot,              |
+| Pace (Minutes per distance-unit) | pace, pace_km, pace_mile, pace_kt                             | 
+| Temperature                      | degreeF, degreeC, degreeK                                                           |
+| Distance                         | mile, miles, m, metres, km, nmi (nautical mile), foot, yard, hand, angstrom, parsec |
+| Acceleration                     | gravity, G, m/s^2, m/s²                                                             |
+| Power                            | W, kW, watt, hp (UK horsepower)                                                     |
+| Rotation                         | degrees, radians                                                                    |
 
 `gravity` and `G` are synonyms for 9.80665 m/s², so will convert acceleration values to G's
 
