@@ -139,13 +139,16 @@ class FrameMeta:
         [fm.add(t, e) for t, e in self.frames.items()]
         return fm
 
+    def date_at(self, t: Timeunit) -> datetime.datetime:
+        return self.get(t).dt
+
     @property
-    def min(self):
+    def min(self) -> Timeunit:
         self.check_modified()
         return self.framelist[0]
 
     @property
-    def max(self):
+    def max(self) -> Timeunit:
         self.check_modified()
         return self.framelist[-1]
 

@@ -233,7 +233,7 @@ if __name__ == "__main__":
                     external_file: Path = args.gpx
                     fit_or_gpx_timeseries = load_external(external_file, units)
                     log(f"GPX/FIT file:     {fmtdt(fit_or_gpx_timeseries.min)} -> {fmtdt(fit_or_gpx_timeseries.max)}")
-                    overlap = DateRange(start=frame_meta.min, end=frame_meta.max).overlap_seconds(
+                    overlap = DateRange(start=frame_meta.date_at(frame_meta.min), end=frame_meta.date_at(frame_meta.max)).overlap_seconds(
                         DateRange(start=fit_or_gpx_timeseries.min, end=fit_or_gpx_timeseries.max)
                     )
 
