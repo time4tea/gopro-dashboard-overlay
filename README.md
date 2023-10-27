@@ -136,7 +136,7 @@ Set-ExecutionPolicy Unrestricted -Scope Process
 python .\venv\Scripts\gopro-dashboard.py --font trebuc.ttf --ffmpeg C:\Users\james\Downloads\ffmpeg-6.0-essentials_build\ffmpeg-6.0-essentials_build\bin input.mp4 output.mp4
 ```
 
-Configuration files will go into %UserProfile%\.gopro-graphics
+Configuration files will go into `%UserProfile%\.gopro-graphics`
 
 On my (pretty quick) Windows 11 Box, I get 35 fps (=3.5x realtime) on 2.7k with CPU only, and about the same with GPU. 
 
@@ -255,7 +255,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
-- 0.107.0 [Feature] New units! - "spm" - steps per minute, and "pace" - see metrics docs for full explanation Thanks [@SlippyJimmy](https://github.com/SlippyJimmy)
+- 0.107.0 [Feature] New units! - "spm" - steps per minute, and "pace" - see [metrics docs](docs/xml/examples/04-metrics/README.md) for full explanation Thanks [@SlippyJimmy](https://github.com/SlippyJimmy)
 - 0.106.0 [Feature] New map style "cyclosm" - see: https://www.cyclosm.org/ - An OpenStreetmap for cycling - See map examples for more
 - 0.105.0 [Behaviour Change]  Fix [#150](https://github.com/time4tea/gopro-dashboard-overlay/issues/150) cairo circuit map aspect raio is wrong. Thanks [@yuanduopeng](https://github.com/yuanduopeng) for raising.
 - 0.104.0 [Fix] Honour cmdline arg `--show-ffmpeg`
