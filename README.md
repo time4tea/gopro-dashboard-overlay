@@ -255,6 +255,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.108.0 [Fix] GPX/GoPro overlay date checking had been broken for a while. Thanks (very much) to [@IbnGit](https://github.com/IbnGit) for raising
 - 0.107.0 [Feature] New units! - "spm" - steps per minute, and "pace" - see [metrics docs](docs/xml/examples/04-metrics/README.md) for full explanation Thanks [@SlippyJimmy](https://github.com/SlippyJimmy)
 - 0.106.0 [Feature] New map style "cyclosm" - see: https://www.cyclosm.org/ - An OpenStreetmap for cycling - See map examples for more
 - 0.105.0 [Behaviour Change]  Fix [#150](https://github.com/time4tea/gopro-dashboard-overlay/issues/150) cairo circuit map aspect raio is wrong. Thanks [@yuanduopeng](https://github.com/yuanduopeng) for raising.
