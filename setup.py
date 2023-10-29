@@ -34,9 +34,8 @@ setup(
     license="MIT",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "Environment :: Console",
         "Topic :: Multimedia :: Graphics",
