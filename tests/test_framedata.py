@@ -106,7 +106,7 @@ def test_loading_cori():
     assert item.cori.v.z == pytest.approx(0.002, abs=0.001)
 
 
-class TestPacketTimeCalculator(PacketTimeCalculator):
+class ExamplePacketTimeCalculator(PacketTimeCalculator):
 
     def __init__(self):
         self.counter = 0
@@ -128,7 +128,7 @@ def test_loading_gps9():
         GPS9Visitor(
             converter=GPS9EntryConverter(
                 units,
-                calculator=TestPacketTimeCalculator(),
+                calculator=ExamplePacketTimeCalculator(),
                 on_item=lambda c, e: frame_meta.add(c, e),
             ).convert
         )

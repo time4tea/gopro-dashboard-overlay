@@ -1,7 +1,7 @@
 import functools
-import importlib
 import math
 import os
+from importlib.resources import files, as_file
 from typing import Tuple, List
 
 from PIL import Image, ImageDraw
@@ -45,7 +45,7 @@ def icon(file, at, transform=lambda x: x) -> Widget:
     if os.path.exists(file):
         image = Image.open(file)
     else:
-        with importlib.resources.path(icons, file) as f:
+        with as_file(files(icons) / file) as f:
             image = Image.open(f)
 
     return Drawable(at, transform(image))
@@ -197,10 +197,12 @@ class Frame(Widget):
                     # we can use a more complex formula for getting the distance from corner_radius, but for simplicity we will use this one
                     # it will lead to more straight lines instead of rounded corners
                     outer_radius = math.sqrt(self.corner_radius ** 2 + self.corner_radius ** 2) - self.corner_radius
-                    rounder_radius = math.sqrt((self.dimensions.x / 2) ** 2 + (self.dimensions.y / 2) ** 2) - outer_radius
+                    rounder_radius = math.sqrt(
+                        (self.dimensions.x / 2) ** 2 + (self.dimensions.y / 2) ** 2) - outer_radius
                     distance_from_corner_radius = (rounder_radius - distance_to_center) / rounder_radius
                 fade_out_percents = max(0.01, min(1.0, self.fade_out / radius))
-                self.mask.putpixel((x, y), int(min(1.0, min(distance_from_side, distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
+                self.mask.putpixel((x, y), int(min(1.0, min(distance_from_side,
+                                                            distance_from_corner_radius) / fade_out_percents) * 255 * self.opacity))
 
     def draw(self, image: Image, draw: ImageDraw):
         self._maybe_init()
@@ -229,7 +231,7 @@ class FrameSupplier:
 
 class SimpleFrameSupplier(FrameSupplier):
 
-    def __init__(self, dimensions: Dimension, background: Tuple = (0,0,0,0)):
+    def __init__(self, dimensions: Dimension, background: Tuple = (0, 0, 0, 0)):
         self._dimensions = dimensions
         self._background = background
 

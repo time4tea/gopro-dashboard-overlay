@@ -1,6 +1,6 @@
 import dataclasses
-import importlib
 import xml.etree.ElementTree as ET
+from importlib.resources import files, as_file
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -34,7 +34,7 @@ def load_xml_layout(filepath: Path):
         with filepath.open() as f:
             return f.read()
 
-    with importlib.resources.path(layouts, f"{filepath.name}.xml") as fn:
+    with as_file(files(layouts) / f"{filepath.name}.xml") as fn:
         with open(fn) as f:
             return f.read()
 
@@ -51,10 +51,10 @@ class Converters:
             "kph": lambda u: u.to("KPH"),
             "knots": lambda u: u.to("knot"),
 
-            "pace": lambda u: (1/u).to(pace_unit),
-            "pace_mile": lambda u: (1/u).to("pace_mile"),
-            "pace_km": lambda u: (1/u).to("pace_km"),
-            "pace_kt": lambda u: (1/u).to("pace_kt"),
+            "pace": lambda u: (1 / u).to(pace_unit),
+            "pace_mile": lambda u: (1 / u).to("pace_mile"),
+            "pace_km": lambda u: (1 / u).to("pace_km"),
+            "pace_kt": lambda u: (1 / u).to("pace_kt"),
 
             "spm": lambda u: u.to("spm"),
 
@@ -364,7 +364,8 @@ class Widgets:
         self.font = font
         self.converters = converters
 
-    @allow_attributes({"x", "y", "metric", "size", "format", "dp", "units", "align", "cache", "rgb", "outline", "outline_width"})
+    @allow_attributes(
+        {"x", "y", "metric", "size", "format", "dp", "units", "align", "cache", "rgb", "outline", "outline_width"})
     def create_metric(self, element, entry, **kwargs) -> Widget:
         return metric(
             at=at(element),
@@ -659,6 +660,7 @@ class Widgets:
     def create_cairo_gauge_round_annotated(self, element, entry, **kwargs):
         try:
             import gopro_overlay.layout_xml_cairo
-            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_round_annotated(element, entry, self.converters, **kwargs)
+            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_round_annotated(element, entry, self.converters,
+                                                                                     **kwargs)
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
