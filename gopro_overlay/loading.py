@@ -6,7 +6,8 @@ from typing import Set, Optional
 
 from gopro_overlay import gpx, fit
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro, GoproRecording
-from gopro_overlay.framemeta import FrameMeta, parse_gopro, LoadFlag
+from gopro_overlay.framemeta import FrameMeta
+from gopro_overlay.framemeta_gpmd import LoadFlag, parse_gopro
 from gopro_overlay.gpmd_filters import GPSLockFilter, NullGPSLockFilter
 from gopro_overlay.log import fatal
 from gopro_overlay.timeseries import Timeseries

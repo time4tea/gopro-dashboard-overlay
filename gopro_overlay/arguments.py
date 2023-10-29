@@ -4,7 +4,7 @@ import pathlib
 import sys
 
 from gopro_overlay import geo
-from gopro_overlay.framemeta import LoadFlag
+from gopro_overlay.framemeta_gpmd import LoadFlag
 from gopro_overlay.framemeta_gpx import MergeMode
 from gopro_overlay.log import fatal
 from gopro_overlay.point import Point, BoundingBox

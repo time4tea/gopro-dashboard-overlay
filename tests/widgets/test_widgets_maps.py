@@ -4,7 +4,7 @@ import pytest
 
 from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.framemeta import gps_framemeta
+from gopro_overlay.framemeta_gpmd import gps_framemeta
 from gopro_overlay.geo import MapRenderer, MapStyler
 from gopro_overlay.gpmf import GPMD, GPSFix
 from gopro_overlay.layout import Overlay

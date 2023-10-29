@@ -19,7 +19,7 @@ from gopro_overlay.dimensions import dimension_from, Dimension
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta import LoadFlag
+from gopro_overlay.framemeta_gpmd import LoadFlag
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout

@@ -6,7 +6,8 @@ import pytest
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
-from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta, cori_framemeta, FrameMeta
+from gopro_overlay.framemeta import FrameMeta
+from gopro_overlay.framemeta_gpmd import gps_framemeta, accl_framemeta, grav_framemeta, cori_framemeta, merge_frame_meta
 from gopro_overlay.gpmf import GPMD
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.gpmd_visitors_gps import GPS9Visitor, GPS9EntryConverter

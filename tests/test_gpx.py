@@ -3,6 +3,7 @@ from pathlib import Path
 
 import gpxpy
 
+import gopro_overlay.framemeta_gpmd
 from gopro_overlay import gpx, framemeta
 from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.framemeta import FrameMeta
@@ -218,7 +219,7 @@ def test_bugfix_converting_gpx_to_journey():
 def test_merge_gpx_with_gopro():
     # the two files should be of the same trip
     gpx_timeseries = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
-    gopro_framemeta = framemeta.framemeta_from_datafile(
+    gopro_framemeta = gopro_overlay.framemeta_gpmd.framemeta_from_datafile(
         file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
         units,
         datastream=DataStream(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
@@ -242,7 +243,7 @@ def test_merge_gpx_with_gopro():
 def test_merge_gpx_with_gopro_extend_mode():
     # the two files should be of the same trip
     gpx_timeseries = gpx.load_timeseries(file_path_of_test_asset("test.gpx.gz"), units)
-    gopro_framemeta = framemeta.framemeta_from_datafile(
+    gopro_framemeta = gopro_overlay.framemeta_gpmd.framemeta_from_datafile(
         file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
         units,
         datastream=DataStream(stream=3, frame_count=707, timebase=1000, frame_duration=1001),

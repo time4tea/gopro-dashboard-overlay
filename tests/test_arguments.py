@@ -5,7 +5,7 @@ from typing import Optional
 import pytest
 
 from gopro_overlay.arguments import gopro_dashboard_arguments
-from gopro_overlay.framemeta import LoadFlag
+from gopro_overlay.framemeta_gpmd import LoadFlag
 from gopro_overlay.framemeta_gpx import MergeMode
 from gopro_overlay.geo import ArgsKeyFinder
 from gopro_overlay.point import Point, BoundingBox

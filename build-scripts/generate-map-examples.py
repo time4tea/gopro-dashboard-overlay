@@ -7,7 +7,7 @@ from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta import framemeta_from_datafile
+from gopro_overlay.framemeta_gpmd import framemeta_from_datafile
 from gopro_overlay.geo import MapRenderer, ConfigKeyFinder, attrs_for_style, MapStyler
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_xml import layout_from_xml
