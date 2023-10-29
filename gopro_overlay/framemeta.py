@@ -226,5 +226,3 @@ class FrameMeta:
     def duration(self):
         self.check_modified()
         return self.framelist[-1]
-
-
