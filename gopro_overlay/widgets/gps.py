@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw
 
-from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpmf import GPSFix
 from .widgets import Widget
 
 

@@ -25,7 +25,7 @@ from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
-from gopro_overlay.gpmd import GPS_FIXED_VALUES, GPSFix
+from gopro_overlay.gpmf import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.layout import Overlay, speed_awareness_layout
 from gopro_overlay.layout_xml import layout_from_xml, load_xml_layout, Converters
 from gopro_overlay.loading import load_external, GoproLoader

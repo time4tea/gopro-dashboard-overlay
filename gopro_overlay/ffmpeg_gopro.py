@@ -28,7 +28,7 @@ class FFMPEGGoPro:
         streams = self.find_recording(filepaths[0])
 
         maps = list(itertools.chain.from_iterable(
-            [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.meta] if it is not None]))
+            [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.data] if it is not None]))
 
         with temporary_file() as commandfile:
             with open(commandfile, "w") as f:
@@ -97,7 +97,7 @@ class FFMPEGGoPro:
         streams = ffprobe_json["streams"]
         video = first_and_only("video stream", streams, video_selector)
 
-        video_meta = VideoMeta(
+        video_stream = VideoStream(
             stream=int(video["index"]),
             dimension=Dimension(video["width"], video["height"]),
             duration=timeunits(seconds=float(video["duration"])),
@@ -107,31 +107,31 @@ class FFMPEGGoPro:
         )
 
         audio = only_if_present("audio stream", streams, audio_selector)
-        audio_meta = None
+        audio_stream = None
         if audio:
-            audio_meta = AudioMeta(stream=int(audio["index"]))
+            audio_stream = AudioStream(stream=int(audio["index"]))
 
-        meta = only_if_present("metadata stream", streams, data_selector)
+        data = only_if_present("metadata stream", streams, data_selector)
 
-        if meta:
-            data_stream_number = int(meta["index"])
+        if data:
+            data_stream_number = int(data["index"])
 
-            meta_meta = MetaMeta(
+            data_stream = DataStream(
                 stream=data_stream_number,
-                frame_count=int(meta["nb_frames"]),
-                timebase=int(meta["time_base"].split("/")[1]),
+                frame_count=int(data["nb_frames"]),
+                timebase=int(data["time_base"].split("/")[1]),
                 frame_duration=self.find_frame_duration(filepath, data_stream_number)
             )
         else:
-            meta_meta = None
+            data_stream = None
 
         return GoproRecording(
             ffmpeg=self.exe,
             location=filepath,
-            file=file_meta(filepath, stat=stat),
-            audio=audio_meta,
-            video=video_meta,
-            meta=meta_meta
+            file=filestat(filepath, stat=stat),
+            audio=audio_stream,
+            video=video_stream,
+            data=data_stream
         )
 
     def load_frame(self, filepath: Path, at_time: Timeunit) -> Optional[bytes]:
@@ -154,7 +154,7 @@ class FFMPEGGoPro:
         streams = self.find_recording(input)
 
         maps = list(itertools.chain.from_iterable(
-            [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.meta] if it is not None]))
+            [["-map", f"0:{it.stream}"] for it in [streams.video, streams.audio, streams.data] if it is not None]))
 
         args = [
             "-hide_banner",
@@ -173,17 +173,17 @@ class FFMPEGGoPro:
 
 
 @dataclass(frozen=True)
-class FileMeta:
+class FileStat:
     length: int
     mtime: datetime.datetime
     ctime: datetime.datetime
     atime: datetime.datetime
 
 
-def file_meta(filepath: Path, stat=os.stat) -> FileMeta:
+def filestat(filepath: Path, stat=os.stat) -> FileStat:
     sr = stat(filepath)
 
-    return FileMeta(
+    return FileStat(
         length=sr.st_size,
         ctime=datetime.datetime.fromtimestamp(sr.st_ctime, tz=datetime.timezone.utc),
         atime=datetime.datetime.fromtimestamp(sr.st_atime, tz=datetime.timezone.utc),
@@ -195,13 +195,13 @@ def file_meta(filepath: Path, stat=os.stat) -> FileMeta:
 class GoproRecording:
     ffmpeg: FFMPEG
     location: Path
-    file: FileMeta
-    audio: Optional[AudioMeta]
-    video: VideoMeta
-    meta: Optional[MetaMeta]
+    file: FileStat
+    audio: Optional[AudioStream]
+    video: VideoStream
+    data: Optional[DataStream]
 
-    def load_gpmd(self) -> array:
-        track = self.meta.stream
+    def load_data(self) -> array:
+        track = self.data.stream
         if track:
             cmd = [
                 "-hide_banner",
@@ -221,7 +221,7 @@ class GoproRecording:
 
 
 @dataclass(frozen=True)
-class MetaMeta:
+class DataStream:
     stream: int
     frame_count: int
     timebase: int
@@ -229,7 +229,7 @@ class MetaMeta:
 
 
 @dataclass(frozen=True)
-class VideoMeta:
+class VideoStream:
     stream: int
     dimension: Dimension
     duration: Timeunit
@@ -240,6 +240,7 @@ class VideoMeta:
     def frame_rate(self) -> float:
         return self.frame_rate_numerator / self.frame_rate_denominator
 
+
 @dataclass(frozen=True)
-class AudioMeta:
+class AudioStream:
     stream: int

@@ -3,7 +3,7 @@ import datetime
 from typing import List
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import VECTOR
+from gopro_overlay.gpmf import VECTOR
 from gopro_overlay.point import PintPoint3
 
 

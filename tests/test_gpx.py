@@ -4,10 +4,10 @@ from pathlib import Path
 import gpxpy
 
 from gopro_overlay import gpx, framemeta
-from gopro_overlay.ffmpeg_gopro import MetaMeta
+from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta, MergeMode
-from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpmf import GPSFix
 from gopro_overlay.gpx import gpx_to_timeseries
 from gopro_overlay.journey import Journey
 from gopro_overlay.point import Point, BoundingBox
@@ -221,7 +221,7 @@ def test_merge_gpx_with_gopro():
     gopro_framemeta = framemeta.framemeta_from_datafile(
         file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
         units,
-        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
+        datastream=DataStream(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
         flags=set()
     )
 
@@ -245,7 +245,7 @@ def test_merge_gpx_with_gopro_extend_mode():
     gopro_framemeta = framemeta.framemeta_from_datafile(
         file_path_of_test_asset("gopro-meta.gpmd", in_dir="meta"),
         units,
-        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
+        datastream=DataStream(stream=3, frame_count=707, timebase=1000, frame_duration=1001),
         flags=set()
     )
     assert gpx_timeseries.min < gopro_framemeta.get(gopro_framemeta.min).dt

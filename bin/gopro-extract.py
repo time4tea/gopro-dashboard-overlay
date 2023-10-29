@@ -25,4 +25,4 @@ if __name__ == "__main__":
     recording = ffmpeg_gopro.find_recording(source)
 
     with dest.open("wb") as output:
-        output.write(recording.load_gpmd())
+        output.write(recording.load_data())

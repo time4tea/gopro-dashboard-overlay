@@ -1,7 +1,7 @@
 import math
 from typing import List
 
-from .gpmd import GPS_FIXED_VALUES
+from .gpmf import GPS_FIXED_VALUES
 from .point import Point, BoundingBox
 
 

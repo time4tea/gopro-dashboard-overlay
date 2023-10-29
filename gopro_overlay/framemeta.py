@@ -2,18 +2,20 @@ import bisect
 import datetime
 from datetime import timedelta
 from enum import Enum
-from typing import Callable, List, MutableMapping, Set
+from typing import Callable, List, MutableMapping, Set, Optional
 
 from gopro_overlay import timeseries_process
 from gopro_overlay.entry import Entry
-from gopro_overlay.ffmpeg_gopro import MetaMeta
-from gopro_overlay.gpmd import GPMD
+from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
+from gopro_overlay.gpmd_filters import GPSLockFilter
 from gopro_overlay.gpmd_visitors import StreamFindingVisitor
 from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter
-from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPS5Visitor, NullGPSLockFilter, GPS9Visitor, GPS9EntryConverter
+from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPS5Visitor, NullGPSLockFilter, GPS9Visitor, \
+    GPS9EntryConverter
 from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
+from gopro_overlay.gpmf import GPMD
 from gopro_overlay.log import log
 from gopro_overlay.timeunits import Timeunit, timeunits
 from gopro_overlay.timing import PoorTimer
@@ -90,7 +92,7 @@ class Window:
 
 class Stepper:
 
-    def __init__(self, framemeta, step: Timeunit):
+    def __init__(self, framemeta: 'FrameMeta', step: Timeunit):
         self._framemeta = framemeta
         self._step = step
 
@@ -239,28 +241,31 @@ class FrameMeta:
         return self.framelist[-1]
 
 
-def gps_framemeta(meta: GPMD, units, metameta=None, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
+def gps_framemeta(gpmd: GPMD,
+                  units,
+                  datastream: Optional[DataStream] = None,
+                  gps_lock_filter: GPSLockFilter = NullGPSLockFilter()) -> FrameMeta:
     frame_meta = FrameMeta()
 
-    if meta.accept(StreamFindingVisitor("GPS9")).found():
+    if gpmd.accept(StreamFindingVisitor("GPS9")).found():
         log(">> Found GPS9 ")
-        meta.accept(
+        gpmd.accept(
             GPS9Visitor(
                 converter=GPS9EntryConverter(
                     units,
-                    calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS9"),
+                    calculator=timestamp_calculator_for_packet_type(gpmd, datastream, "GPS9"),
                     on_item=lambda c, e: frame_meta.add(c, e),
                     gps_lock_filter=gps_lock_filter
                 ).convert
             )
         )
-    elif meta.accept(StreamFindingVisitor("GPS5")).found():
+    elif gpmd.accept(StreamFindingVisitor("GPS5")).found():
         log(">> Found GPS5 ")
-        meta.accept(
+        gpmd.accept(
             GPS5Visitor(
                 converter=GPS5EntryConverter(
                     units,
-                    calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS5"),
+                    calculator=timestamp_calculator_for_packet_type(gpmd, datastream, "GPS5"),
                     on_item=lambda c, e: frame_meta.add(c, e),
                     gps_lock_filter=gps_lock_filter
                 ).convert
@@ -269,18 +274,17 @@ def gps_framemeta(meta: GPMD, units, metameta=None, gps_lock_filter=NullGPSLockF
     else:
         log(">> Can't find any GPS information")
 
-
     return frame_meta
 
 
-def accl_framemeta(meta, units, metameta=None):
+def accl_framemeta(gpmd: GPMD, units, datastream: Optional[DataStream] = None):
     framemeta = FrameMeta()
 
-    meta.accept(
+    gpmd.accept(
         XYZVisitor(
             "ACCL",
             on_item=XYZComponentConverter(
-                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "ACCL"),
+                frame_calculator=timestamp_calculator_for_packet_type(gpmd, datastream, "ACCL"),
                 units=units,
                 on_item=lambda t, x: framemeta.add(t, x)
             ).convert
@@ -293,13 +297,13 @@ def accl_framemeta(meta, units, metameta=None):
     return framemeta
 
 
-def grav_framemeta(meta, units, metameta=None):
+def grav_framemeta(gpmd: GPMD, units, datastream: Optional[DataStream] = None):
     framemeta = FrameMeta()
 
-    meta.accept(
+    gpmd.accept(
         GRAVisitor(
             on_item=GRAVComponentConverter(
-                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "GRAV"),
+                frame_calculator=timestamp_calculator_for_packet_type(gpmd, datastream, "GRAV"),
                 units=units,
                 on_item=lambda t, x: framemeta.add(t, x)
             ).convert
@@ -309,13 +313,13 @@ def grav_framemeta(meta, units, metameta=None):
     return framemeta
 
 
-def cori_framemeta(meta, units, metameta=None):
+def cori_framemeta(gpmd: GPMD, units, datastream: Optional[DataStream] = None):
     framemeta = FrameMeta()
 
-    meta.accept(
+    gpmd.accept(
         CORIVisitor(
             on_item=CORIComponentConverter(
-                frame_calculator=timestamp_calculator_for_packet_type(meta, metameta, "CORI"),
+                frame_calculator=timestamp_calculator_for_packet_type(gpmd, datastream, "CORI"),
                 units=units,
                 on_item=lambda t, x: framemeta.add(t, x)
             ).convert
@@ -339,23 +343,23 @@ class LoadFlag(Enum):
     CORI = 3
 
 
-def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = None,
-                gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
+def parse_gopro(gpmd_from, units, datastream: DataStream, flags: Set[LoadFlag] = None,
+                gps_lock_filter: GPSLockFilter = NullGPSLockFilter()) -> FrameMeta:
     if flags is None:
         flags = set(list(LoadFlag))
 
     with PoorTimer("parsing").timing():
         with PoorTimer("GPMD", indent=1).timing():
-            gopro_meta = GPMD.parse(gpmd_from)
+            gpmd = GPMD.parse(gpmd_from)
 
         with PoorTimer("extract GPS", indent=1).timing():
-            gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta, gps_lock_filter=gps_lock_filter)
+            gps_frame_meta = gps_framemeta(gpmd, units, datastream=datastream, gps_lock_filter=gps_lock_filter)
 
         if LoadFlag.ACCL in flags:
             with PoorTimer("extract ACCL", indent=1).timing():
                 merge_frame_meta(
                     gps_frame_meta,
-                    accl_framemeta(gopro_meta, units, metameta=metameta),
+                    accl_framemeta(gpmd, units, datastream=datastream),
                     lambda a: {"accl": a.accl}
                 )
 
@@ -363,7 +367,7 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = Non
             with PoorTimer("extract GRAV", indent=1).timing():
                 merge_frame_meta(
                     gps_frame_meta,
-                    grav_framemeta(gopro_meta, units, metameta=metameta),
+                    grav_framemeta(gpmd, units, datastream=datastream),
                     lambda a: {"grav": a.grav}
                 )
 
@@ -371,13 +375,13 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = Non
             with PoorTimer("extract CORI", indent=1).timing():
                 merge_frame_meta(
                     gps_frame_meta,
-                    cori_framemeta(gopro_meta, units, metameta=metameta),
+                    cori_framemeta(gpmd, units, datastream=datastream),
                     lambda a: {"cori": a.cori, "ori": a.ori}
                 )
 
         return gps_frame_meta
 
 
-def framemeta_from_datafile(datapath, units, metameta: MetaMeta, flags: Set[LoadFlag] = None):
+def framemeta_from_datafile(datapath, units, datastream: DataStream, flags: Set[LoadFlag] = None):
     with open(datapath, "rb") as data:
-        return parse_gopro(data.read(), units, metameta, flags)
+        return parse_gopro(data.read(), units, datastream, flags)

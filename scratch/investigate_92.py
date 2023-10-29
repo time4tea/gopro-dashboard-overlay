@@ -6,7 +6,7 @@ import matplotlib.pyplot as plot
 
 from gopro_overlay import gpx, timeseries_process
 from gopro_overlay.framemeta_gpx import timeseries_to_framemeta, merge_gpx_with_gopro
-from gopro_overlay.gpmd import GPS_FIXED_VALUES
+from gopro_overlay.gpmf import GPS_FIXED_VALUES
 from gopro_overlay.loading import GoproLoader
 from gopro_overlay.units import units
 

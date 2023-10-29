@@ -129,10 +129,10 @@ def test_parsing_stream_information():
     assert streams.video.dimension == Dimension(1920, 1080)
     assert streams.video.duration == timeunits(seconds=707.707)
     assert streams.audio.stream == 1
-    assert streams.meta.stream == 3
-    assert streams.meta.frame_count == 707
-    assert streams.meta.timebase == 1000
-    assert streams.meta.frame_duration == 1001
+    assert streams.data.stream == 3
+    assert streams.data.frame_count == 707
+    assert streams.data.timebase == 1000
+    assert streams.data.frame_duration == 1001
 
     assert streams.file.length == 9876
 

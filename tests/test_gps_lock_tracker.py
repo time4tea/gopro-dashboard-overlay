@@ -1,5 +1,5 @@
 from gopro_overlay.counter import ReasonCounter
-from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpmf import GPSFix
 from gopro_overlay.gpmd_filters import GPSLockTracker, GPSLockComponents, GPSDOPFilter, GPSMaxSpeedFilter, GPSReportingFilter
 from gopro_overlay.point import Point
 

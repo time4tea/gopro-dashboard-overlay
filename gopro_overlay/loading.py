@@ -43,14 +43,14 @@ class GoproLoader:
     def load(self, file: Path) -> GoPro:
         recording = self.ffmpeg_gopro.find_recording(file)
 
-        if not recording.meta:
+        if not recording.data:
             raise IOError(f"Unable to locate metadata stream in '{file}' - is it a GoPro file")
 
         try:
             frame_meta = parse_gopro(
-                recording.load_gpmd(),
+                recording.load_data(),
                 self.units,
-                recording.meta,
+                recording.data,
                 flags=self.flags,
                 gps_lock_filter=self.filter
             )

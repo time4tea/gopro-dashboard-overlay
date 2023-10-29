@@ -1,6 +1,6 @@
 from geographiclib.geodesic import Geodesic
 
-from .gpmd import GPS_FIXED_VALUES
+from .gpmf import GPS_FIXED_VALUES
 from .point import PintPoint3, Point
 from .smoothing import Kalman, SimpleExponential
 from .units import units

@@ -4,7 +4,7 @@ from typing import Optional, Callable
 
 from pint import Quantity
 
-from gopro_overlay.gpmd import GPSFix, GPS_FIXED
+from gopro_overlay.gpmf import GPSFix, GPS_FIXED
 from gopro_overlay.log import log
 from gopro_overlay.point import Point, BoundingBox
 

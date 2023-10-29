@@ -1,8 +1,8 @@
 from typing import Optional, Any, Callable, Tuple
 
 from gopro_overlay.exceptions import Defect
-from gopro_overlay.ffmpeg_gopro import MetaMeta
-from gopro_overlay.gpmd import GPMD
+from gopro_overlay.ffmpeg_gopro import DataStream
+from gopro_overlay.gpmf import GPMD
 from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
     CalculateCorrectionFactorsVisitor
 from gopro_overlay.log import log
@@ -64,13 +64,13 @@ class UnknownPacketTimeCalculator(PacketTimeCalculator):
         raise Defect("can't calculate timings for {self._packet_type} as none were seen.")
 
 
-def timestamp_calculator_for_packet_type(meta: GPMD, metameta: MetaMeta, packet_type: str) -> PacketTimeCalculator:
+def timestamp_calculator_for_packet_type(meta: GPMD, datastream: Optional[DataStream], packet_type: str) -> PacketTimeCalculator:
     cori_timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
     if cori_timestamp is not None:
         return CoriTimestampPacketTimeCalculator(cori_timestamp)
     else:
-        assert metameta is not None
-        visitor = CalculateCorrectionFactorsVisitor(packet_type, metameta)
+        assert datastream is not None
+        visitor = CalculateCorrectionFactorsVisitor(packet_type, datastream)
         meta.accept(visitor)
 
         if visitor.found():

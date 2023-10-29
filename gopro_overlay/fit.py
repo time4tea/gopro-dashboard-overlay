@@ -3,7 +3,7 @@ from pathlib import Path
 import fitdecode
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpmf import GPSFix
 from gopro_overlay.point import Point
 from gopro_overlay.timeseries import Timeseries
 

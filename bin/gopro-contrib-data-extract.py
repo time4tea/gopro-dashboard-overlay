@@ -6,7 +6,7 @@ import pathlib
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
-from gopro_overlay.gpmd import GPMD
+from gopro_overlay.gpmf import GPMD
 
 
 class DataDumpVisitor:
@@ -94,11 +94,11 @@ class DumpAggregateConverter:
 
 
 def dump(recording: GoproRecording, fourcc, output_file):
-    meta = GPMD.parse(recording.load_gpmd())
+    gpmd = GPMD.parse(recording.load_data())
 
     with open(output_file, 'wt', encoding='utf-8') as file:
         converter = DumpAggregateConverter(file)
-        meta.accept(DataDumpVisitor(fourcc=fourcc, converter=converter.convert))
+        gpmd.accept(DataDumpVisitor(fourcc=fourcc, converter=converter.convert))
 
 
 if __name__ == "__main__":

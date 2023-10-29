@@ -5,7 +5,7 @@ from typing import List, Optional
 from pint import Quantity
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import QUATERNION
+from gopro_overlay.gpmf import QUATERNION
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.point import Quaternion, Point3, EulerRadians
 

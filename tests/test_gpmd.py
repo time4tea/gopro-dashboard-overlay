@@ -9,7 +9,7 @@ import pytest
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
-from gopro_overlay.gpmd import GPMD, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
+from gopro_overlay.gpmf import GPMD, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
     CorrectionFactors
@@ -286,15 +286,15 @@ def test_loading_time_lapse_file():
     streams, _ = load_mp4_meta("time-lapse.mp4", missing_ok=True)
     assert streams.audio is None
     assert streams.video.stream == 0
-    assert streams.meta.stream == 2
-    assert streams.meta.frame_count == 63
-    assert streams.meta.frame_duration == 500
-    assert streams.meta.timebase == 15000
+    assert streams.data.stream == 2
+    assert streams.data.frame_count == 63
+    assert streams.data.frame_duration == 500
+    assert streams.data.timebase == 15000
 
 
 def test_estimation_of_timestamps_for_timelapse():
     stream_info, meta = load_mp4_meta("time-lapse.mp4", missing_ok=True)
-    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.meta))
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.data))
 
     factors = visitor.factors()
 
@@ -305,7 +305,7 @@ def test_estimation_of_timestamps_for_timelapse():
 
 def test_loading_time_warp_file():
     stream_info, meta = load_mp4_meta("time-warp.mp4", missing_ok=True)
-    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.meta))
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.data))
 
     factors = visitor.factors()
 
@@ -360,7 +360,7 @@ def test_calculation_of_timestamps_gps9():
 
     stream_info, meta = load_mp4_meta("/data/richja/gopro/GX010372.MP4", missing_ok=True)
 
-    assert stream_info.meta.frame_duration == 1001
+    assert stream_info.data.frame_duration == 1001
 
     timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
 
@@ -374,9 +374,9 @@ def test_estimation_of_timestamps_gps5():
 
     stream_info, meta = load_mp4_meta("hero7.mp4")
 
-    assert stream_info.meta.frame_duration == 1001
+    assert stream_info.data.frame_duration == 1001
 
-    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.meta))
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GPS5", stream_info.data))
 
     factors = visitor.factors()
 
@@ -395,9 +395,9 @@ def test_estimation_of_timestamps_grav():
 
     stream_info, meta = load_mp4_meta("time-warp.mp4", missing_ok=True)
 
-    assert stream_info.meta.frame_duration == 1001
+    assert stream_info.data.frame_duration == 1001
 
-    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GRAV", stream_info.meta))
+    visitor = meta.accept(CalculateCorrectionFactorsVisitor("GRAV", stream_info.data))
 
     factors = visitor.factors()
 

@@ -1,4 +1,4 @@
-from gopro_overlay.gpmd import XYZ
+from gopro_overlay.gpmf import XYZ
 from gopro_overlay.gpmd_visitors_xyz import ORIN
 
 

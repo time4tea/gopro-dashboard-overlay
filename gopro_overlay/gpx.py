@@ -5,7 +5,7 @@ from typing import List
 
 import gpxpy
 
-from .gpmd import GPSFix
+from .gpmf import GPSFix
 from .point import Point
 from .timeseries import Timeseries, Entry
 

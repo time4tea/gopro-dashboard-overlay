@@ -5,7 +5,7 @@ from pathlib import Path
 from gopro_overlay import geo, arguments
 from gopro_overlay.config import Config
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.ffmpeg_gopro import MetaMeta
+from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.font import load_font
 from gopro_overlay.framemeta import framemeta_from_datafile
 from gopro_overlay.geo import MapRenderer, ConfigKeyFinder, attrs_for_style, MapStyler
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     framemeta = framemeta_from_datafile(
         datapath=datapath,
         units=units,
-        metameta=MetaMeta(stream=3, frame_count=707, timebase=1000, frame_duration=1001)
+        datastream=DataStream(stream=3, frame_count=707, timebase=1000, frame_duration=1001)
     )
 
     font = load_font("Roboto-Medium.ttf")

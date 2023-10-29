@@ -3,7 +3,7 @@ import random
 
 from . import timeseries_process
 from .framemeta import FrameMeta
-from .gpmd import GPSFix
+from .gpmf import GPSFix
 from .point import Point, PintPoint3
 from .timeseries import Entry
 from .timeunits import timeunits

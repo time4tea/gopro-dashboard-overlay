@@ -7,7 +7,7 @@ import pytest
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta, cori_framemeta, FrameMeta
-from gopro_overlay.gpmd import GPMD
+from gopro_overlay.gpmf import GPMD
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.gpmd_visitors_gps import GPS9Visitor, GPS9EntryConverter
 from gopro_overlay.timeunits import timeunits
@@ -18,7 +18,7 @@ g = FFMPEGGoPro(FFMPEG())
 
 def load_file(path: Path) -> GPMD:
     recording = g.find_recording(path)
-    return GPMD.parse(recording.load_gpmd())
+    return GPMD.parse(recording.load_data())
 
 
 def file_path_of_test_asset(name, missing_ok=False) -> Path:
@@ -41,11 +41,11 @@ def test_loading_data_by_frame():
     filepath = file_path_of_test_asset("hero7.mp4")
     meta = load_file(filepath)
 
-    metameta = g.find_recording(filepath).meta
+    metameta = g.find_recording(filepath).data
 
     gps_framemeta(
         meta,
-        metameta=metameta,
+        datastream=metameta,
         units=units
     )
 
@@ -55,7 +55,7 @@ def test_loading_accl():
     meta = load_file(filepath)
     stream_info = g.find_recording(filepath)
 
-    framemeta = accl_framemeta(meta, units, stream_info.meta)
+    framemeta = accl_framemeta(meta, units, stream_info.data)
 
     item = list(framemeta.items())[0]
     assert f"{item.accl.x.units:P~}" == "m/s²"
@@ -68,7 +68,7 @@ def test_loading_grav():
     meta = load_file(filepath)
     stream_info = g.find_recording(filepath)
 
-    framemeta = grav_framemeta(meta, units, stream_info.meta)
+    framemeta = grav_framemeta(meta, units, stream_info.data)
 
     item = list(framemeta.items())[0]
     assert item.grav.x.magnitude == pytest.approx(0.046, 0.01)
@@ -82,7 +82,7 @@ def test_loading_cori():
     meta = load_file(filepath)
     stream_info = g.find_recording(filepath)
 
-    framemeta = cori_framemeta(meta, units, stream_info.meta)
+    framemeta = cori_framemeta(meta, units, stream_info.data)
 
     item = list(framemeta.items())[0]
     assert item.cori.w == pytest.approx(1, abs=0.001)
@@ -129,8 +129,8 @@ def test_loading_gps_and_accl():
     meta = load_file(filepath)
     stream_info = g.find_recording(filepath)
 
-    gps_frame_meta = gps_framemeta(meta, units, stream_info.meta)
-    accl_frame_meta = accl_framemeta(meta, units, stream_info.meta)
+    gps_frame_meta = gps_framemeta(meta, units, stream_info.data)
+    accl_frame_meta = accl_framemeta(meta, units, stream_info.data)
 
     merge_frame_meta(gps_frame_meta, accl_frame_meta, lambda a: {"accl": a.accl})
 

@@ -2,7 +2,7 @@ import pytest
 from PIL import Image, ImageDraw
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.gpmd import GPSFix
+from gopro_overlay.gpmf import GPSFix
 from gopro_overlay.layout import BigMetric, gps_info
 from gopro_overlay.layout_components import text, metric
 from gopro_overlay.point import Coordinate

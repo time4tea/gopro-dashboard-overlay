@@ -1,6 +1,6 @@
 import collections
 
-from gopro_overlay.ffmpeg_gopro import MetaMeta
+from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.timeunits import timeunits
 
 
@@ -54,12 +54,12 @@ class DetermineTimestampOfFirstSHUTVisitor:
 
 
 class PayloadMaths:
-    def __init__(self, metameta: MetaMeta):
-        self._metameta = metameta
-        self._max_time = metameta.frame_count * metameta.frame_duration / metameta.timebase
+    def __init__(self, datastream: DataStream):
+        self._datastream = datastream
+        self._max_time = datastream.frame_count * datastream.frame_duration / datastream.timebase
 
     def time_of_out_packet(self, packet_number):
-        packet_time = (packet_number + 1) * self._metameta.frame_duration / self._metameta.timebase
+        packet_time = (packet_number + 1) * self._datastream.frame_duration / self._datastream.timebase
         return min(packet_time, self._max_time)
 
 
@@ -69,7 +69,7 @@ CorrectionFactors = collections.namedtuple("CorrectionFactors", ["first_frame", 
 class CalculateCorrectionFactorsVisitor:
     """This implements GetGPMFSampleRate in GPMF_utils.c"""
 
-    def __init__(self, wanted: str, metameta: MetaMeta):
+    def __init__(self, wanted: str, metameta: DataStream):
         self.wanted = wanted
         self.wanted_method_name = f"vi_{self.wanted}"
         self._payload_maths = PayloadMaths(metameta)

@@ -3,7 +3,7 @@ import datetime
 from typing import List, Optional
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5, GPSFix, GPS9
+from gopro_overlay.gpmf import interpret_item, GPS_FIXED, GPS5, GPSFix, GPS9
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSLockComponents
 from gopro_overlay.point import Point
