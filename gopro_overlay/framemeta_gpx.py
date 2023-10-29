@@ -10,7 +10,7 @@ from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timeunits import Timeunit, timeunits
 
 
-def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0), filter_fn = lambda e: True):
+def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0), filter_fn=lambda e: True):
     gpx = gpxpy.gpx.GPX()
 
     gpx_track = gpxpy.gpx.GPXTrack()
@@ -20,7 +20,6 @@ def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0), filt
     gpx_track.segments.append(gpx_segment)
 
     for entry in filter(filter_fn, fm.items(step=step)):
-
         entry_dt = entry.dt
 
         gpx_segment.points.append(
@@ -79,7 +78,8 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta,
     gopro_framemeta.process(processor)
 
 
-def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datetime.datetime = None, duration: Timeunit = None) -> FrameMeta:
+def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datetime.datetime = None,
+                            duration: Timeunit = None) -> FrameMeta:
     fake_frame_meta = FrameMeta()
 
     if start_date is None:
@@ -110,7 +110,7 @@ def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datet
             Entry(
                 dt=point_datetime,
                 timestamp=units.Quantity(offset.millis(), units.number),
-                ** { 'dop': units.Quantity(10, units.number), **entry.items }
+                **{'dop': units.Quantity(10, units.number), **entry.items}
             )
         )
 
