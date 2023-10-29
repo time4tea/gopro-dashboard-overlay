@@ -1,3 +1,4 @@
+import datetime
 import inspect
 from pathlib import Path
 
@@ -5,16 +6,19 @@ import pytest
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
-from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta, cori_framemeta
-from gopro_overlay.gpmd import GoproMeta
+from gopro_overlay.framemeta import gps_framemeta, accl_framemeta, merge_frame_meta, grav_framemeta, cori_framemeta, FrameMeta
+from gopro_overlay.gpmd import GPMD
+from gopro_overlay.gpmd_calculate import PacketTimeCalculator
+from gopro_overlay.gpmd_visitors_gps import GPS9Visitor, GPS9EntryConverter
+from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 
 g = FFMPEGGoPro(FFMPEG())
 
 
-def load_file(path: Path) -> GoproMeta:
+def load_file(path: Path) -> GPMD:
     recording = g.find_recording(path)
-    return GoproMeta.parse(recording.load_gpmd())
+    return GPMD.parse(recording.load_gpmd())
 
 
 def file_path_of_test_asset(name, missing_ok=False) -> Path:
@@ -85,6 +89,39 @@ def test_loading_cori():
     assert item.cori.v.x == pytest.approx(0.000, abs=0.001)
     assert item.cori.v.y == pytest.approx(0.005, abs=0.001)
     assert item.cori.v.z == pytest.approx(0.002, abs=0.001)
+
+
+class TestPacketTimeCalculator(PacketTimeCalculator):
+
+    def __init__(self):
+        self.counter = 0
+
+    def next_packet(self, timestamp, samples_before_this, num_samples):
+        start = timeunits(seconds=self.counter)
+        self.counter += 1
+        per_sample = timeunits(seconds=1) / num_samples
+        return lambda x: (start + (x * per_sample), (x * per_sample))
+
+
+def test_loading_gps9():
+    filepath = file_path_of_test_asset("gps9.gpmd")
+
+    gpmd = GPMD.parse(filepath.read_bytes())
+
+    frame_meta = FrameMeta()
+    gpmd.accept(
+        GPS9Visitor(
+            converter=GPS9EntryConverter(
+                units,
+                calculator=TestPacketTimeCalculator(),
+                on_item=lambda c, e: frame_meta.add(c, e),
+            ).convert
+        )
+    )
+
+    assert len(frame_meta) == 3621
+    entry = next(frame_meta.items())
+    assert entry.dt == datetime.datetime(2023, 10, 1, 8, 18, 25, 700000, tzinfo=datetime.timezone.utc)
 
 
 def test_loading_gps_and_accl():

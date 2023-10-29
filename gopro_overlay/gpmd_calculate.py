@@ -1,15 +1,18 @@
-from typing import Optional, Any
+from typing import Optional, Any, Callable, Tuple
 
 from gopro_overlay.exceptions import Defect
 from gopro_overlay.ffmpeg_gopro import MetaMeta
-from gopro_overlay.gpmd import GoproMeta
+from gopro_overlay.gpmd import GPMD
 from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
     CalculateCorrectionFactorsVisitor
 from gopro_overlay.log import log
 from gopro_overlay.timeunits import Timeunit, timeunits
 
+class PacketTimeCalculator:
+    def next_packet(self, timestamp: int, samples_before_this: int, num_samples: int) -> Callable[[int], Tuple[Timeunit, Timeunit]]:
+        raise NotImplementedError()
 
-class CoriTimestampPacketTimeCalculator:
+class CoriTimestampPacketTimeCalculator(PacketTimeCalculator):
     def __init__(self, cori_timestamp: Timeunit):
         self._cori_timestamp = cori_timestamp
         self._first_timestamp: Optional[Timeunit] = None
@@ -41,7 +44,7 @@ class CoriTimestampPacketTimeCalculator:
         )
 
 
-class CorrectionFactorsPacketTimeCalculator:
+class CorrectionFactorsPacketTimeCalculator(PacketTimeCalculator):
     def __init__(self, correction_factors: CorrectionFactors):
         self.correction_factors = correction_factors
 
@@ -53,7 +56,7 @@ class CorrectionFactorsPacketTimeCalculator:
         )
 
 
-class UnknownPacketTimeCalculator:
+class UnknownPacketTimeCalculator(PacketTimeCalculator):
     def __init__(self, packet_type):
         self._packet_type = packet_type
 
@@ -61,7 +64,7 @@ class UnknownPacketTimeCalculator:
         raise Defect("can't calculate timings for {self._packet_type} as none were seen.")
 
 
-def timestamp_calculator_for_packet_type(meta: GoproMeta, metameta: MetaMeta, packet_type: str) -> Optional[Any]:
+def timestamp_calculator_for_packet_type(meta: GPMD, metameta: MetaMeta, packet_type: str) -> PacketTimeCalculator:
     cori_timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
     if cori_timestamp is not None:
         return CoriTimestampPacketTimeCalculator(cori_timestamp)

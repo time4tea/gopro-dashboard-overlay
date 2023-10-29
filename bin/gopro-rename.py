@@ -9,7 +9,7 @@ from typing import List
 from gopro_overlay import functional, filenaming, geocode
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
-from gopro_overlay.gpmd import GoproMeta
+from gopro_overlay.gpmd import GPMD
 from gopro_overlay.gpmd_visitors_gps import DetermineFirstLockedGPSUVisitor
 from gopro_overlay.log import log
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     for file in file_list:
         recording = ffmpeg_gopro.find_recording(file)
-        meta = GoproMeta.parse(recording.load_gpmd())
+        meta = GPMD.parse(recording.load_gpmd())
         found = meta.accept(DetermineFirstLockedGPSUVisitor())
         gps_datetime = found.packet_time
         if gps_datetime is None:

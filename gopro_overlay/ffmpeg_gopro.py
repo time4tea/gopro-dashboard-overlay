@@ -100,7 +100,10 @@ class FFMPEGGoPro:
         video_meta = VideoMeta(
             stream=int(video["index"]),
             dimension=Dimension(video["width"], video["height"]),
-            duration=timeunits(seconds=float(video["duration"]))
+            duration=timeunits(seconds=float(video["duration"])),
+            frame_count=int(video["nb_frames"]),
+            frame_rate_numerator=int(video["avg_frame_rate"].split("/")[0]),
+            frame_rate_denominator=int(video["avg_frame_rate"].split("/")[1]),
         )
 
         audio = only_if_present("audio stream", streams, audio_selector)
@@ -230,7 +233,12 @@ class VideoMeta:
     stream: int
     dimension: Dimension
     duration: Timeunit
+    frame_count: int
+    frame_rate_numerator: int
+    frame_rate_denominator: int
 
+    def frame_rate(self) -> float:
+        return self.frame_rate_numerator / self.frame_rate_denominator
 
 @dataclass(frozen=True)
 class AudioMeta:

@@ -9,12 +9,12 @@ import pytest
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
-from gopro_overlay.gpmd import GoproMeta, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
+from gopro_overlay.gpmd import GPMD, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
 from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
 from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
     CorrectionFactors
 from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
-from gopro_overlay.gpmd_visitors_gps import GPSVisitor, GPS5EntryConverter, DetermineFirstLockedGPSUVisitor
+from gopro_overlay.gpmd_visitors_gps import GPS5Visitor, GPS5EntryConverter, DetermineFirstLockedGPSUVisitor
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.point import Point, Point3, Quaternion
 from gopro_overlay.timeunits import timeunits
@@ -38,7 +38,7 @@ def load_meta(name):
 
 
 def load(name):
-    return GoproMeta.parse(load_meta(name))
+    return GPMD.parse(load_meta(name))
 
 
 def test_load_hero6_raw():
@@ -80,7 +80,7 @@ def test_load_hero5_raw_gps5():
         assert components.scale == (10000000, 10000000, 1000, 1000, 100)
         assert components.points[0] == GPS5(lat=33.1264969, lon=-117.3273542, alt=-20.184, speed=0.167, speed3d=0.19)
 
-    meta[0].accept(GPSVisitor(converter=assert_components))
+    meta[0].accept(GPS5Visitor(converter=assert_components))
 
 
 def test_load_hero5_raw_entry():
@@ -112,7 +112,7 @@ def test_load_hero5_raw_entry():
         ))
     )
 
-    meta[0].accept(GPSVisitor(converter=converter.convert))
+    meta[0].accept(GPS5Visitor(converter=converter.convert))
 
     assert counter[0] == 18
 
@@ -268,7 +268,7 @@ def test_load_gravity_meta():
     meta.accept(GRAVisitor(process_gravities))
 
 
-def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[GoproRecording, GoproMeta]:
+def load_mp4_meta(test_file_name, missing_ok=False) -> Tuple[GoproRecording, GPMD]:
     filepath = path_of_meta(test_file_name)
 
     if not os.path.exists(filepath):
@@ -312,6 +312,61 @@ def test_loading_time_warp_file():
     assert factors.first_frame == timeunits(seconds=0.000000)
     assert factors.last_frame == timeunits(seconds=2.235566)  # differs by 0.000001 from gpmf-parser frame time
     assert factors.frames_s == pytest.approx(29.970030, 0.0000001)
+
+
+class TimestampCalculatingVisitor:
+
+    def __init__(self, shut_timestamp, wanted):
+        self.shut_timestamp = shut_timestamp
+        self.wanted = wanted
+        self.wanted_method_name = f"vi_{self.wanted}"
+
+        self._timestamp = None
+        self._samples = None
+
+        self._packet_timestamps = []
+
+        self.calculator = CoriTimestampPacketTimeCalculator(shut_timestamp)
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def vic_STRM(self, item, contents):
+        if self.wanted in contents:
+            return self
+
+    def vi_STMP(self, item):
+        self._timestamp = item.interpret()
+
+    def vi_TSMP(self, item):
+        self._samples = item.interpret()
+
+    def __getattr__(self, name, *args):
+        if name == self.wanted_method_name:
+            return self._handle_item
+        else:
+            raise AttributeError(f"{name}")
+
+    def _handle_item(self, item):
+        ts = self.calculator.next_packet(self._timestamp, 0, 10)(0)
+        self._packet_timestamps.append(ts[0])
+
+    def v_end(self):
+        pass
+
+
+def test_calculation_of_timestamps_gps9():
+    ''' use GetGPMFSampleRate on the same file to get the values to assert... '''
+
+    stream_info, meta = load_mp4_meta("/data/richja/gopro/GX010372.MP4", missing_ok=True)
+
+    assert stream_info.meta.frame_duration == 1001
+
+    timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
+
+    packet_timestamps = meta.accept(TimestampCalculatingVisitor(timestamp, "GPS9"))._packet_timestamps
+
+    assert packet_timestamps[0] == timeunits(millis=92.745)
 
 
 def test_estimation_of_timestamps_gps5():

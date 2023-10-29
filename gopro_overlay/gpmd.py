@@ -4,13 +4,13 @@ import datetime
 import itertools
 import struct
 from enum import Enum
-from typing import List
+from typing import List, TypeVar
 
 from .timeunits import timeunits
 
 GPMDStruct = struct.Struct('>4sBBH')
-
 GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
+GPS9 = collections.namedtuple("GPS9", "lat lon alt speed speed3d days secs dop fix")
 XYZ = collections.namedtuple('XYZ', "x y z")
 VECTOR = collections.namedtuple("VECTOR", "a b c")
 # https://github.com/gopro/gpmf-parser/issues/100 says it is w x z y
@@ -39,11 +39,11 @@ type_mappings = {'c': 'c',
                  }
 
 
-def _interpret_string(item, *args):
+def _interpret_string(item, **kwargs):
     return str(item.rawdata, encoding='unicode_escape', errors="replace").strip('\0')
 
 
-def _interpret_gps_timestamp(item, *args):
+def _interpret_gps_timestamp(item, **kwargs):
     return datetime.datetime.strptime(
         item.rawdata.decode(
             'utf-8',
@@ -57,61 +57,77 @@ def _struct_mapping_for(item, repeat=None):
     return struct.Struct('>' + type_mappings[item.type_char] * repeat)
 
 
-def _interpret_atom(item, *args):
+def _struct_mapping_for_type(types):
+    return struct.Struct('>' + "".join([type_mappings[t] for t in types]))
+
+def _interpret_atom(item, **kwargs):
     return _struct_mapping_for(item).unpack_from(item.rawdata)[0]
 
 
-def _interpret_timestamp(item, *args):
-    return timeunits(micros=_interpret_atom(item, *args))
+def _interpret_timestamp(item, **kwargs):
+    return timeunits(micros=_interpret_atom(item, **kwargs))
 
 
-def _interpret_list(item, *args):
+def _interpret_list(item, **kwargs):
     return _struct_mapping_for(item).unpack_from(item.rawdata)
 
 
-def _interpret_element(item, scale):
-    single = _struct_mapping_for(item, repeat=1)
-    mapping = _struct_mapping_for(item, repeat=item.size // single.size)
+def _interpret_element(item, scale, types=None):
+    if types is None:
+        single = _struct_mapping_for(item, repeat=1)
+        mapping = _struct_mapping_for(item, repeat=item.size // single.size)
+    else:
+        mapping = _struct_mapping_for_type(types)
 
-    if item.size > 1 and len(scale) == 1:
+    repeat = item.repeat
+
+    if repeat > 1 and len(scale) == 1:
         scale = list(itertools.repeat(scale[0], item.size))
 
     def unpack_single(r):
         unscaled = mapping.unpack_from(item.rawdata[r * item.size: (r + 1) * item.size])
         return [float(x) / float(y) for x, y in zip(unscaled, scale)]
 
-    return [unpack_single(r) for r in range(item.repeat)]
+    return [unpack_single(r) for r in range(repeat)]
 
 
-def _interpret_gps5(item, scale) -> List[GPS5]:
-    return [GPS5._make(it) for it in _interpret_element(item, scale)]
+def _interpret_gps5(item, **kwargs) -> List[GPS5]:
+    return [GPS5._make(it) for it in _interpret_element(item, **kwargs)]
 
 
-def _interpret_gps_precision(item, *args) -> float:
-    return _interpret_atom(item) / 100.0
+def _interpret_gps9(item, **kwargs) -> List[GPS9]:
+    return [GPS9._make(it) for it in _interpret_element(item, **kwargs)]
 
 
-def _interpret_xyz(item, scale) -> List[XYZ]:
-    return [XYZ._make(it) for it in _interpret_element(item, scale)]
+def _interpret_gps_precision(item, **kwargs) -> float:
+    return _interpret_atom(item, **kwargs) / 100.0
 
 
-def _interpret_vector(item, scale) -> List[VECTOR]:
-    return [VECTOR._make(it) for it in _interpret_element(item, scale)]
+def _interpret_type(item, **kwargs) -> List[str]:
+    return list(_interpret_string(item, **kwargs))
 
 
-def _interpret_quaternion(item, scale) -> List[QUATERNION]:
-    return [QUATERNION._make(it) for it in _interpret_element(item, scale)]
+def _interpret_xyz(item, **kwargs) -> List[XYZ]:
+    return [XYZ._make(it) for it in _interpret_element(item, **kwargs)]
 
 
-def _interpret_gps_lock(item, *args) -> GPSFix:
+def _interpret_vector(item, **kwargs) -> List[VECTOR]:
+    return [VECTOR._make(it) for it in _interpret_element(item, **kwargs)]
+
+
+def _interpret_quaternion(item, **kwargs) -> List[QUATERNION]:
+    return [QUATERNION._make(it) for it in _interpret_element(item, **kwargs)]
+
+
+def _interpret_gps_lock(item, **kwargs) -> GPSFix:
     return GPSFix(_interpret_atom(item))
 
 
-def _interpret_stream_marker(item, *args) -> str:
+def _interpret_stream_marker(item, **kwargs) -> str:
     return "Stream Marker"
 
 
-def _interpret_device_marker(item, *args):
+def _interpret_device_marker(item, **kwargs):
     return "Device Marker"
 
 
@@ -121,6 +137,7 @@ interpreters = {
     "DEVC": _interpret_device_marker,
     "DVNM": _interpret_string,
     "GPS5": _interpret_gps5,
+    "GPS9": _interpret_gps9,
     "GPSF": _interpret_gps_lock,
     "GPSP": _interpret_gps_precision,
     "GPSU": _interpret_gps_timestamp,
@@ -137,15 +154,16 @@ interpreters = {
     "TMPC": _interpret_atom,
     "TOCK": _interpret_atom,
     "TSMP": _interpret_atom,
+    "TYPE": _interpret_type,
     "WNDM": _interpret_list,
 }
 
 
-def interpret_item(item, scale=None):
-    try:
-        return interpreters[item.fourcc](item, scale)
-    except KeyError:
-        raise KeyError(f"No interpreter is configured for packets of type {item.fourcc}") from None
+def interpret_item(item, **kwargs):
+    if item.fourcc in interpreters:
+        return interpreters[item.fourcc](item, **kwargs)
+    else:
+        raise KeyError(f"No interpreter is configured for packets of type {item.fourcc}")
 
 
 class GPMDContainer:
@@ -227,7 +245,7 @@ class GPMDItem:
         return GPMDStruct.size + self._padded_length if self._type != 0 else GPMDStruct.size
 
     def interpret(self, scale=None):
-        return interpret_item(self, scale)
+        return interpret_item(self, scale=scale)
 
     def accept(self, visitor):
         method = f"vi_{self.fourcc}"
@@ -296,7 +314,10 @@ class GPMDParser:
         return i
 
 
-class GoproMeta:
+T = TypeVar("T")
+
+
+class GPMD:
 
     def __init__(self, items):
         self._items = items
@@ -307,11 +328,11 @@ class GoproMeta:
     def __getitem__(self, key):
         return self._items[key]
 
-    def accept(self, visitor):
+    def accept(self, visitor: T) -> T:
         for item in self._items:
             item.accept(visitor)
         return visitor
 
     @staticmethod
-    def parse(data) -> 'GoproMeta':
-        return GoproMeta(list(GPMDParser(data).items()))
+    def parse(data) -> 'GPMD':
+        return GPMD(list(GPMDParser(data).items()))

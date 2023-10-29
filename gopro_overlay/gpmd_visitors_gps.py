@@ -3,7 +3,8 @@ import datetime
 from typing import List, Optional
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5, GPSFix
+from gopro_overlay.gpmd import interpret_item, GPS_FIXED, GPS5, GPSFix, GPS9
+from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSLockComponents
 from gopro_overlay.point import Point
 
@@ -20,7 +21,7 @@ class GPS5Components:
 
 
 class GPS5EntryConverter:
-    def __init__(self, units, calculator, on_item=lambda c, e: None, gps_lock_filter=NullGPSLockFilter()):
+    def __init__(self, units, calculator: PacketTimeCalculator, on_item=lambda c, e: None, gps_lock_filter=NullGPSLockFilter()):
         self._units = units
         self._on_item = on_item
         self._total_samples = 0
@@ -84,25 +85,25 @@ class GPS5StreamVisitor:
         self._dop: Optional[float] = None
 
     def vi_STMP(self, item):
-        self._timestamp = interpret_item(item)
+        self._timestamp = item.interpret()
 
     def vi_TSMP(self, item):
-        self._samples = interpret_item(item)
+        self._samples = item.interpret()
 
     def vi_GPSU(self, item):
-        self._basetime = interpret_item(item)
+        self._basetime = item.interpret()
 
     def vi_GPSF(self, item):
-        self._fix = interpret_item(item)
+        self._fix = item.interpret()
 
     def vi_GPSP(self, item):
-        self._dop = interpret_item(item)
+        self._dop = item.interpret()
 
     def vi_SCAL(self, item):
-        self._scale = interpret_item(item)
+        self._scale = item.interpret()
 
     def vi_GPS5(self, item):
-        self._points = interpret_item(item, self._scale)
+        self._points = interpret_item(item, scale=self._scale)
 
     def v_end(self):
         self._on_end(GPS5Components(
@@ -114,6 +115,143 @@ class GPS5StreamVisitor:
             scale=self._scale,
             points=self._points
         ))
+
+
+# noinspection PyPep8Naming
+class GPS5Visitor:
+
+    def __init__(self, converter):
+        self._converter = converter
+        self._counter = 0
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def vic_STRM(self, item, contents):
+        if "GPS5" in contents:
+            return GPS5StreamVisitor(
+                on_end=lambda c: self._converter(self._counter, c)
+            )
+
+    def v_end(self):
+        self._counter += 1
+        pass
+
+
+@dataclasses.dataclass(frozen=True)
+class GPS9Components:
+    samples: int
+    timestamp: int
+    scale: int
+    points: List[GPS9]
+
+
+gps9_date_base = datetime.datetime.fromisoformat("2000-01-01T00:00:00Z")
+
+
+class GPS9EntryConverter:
+    def __init__(self, units, calculator: PacketTimeCalculator, on_item=lambda c, e: None, gps_lock_filter=NullGPSLockFilter()):
+        self._units = units
+        self._on_item = on_item
+        self._total_samples = 0
+        self._frame_calculator = calculator
+        self._tracker = gps_lock_filter
+
+    def convert(self, counter, components: GPS9Components):
+
+        # Turns out GPS9 can contain no points. Possibly accompanied by EMPT packet?
+        if len(components.points) == 0:
+            return
+
+        sample_time_calculator = self._frame_calculator.next_packet(
+            components.timestamp,
+            self._total_samples,
+            len(components.points)
+        )
+
+        for (index, point) in enumerate(components.points):
+            sample_frame_timestamp, _ = sample_time_calculator(index)
+
+            position = Point(point.lat, point.lon)
+            speed = self._units.Quantity(point.speed, self._units.mps)
+
+            fix = GPSFix(point.fix)
+            calculated_fix = self._tracker.submit(GPSLockComponents(fix, position, speed.magnitude, point.dop))
+
+            point_datetime = gps9_date_base + datetime.timedelta(
+                days=point.days,
+                seconds=point.secs
+            )
+
+            self._on_item(
+                sample_frame_timestamp,
+                Entry(
+                    dt=point_datetime,
+                    timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
+                    dop=self._units.Quantity(point.dop, self._units.number),
+                    packet=self._units.Quantity(counter, self._units.number),
+                    packet_index=self._units.Quantity(index, self._units.number),
+                    point=position,
+                    speed=speed,
+                    alt=self._units.Quantity(point.alt, self._units.m),
+                    gpsfix=calculated_fix.value,
+                    gpslock=self._units.Quantity(calculated_fix.value),
+                )
+            )
+        self._total_samples += len(components.points)
+
+
+class GPS9StreamVisitor:
+
+    def __init__(self, on_end):
+        self._on_end = on_end
+        self._samples: Optional[int] = None
+        self._scale: Optional[int] = None
+        self._points: Optional[List[GPS9]] = None
+        self._timestamp: Optional[int] = None
+
+    def vi_STMP(self, item):
+        self._timestamp = item.interpret()
+
+    def vi_TSMP(self, item):
+        self._samples = item.interpret()
+
+    def vi_TYPE(self, item):
+        self._type = item.interpret()
+
+    def vi_SCAL(self, item):
+        self._scale = item.interpret()
+
+    def vi_GPS9(self, item):
+        self._points = interpret_item(item, scale=self._scale, types=self._type)
+
+    def v_end(self):
+        self._on_end(GPS9Components(
+            samples=self._samples,
+            timestamp=self._timestamp,
+            scale=self._scale,
+            points=self._points
+        ))
+
+
+class GPS9Visitor:
+
+    def __init__(self, converter):
+        self._converter = converter
+        self._counter = 0
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def vic_STRM(self, item, contents):
+        if "GPS9" in contents:
+            return GPS9StreamVisitor(
+                on_end=lambda c: self._converter(self._counter, c)
+            )
+
+    def v_end(self):
+        self._counter += 1
+        pass
 
 
 # have seen stuff like this: lock acquired, DOP reduced, but still location way wrong.
@@ -148,17 +286,17 @@ class DetermineFirstLockedGPSUVisitor:
             self._count += 1
 
             if self._count == 3:
-                self._basetime = interpret_item(item)
+                self._basetime = item.interpret()
 
     def vi_GPSF(self, item):
-        self._fix = interpret_item(item)
+        self._fix = item.interpret()
 
     def vi_SCAL(self, item):
-        self._scale = interpret_item(item)
+        self._scale = item.interpret()
 
     def vi_GPS5(self, item):
         if self._basetime is not None:
-            self._point = interpret_item(item, self._scale)[0]
+            self._point = interpret_item(item, scale=self._scale)[0]
 
     @property
     def packet_time(self) -> datetime.datetime:
@@ -169,25 +307,4 @@ class DetermineFirstLockedGPSUVisitor:
         return self._point
 
     def v_end(self):
-        pass
-
-
-# noinspection PyPep8Naming
-class GPSVisitor:
-
-    def __init__(self, converter):
-        self._converter = converter
-        self._counter = 0
-
-    def vic_DEVC(self, item, contents):
-        return self
-
-    def vic_STRM(self, item, contents):
-        if "GPS5" in contents:
-            return GPS5StreamVisitor(
-                on_end=lambda c: self._converter(self._counter, c)
-            )
-
-    def v_end(self):
-        self._counter += 1
         pass

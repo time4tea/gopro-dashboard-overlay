@@ -1,8 +1,28 @@
 import collections
 
 from gopro_overlay.ffmpeg_gopro import MetaMeta
-from gopro_overlay.gpmd import interpret_item
 from gopro_overlay.timeunits import timeunits
+
+
+
+class StreamFindingVisitor:
+
+    def __init__(self, wanted):
+        self.wanted = wanted
+        self._found = False
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def vic_STRM(self, item, contents):
+        if self.wanted in contents:
+            self._found = True
+
+    def found(self):
+        return self._found
+
+    def v_end(self):
+        pass
 
 
 class DetermineTimestampOfFirstSHUTVisitor:
@@ -23,7 +43,7 @@ class DetermineTimestampOfFirstSHUTVisitor:
             return self
 
     def vi_STMP(self, item):
-        self._initial_timestamp = interpret_item(item)
+        self._initial_timestamp = item.interpret()
 
     def vic_STRM(self, item, contents):
         if "SHUT" in contents and not self._initial_timestamp:

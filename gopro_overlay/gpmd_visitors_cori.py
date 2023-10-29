@@ -6,6 +6,7 @@ from pint import Quantity
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.gpmd import QUATERNION
+from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.point import Quaternion, Point3, EulerRadians
 
 
@@ -34,7 +35,7 @@ def euler_to_orientation(e: EulerRadians, units) -> Orientation:
 
 class CORIComponentConverter:
 
-    def __init__(self, frame_calculator, units, on_item):
+    def __init__(self, frame_calculator: PacketTimeCalculator, units, on_item):
         self._frame_calculator = frame_calculator
         self._units = units
         self._on_item = on_item

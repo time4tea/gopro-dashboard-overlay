@@ -6,7 +6,7 @@ from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import gps_framemeta
 from gopro_overlay.geo import MapRenderer, MapStyler
-from gopro_overlay.gpmd import GoproMeta, GPSFix
+from gopro_overlay.gpmd import GPMD, GPSFix
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
 from gopro_overlay.point import Coordinate
@@ -33,7 +33,7 @@ def a_real_journey(name, dimension, f_scene):
     with open("../meta/gopro-meta.gpmd", "rb") as f:
         data = f.read()
 
-    framemeta = gps_framemeta(meta=GoproMeta.parse(data), units=units)
+    framemeta = gps_framemeta(meta=GPMD.parse(data), units=units)
 
     supplier = SimpleFrameSupplier(dimension)
 

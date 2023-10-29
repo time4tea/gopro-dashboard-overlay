@@ -6,7 +6,7 @@ import pathlib
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
-from gopro_overlay.gpmd import GoproMeta, interpret_item
+from gopro_overlay.gpmd import GPMD
 
 
 class DataDumpVisitor:
@@ -36,12 +36,12 @@ class DataDumpStreamVisitor:
         self._scale = None
 
     def vi_SCAL(self, item):
-        self._scale = interpret_item(item)
+        self._scale = item.interpret()
 
     def __getattr__(self, attr):
         if attr in ['vi_' + self._fourcc, 'vi_GPSU']:
             def vi(item):
-                data = interpret_item(item, self._scale)
+                data = item.interpret(scale=self._scale)
                 self._visit(item.fourcc, data)
                 return data
 
@@ -94,7 +94,7 @@ class DumpAggregateConverter:
 
 
 def dump(recording: GoproRecording, fourcc, output_file):
-    meta = GoproMeta.parse(recording.load_gpmd())
+    meta = GPMD.parse(recording.load_gpmd())
 
     with open(output_file, 'wt', encoding='utf-8') as file:
         converter = DumpAggregateConverter(file)

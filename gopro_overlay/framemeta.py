@@ -7,10 +7,11 @@ from typing import Callable, List, MutableMapping, Set
 from gopro_overlay import timeseries_process
 from gopro_overlay.entry import Entry
 from gopro_overlay.ffmpeg_gopro import MetaMeta
-from gopro_overlay.gpmd import GoproMeta
+from gopro_overlay.gpmd import GPMD
 from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
+from gopro_overlay.gpmd_visitors import StreamFindingVisitor
 from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter
-from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPSVisitor, NullGPSLockFilter
+from gopro_overlay.gpmd_visitors_gps import GPS5EntryConverter, GPS5Visitor, NullGPSLockFilter, GPS9Visitor, GPS9EntryConverter
 from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
 from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
 from gopro_overlay.log import log
@@ -238,19 +239,36 @@ class FrameMeta:
         return self.framelist[-1]
 
 
-def gps_framemeta(meta: GoproMeta, units, metameta=None, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
+def gps_framemeta(meta: GPMD, units, metameta=None, gps_lock_filter=NullGPSLockFilter()) -> FrameMeta:
     frame_meta = FrameMeta()
 
-    meta.accept(
-        GPSVisitor(
-            converter=GPS5EntryConverter(
-                units,
-                calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS5"),
-                on_item=lambda c, e: frame_meta.add(c, e),
-                gps_lock_filter=gps_lock_filter
-            ).convert
+    if meta.accept(StreamFindingVisitor("GPS9")).found():
+        log(">> Found GPS9 ")
+        meta.accept(
+            GPS9Visitor(
+                converter=GPS9EntryConverter(
+                    units,
+                    calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS9"),
+                    on_item=lambda c, e: frame_meta.add(c, e),
+                    gps_lock_filter=gps_lock_filter
+                ).convert
+            )
         )
-    )
+    elif meta.accept(StreamFindingVisitor("GPS5")).found():
+        log(">> Found GPS5 ")
+        meta.accept(
+            GPS5Visitor(
+                converter=GPS5EntryConverter(
+                    units,
+                    calculator=timestamp_calculator_for_packet_type(meta, metameta, "GPS5"),
+                    on_item=lambda c, e: frame_meta.add(c, e),
+                    gps_lock_filter=gps_lock_filter
+                ).convert
+            )
+        )
+    else:
+        log(">> Can't find any GPS information")
+
 
     return frame_meta
 
@@ -328,7 +346,7 @@ def parse_gopro(gpmd_from, units, metameta: MetaMeta, flags: Set[LoadFlag] = Non
 
     with PoorTimer("parsing").timing():
         with PoorTimer("GPMD", indent=1).timing():
-            gopro_meta = GoproMeta.parse(gpmd_from)
+            gopro_meta = GPMD.parse(gpmd_from)
 
         with PoorTimer("extract GPS", indent=1).timing():
             gps_frame_meta = gps_framemeta(gopro_meta, units, metameta=metameta, gps_lock_filter=gps_lock_filter)
