@@ -109,8 +109,7 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
         current_dt = current_dt + step
         current_frame_time = current_frame_time + timeunits(seconds=step.total_seconds())
 
-        counter +=1
-
+        counter += 1
 
     fm.process(timeseries_process.calculate_odo())
 

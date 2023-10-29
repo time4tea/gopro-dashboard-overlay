@@ -26,9 +26,11 @@ class Entry:
             log(f"**Note** Requested interpolation [{self.dt} < *{dt}* < {other.dt}] : Lower point should be first - data out of order?")
             return other.interpolate(self, dt)
         if dt < self.dt:
-            raise ValueError(f"Requested interpolation [{self.dt} < *{dt}* < {other.dt}] lies before this point [{self.dt}] (should be after)")
+            raise ValueError(
+                f"Requested interpolation [{self.dt} < *{dt}* < {other.dt}] lies before this point [{self.dt}] (should be after)")
         if dt > other.dt:
-            raise ValueError(f"Requested interpolation [{self.dt} < *{dt}* < {other.dt}] lies after other point [{other.dt}] (should be before)")
+            raise ValueError(
+                f"Requested interpolation [{self.dt} < *{dt}* < {other.dt}] lies after other point [{other.dt}] (should be before)")
 
         if dt == self.dt:
             return self

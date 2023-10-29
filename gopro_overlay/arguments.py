@@ -94,7 +94,8 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("--overlay-size",
                         help="<XxY> e.g. 1920x1080 Force size of overlay. "
                              "Use if video differs from supported bundled overlay sizes (1920x1080, 3840x2160), Required if --use-gpx-only")
-    parser.add_argument("--bg", help="Background Colour - R,G,B,A - each 0-255, no spaces!", default=(0, 0, 0, 0), action=ColourArgs)
+    parser.add_argument("--bg", help="Background Colour - R,G,B,A - each 0-255, no spaces!", default=(0, 0, 0, 0),
+                        action=ColourArgs)
 
     parser.add_argument("--config-dir", help="Location of config files (api keys, profiles, ...)", type=pathlib.Path,
                         default=default_config_location)
@@ -102,16 +103,20 @@ def gopro_dashboard_arguments(args=None):
                         default=default_config_location)
 
     render = parser.add_argument_group("Render", "Controlling rendering performance")
-    render.add_argument("--profile", help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
-    render.add_argument("--double-buffer", action="store_true", help="Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all")
-    render.add_argument("--ffmpeg-dir", type=pathlib.Path, help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
+    render.add_argument("--profile",
+                        help="Use ffmpeg options profile <name> from ~/gopro-graphics/ffmpeg-profiles.json")
+    render.add_argument("--double-buffer", action="store_true",
+                        help="Enable HIGHLY EXPERIMENTAL double buffering mode. May speed things up. May not work at all")
+    render.add_argument("--ffmpeg-dir", type=pathlib.Path,
+                        help="Directory where ffmpeg/ffprobe located, default=Look in PATH")
 
     loading = parser.add_argument_group("Loading", "Loading data from GoPro")
     loading.add_argument("--load", nargs="+", type=LoadFlag, action=EnumNameAction, default=set())
 
     gpx = parser.add_argument_group("GPX", "Using GPX & Fit Files")
 
-    gpx.add_argument("--gpx", "--fit", type=pathlib.Path, help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
+    gpx.add_argument("--gpx", "--fit", type=pathlib.Path,
+                     help="Use GPX/FIT file for location / alt / hr / cadence / temp ...")
     gpx.add_argument("--gpx-merge", type=MergeMode, action=EnumNameAction, default=MergeMode.EXTEND,
                      help="When using GPX/FIT file - OVERWRITE=replace GPS/alt from GoPro with GPX values, EXTEND=just use additional values from GPX/FIT file e.g. hr/cad/power")
 
@@ -141,17 +146,24 @@ def gopro_dashboard_arguments(args=None):
 
     units = parser.add_argument_group("Units", "Controlling Units")
 
-    units.add_argument("--units-speed", default="mph", help="Default unit for speed. Many units supported: mph, mps, kph, kph, knot, ...")
-    units.add_argument("--units-altitude", default="metre", help="Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec, angstrom, ...")
-    units.add_argument("--units-distance", default="mile", help="Default unit for distance. Many units supported: mile, km, foot, nmi, meter, metre, parsec, ...")
-    units.add_argument("--units-temperature", default="degC", choices=["kelvin", "degC", "degF"], help="Default unit for temperature")
+    units.add_argument("--units-speed", default="mph",
+                       help="Default unit for speed. Many units supported: mph, mps, kph, kph, knot, ...")
+    units.add_argument("--units-altitude", default="metre",
+                       help="Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec, angstrom, ...")
+    units.add_argument("--units-distance", default="mile",
+                       help="Default unit for distance. Many units supported: mile, km, foot, nmi, meter, metre, parsec, ...")
+    units.add_argument("--units-temperature", default="degC", choices=["kelvin", "degC", "degF"],
+                       help="Default unit for temperature")
 
     gps = parser.add_argument_group("GPS", "Controlling GPS Parsing (from GoPro Only)")
 
-    gps.add_argument("--gps-dop-max", type=float, default=10, help="Max DOP - Points with greater DOP will be considered 'Not Locked'")
-    gps.add_argument("--gps-speed-max", type=float, default=60, help="Max GPS Speed - Points with greater speed will be considered 'Not Locked'")
+    gps.add_argument("--gps-dop-max", type=float, default=10,
+                     help="Max DOP - Points with greater DOP will be considered 'Not Locked'")
+    gps.add_argument("--gps-speed-max", type=float, default=60,
+                     help="Max GPS Speed - Points with greater speed will be considered 'Not Locked'")
     gps.add_argument("--gps-speed-max-units", default="kph", help="Units for --gps-speed-max")
-    gps.add_argument("--gps-bbox-lon-lat", action=BBoxArgs, help="Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat")
+    gps.add_argument("--gps-bbox-lon-lat", action=BBoxArgs,
+                     help="Define GPS Bounding Box, anything outside will be considered 'Not Locked' - minlon,minlat,maxlon,maxlat")
 
     debugging = parser.add_argument_group("Debugging", "Controlling debugging outputs")
 

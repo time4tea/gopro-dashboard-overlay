@@ -2,8 +2,8 @@ from PIL import ImageDraw, Image
 
 from gopro_overlay.models import KineticEnergyModel
 from gopro_overlay.point import Coordinate
-from .widgets import Composite, simple_icon, Translate, Widget
 from .text import CachingText
+from .widgets import Composite, simple_icon, Translate, Widget
 
 
 class ComparativeEnergy(Widget):

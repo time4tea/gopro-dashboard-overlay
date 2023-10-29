@@ -1,16 +1,19 @@
-from typing import Optional, Any, Callable, Tuple
+from typing import Optional, Callable, Tuple
 
 from gopro_overlay.exceptions import Defect
 from gopro_overlay.ffmpeg_gopro import DataStream
-from gopro_overlay.gpmf import GPMD
 from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
     CalculateCorrectionFactorsVisitor
+from gopro_overlay.gpmf import GPMD
 from gopro_overlay.log import log
 from gopro_overlay.timeunits import Timeunit, timeunits
 
+
 class PacketTimeCalculator:
-    def next_packet(self, timestamp: int, samples_before_this: int, num_samples: int) -> Callable[[int], Tuple[Timeunit, Timeunit]]:
+    def next_packet(self, timestamp: int, samples_before_this: int, num_samples: int) -> Callable[
+        [int], Tuple[Timeunit, Timeunit]]:
         raise NotImplementedError()
+
 
 class CoriTimestampPacketTimeCalculator(PacketTimeCalculator):
     def __init__(self, cori_timestamp: Timeunit):
@@ -64,7 +67,8 @@ class UnknownPacketTimeCalculator(PacketTimeCalculator):
         raise Defect("can't calculate timings for {self._packet_type} as none were seen.")
 
 
-def timestamp_calculator_for_packet_type(meta: GPMD, datastream: Optional[DataStream], packet_type: str) -> PacketTimeCalculator:
+def timestamp_calculator_for_packet_type(meta: GPMD, datastream: Optional[DataStream],
+                                         packet_type: str) -> PacketTimeCalculator:
     cori_timestamp = meta.accept(DetermineTimestampOfFirstSHUTVisitor()).timestamp
     if cori_timestamp is not None:
         return CoriTimestampPacketTimeCalculator(cori_timestamp)

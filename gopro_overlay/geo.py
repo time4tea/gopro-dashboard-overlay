@@ -28,7 +28,7 @@ class PrefixMapStyleConfig:
 
     def attributes(self, style: str) -> Dict:
         if self.prefix:
-            return self._attributes(style[len(self.prefix)+1:])
+            return self._attributes(style[len(self.prefix) + 1:])
         else:
             return self._attributes(style)
 
@@ -163,7 +163,8 @@ def configured_style(loader: Config, name: str) -> Optional[dict]:
     return None
 
 
-configurations = [OSMStyleConfig(), CyclOSMStyleConfig(), ThunderforestStyleConfig(), GeoapifyStyleConfig(), LocalStyleConfig()]
+configurations = [OSMStyleConfig(), CyclOSMStyleConfig(), ThunderforestStyleConfig(), GeoapifyStyleConfig(),
+                  LocalStyleConfig()]
 
 
 def available_map_styles() -> List[str]:

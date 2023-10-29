@@ -4,7 +4,6 @@ from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.timeunits import timeunits
 
 
-
 class StreamFindingVisitor:
 
     def __init__(self, wanted):

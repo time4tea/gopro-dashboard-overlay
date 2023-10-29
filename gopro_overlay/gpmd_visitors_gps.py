@@ -3,9 +3,9 @@ import datetime
 from typing import List, Optional
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmf import interpret_item, GPS_FIXED, GPS5, GPSFix, GPS9
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSLockComponents
+from gopro_overlay.gpmf import interpret_item, GPS_FIXED, GPS5, GPSFix, GPS9
 from gopro_overlay.point import Point
 
 
@@ -21,7 +21,8 @@ class GPS5Components:
 
 
 class GPS5EntryConverter:
-    def __init__(self, units, calculator: PacketTimeCalculator, on_item=lambda c, e: None, gps_lock_filter=NullGPSLockFilter()):
+    def __init__(self, units, calculator: PacketTimeCalculator, on_item=lambda c, e: None,
+                 gps_lock_filter=NullGPSLockFilter()):
         self._units = units
         self._on_item = on_item
         self._total_samples = 0
@@ -150,7 +151,8 @@ gps9_date_base = datetime.datetime.fromisoformat("2000-01-01T00:00:00Z")
 
 
 class GPS9EntryConverter:
-    def __init__(self, units, calculator: PacketTimeCalculator, on_item=lambda c, e: None, gps_lock_filter=NullGPSLockFilter()):
+    def __init__(self, units, calculator: PacketTimeCalculator, on_item=lambda c, e: None,
+                 gps_lock_filter=NullGPSLockFilter()):
         self._units = units
         self._on_item = on_item
         self._total_samples = 0

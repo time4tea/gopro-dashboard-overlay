@@ -118,7 +118,6 @@ class CairoCircuit(CairoWidget):
             )
         ])
 
-
     def journey(self):
         if self._journey is None:
             self._journey = Journey()

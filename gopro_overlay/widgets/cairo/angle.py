@@ -54,7 +54,6 @@ class Angle:
             return Angle(radians=self.angle * other)
         return NotImplemented
 
-
     def __neg__(self):
         return Angle(radians=-self.angle)
 

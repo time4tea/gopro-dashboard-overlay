@@ -106,4 +106,3 @@ class Stepper:
         while running <= end:
             yield running
             running += self._step
-

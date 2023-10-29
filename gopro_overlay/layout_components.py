@@ -1,5 +1,5 @@
-from .widgets.text import CachingText, Text
 from .widgets.map import MovingMap, JourneyMap
+from .widgets.text import CachingText, Text
 from .widgets.widgets import Widget
 
 

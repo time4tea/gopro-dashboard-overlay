@@ -1,4 +1,3 @@
-
 __title__ = 'gopro_overlay'
 __description__ = 'Dashboards for GoPro'
 __url__ = 'https://github.com/time4tea/gopro-dashboard-overlay'

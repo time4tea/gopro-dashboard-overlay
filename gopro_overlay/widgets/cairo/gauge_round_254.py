@@ -31,10 +31,9 @@ class CairoGaugeRoundAnnotated(CairoWidget):
             v_max=170,
             sectors=17,
             background_colour: Colour = WHITE.alpha(0.7),
-            needle_colour = RED,
+            needle_colour=RED,
             reading: Callable[[], Reading] = lambda: Reading.full(),
     ):
-
         texts = create_texts(v_min, v_max, sectors)
         minor_texts, major_texts = distribute(texts, 2)
 
@@ -110,10 +109,10 @@ class CairoGaugeRoundAnnotated(CairoWidget):
             CairoCache(
                 CairoComposite(
                     [background,
-                    major_ticks,
-                    minor_ticks,
-                    major_annotation,
-                    minor_annotation,]
+                     major_ticks,
+                     minor_ticks,
+                     major_annotation,
+                     minor_annotation, ]
                 )
             ),
             needle,

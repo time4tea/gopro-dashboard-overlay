@@ -21,13 +21,13 @@ class Encoding(Enum):
             raise ValueError(f"Unknown encoding letter {letter}")
 
 
-def gopro_files_in(path:Path) -> List[Path]:
+def gopro_files_in(path: Path) -> List[Path]:
     path = Path(path)
     if path.is_file():
         if GoProFile.is_valid_filepath(path):
             return [path]
     elif path.is_dir():
-        potentials = [ path / f for f in os.listdir(path) ]
+        potentials = [path / f for f in os.listdir(path)]
         return [p for p in potentials if GoProFile.is_valid_filepath(p)]
     else:
         raise ValueError(f"{path} is not file or directory?")
@@ -58,7 +58,7 @@ class GoProFile:
             n=f"{self.recording:04}"
         ))
 
-        potentials = [ d / name for name in listdir(d) ]
+        potentials = [d / name for name in listdir(d)]
 
         found = [GoProFile(p) for p in potentials if find.match(p.name)]
         found.sort(key=lambda f: f.sequence)

@@ -20,7 +20,6 @@ def metres(n):
 
 
 if __name__ == "__main__":
-
     rpms = units.Quantity(10, "rpm")
 
     print(rpms.to("spm"))

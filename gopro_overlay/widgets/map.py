@@ -20,7 +20,6 @@ class PerceptibleMovementCheck:
         self.always = always
         self.last_location = None
 
-
     def moved(self, map, location):
 
         if self.always:

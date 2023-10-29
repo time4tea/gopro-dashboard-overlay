@@ -3,7 +3,6 @@ The Ramer-Douglas-Peucker algorithm roughly ported from the pseudo-code provided
 by http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
 """
 
-
 """
 MIT License
 

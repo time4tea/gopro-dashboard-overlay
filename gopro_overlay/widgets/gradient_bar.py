@@ -1,6 +1,9 @@
 from functools import cached_property
+
 from PIL import ImageDraw, Image
+
 from .widgets import Widget
+
 
 class GradientBar(Widget):
 
@@ -32,7 +35,6 @@ class GradientBar(Widget):
         self.z2_col = z2_col
         self.z3_col = z3_col
 
-
     def x_coord(self, value):
         value = max(min(value, self.max_value), self.min_value)
         scale = self.scale
@@ -42,7 +44,7 @@ class GradientBar(Widget):
     @cached_property
     def scale(self):
         range = self.max_value - self.min_value
-        scale = (self.size.x - (self.line_width + 2)) / range #px/unit
+        scale = (self.size.x - (self.line_width + 2)) / range  # px/unit
         return scale
 
     def value(self, x_coord):
@@ -56,17 +58,17 @@ class GradientBar(Widget):
         if value < self.z1_value:
             range = self.x_coord(self.z1_value) - self.x_coord(self.min_value)
             i = x_coord - self.x_coord(self.min_value)
-            gradient_step = [(t-f) / range for f, t in zip(self.z0_col, self.z1_col)]
+            gradient_step = [(t - f) / range for f, t in zip(self.z0_col, self.z1_col)]
             return [round(f + gs * i) for f, gs in zip(self.z0_col, gradient_step)]
         elif value < self.z2_value:
             range = self.x_coord(self.z2_value) - self.x_coord(self.z1_value)
             i = x_coord - self.x_coord(self.z1_value)
-            gradient_step = [(t-f) / range for f, t in zip(self.z1_col, self.z2_col)]
+            gradient_step = [(t - f) / range for f, t in zip(self.z1_col, self.z2_col)]
             return [round(f + gs * i) for f, gs in zip(self.z1_col, gradient_step)]
         elif value < self.z3_value:
             range = self.x_coord(self.z3_value) - self.x_coord(self.z2_value)
             i = x_coord - self.x_coord(self.z2_value)
-            gradient_step = [(t-f) / range for f, t in zip(self.z2_col, self.z3_col)]
+            gradient_step = [(t - f) / range for f, t in zip(self.z2_col, self.z3_col)]
             return [round(f + gs * i) for f, gs in zip(self.z2_col, gradient_step)]
         else:
             return self.z3_col
@@ -84,12 +86,11 @@ class GradientBar(Widget):
             ((self.x_coord(0), 0), (self.x_coord(0), self.size.y)),
             fill=self.divider
         )
-        for i in range(round(self.x_coord(0))+self.line_width, round(self.x_coord(current))):
-            draw.line(((i, self.line_width), (i, self.size.y-self.line_width-1)), tuple(self.get_color(i)), width=1)
+        for i in range(round(self.x_coord(0)) + self.line_width, round(self.x_coord(current))):
+            draw.line(((i, self.line_width), (i, self.size.y - self.line_width - 1)), tuple(self.get_color(i)), width=1)
         if self.divider:
             for v in (self.z1_value, self.z2_value, self.z3_value):
                 draw.line(
-                    ((self.x_coord(v), self.line_width), (self.x_coord(v), self.size.y-self.line_width-1)),
+                    ((self.x_coord(v), self.line_width), (self.x_coord(v), self.size.y - self.line_width - 1)),
                     fill=self.divider
                 )
-

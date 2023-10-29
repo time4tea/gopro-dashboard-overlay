@@ -7,8 +7,8 @@ import cairo
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.cairo.angle import Angle
 from gopro_overlay.widgets.cairo.cairo import saved, CairoWidget
-from gopro_overlay.widgets.cairo.reading import Reading
 from gopro_overlay.widgets.cairo.colour import Colour
+from gopro_overlay.widgets.cairo.reading import Reading
 
 
 @dataclasses.dataclass(frozen=True)

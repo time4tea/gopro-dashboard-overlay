@@ -1,4 +1,3 @@
-
 import requests
 
 from gopro_overlay.log import log
@@ -10,7 +9,6 @@ class GeoCode:
         self.key = key
 
     def geocode_location(self, lat, lon):
-
         url = f"https://geocode.xyz/{lat},{lon}"
 
         params = {
@@ -26,6 +24,3 @@ class GeoCode:
         response.raise_for_status()
 
         return response.json()
-
-
-

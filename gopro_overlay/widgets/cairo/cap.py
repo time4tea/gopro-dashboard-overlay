@@ -56,6 +56,3 @@ class Cap(AbstractBordered):
         context.set_source(self.pattern)
         context.mask(self.mask)
         # context.stroke()
-
-
-

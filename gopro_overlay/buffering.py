@@ -97,7 +97,9 @@ class Frame:
 
     def draw(self, f: Callable[[Image.Image], None]) -> bool:
         with self.can_draw:
-            while not self.can_draw.wait_for(predicate=lambda: self.quit.value == 1 or self.written_frame_number.value == self.drawn_frame_number.value, timeout=cond_timeout):
+            while not self.can_draw.wait_for(
+                    predicate=lambda: self.quit.value == 1 or self.written_frame_number.value == self.drawn_frame_number.value,
+                    timeout=cond_timeout):
                 pass
 
         if self.drawn_frame_number.value == self.written_frame_number.value:
@@ -128,7 +130,9 @@ class Frame:
 
     def write(self, writer: io.BytesIO) -> bool:
         with self.can_write:
-            while not self.can_write.wait_for(predicate=lambda: self.quit.value == 1 or self.drawn_frame_number.value > self.written_frame_number.value, timeout=cond_timeout):
+            while not self.can_write.wait_for(
+                    predicate=lambda: self.quit.value == 1 or self.drawn_frame_number.value > self.written_frame_number.value,
+                    timeout=cond_timeout):
                 pass
 
         if self.drawn_frame_number.value > self.written_frame_number.value:

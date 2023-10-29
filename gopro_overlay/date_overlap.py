@@ -15,5 +15,3 @@ class DateRange:
         earliest_end = min(self.end, other.end)
         delta = (earliest_end - latest_start).total_seconds()
         return int(max(0.0, delta))
-
-

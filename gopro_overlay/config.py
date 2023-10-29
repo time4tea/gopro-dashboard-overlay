@@ -13,12 +13,13 @@ class ConfigFile:
     def exists(self):
         return self.content is not None
 
+
 class Config:
 
     def __init__(self, location: Path):
         self.location = location
 
-    def load(self, explanation:str, name:str) -> ConfigFile:
+    def load(self, explanation: str, name: str) -> ConfigFile:
         r = self.maybe(name)
         if not r.exists():
             raise ValueError(f"Expecting to find an {explanation} configuration at: {r.location}")

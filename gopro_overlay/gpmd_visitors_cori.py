@@ -5,8 +5,8 @@ from typing import List, Optional
 from pint import Quantity
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmf import QUATERNION
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
+from gopro_overlay.gpmf import QUATERNION
 from gopro_overlay.point import Quaternion, Point3, EulerRadians
 
 
@@ -55,7 +55,8 @@ class CORIComponentConverter:
         for index, cori in enumerate(components.orientations):
             sample_frame_timestamp, _ = sample_time_calculator(index)
 
-            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000, tz=datetime.timezone.utc)
+            point_datetime = datetime.datetime.fromtimestamp(sample_frame_timestamp.millis() / 1000,
+                                                             tz=datetime.timezone.utc)
 
             quat = Quaternion(
                 w=cori.w,

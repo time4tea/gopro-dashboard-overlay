@@ -114,7 +114,7 @@ def standard(
         dop_max: float,
         speed_max: Quantity,
         bbox: Optional[BoundingBox] = None,
-        report: Callable[[str],None] = lambda x: None
+        report: Callable[[str], None] = lambda x: None
 ) -> GPSLockFilter:
     if bbox is not None:
         bbox_filter = GPSBBoxFilter(bbox=bbox)

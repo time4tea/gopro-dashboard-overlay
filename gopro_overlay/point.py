@@ -30,7 +30,7 @@ class Coordinate:
 
 
 class Point:
-    def __init__(self, lat:float, lon:float):
+    def __init__(self, lat: float, lon: float):
         self.lon = lon
         self.lat = lat
 
@@ -218,7 +218,7 @@ class BoundingBox:
     min: Point
     max: Point
 
-    def contains(self, point:Point)->bool:
+    def contains(self, point: Point) -> bool:
         return self.min.lat <= point.lat <= self.max.lat and self.min.lon <= point.lon <= self.max.lon
 
     def __eq__(self, other):
