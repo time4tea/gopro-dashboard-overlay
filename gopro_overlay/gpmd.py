@@ -60,6 +60,7 @@ def _struct_mapping_for(item, repeat=None):
 def _struct_mapping_for_type(types):
     return struct.Struct('>' + "".join([type_mappings[t] for t in types]))
 
+
 def _interpret_atom(item, **kwargs):
     return _struct_mapping_for(item).unpack_from(item.rawdata)[0]
 
