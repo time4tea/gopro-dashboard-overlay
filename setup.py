@@ -7,14 +7,14 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 requires = [
-    "geotiler==0.14.7",
-    "gpxpy==1.5.0",
-    "geographiclib==1.52",
     "pillow==9.4.0",
-    "pint==0.20.1",
-    "progressbar2==4.2.0",
-    "requests==2.28.2",
+    "pint==0.22",
+    "geotiler==0.14.7",
+    "gpxpy==1.6.1",
     "fitdecode==0.10.0",
+    "geographiclib==1.52",
+    "progressbar2==4.2.0",
+    "requests==2.31.0",
     "sqlitedict==2.1.0",
 ]
 

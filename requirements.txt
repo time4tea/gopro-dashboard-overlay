@@ -1,17 +1,17 @@
 # for drawing text/images
 pillow==9.4.0
 # pint for unit conversion
-pint==0.20.1
+pint==0.22
 # for drawing little map
 geotiler==0.14.7
 # for loading GPX files
-gpxpy==1.5.0
+gpxpy==1.6.1
 # for loading FIT files
 fitdecode==0.10.0
 # for lat/lon/speed calcs
 geographiclib==1.52
 progressbar2==4.2.0
-requests==2.28.2
+requests==2.31.0
 pycairo==1.23.0
 sqlitedict==2.1.0
 pytest
