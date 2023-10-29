@@ -4,13 +4,14 @@ from pathlib import Path
 
 import pytest
 
+from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.framemeta_gpmd import gps_framemeta, accl_framemeta, grav_framemeta, cori_framemeta, merge_frame_meta
-from gopro_overlay.gpmf import GPMD
 from gopro_overlay.gpmd_calculate import PacketTimeCalculator
 from gopro_overlay.gpmd_visitors_gps import GPS9Visitor, GPS9EntryConverter
+from gopro_overlay.gpmf import GPMD
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 
@@ -40,23 +41,36 @@ def file_path_of_test_asset(name, missing_ok=False) -> Path:
 
 def test_loading_data_by_frame():
     filepath = file_path_of_test_asset("hero7.mp4")
-    meta = load_file(filepath)
+    gpmd = load_file(filepath)
 
-    metameta = g.find_recording(filepath).data
+    recording = g.find_recording(filepath)
+
+    assert recording.audio.stream == 1
+    assert recording.data.stream == 3
+    assert recording.data.frame_count == 12
+    assert recording.data.timebase == 1000
+    assert recording.data.frame_duration == 1001
+
+    assert recording.video.stream == 0
+    assert recording.video.dimension == Dimension(x=848, y=480)
+    assert recording.video.duration == timeunits(millis=12712.7)
+    assert recording.video.frame_count == 381
+    assert recording.video.frame_rate_numerator == 30000
+    assert recording.video.frame_rate_denominator == 1001
 
     gps_framemeta(
-        meta,
-        datastream=metameta,
+        gpmd,
+        datastream=recording.data,
         units=units
     )
 
 
 def test_loading_accl():
     filepath = file_path_of_test_asset("../../render/test-rotating-slowly.MP4", missing_ok=True)
-    meta = load_file(filepath)
+    gpmd = load_file(filepath)
     stream_info = g.find_recording(filepath)
 
-    framemeta = accl_framemeta(meta, units, stream_info.data)
+    framemeta = accl_framemeta(gpmd, units, stream_info.data)
 
     item = list(framemeta.items())[0]
     assert f"{item.accl.x.units:P~}" == "m/s²"

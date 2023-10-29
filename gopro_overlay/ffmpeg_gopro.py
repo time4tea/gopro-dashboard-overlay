@@ -97,13 +97,14 @@ class FFMPEGGoPro:
         streams = ffprobe_json["streams"]
         video = first_and_only("video stream", streams, video_selector)
 
+        avg_frame_rate_fraction = video["avg_frame_rate"].split("/")
         video_stream = VideoStream(
             stream=int(video["index"]),
             dimension=Dimension(video["width"], video["height"]),
             duration=timeunits(seconds=float(video["duration"])),
             frame_count=int(video["nb_frames"]),
-            frame_rate_numerator=int(video["avg_frame_rate"].split("/")[0]),
-            frame_rate_denominator=int(video["avg_frame_rate"].split("/")[1]),
+            frame_rate_numerator=int(avg_frame_rate_fraction[0]),
+            frame_rate_denominator=int(avg_frame_rate_fraction[1]),
         )
 
         audio = only_if_present("audio stream", streams, audio_selector)
