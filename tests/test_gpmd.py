@@ -10,10 +10,10 @@ import pytest
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
 from gopro_overlay.gpmf import GPSFix, GPS5, XYZ, GPMDItem, interpret_item
-from gopro_overlay.gpmf.gpmf import GPMD
 from gopro_overlay.gpmf.calc import CorrectionFactors, CoriTimestampPacketTimeCalculator, CorrectionFactorsPacketTimeCalculator, CalculateCorrectionFactorsVisitor
-from gopro_overlay.gpmf.visitors.find import DetermineTimestampOfFirstSHUTVisitor
+from gopro_overlay.gpmf.gpmf import GPMD, GPS9, QUATERNION
 from gopro_overlay.gpmf.visitors.debug import DebuggingVisitor
+from gopro_overlay.gpmf.visitors.find import DetermineTimestampOfFirstSHUTVisitor
 from gopro_overlay.gpmf.visitors.gps import GPS5EntryConverter, GPS5Visitor, DetermineFirstLockedGPSUVisitor
 from gopro_overlay.gpmf.visitors.xyz import XYZComponentConverter, XYZVisitor
 from gopro_overlay.point import Point, Point3, Quaternion
@@ -39,6 +39,36 @@ def load_meta(name):
 
 def load(name):
     return GPMD.parse(load_meta(name))
+
+
+def test_creating_gps5():
+    gps5 = GPS5(*[1, 2, 3, 4, 5])
+    assert gps5.lat == 1
+    assert gps5.lon == 2
+    assert gps5.alt == 3
+    assert gps5.speed == 4
+    assert gps5.speed3d == 5
+
+
+def test_creating_gps9():
+    gps9 = GPS9(*[1, 2, 3, 4, 5, 6, 7, 8, 9])
+    assert gps9.lat == 1
+    assert gps9.lon == 2
+    assert gps9.alt == 3
+    assert gps9.speed == 4
+    assert gps9.speed3d == 5
+    assert gps9.days == 6
+    assert gps9.secs == 7
+    assert gps9.dop == 8
+    assert gps9.fix == 9
+
+
+def test_creating_quaternion():
+    q = QUATERNION(*[1, 2, 3, 4])
+    assert q.w == 1
+    assert q.x == 2
+    assert q.y == 4
+    assert q.z == 3
 
 
 def test_load_hero6_raw():

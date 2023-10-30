@@ -1,5 +1,5 @@
 import array
-import collections
+import dataclasses
 import datetime
 import itertools
 import struct
@@ -33,11 +33,50 @@ class GPMD:
 
 
 GPMDStruct = struct.Struct('>4sBBH')
-GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
-GPS9 = collections.namedtuple("GPS9", "lat lon alt speed speed3d days secs dop fix")
-XYZ = collections.namedtuple('XYZ', "x y z")
-VECTOR = collections.namedtuple("VECTOR", "a b c")
-QUATERNION = collections.namedtuple("QUATERNION", "w x z y")
+
+
+@dataclasses.dataclass(frozen=True)
+class GPS5:
+    lat: float
+    lon: float
+    alt: float
+    speed: float
+    speed3d: float
+
+
+@dataclasses.dataclass(frozen=True)
+class GPS9:
+    lat: float
+    lon: float
+    alt: float
+    speed: float
+    speed3d: float
+    days: int
+    secs: float
+    dop: float
+    fix: int
+
+
+@dataclasses.dataclass(frozen=True)
+class XYZ:
+    x: float
+    y: float
+    z: float
+
+
+@dataclasses.dataclass(frozen=True)
+class VECTOR:
+    a: float
+    b: float
+    c: float
+
+
+@dataclasses.dataclass(frozen=True)
+class QUATERNION:
+    w: float
+    x: float
+    z: float
+    y: float
 
 
 class GPSFix(Enum):
@@ -49,6 +88,7 @@ class GPSFix(Enum):
 
 GPS_FIXED = {GPSFix.LOCK_3D, GPSFix.LOCK_2D}
 GPS_FIXED_VALUES = {GPSFix.LOCK_3D.value, GPSFix.LOCK_2D.value}
+
 type_mappings = {'c': 'c',
                  'L': 'L',
                  's': 'h',
@@ -115,11 +155,11 @@ def _interpret_element(item, scale, types=None):
 
 
 def _interpret_gps5(item, **kwargs) -> List[GPS5]:
-    return [GPS5._make(it) for it in _interpret_element(item, **kwargs)]
+    return [GPS5(*it) for it in _interpret_element(item, **kwargs)]
 
 
 def _interpret_gps9(item, **kwargs) -> List[GPS9]:
-    return [GPS9._make(it) for it in _interpret_element(item, **kwargs)]
+    return [GPS9(*it) for it in _interpret_element(item, **kwargs)]
 
 
 def _interpret_gps_precision(item, **kwargs) -> float:
@@ -131,15 +171,15 @@ def _interpret_type(item, **kwargs) -> List[str]:
 
 
 def _interpret_xyz(item, **kwargs) -> List[XYZ]:
-    return [XYZ._make(it) for it in _interpret_element(item, **kwargs)]
+    return [XYZ(*it) for it in _interpret_element(item, **kwargs)]
 
 
 def _interpret_vector(item, **kwargs) -> List[VECTOR]:
-    return [VECTOR._make(it) for it in _interpret_element(item, **kwargs)]
+    return [VECTOR(*it) for it in _interpret_element(item, **kwargs)]
 
 
 def _interpret_quaternion(item, **kwargs) -> List[QUATERNION]:
-    return [QUATERNION._make(it) for it in _interpret_element(item, **kwargs)]
+    return [QUATERNION(*it) for it in _interpret_element(item, **kwargs)]
 
 
 def _interpret_gps_lock(item, **kwargs) -> GPSFix:
@@ -335,4 +375,3 @@ class GPMDParser:
         while i % base != 0:
             i += 1
         return i
-
