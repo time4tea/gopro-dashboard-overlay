@@ -6,7 +6,8 @@ from gopro_overlay import fake, arguments
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta_gpmd import gps_framemeta
 from gopro_overlay.geo import MapRenderer, MapStyler
-from gopro_overlay.gpmf import GPMD, GPSFix
+from gopro_overlay.gpmf import GPSFix
+from gopro_overlay.gpmf.gpmf import GPMD
 from gopro_overlay.layout import Overlay
 from gopro_overlay.layout_components import moving_map, journey_map
 from gopro_overlay.point import Coordinate

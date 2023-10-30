@@ -82,7 +82,6 @@ class GRAVStreamVisitor:
         )
 
 
-# noinspection PyPep8Naming
 class GRAVisitor:
 
     def __init__(self, on_item=lambda counter, components: None):

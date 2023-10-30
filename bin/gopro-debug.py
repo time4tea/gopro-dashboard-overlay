@@ -6,8 +6,8 @@ import pathlib
 from gopro_overlay.assertion import assert_file_exists
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
-from gopro_overlay.gpmf import GPMD
-from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
+from gopro_overlay.gpmf.gpmf import GPMD
+from gopro_overlay.gpmf.visitors.debug import DebuggingVisitor
 from gopro_overlay.log import log
 
 if __name__ == "__main__":

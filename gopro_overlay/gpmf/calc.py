@@ -1,17 +1,18 @@
-from typing import Optional, Callable, Tuple
+import collections
+from typing import Callable, Tuple, Optional
 
 from gopro_overlay.exceptions import Defect
 from gopro_overlay.ffmpeg_gopro import DataStream
-from gopro_overlay.gpmd_visitors import CorrectionFactors, DetermineTimestampOfFirstSHUTVisitor, \
-    CalculateCorrectionFactorsVisitor
 from gopro_overlay.gpmf import GPMD
+from gopro_overlay.gpmf.visitors.find import DetermineTimestampOfFirstSHUTVisitor
 from gopro_overlay.log import log
 from gopro_overlay.timeunits import Timeunit, timeunits
 
+CorrectionFactors = collections.namedtuple("CorrectionFactors", ["first_frame", "last_frame", "frames_s"])
+
 
 class PacketTimeCalculator:
-    def next_packet(self, timestamp: int, samples_before_this: int, num_samples: int) -> Callable[
-        [int], Tuple[Timeunit, Timeunit]]:
+    def next_packet(self, timestamp: Timeunit, samples_before_this: int, num_samples: int) -> Callable[[int], Tuple[Timeunit, Timeunit]]:
         raise NotImplementedError()
 
 
@@ -82,3 +83,79 @@ def timestamp_calculator_for_packet_type(meta: GPMD, datastream: Optional[DataSt
         else:
             # assume that processing of same packet will follow, and not find any...
             return UnknownPacketTimeCalculator(packet_type)
+
+
+class PayloadMaths:
+    def __init__(self, datastream: DataStream):
+        self._datastream = datastream
+        self._max_time = datastream.frame_count * datastream.frame_duration / datastream.timebase
+
+    def time_of_out_packet(self, packet_number):
+        packet_time = (packet_number + 1) * self._datastream.frame_duration / self._datastream.timebase
+        return min(packet_time, self._max_time)
+
+
+class CalculateCorrectionFactorsVisitor:
+    """This implements GetGPMFSampleRate in GPMF_utils.c"""
+
+    def __init__(self, wanted: str, datastream: DataStream):
+        self.wanted = wanted
+        self.wanted_method_name = f"vi_{self.wanted}"
+        self._payload_maths = PayloadMaths(datastream)
+        self.count = 0
+        self.samples = 0
+        self.meanY = 0
+        self.meanX = 0
+        self.repeatarray = []
+
+    def vic_DEVC(self, item, contents):
+        return self
+
+    def __getattr__(self, name, *args):
+        if name == self.wanted_method_name:
+            return self._handle_item
+        else:
+            raise AttributeError(f"{name}")
+
+    def vic_STRM(self, item, contents):
+        if self.wanted in contents:
+            return self
+
+    def _handle_item(self, item):
+        self.samples += item.repeat
+        self.meanY += self.samples
+        self.meanX += self._payload_maths.time_of_out_packet(self.count)
+        self.repeatarray.append(self.samples)
+        self.count += 1
+
+    def v_end(self):
+        pass
+
+    def found(self) -> bool:
+        """indicate if we found any of the requested packet. might be one that's not present in this stream"""
+        return self.count > 0
+
+    # no idea how this works, but the numbers that come out of it are the same numbers as in GPMF_utils.c
+    def factors(self):
+        meanY = self.meanY / self.count
+        meanX = self.meanX / self.count
+
+        top = 0
+        bottom = 0
+        for index, sample in enumerate(self.repeatarray):
+            time_of_out_packet = self._payload_maths.time_of_out_packet(index)
+            top += (time_of_out_packet - meanX) * (sample - meanY)
+            bottom += (time_of_out_packet - meanX) * (time_of_out_packet - meanX)
+
+        slope = top / bottom
+        rate = slope
+
+        intercept = meanY - slope * meanX
+        first = -intercept / rate
+        last = first + self.samples / rate
+
+        return CorrectionFactors(
+            first_frame=timeunits(seconds=first),
+            last_frame=timeunits(seconds=last),
+            frames_s=rate
+        )

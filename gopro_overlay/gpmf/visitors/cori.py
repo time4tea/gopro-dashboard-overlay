@@ -5,15 +5,17 @@ from typing import List, Optional
 from pint import Quantity
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd_calculate import PacketTimeCalculator
+from gopro_overlay.gpmf.calc import PacketTimeCalculator
+
 from gopro_overlay.gpmf import QUATERNION
-from gopro_overlay.point import Quaternion, Point3, EulerRadians
+from gopro_overlay.point import EulerRadians, Quaternion, Point3
+from gopro_overlay.timeunits import Timeunit
 
 
 @dataclasses.dataclass(frozen=True)
 class CORIComponents:
     orientations: List[QUATERNION]
-    timestamp: int
+    timestamp: Timeunit
     samples: int
 
 
@@ -86,6 +88,8 @@ class CORIStreamVisitor:
         self.on_end = on_end
         self._scale: Optional[int] = None
         self._cori: Optional[List[QUATERNION]] = None
+        self._timestamp: Optional[Timeunit] = None
+        self._samples_total: Optional[int] = None
 
     def vi_STMP(self, item):
         self._timestamp = item.interpret()
@@ -105,7 +109,6 @@ class CORIStreamVisitor:
         )
 
 
-# noinspection PyPep8Naming
 class CORIVisitor:
 
     def __init__(self, on_item=lambda counter, components: None):

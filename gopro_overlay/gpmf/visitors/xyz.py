@@ -38,7 +38,6 @@ class XYZComponents:
     points: List[XYZ]
 
 
-# noinspection PyPep8Naming
 class XYZStreamVisitor:
 
     def __init__(self, on_end):
@@ -142,7 +141,6 @@ class XYZComponentConverter:
         self._total_samples += len(components.points)
 
 
-# noinspection PyPep8Naming
 class XYZVisitor:
 
     def __init__(self, name, on_item):

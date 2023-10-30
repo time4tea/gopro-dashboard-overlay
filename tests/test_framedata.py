@@ -9,9 +9,9 @@ from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.framemeta_gpmd import gps_framemeta, accl_framemeta, grav_framemeta, cori_framemeta, merge_frame_meta
-from gopro_overlay.gpmd_calculate import PacketTimeCalculator
-from gopro_overlay.gpmd_visitors_gps import GPS9Visitor, GPS9EntryConverter
-from gopro_overlay.gpmf import GPMD
+from gopro_overlay.gpmf.calc import PacketTimeCalculator
+from gopro_overlay.gpmf.visitors.gps import GPS9EntryConverter, GPS9Visitor
+from gopro_overlay.gpmf.gpmf import GPMD
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
 

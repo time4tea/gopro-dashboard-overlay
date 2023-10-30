@@ -6,14 +6,37 @@ import struct
 from enum import Enum
 from typing import List, TypeVar
 
-from .timeunits import timeunits
+from gopro_overlay.timeunits import timeunits
+
+T = TypeVar("T")
+
+
+class GPMD:
+
+    def __init__(self, items):
+        self._items = items
+
+    def __len__(self):
+        return len(self._items)
+
+    def __getitem__(self, key):
+        return self._items[key]
+
+    def accept(self, visitor: T) -> T:
+        for item in self._items:
+            item.accept(visitor)
+        return visitor
+
+    @staticmethod
+    def parse(data) -> 'GPMD':
+        return GPMD(list(GPMDParser(data).items()))
+
 
 GPMDStruct = struct.Struct('>4sBBH')
 GPS5 = collections.namedtuple("GPS5", "lat lon alt speed speed3d")
 GPS9 = collections.namedtuple("GPS9", "lat lon alt speed speed3d days secs dop fix")
 XYZ = collections.namedtuple('XYZ', "x y z")
 VECTOR = collections.namedtuple("VECTOR", "a b c")
-# https://github.com/gopro/gpmf-parser/issues/100 says it is w x z y
 QUATERNION = collections.namedtuple("QUATERNION", "w x z y")
 
 
@@ -26,7 +49,6 @@ class GPSFix(Enum):
 
 GPS_FIXED = {GPSFix.LOCK_3D, GPSFix.LOCK_2D}
 GPS_FIXED_VALUES = {GPSFix.LOCK_3D.value, GPSFix.LOCK_2D.value}
-
 type_mappings = {'c': 'c',
                  'L': 'L',
                  's': 'h',
@@ -314,26 +336,3 @@ class GPMDParser:
             i += 1
         return i
 
-
-T = TypeVar("T")
-
-
-class GPMD:
-
-    def __init__(self, items):
-        self._items = items
-
-    def __len__(self):
-        return len(self._items)
-
-    def __getitem__(self, key):
-        return self._items[key]
-
-    def accept(self, visitor: T) -> T:
-        for item in self._items:
-            item.accept(visitor)
-        return visitor
-
-    @staticmethod
-    def parse(data) -> 'GPMD':
-        return GPMD(list(GPMDParser(data).items()))

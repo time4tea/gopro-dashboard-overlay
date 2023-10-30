@@ -1,5 +1,5 @@
 from gopro_overlay.gpmf import XYZ
-from gopro_overlay.gpmd_visitors_xyz import ORIN
+from gopro_overlay.gpmf.visitors.xyz import ORIN
 
 
 def apply_orin(orin, original):

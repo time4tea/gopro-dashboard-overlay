@@ -71,6 +71,7 @@ version:
 test-distribution-install: dist
 	@echo "Current Version is $(CURRENT_VERSION)"
 	rm -rf $(DIST_TEST)
+	rm -rf gopro_overlay.egg-info
 	$(PYTHON) -m venv $(DIST_TEST)/venv
 	$(DIST_TEST)/venv/bin/pip install wheel dist/gopro-overlay-$(CURRENT_VERSION).tar.gz
 	$(DIST_TEST)/venv/bin/pip install pycairo==1.23.0

@@ -4,14 +4,14 @@ from typing import Optional, Callable, Set
 from gopro_overlay import timeseries_process
 from gopro_overlay.ffmpeg_gopro import DataStream
 from gopro_overlay.framemeta import FrameMeta
-from gopro_overlay.gpmd_calculate import timestamp_calculator_for_packet_type
+from gopro_overlay.gpmf.calc import timestamp_calculator_for_packet_type
 from gopro_overlay.gpmd_filters import GPSLockFilter, NullGPSLockFilter
-from gopro_overlay.gpmd_visitors import StreamFindingVisitor
-from gopro_overlay.gpmd_visitors_cori import CORIVisitor, CORIComponentConverter
-from gopro_overlay.gpmd_visitors_gps import GPS9Visitor, GPS9EntryConverter, GPS5Visitor, GPS5EntryConverter
-from gopro_overlay.gpmd_visitors_grav import GRAVisitor, GRAVComponentConverter
-from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
-from gopro_overlay.gpmf import GPMD
+from gopro_overlay.gpmf.visitors.find import StreamFindingVisitor
+from gopro_overlay.gpmf.visitors.cori import CORIComponentConverter, CORIVisitor
+from gopro_overlay.gpmf.visitors.gps import GPS5EntryConverter, GPS5Visitor, GPS9EntryConverter, GPS9Visitor
+from gopro_overlay.gpmf.visitors.grav import GRAVComponentConverter, GRAVisitor
+from gopro_overlay.gpmf.visitors.xyz import XYZComponentConverter, XYZVisitor
+from gopro_overlay.gpmf.gpmf import GPMD
 from gopro_overlay.log import log
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.timing import PoorTimer

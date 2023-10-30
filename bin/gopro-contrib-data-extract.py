@@ -6,7 +6,7 @@ import pathlib
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
-from gopro_overlay.gpmf import GPMD
+from gopro_overlay.gpmf.gpmf import GPMD
 
 
 class DataDumpVisitor:

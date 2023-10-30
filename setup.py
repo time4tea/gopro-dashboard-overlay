@@ -43,6 +43,8 @@ setup(
     ],
     packages=[
         "gopro_overlay",
+        "gopro_overlay.gpmf",
+        "gopro_overlay.gpmf.visitors",
         "gopro_overlay.icons",
         "gopro_overlay.layouts",
         "gopro_overlay.widgets",

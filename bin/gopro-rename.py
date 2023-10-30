@@ -9,8 +9,8 @@ from typing import List
 from gopro_overlay import functional, filenaming, geocode
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
-from gopro_overlay.gpmf import GPMD
-from gopro_overlay.gpmd_visitors_gps import DetermineFirstLockedGPSUVisitor
+from gopro_overlay.gpmf.gpmf import GPMD
+from gopro_overlay.gpmf.visitors.gps import DetermineFirstLockedGPSUVisitor
 from gopro_overlay.log import log
 
 if __name__ == "__main__":

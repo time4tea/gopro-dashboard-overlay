@@ -3,10 +3,11 @@ import datetime
 from typing import List, Optional
 
 from gopro_overlay.entry import Entry
-from gopro_overlay.gpmd_calculate import PacketTimeCalculator
+from gopro_overlay.gpmf.calc import PacketTimeCalculator
 from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSLockComponents
-from gopro_overlay.gpmf import interpret_item, GPS_FIXED, GPS5, GPSFix, GPS9
+from gopro_overlay.gpmf import GPSFix, GPS5, interpret_item, GPS9, GPS_FIXED
 from gopro_overlay.point import Point
+from gopro_overlay.timeunits import Timeunit
 
 
 @dataclasses.dataclass(frozen=True)
@@ -72,7 +73,6 @@ class GPS5EntryConverter:
         self._total_samples += len(components.points)
 
 
-# noinspection PyPep8Naming
 class GPS5StreamVisitor:
 
     def __init__(self, on_end):
@@ -118,7 +118,6 @@ class GPS5StreamVisitor:
         ))
 
 
-# noinspection PyPep8Naming
 class GPS5Visitor:
 
     def __init__(self, converter):
@@ -142,7 +141,7 @@ class GPS5Visitor:
 @dataclasses.dataclass(frozen=True)
 class GPS9Components:
     samples: int
-    timestamp: int
+    timestamp: Timeunit
     scale: int
     points: List[GPS9]
 
@@ -210,7 +209,7 @@ class GPS9StreamVisitor:
         self._samples: Optional[int] = None
         self._scale: Optional[int] = None
         self._points: Optional[List[GPS9]] = None
-        self._timestamp: Optional[int] = None
+        self._timestamp: Optional[Timeunit] = None
 
     def vi_STMP(self, item):
         self._timestamp = item.interpret()
@@ -256,15 +255,14 @@ class GPS9Visitor:
         pass
 
 
-# have seen stuff like this: lock acquired, DOP reduced, but still location way wrong.
-# 121,17,NO,2022-05-05 10:22:55.276481+00:00,43.7064837,31.3332034,99.99
-# 122,0,LOCK_2D,2022-05-05 10:22:55.335000+00:00,43.7063872,31.333535,3.16
-# ...
-# 123,0,LOCK_2D,2022-05-05 10:22:56.325000+00:00,43.3438812,31.8257702,3.16
-# 123,1,LOCK_2D,2022-05-05 10:22:56.380320+00:00,39.7817877,2.7167594,3.16
-
-# noinspection PyPep8Naming
 class DetermineFirstLockedGPSUVisitor:
+    """# have seen stuff like this: lock acquired, DOP reduced, but still location way wrong.
+    # 121,17,NO,2022-05-05 10:22:55.276481+00:00,43.7064837,31.3332034,99.99
+    # 122,0,LOCK_2D,2022-05-05 10:22:55.335000+00:00,43.7063872,31.333535,3.16
+    # ...
+    # 123,0,LOCK_2D,2022-05-05 10:22:56.325000+00:00,43.3438812,31.8257702,3.16
+    # 123,1,LOCK_2D,2022-05-05 10:22:56.380320+00:00,39.7817877,2.7167594,3.16
+    """
 
     def __init__(self):
         self._count = 0

@@ -9,13 +9,13 @@ import pytest
 
 from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import GoproRecording, FFMPEGGoPro
-from gopro_overlay.gpmf import GPMD, GPSFix, GPS5, XYZ, GPMDItem, interpret_item
-from gopro_overlay.gpmd_calculate import CorrectionFactorsPacketTimeCalculator, CoriTimestampPacketTimeCalculator
-from gopro_overlay.gpmd_visitors import DetermineTimestampOfFirstSHUTVisitor, CalculateCorrectionFactorsVisitor, \
-    CorrectionFactors
-from gopro_overlay.gpmd_visitors_debug import DebuggingVisitor
-from gopro_overlay.gpmd_visitors_gps import GPS5Visitor, GPS5EntryConverter, DetermineFirstLockedGPSUVisitor
-from gopro_overlay.gpmd_visitors_xyz import XYZVisitor, XYZComponentConverter
+from gopro_overlay.gpmf import GPSFix, GPS5, XYZ, GPMDItem, interpret_item
+from gopro_overlay.gpmf.gpmf import GPMD
+from gopro_overlay.gpmf.calc import CorrectionFactors, CoriTimestampPacketTimeCalculator, CorrectionFactorsPacketTimeCalculator, CalculateCorrectionFactorsVisitor
+from gopro_overlay.gpmf.visitors.find import DetermineTimestampOfFirstSHUTVisitor
+from gopro_overlay.gpmf.visitors.debug import DebuggingVisitor
+from gopro_overlay.gpmf.visitors.gps import GPS5EntryConverter, GPS5Visitor, DetermineFirstLockedGPSUVisitor
+from gopro_overlay.gpmf.visitors.xyz import XYZComponentConverter, XYZVisitor
 from gopro_overlay.point import Point, Point3, Quaternion
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units

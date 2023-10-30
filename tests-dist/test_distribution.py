@@ -71,67 +71,73 @@ def test_init_pys_are_in_right_subfolders():
             os.path.join(distribution, "lib", "python3.11", "site-packages", "gopro_overlay", p, "__init__.py"))
 
 
+def run_from_venv(cmd):
+    run(cmd, env={})
+
+def invoke_from_venv(cmd):
+    return invoke(cmd, env={})
+
 def test_maybe_renders_something():
     prog = distribution / "bin" / "gopro-dashboard.py"
-    run([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"])
+    run_from_venv([prog, "--overlay-size", "1920x1080", clip, "/tmp/render-clip.MP4"])
 
 
 def test_maybe_renders_something_kph():
     prog = distribution / "bin" / "gopro-dashboard.py"
-    run([prog, "--overlay-size", "1920x1080", "--units-speed", "kph", "--units-altitude", "inch", clip, "/tmp/render-clip-kph.MP4"])
+    run_from_venv([prog, "--overlay-size", "1920x1080", "--units-speed", "kph", "--units-altitude", "inch", clip, "/tmp/render-clip-kph.MP4"])
 
 
 def test_maybe_renders_something_example_layout():
     prog = distribution / "bin" / "gopro-dashboard.py"
-    run([prog, "--layout-xml", top / "examples/layout/layout-cairo-2704x1520.xml", clip , "/tmp/render-clip-example.MP4"])
+    run_from_venv([prog, "--layout-xml", top / "examples/layout/layout-cairo-2704x1520.xml", clip, "/tmp/render-clip-example.MP4"])
 
 
 @approve_text
 def test_maybe_makes_a_csv():
-    r = invoke([(distribution / "bin" / "gopro-to-csv.py"), clip, "-"])
+    r = invoke_from_venv([(distribution / "bin" / "gopro-to-csv.py"), clip, "-"])
     print(r.stderr)
     return r.stdout
 
 
 @approve_text
 def test_maybe_makes_a_csv_every_second():
-    r = invoke([(distribution / "bin" / "gopro-to-csv.py"), "--every", "1", clip, "-"])
+    r = invoke_from_venv([(distribution / "bin" / "gopro-to-csv.py"), "--every", "1", clip, "-"])
     print(r.stderr)
     return r.stdout
 
 
 @approve_text
 def test_maybe_makes_a_gpx():
-    r = invoke([(distribution / "bin" / "gopro-to-gpx.py"), clip, "-"])
+    r = invoke_from_venv([(distribution / "bin" / "gopro-to-gpx.py"), clip, "-"])
     print(r.stderr)
     return r.stdout
 
 
 @approve_text
 def test_maybe_makes_a_gpx_every_second():
-    r = invoke([(distribution / "bin" / "gopro-to-gpx.py"), "--every", "1", clip, "-"])
+    r = invoke_from_venv([(distribution / "bin" / "gopro-to-gpx.py"), "--every", "1", clip, "-"])
     print(r.stderr)
     return r.stdout
 
 
 def test_maybe_clips_something():
     prog = distribution / "bin" / "gopro-cut.py"
-    run([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"])
+    run_from_venv([prog, "--start", "1", "--end", "2", clip, "/tmp/clip-clip.MP4"])
 
 
 def test_maybe_clips_something_with_duration():
     prog = distribution / "bin" / "gopro-cut.py"
-    run([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"])
+    run_from_venv([prog, "--start", "1", "--duration", "1", clip, "/tmp/clip-clip.MP4"])
 
 
 def test_maybe_joins_some_files():
     prog = distribution / "bin" / "gopro-join.py"
-    run([prog, to_join, joined])
+    run_from_venv([prog, to_join, joined])
 
 
 def test_maybe_rename_some_files_in_a_folder():
     prog = distribution / "bin" / "gopro-rename.py"
-    output = invoke([prog, "--dirs", join_dir]).stderr
+    output = invoke_from_venv([prog, "--dirs", join_dir]).stderr
     assert "GH010051.MP4" in output
     assert "20210905-062805.MP4" in output
 
@@ -145,6 +151,6 @@ def test_maybe_rename_some_files_in_a_folder():
 def test_maybe_rename_some_files():
     prog = distribution / "bin" / "gopro-rename.py"
     print(prog)
-    output = invoke([prog, to_join]).stderr
+    output = invoke_from_venv([prog, to_join]).stderr
     assert "GH010051.MP4" in output
     assert "20210905-062805.MP4" in output
