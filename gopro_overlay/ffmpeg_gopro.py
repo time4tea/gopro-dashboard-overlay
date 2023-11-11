@@ -14,6 +14,7 @@ from typing import Optional
 from gopro_overlay.common import temporary_file
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.ffmpeg import FFMPEG
+from gopro_overlay.progresstrack import ProgressBarProgress
 from gopro_overlay.timeunits import timeunits, Timeunit
 
 
@@ -201,7 +202,7 @@ class GoproRecording:
     video: VideoStream
     data: Optional[DataStream]
 
-    def load_data(self) -> array:
+    def load_data(self) -> bytes:
         track = self.data.stream
         if track:
             cmd = [
@@ -213,12 +214,22 @@ class GoproRecording:
                 '-f', 'rawvideo',
                 "-"
             ]
-            result = self.ffmpeg.run(cmd, capture_output=True, timeout=45)
-            if result.returncode != 0:
-                raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")
-            arr = array("b")
-            arr.frombytes(result.stdout)
-            return arr
+
+            progress = ProgressBarProgress("Loading GoPro Data Track", transfer=True, delta=True)
+            progress.start()
+            try:
+                arr = bytearray()
+
+                def update(b: bytes):
+                    progress.update(len(b))
+                    arr.extend(b)
+
+                result = self.ffmpeg.stream(cmd, cb=update)
+                if result != 0:
+                    raise IOError(f"ffmpeg failed code: {result}")
+                return bytes(arr)
+            finally:
+                progress.complete()
 
 
 @dataclass(frozen=True)

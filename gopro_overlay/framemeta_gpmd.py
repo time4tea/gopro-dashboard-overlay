@@ -119,14 +119,14 @@ class LoadFlag(Enum):
     CORI = 3
 
 
-def parse_gopro(gpmd_from, units, datastream: DataStream, flags: Set[LoadFlag] = None,
+def parse_gopro(gopro_data:bytes, units, datastream: DataStream, flags: Set[LoadFlag] = None,
                 gps_lock_filter: GPSLockFilter = NullGPSLockFilter()) -> FrameMeta:
     if flags is None:
         flags = set(list(LoadFlag))
 
     with PoorTimer("parsing").timing():
         with PoorTimer("GPMD", indent=1).timing():
-            gpmd = GPMD.parse(gpmd_from)
+            gpmd = GPMD.parse(gopro_data)
 
         with PoorTimer("extract GPS", indent=1).timing():
             gps_frame_meta = gps_framemeta(gpmd, units, datastream=datastream, gps_lock_filter=gps_lock_filter)

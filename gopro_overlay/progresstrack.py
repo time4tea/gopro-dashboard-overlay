@@ -17,30 +17,44 @@ class ProgressTracker:
 
 class ProgressBarProgress(ProgressTracker):
 
-    def __init__(self, title):
+    def __init__(self, title, delta:bool=False, transfer:bool=False):
         self.progress = None
         self.title = title
+        self.rate = not transfer
+        self.delta = delta
+        self.total = 0
 
-    def start(self, count):
+    def _rate_widgets(self):
+        return ' [', progress_frames.Rate() , '] '
+
+    def _transfer_widgets(self):
+        return ' [', progressbar.DataSize() , '] ', ' [', progressbar.FileTransferSpeed() , '] '
+
+    def start(self, count=None):
         if count:
             widgets = [
                 f'{self.title}: ',
                 progressbar.Counter(format="{value:,}", new_style=True),
                 ' [', progressbar.Percentage(), '] ',
-                ' [', progress_frames.Rate(), '] ',
+                *(self._rate_widgets() if self.rate else self._transfer_widgets()),
                 progressbar.Bar(), ' ', progressbar.ETA()
             ]
         else:
             widgets = [
-                f'{self.title} (#Items Unknown): ',
+                f'{self.title}: ',
                 progressbar.Counter(format="{value:,}", new_style=True),
-                ' [', progress_frames.Rate(), '] ',
+                *(self._rate_widgets() if self.rate else self._transfer_widgets()),
             ]
 
         self.progress = progressbar.ProgressBar(widgets=widgets, min_poll_interval=0.25, max_value=count)
 
     def update(self, processed):
-        self.progress.update(processed)
+        if self.delta:
+            self.total += processed
+        else:
+            self.total = processed
+
+        self.progress.update(self.total)
 
     def complete(self):
         self.progress.finish()

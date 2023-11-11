@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import re
 from pathlib import Path
 from typing import Optional
@@ -62,6 +63,28 @@ class FFMPEG:
 
     def execute(self, execution: InProcessExecution, args):
         yield from execution.execute([self._path(), *args])
+
+    async def _stream(self, args, cb):
+        process = await asyncio.create_subprocess_exec(
+            self._path(), *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL
+        )
+        while True:
+            read = await process.stdout.read(1024 * 1024)
+            if len(read) != 0:
+                cb(read)
+            else:
+                return await process.wait()
+
+    def stream(self, args, cb):
+        if self.print_cmds:
+            log(f"Running {args}")
+
+        loop = asyncio.get_event_loop()
+        task = self._stream(args, cb)
+        return loop.run_until_complete(task)
+
 
 
 if __name__ == "__main__":

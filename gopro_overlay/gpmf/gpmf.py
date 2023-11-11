@@ -28,7 +28,7 @@ class GPMD:
         return visitor
 
     @staticmethod
-    def parse(data) -> 'GPMD':
+    def parse(data:bytes) -> 'GPMD':
         return GPMD(list(GPMDParser(data).items()))
 
 
@@ -333,7 +333,7 @@ class GPMDItem:
 
 class GPMDParser:
 
-    def __init__(self, data: array.array):
+    def __init__(self, data: bytes):
         self.data = data
 
     def items(self):
