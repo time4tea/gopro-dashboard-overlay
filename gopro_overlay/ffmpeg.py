@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-import asyncio
+import datetime
 import re
+import subprocess
+import time
 from pathlib import Path
+from subprocess import TimeoutExpired
 from typing import Optional
 
 from gopro_overlay.execution import InProcessExecution
@@ -64,27 +67,32 @@ class FFMPEG:
     def execute(self, execution: InProcessExecution, args):
         yield from execution.execute([self._path(), *args])
 
-    async def _stream(self, args, cb):
-        process = await asyncio.create_subprocess_exec(
-            self._path(), *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL
-        )
-        while True:
-            read = await process.stdout.read(1024 * 1024)
-            if len(read) != 0:
-                cb(read)
-            else:
-                return await process.wait()
-
-    def stream(self, args, cb):
+    def stream(self, args, cb, timeout=None):
+        timeout = datetime.timedelta(seconds=45) if timeout is None else timeout
         if self.print_cmds:
             log(f"Running {args}")
 
-        loop = asyncio.get_event_loop()
-        task = self._stream(args, cb)
-        return loop.run_until_complete(task)
+        deadline = datetime.datetime.now() + timeout
 
+        process = subprocess.Popen([self._path(), *args], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        try:
+            while True:
+                if datetime.datetime.now() > deadline:
+                    process.kill()
+                    raise TimeoutError(f"Exceeded timeout of {timeout}")
+                read = process.stdout.read(1024 * 1024)
+                if len(read) != 0:
+                    cb(read)
+                else:
+                    break
+        except (KeyboardInterrupt, TimeoutError):
+            try:
+                process.wait(timeout=0.25)
+            except TimeoutExpired:
+                pass
+            raise
+
+        return process.wait(timeout=0.1)
 
 
 if __name__ == "__main__":

@@ -224,7 +224,7 @@ class GoproRecording:
                     progress.update(len(b))
                     arr.extend(b)
 
-                result = self.ffmpeg.stream(cmd, cb=update)
+                result = self.ffmpeg.stream(cmd, cb=update, timeout=datetime.timedelta(seconds=45))
                 if result != 0:
                     raise IOError(f"ffmpeg failed code: {result}")
                 return bytes(arr)
