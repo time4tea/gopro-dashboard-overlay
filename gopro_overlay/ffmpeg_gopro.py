@@ -213,7 +213,7 @@ class GoproRecording:
                 '-f', 'rawvideo',
                 "-"
             ]
-            result = self.ffmpeg.run(cmd, capture_output=True, timeout=10)
+            result = self.ffmpeg.run(cmd, capture_output=True, timeout=45)
             if result.returncode != 0:
                 raise IOError(f"ffmpeg failed code: {result.returncode} : {result.stderr.decode('utf-8')}")
             arr = array("b")
