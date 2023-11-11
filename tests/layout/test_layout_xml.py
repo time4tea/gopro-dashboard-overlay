@@ -1,6 +1,7 @@
 import datetime
 
-from gopro_overlay.layout_xml import metric_accessor_from, date_formatter_from
+from gopro_overlay.layout_components import metric_value
+from gopro_overlay.layout_xml import metric_accessor_from, date_formatter_from, Converters, quantity_formatter_for
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.units import units
 from tests.test_timeseries import datetime_of
@@ -20,6 +21,31 @@ def test_metric_accessor_speed_fallback():
     entry = Entry(datetime_of(0), cspeed=cspeed)
 
     assert metric_accessor_from("speed")(entry) == cspeed
+
+
+def test_metric_none_after_conversion():
+    speed = units.Quantity(0, units.mph)
+
+    converters = Converters()
+
+    entry = Entry(datetime_of(1), speed=speed)
+
+    some_default_value = 123
+
+    value = metric_value(
+        lambda: entry,
+        accessor=metric_accessor_from("speed"),
+        converter=converters.converter("pace"),
+        formatter=lambda q: q.m,
+        default=some_default_value
+    )
+
+    assert value() == some_default_value
+
+
+def test_formatting():
+    assert (quantity_formatter_for("pace", None)((1 / units.Quantity("60 mph")).to("pace_miles"))) == "1:00"
+    assert (quantity_formatter_for("pace", None)((1 / units.Quantity("30 mph")).to("pace_miles"))) == "2:00"
 
 
 def test_date_formatter():

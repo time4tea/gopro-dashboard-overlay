@@ -1,4 +1,5 @@
 import dataclasses
+import math
 import xml.etree.ElementTree as ET
 from importlib.resources import files, as_file
 from pathlib import Path
@@ -15,6 +16,7 @@ from gopro_overlay.point import Coordinate
 from gopro_overlay.timeseries import Entry
 from gopro_overlay.timeunits import timeunits
 from gopro_overlay.units import units
+from .exceptions import Defect
 from .layout_xml_attribute import allow_attributes
 from .log import log
 from .widgets.asi import AirspeedIndicator
@@ -39,6 +41,12 @@ def load_xml_layout(filepath: Path):
             return f.read()
 
 
+def zero_safe(n, f):
+    if n is None or n.m < 0.0000001:
+        return None
+    return f(n)
+
+
 class Converters:
 
     def __init__(self, speed_unit="mph", distance_unit="mile", altitude_unit="m", temperature_unit="degC"):
@@ -51,10 +59,10 @@ class Converters:
             "kph": lambda u: u.to("KPH"),
             "knots": lambda u: u.to("knot"),
 
-            "pace": lambda u: (1 / u).to(pace_unit),
-            "pace_mile": lambda u: (1 / u).to("pace_mile"),
-            "pace_km": lambda u: (1 / u).to("pace_km"),
-            "pace_kt": lambda u: (1 / u).to("pace_kt"),
+            "pace": lambda u: zero_safe(u, lambda nz: (1 / nz).to(pace_unit)),
+            "pace_mile": lambda u: zero_safe(u, lambda nz: (1 / nz).to("pace_mile")),
+            "pace_km": lambda u: zero_safe(u, lambda nz: (1 / nz).to("pace_km")),
+            "pace_kt": lambda u: zero_safe(u, lambda nz: (1 / nz).to("pace_kt")),
 
             "spm": lambda u: u.to("spm"),
 
@@ -78,7 +86,7 @@ class Converters:
             "nautical_miles": lambda u: u.to("nautical_mile"),
         }
 
-    def converter(self, name):
+    def converter(self, name: str) -> Callable[[pint.Quantity], Optional[pint.Quantity]]:
         if name is None:
             return lambda x: x
         if name in self.converters:
@@ -249,7 +257,7 @@ def at(el):
     return Coordinate(iattrib(el, "x", d=0), iattrib(el, "y", d=0))
 
 
-def metric_accessor_from(name):
+def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]]:
     accessors = {
         "hr": lambda e: e.hr,
         "cadence": lambda e: e.cad,
@@ -289,23 +297,33 @@ def metric_accessor_from(name):
     raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
 
 
-def quantity_formatter_from(element) -> Callable[[pint.Quantity], str]:
-    format_string = attrib(element, "format", d=None)
-    dp = attrib(element, "dp", d=None)
-
+def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> Callable[[pint.Quantity], str]:
     if format_string and dp:
         raise IOError("Cannot supply both 'format' and 'dp', just use one")
 
     if format_string is None and dp is None:
         dp = 2
 
-    if format_string:
-        try:
-            return lambda q: format(q.m, format_string)
-        except ValueError:
-            raise ValueError(f"Unable to format value with format string {format_string}")
-    if dp:
+    if format_string is not None:
+        if format_string == "pace":
+            # pace is in minutes, and we want minutes / seconds
+            return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
+        else:
+            try:
+                return lambda q: format(q.m, format_string)
+            except ValueError:
+                raise ValueError(f"Unable to format value with format string {format_string}")
+    elif dp is not None:
         return lambda q: format(q.m, f".{dp}f")
+    else:
+        raise Defect("Problem deciding how to format")
+
+
+def quantity_formatter_from(element) -> Callable[[pint.Quantity], str]:
+    return quantity_formatter_for(
+        attrib(element, "format", d=None),
+        iattrib(element, "dp", d=None)
+    )
 
 
 def date_formatter_from(entry: Callable[[], Entry], format_string, truncate=0, tz=None) -> Callable[[], str]:

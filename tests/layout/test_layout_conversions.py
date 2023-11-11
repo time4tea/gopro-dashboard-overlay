@@ -123,6 +123,15 @@ def test_pace_conversions_defaults():
     assert converters.converter("pace_kt")(speed).m == pytest.approx(11.112, abs=0.001)
 
 
+def test_pace_conversions_zero_or_none():
+    converters = Converters()
+    speed = units.Quantity('0 kph')
+    assert converters.converter("pace")(speed) is None
+    assert converters.converter("pace_mile")(speed) is None
+    assert converters.converter("pace_km")(speed) is None
+    assert converters.converter("pace_kt")(speed) is None
+
+
 def test_pace_conversions_defaults_km():
     speed = units.Quantity('10 kph')
     converters = Converters(distance_unit="km")
