@@ -32,6 +32,7 @@ from gopro_overlay.loading import load_external, GoproLoader
 from gopro_overlay.log import log, fatal
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
+from gopro_overlay.progresstrack import ProgressBarProgress
 from gopro_overlay.timeunits import timeunits, Timeunit
 from gopro_overlay.timing import PoorTimer, Timers
 from gopro_overlay.units import units
@@ -334,17 +335,7 @@ if __name__ == "__main__":
             timelapse_correction = frame_meta.duration() / video_duration
             log(f"Timelapse Factor = {timelapse_correction:.3f}")
             stepper = frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
-            progress = progressbar.ProgressBar(
-                widgets=[
-                    'Render: ',
-                    progressbar.Counter(),
-                    ' [', progressbar.Percentage(), '] ',
-                    ' [', progress_frames.Rate(), '] ',
-                    progressbar.Bar(), ' ', progressbar.ETA()
-                ],
-                poll_interval=2.0,
-                max_value=len(stepper)
-            )
+            progress = ProgressBarProgress("Render")
 
             unit_converters = Converters(
                 speed_unit=args.units_speed,
@@ -370,6 +361,7 @@ if __name__ == "__main__":
             overlay = Overlay(framemeta=frame_meta, create_widgets=layout_creator)
 
             try:
+                progress.start(len(stepper))
                 with ffmpeg.generate() as writer:
 
                     if args.double_buffer:
@@ -385,7 +377,7 @@ if __name__ == "__main__":
                             draw_timer.time(lambda: buffer.draw(lambda frame: overlay.draw(dt, frame)))
 
                 log("Finished drawing frames. waiting for ffmpeg to catch up")
-                progress.finish()
+                progress.complete()
 
             except KeyboardInterrupt:
                 log("...Stopping...")
