@@ -68,7 +68,7 @@ quite slow to render. This can be ignored really unless there are memory errors 
 
 ## Formatting
 
-Either a number of decimal places, or a specific python formatting string can be used.
+Either a number of decimal places, or a specific python formatting string can be used, or the word "pace"
 
 ### Decimal Places
 
@@ -83,6 +83,13 @@ use the `dp` attribute
 Use the `format` attribute.
 
 {{ <component type="metric" metric="speed" format=".4f" /> }}
+
+
+### Pace
+
+A special case for formatting pace.
+
+{{ <component type="metric" metric="speed" units="pace" format="pace" /> }}
 
 ## Positioning
 

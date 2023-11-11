@@ -118,8 +118,9 @@ class ExamplePacketTimeCalculator(PacketTimeCalculator):
         return lambda x: (start + (x * per_sample), (x * per_sample))
 
 
+# TODO 2023-11-11 -> Find a better test file.
 def test_loading_gps9():
-    filepath = file_path_of_test_asset("gps9.gpmd")
+    filepath = file_path_of_test_asset("gps9.gpmd", missing_ok=True)
 
     gpmd = GPMD.parse(filepath.read_bytes())
 

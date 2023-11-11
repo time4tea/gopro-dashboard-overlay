@@ -111,7 +111,7 @@ quite slow to render. This can be ignored really unless there are memory errors 
 
 ## Formatting
 
-Either a number of decimal places, or a specific python formatting string can be used.
+Either a number of decimal places, or a specific python formatting string can be used, or the word "pace"
 
 ### Decimal Places
 
@@ -147,6 +147,18 @@ Use the `format` attribute.
 <kbd>![04-metrics-11.png](04-metrics-11.png)</kbd>
 
 
+
+### Pace
+
+A special case for formatting pace.
+
+
+```xml
+<component type="metric" metric="speed" units="pace" format="pace" />
+```
+<kbd>![04-metrics-12.png](04-metrics-12.png)</kbd>
+
+
 ## Positioning
 
 The same positioning as in the [text](01-simple-text.md) component
@@ -155,7 +167,7 @@ The same positioning as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" x="40" metric="speed" />
 ```
-<kbd>![04-metrics-12.png](04-metrics-12.png)</kbd>
+<kbd>![04-metrics-13.png](04-metrics-13.png)</kbd>
 
 
 ## Alignment
@@ -166,7 +178,7 @@ The same alignment as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" x="40" metric="speed" align="right" />
 ```
-<kbd>![04-metrics-13.png](04-metrics-13.png)</kbd>
+<kbd>![04-metrics-14.png](04-metrics-14.png)</kbd>
 
 
 ## Colour
@@ -177,25 +189,25 @@ The same colour as in the [text](01-simple-text.md) component
 ```xml
 <component type="metric" metric="speed" rgb="255,255,0" />
 ```
-<kbd>![04-metrics-14.png](04-metrics-14.png)</kbd>
+<kbd>![04-metrics-15.png](04-metrics-15.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" rgb="255,255,0,128" />
 ```
-<kbd>![04-metrics-15.png](04-metrics-15.png)</kbd>
+<kbd>![04-metrics-16.png](04-metrics-16.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" rgb="255,0,0" outline="255,255,255" size="48" />
 ```
-<kbd>![04-metrics-16.png](04-metrics-16.png)</kbd>
+<kbd>![04-metrics-17.png](04-metrics-17.png)</kbd>
 
 
 ```xml
 <component type="metric" metric="speed" rgb="255,0,0" outline="255,255,255" outline_width="5" size="48"  />
 ```
-<kbd>![04-metrics-17.png](04-metrics-17.png)</kbd>
+<kbd>![04-metrics-18.png](04-metrics-18.png)</kbd>
 
 
 ## Supported Metrics
