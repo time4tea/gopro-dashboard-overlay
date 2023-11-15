@@ -255,6 +255,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.112.0 [Enhancement] Show loading speed of gopro data.
 - 0.111.0 [Fix] Simple Fix for #157 - timeout when reading large data files. Thanks to [@rpoxo](https://github.com/rpoxo) for raising.  
 - 0.110.0 [Fix] Hopefully make the 'pace' units more robust. New metric format "pace".
 - 0.109.0 [Feature] Support for new GPS9 data type - should give more accurate GPS. Supported on Hero11+
