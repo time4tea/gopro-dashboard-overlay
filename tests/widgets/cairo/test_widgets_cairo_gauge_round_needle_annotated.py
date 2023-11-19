@@ -1,7 +1,7 @@
 import pytest
 
 from gopro_overlay.widgets.cairo.angle import Angle
-from gopro_overlay.widgets.cairo.colour import RED, Colour, WHITE
+from gopro_overlay.widgets.cairo.colour import RED, Colour, WHITE, BLACK
 from gopro_overlay.widgets.cairo.gauge_round_254 import CairoGaugeRoundAnnotated
 from gopro_overlay.widgets.cairo.reading import Reading
 from tests.approval import approve_image
@@ -14,6 +14,24 @@ def test_gauge_round_254_defaults():
     return cairo_widget_test(
         widget=CairoGaugeRoundAnnotated(
             reading=lambda: Reading(3.0 / 17)
+        ),
+        repeat=10
+    )
+
+
+@pytest.mark.cairo
+@approve_image
+def test_gauge_round_254_alt():
+    return cairo_widget_test(
+        widget=CairoGaugeRoundAnnotated(
+            reading=lambda: Reading(3.0 / 17),
+            v_max=60,
+            sectors=12,
+            background_colour=BLACK.alpha(0.6),
+            major_annotation_colour=WHITE,
+            minor_annotation_colour=WHITE,
+            major_tick_colour=WHITE,
+            minor_tick_colour=WHITE,
         ),
         repeat=10
     )

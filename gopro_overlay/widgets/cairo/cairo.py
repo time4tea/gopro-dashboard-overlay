@@ -16,6 +16,11 @@ class CairoWidget:
         raise NotImplemented()
 
 
+class NullCairoWidget(CairoWidget):
+    def draw(self, context: cairo.Context):
+        pass
+
+
 class CairoTranslate(CairoWidget):
     def __init__(self, by: Coordinate, widget: CairoWidget):
         self.by = by

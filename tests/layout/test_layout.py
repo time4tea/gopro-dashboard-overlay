@@ -95,6 +95,7 @@ def test_render_example_2_layout():
     with renderer.open() as map_renderer:
         return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
+
 @approve_image
 def test_render_power_1920_1080():
     xmldoc = load_xml_layout(Path("power-1920x1080"))
@@ -114,7 +115,21 @@ def test_render_xml_component():
         </composite>
     </layout>
     """
+    return do_layout(xmldoc)
 
+
+@approve_image
+def test_render_cairo_arc_annotated():
+    xml = """
+    <layout>
+     <component type="cairo_gauge_arc_annotated" metric="speed" start="0" arc-value-lower="15" arc-value-upper="30" />
+    </layout>
+    """
+
+    return do_layout(xml)
+
+
+def do_layout(xmldoc):
     with renderer.open() as map_renderer:
         return time_layout("xml", layout_from_xml(xmldoc, map_renderer, framemeta, font, privacy=NoPrivacyZone()))
 
@@ -149,7 +164,7 @@ def test_render_xml_component_with_exclusions():
 
 
 def time_layout(name, layout, repeat=20, dimensions=Dimension(1920, 1080)):
-    supplier =SimpleFrameSupplier(dimensions)
+    supplier = SimpleFrameSupplier(dimensions)
     overlay = Overlay(framemeta=framemeta, create_widgets=layout)
 
     timer = PoorTimer(name)

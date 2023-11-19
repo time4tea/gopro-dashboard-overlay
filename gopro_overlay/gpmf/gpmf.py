@@ -1,4 +1,3 @@
-import array
 import dataclasses
 import datetime
 import itertools
@@ -28,7 +27,7 @@ class GPMD:
         return visitor
 
     @staticmethod
-    def parse(data:bytes) -> 'GPMD':
+    def parse(data: bytes) -> 'GPMD':
         return GPMD(list(GPMDParser(data).items()))
 
 
@@ -339,11 +338,11 @@ class GPMDParser:
     def items(self):
         offset = 0
         while offset < len(self.data):
-            item = self.from_array(self.data, offset)
+            item = self.from_bytes(self.data, offset)
             yield item
             offset += item.bytecount
 
-    def from_array(self, data, offset):
+    def from_bytes(self, data: bytes, offset: int):
         fourcc, type_char_code, size, repeat = GPMDStruct.unpack_from(data, offset=offset)
         fourcc = fourcc.decode()
         length = size * repeat
@@ -363,7 +362,7 @@ class GPMDParser:
             child_offset = 0
 
             while child_offset < len(child_data):
-                child = self.from_array(child_data, child_offset)
+                child = self.from_bytes(child_data, child_offset)
                 children.append(child)
                 child_offset += child.bytecount
 

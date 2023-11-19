@@ -140,7 +140,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
 
     def create(entry):
         def create_component(child, level):
-            component_type = child.attrib["type"].replace("-", "_")
+            component_type = component_type_of(child)
 
             attr = f"create_{component_type}"
 
@@ -153,6 +153,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
                 level=level,
                 widget=method(child, entry=entry)
             )
+
 
         @allow_attributes({"x", "y"})
         def create_composite(element, level):
@@ -212,6 +213,10 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
             raise IOError(e)
 
     return create
+
+
+def component_type_of(element):
+    return element.attrib["type"].replace("-", "_")
 
 
 def attrib(el, a, f=lambda v: v, **kwargs):
@@ -679,6 +684,14 @@ class Widgets:
         try:
             import gopro_overlay.layout_xml_cairo
             return gopro_overlay.layout_xml_cairo.create_cairo_gauge_round_annotated(element, entry, self.converters,
+                                                                                     **kwargs)
+        except ModuleNotFoundError:
+            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+
+    def create_cairo_gauge_arc_annotated(self, element, entry, **kwargs):
+        try:
+            import gopro_overlay.layout_xml_cairo
+            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_arc_annotated(element, entry, self.converters,
                                                                                      **kwargs)
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None

@@ -13,6 +13,7 @@ from .widgets.cairo.circuit import Line
 from .widgets.cairo.colour import Colour
 from .widgets.cairo.gauge_marker import CairoGaugeMarker
 from .widgets.cairo.gauge_round_254 import CairoGaugeRoundAnnotated
+from .widgets.cairo.gauge_sector_254 import CairoGaugeSectorAnnotated
 from .widgets.cairo.reading import Reading
 from .widgets.widgets import Widget
 
@@ -135,5 +136,72 @@ def create_cairo_gauge_round_annotated(element, entry, converters, **kwargs) -> 
             v_min=min_value,
             v_max=max_value,
             needle_colour=cairo_colour(rgbattr(element, "needle-rgb", d=(255, 0, 0)))
+        )
+    )
+
+
+@allow_attributes({"size", "min", "max", "metric", "units", "start", "length",
+                   "sectors",
+                   "background-rgb",
+                   "major-ann-rgb", "minor-ann-rgb",
+                   "major-tick-rgb", "minor-tick-rgb",
+                   "needle-rgb",
+                   "arc-inner-rgb", "arc-outer-rgb",
+                   "arc-metric-upper", "arc-metric-lower",
+                   "arc-value-upper", "arc-value-lower"
+                   })
+def create_cairo_gauge_arc_annotated(element, entry, converters, **kwargs) -> Widget:
+    size = iattrib(element, "size", d=256)
+
+    min_value = iattrib(element, "min", d=0)
+    max_value = iattrib(element, "max", d=50)
+
+    converter = converters.converter(attrib(element, "units", d=None))
+
+    def a_metric(attr_name):
+        return metric_value(
+            entry,
+            accessor=metric_accessor_from(attrib(element, attr_name)),
+            converter=converter,
+            formatter=lambda q: q.m,
+            default=0
+        )
+
+    if "arc-metric-lower" in element.attrib:
+        reading_arc_lower = a_metric("arc-metric-lower")
+    elif "arc-value-lower" in element.attrib:
+        lower_value = fattrib(element, "arc-value-lower")
+        reading_arc_lower = as_reading(lambda: lower_value, min_value, max_value)
+    else:
+        reading_arc_lower = as_reading(lambda: 0, min_value, max_value)
+
+    if "arc-metric-upper" in element.attrib:
+        reading_arc_upper = a_metric("arc-metric-upper")
+    elif "arc-value-upper" in element.attrib:
+        upper_value = fattrib(element, "arc-value-upper")
+        reading_arc_upper = as_reading(lambda: upper_value, min_value, max_value)
+    else:
+        reading_arc_upper = None
+
+
+    return CairoAdapter(
+        size=Dimension(size, size),
+        widget=CairoGaugeSectorAnnotated(
+            start=Angle(degrees=iattrib(element, "start", d=143)),
+            length=Angle(degrees=iattrib(element, "length", d=254)),
+            sectors=iattrib(element, "sectors", d=5),
+            background_colour=cairo_colour(rgbattr(element, "background-rgb", d=(255, 255, 255, 150))),
+            major_annotation_colour=cairo_colour(rgbattr(element, "major-ann-rgb", d=(0, 0, 0))),
+            minor_annotation_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(0, 0, 0))),
+            major_tick_colour=cairo_colour(rgbattr(element, "major-tick-rgb", d=(0, 0, 0))),
+            minor_tick_colour=cairo_colour(rgbattr(element, "minor-tick-rgb", d=(0, 0, 0))),
+            v_min=min_value,
+            v_max=max_value,
+            reading=as_reading(a_metric("metric"), min_value, max_value),
+            needle_colour=cairo_colour(rgbattr(element, "needle-rgb", d=(255, 0, 0))),
+            arc_inner_colour=cairo_colour(rgbattr(element, "arc-inner-rgb", d=(0, 0, 190, 50))),
+            arc_outer_colour=cairo_colour(rgbattr(element, "arc-outer-rgb", d=(0, 0, 190, 190))),
+            reading_arc_max=reading_arc_upper,
+            reading_arc_min=reading_arc_lower
         )
     )

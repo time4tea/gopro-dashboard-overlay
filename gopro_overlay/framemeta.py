@@ -154,18 +154,15 @@ class FrameMeta:
         if self.modified:
             self._update()
 
-    def get(self, frame_time: Timeunit, interpolate=True) -> Entry:
+    def get(self, frame_time: Timeunit) -> Entry:
         self.check_modified()
 
         if frame_time in self.frames:
             return self.frames[frame_time]
 
-        if not interpolate:
-            raise KeyError(f"Frame at {frame_time}ms not found")
+        return self._get_closest(frame_time)
 
-        return self._get_interpolate(frame_time)
-
-    def _get_interpolate(self, frame_time) -> Entry:
+    def _get_closest(self, frame_time) -> Entry:
 
         if frame_time < self.min:
             log(f"Request for data at time {frame_time}, before start of metadata, returning first item")
