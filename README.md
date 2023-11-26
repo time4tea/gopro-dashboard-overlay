@@ -255,6 +255,13 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.114.0 [Enhancement] Huge Improvement to usability of speed gauges! - Speed was not being smoothed. Now a kalman filter is applied to speed, giving a much better result.
+See below for before and after. This stops the speed gauges flickering between values. 
+- [Breaking/Minor] Removed the decimal values for altitude & gradient in the default layouts - they were distracting as they changed too much.
+
+ ![Speed Gauge Before Smoothing](examples/2023-11-26-speed-no-smoothing.png)
+ ![Speed Gauge After Smoothing](examples/2023-11-26-speed-with-smoothing.png)
+
 - 0.113.0 [Enhancement] Add arc gauge - See [Arc Gauge Docs](docs/xml/examples/06-cairo-gauge-arc-annotated/README.md) for examples
 - 0.112.0 [Enhancement] Show loading speed of gopro data.
 - 0.111.0 [Fix] Simple Fix for #157 - timeout when reading large data files. Thanks to [@rpoxo](https://github.com/rpoxo) for raising.  
