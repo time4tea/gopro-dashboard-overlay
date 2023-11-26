@@ -174,3 +174,17 @@ Any colour that is completely transparent will disappear... this can be used to 
 <kbd>![06-cairo-gauge-arc-annotated-19.png](06-cairo-gauge-arc-annotated-19.png)</kbd>
 
 
+# A Full Example
+
+Here's an example of how to combine this with a metric to get a full speedometer
+
+
+```xml
+<translate x="0" y="0">
+    <component type="cairo-gauge-arc-annotated" metric="speed" units="mph" start="90" size="250"/>
+    <translate x="125" y="70">
+        <component type="metric" metric="speed" units="mph" size="100" dp="0" rgb="255,255,255,160" outline="0,0,0,160" align="centre"/>
+    </translate>
+</translate>
+```
+<kbd>![06-cairo-gauge-arc-annotated-20.png](06-cairo-gauge-arc-annotated-20.png)</kbd>

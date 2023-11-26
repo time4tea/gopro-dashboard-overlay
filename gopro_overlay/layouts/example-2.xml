@@ -39,4 +39,12 @@
             <component type="metric" metric="speed" units="mph" size="60" dp="0" rgb="255,255,255,160" outline="0,0,0,160"/>
         </translate>
     </translate>
+
+    <translate x="800" y="600">
+        <component type="cairo-gauge-arc-annotated" metric="speed" units="mph" start="90" size="250"/>
+        <translate x="125" y="70">
+            <component type="metric" metric="speed" units="mph" size="100" dp="0" rgb="255,255,255,160" outline="0,0,0,160" align="centre"/>
+        </translate>
+    </translate>
+
 </layout>

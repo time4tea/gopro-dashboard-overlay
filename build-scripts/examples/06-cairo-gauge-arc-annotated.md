@@ -70,3 +70,15 @@ Any colour that is completely transparent will disappear... this can be used to 
 {{ <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  minor-tick-rgb="255,0,0,0" arc-value-upper="25"/> }}
 {{ <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  needle-rgb="255,0,255,40" arc-value-upper="25"/> }}
 
+# A Full Example
+
+Here's an example of how to combine this with a metric to get a full speedometer
+
+{{
+<translate x="0" y="0">
+    <component type="cairo-gauge-arc-annotated" metric="speed" units="mph" start="90" size="250"/>
+    <translate x="125" y="70">
+        <component type="metric" metric="speed" units="mph" size="100" dp="0" rgb="255,255,255,160" outline="0,0,0,160" align="centre"/>
+    </translate>
+</translate>
+}}
