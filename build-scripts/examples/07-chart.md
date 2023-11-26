@@ -35,6 +35,10 @@ Use any standard metric, with any standard unit. See [04-metrics](../04-metrics)
 {{ <component type="chart" metric="speed" units="kph" /> }}
 {{ <component type="chart" metric="accl.x" units="m/s^2" /> }}
 
+For metrics with no unit, use units `none`
+
+{{ <component type="chart" metric="gradient" units="none" /> }}
+
 # Max and Min Values
 
 By default the chart will draw the max and min values in the window. This can be disabled with `values`

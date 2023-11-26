@@ -55,6 +55,8 @@ class Converters:
 
         self.converters = {
             # speed
+            "none": lambda u: u,
+
             "mph": lambda u: u.to("MPH"),
             "kph": lambda u: u.to("KPH"),
             "knots": lambda u: u.to("knot"),

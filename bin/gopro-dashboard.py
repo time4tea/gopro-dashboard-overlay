@@ -268,6 +268,7 @@ if __name__ == "__main__":
             frame_meta.process(timeseries_process.calculate_odo(), filter_fn=locked_2d)
             frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3,
                                       filter_fn=locked_3d)  # hack
+            frame_meta.process(timeseries_process.process_kalman("speed", lambda e: e.speed))
             frame_meta.process(timeseries_process.filter_locked())
 
         # privacy zone applies everywhere, not just at start, so might not always be suitable...

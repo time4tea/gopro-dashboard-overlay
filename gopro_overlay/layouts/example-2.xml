@@ -47,4 +47,22 @@
         </translate>
     </translate>
 
+    <translate y="800" x="600">
+        <component type="chart" height="200" seconds="100" samples="1024" bg="0,0,0,0" textsize="48" metric="gradient" units="none"/>
+        <component type="text" y="80" size="32" rgb="255,255,255,128">Grad(%)</component>
+    </translate>
+
+
+    <translate y="1000" x="600">
+        <component type="chart" height="200" seconds="100" samples="1024" bg="0,0,0,0" textsize="48" metric="alt" units="m"/>
+        <component type="text" y="80" size="32" rgb="255,255,255,128">Alt(m)</component>
+    </translate>
+
+    <translate y="1250" x="600">
+        <component type="chart" height="200" seconds="100" samples="1024" bg="0,0,0,0" textsize="48" metric="speed" units="mph"/>
+        <component type="text" y="80" size="32" rgb="255,255,255,128">Speed(mph)</component>
+    </translate>
+
+
+
 </layout>

@@ -27,13 +27,13 @@
         <composite x="220" y="0" name="gradient">
             <component type="text" x="70" y="0" size="16">SLOPE(%)</component>
             <component type="icon" x="0" y="0" file="slope-triangle.png" size="64"/>
-            <component type="metric" x="70" y="18" metric="gradient" dp="1" size="32" />
+            <component type="metric" x="70" y="18" metric="gradient" dp="0" size="32" />
         </composite>
 
         <composite x="16" y="0" name="altitude">
             <component type="metric_unit" x="70" y="0" metric="alt" units="alt" size="16">ALT({:~C})</component>
             <component type="icon" x="0" y="0" file="mountain.png" size="64"/>
-            <component type="metric" x="70" y="18" metric="alt" units="alt" dp="1" size="32" />
+            <component type="metric" x="70" y="18" metric="alt" units="alt" dp="0" size="32" />
         </composite>
 
         <component type="chart" name="gradient_chart" x="400" y="0"/>

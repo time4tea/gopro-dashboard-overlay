@@ -80,6 +80,15 @@ Use any standard metric, with any standard unit. See [04-metrics](../04-metrics)
 <kbd>![07-chart-7.png](07-chart-7.png)</kbd>
 
 
+For metrics with no unit, use units `none`
+
+
+```xml
+<component type="chart" metric="gradient" units="none" />
+```
+<kbd>![07-chart-8.png](07-chart-8.png)</kbd>
+
+
 # Max and Min Values
 
 By default the chart will draw the max and min values in the window. This can be disabled with `values`
@@ -88,13 +97,13 @@ By default the chart will draw the max and min values in the window. This can be
 ```xml
 <component type="chart" metric="speed" units="kph" />
 ```
-<kbd>![07-chart-8.png](07-chart-8.png)</kbd>
+<kbd>![07-chart-9.png](07-chart-9.png)</kbd>
 
 
 ```xml
 <component type="chart" metric="speed" units="kph" values="false" />
 ```
-<kbd>![07-chart-9.png](07-chart-9.png)</kbd>
+<kbd>![07-chart-10.png](07-chart-10.png)</kbd>
 
 
 The current value could be overlaid with a `metric` somewhere over the chart if that was wanted
@@ -106,7 +115,7 @@ The current value could be overlaid with a `metric` somewhere over the chart if 
                 <component type="metric" metric="speed" units="mph" dp="1"/>
             </translate>
 ```
-<kbd>![07-chart-10.png](07-chart-10.png)</kbd>
+<kbd>![07-chart-11.png](07-chart-11.png)</kbd>
 
 
 ## Colours / Sizing
@@ -117,7 +126,7 @@ Set the height using `height`
 ```xml
 <component type="chart" height="100" />
 ```
-<kbd>![07-chart-11.png](07-chart-11.png)</kbd>
+<kbd>![07-chart-12.png](07-chart-12.png)</kbd>
 
 
 Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g,b,a".
@@ -126,7 +135,7 @@ Set colours using `bg`, `fill`, `line` and `text`. These can be "r,g,b", or "r,g
 ```xml
 <component type="chart" bg="255,255,0" fill="0,255,255" line="255,0,255" text="0,0,255" />
 ```
-<kbd>![07-chart-12.png](07-chart-12.png)</kbd>
+<kbd>![07-chart-13.png](07-chart-13.png)</kbd>
 
 
 ## Text Size
@@ -137,7 +146,7 @@ Set the text size using `textsize`
 ```xml
 <component type="chart" textsize="32" />
 ```
-<kbd>![07-chart-13.png](07-chart-13.png)</kbd>
+<kbd>![07-chart-14.png](07-chart-14.png)</kbd>
 
 
 ## History
