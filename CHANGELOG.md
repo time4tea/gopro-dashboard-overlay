@@ -2,6 +2,15 @@
 # Changelog
 
 Newest changes are always in [README.md](README.md)
+- 0.103.0 [Feature] Initial Windows Support! See Windows Installation Instructions.
+- 0.102.0 [Feature] Support for alternate GoPro Max ORIN. Indicate when no GPS information found in file. Thanks [@xiaoxin01](https://github.com/xiaoxin01), [@ilisparrow](https://github.com/ilisparrow)  
+- 0.101.0 [Fix] Fix error when loading FIT files that had GPS Accuracy information. Thanks [@rpellerin](https://github.com/rpellerin) 
+- 0.100.0 [Breaking] Don't load GRAV/ACCL/CORI by default - its slow
+  - [Breaking] Use EXTEND mode for GPX, so only add in additional data items. Use `--gpx-merge OVERWRITE` to restore previous behaviour. Previously it was all-or-none for GPX, now can choose to add hr/cad/power to GPX track from GoPro.
+- 0.99.0 [Internal Changes Only] No user-visible changes expected.
+- 0.98.0 [Feature] Add configurable background colour with `--bg rgba` thanks to [@mishuha](https://github.com/mishuha) in discussion https://github.com/time4tea/gopro-dashboard-overlay/discussions/120 for the concept. 
+- 0.97.0 [Feature] Add new map style "local" - which will connect to a tileserver running locally on port 8000. This may be useful if you want to use a completely custom map - like a hand drawn one.
+  - For more details see: https://github.com/time4tea/gopro-dashboard-overlay/discussions/132 Thanks to [@mattghub1](https://github.com/mattghub1) for the concept.
 - 0.96.0 [Feature] Hopefully add support for older gopro files when joining. [#129](https://github.com/time4tea/gopro-dashboard-overlay/issues/129) Thanks [@FFMbyBicycle](https://github.com/FFMbyBicycle) for raising and some example code. 
 - 0.95.0 [Feature] Add api key support for geocode.xyz - [#117](https://github.com/time4tea/gopro-dashboard-overlay/issues/117) Thanks [@mishuha](https://github.com/mishuha) for raising.
 - 0.94.0 [Change] Update docker image to python3.11/ffmpeg 6.0 

@@ -272,15 +272,6 @@ See below for before and after. This stops the speed gauges flickering between v
 - 0.106.0 [Feature] New map style "cyclosm" - see: https://www.cyclosm.org/ - An OpenStreetmap for cycling - See map examples for more
 - 0.105.0 [Behaviour Change]  Fix [#150](https://github.com/time4tea/gopro-dashboard-overlay/issues/150) cairo circuit map aspect raio is wrong. Thanks [@yuanduopeng](https://github.com/yuanduopeng) for raising.
 - 0.104.0 [Fix] Honour cmdline arg `--show-ffmpeg`
-- 0.103.0 [Feature] Initial Windows Support! See Windows Installation Instructions.
-- 0.102.0 [Feature] Support for alternate GoPro Max ORIN. Indicate when no GPS information found in file. Thanks [@xiaoxin01](https://github.com/xiaoxin01), [@ilisparrow](https://github.com/ilisparrow)  
-- 0.101.0 [Fix] Fix error when loading FIT files that had GPS Accuracy information. Thanks [@rpellerin](https://github.com/rpellerin) 
-- 0.100.0 [Breaking] Don't load GRAV/ACCL/CORI by default - its slow
-  - [Breaking] Use EXTEND mode for GPX, so only add in additional data items. Use `--gpx-merge OVERWRITE` to restore previous behaviour. Previously it was all-or-none for GPX, now can choose to add hr/cad/power to GPX track from GoPro.
-- 0.99.0 [Internal Changes Only] No user-visible changes expected.
-- 0.98.0 [Feature] Add configurable background colour with `--bg rgba` thanks to [@mishuha](https://github.com/mishuha) in discussion https://github.com/time4tea/gopro-dashboard-overlay/discussions/120 for the concept. 
-- 0.97.0 [Feature] Add new map style "local" - which will connect to a tileserver running locally on port 8000. This may be useful if you want to use a completely custom map - like a hand drawn one.
-  - For more details see: https://github.com/time4tea/gopro-dashboard-overlay/discussions/132 Thanks to [@mattghub1](https://github.com/mattghub1) for the concept. 
 
 Older changes are in [CHANGELOG.md](CHANGELOG.md)
 
