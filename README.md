@@ -255,6 +255,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.113.0 [Enhancement] Add arc gauge - See [Arc Gauge Docs](docs/xml/examples/06-cairo-gauge-arc-annotated/README.md) for examples
 - 0.112.0 [Enhancement] Show loading speed of gopro data.
 - 0.111.0 [Fix] Simple Fix for #157 - timeout when reading large data files. Thanks to [@rpoxo](https://github.com/rpoxo) for raising.  
 - 0.110.0 [Fix] Hopefully make the 'pace' units more robust. New metric format "pace".
