@@ -255,6 +255,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.115.0 [Fix] Previous smoothing had some issues - hopefully sorted. Fixed possible issue with ffmpeg exiting before writing MOOV - sometimes could result in unplayable MP4 files.
 - 0.114.0 [Enhancement] Huge Improvement to usability of speed gauges! - Speed was not being smoothed. Now a kalman filter is applied to speed, giving a much better result.
 See below for before and after. This stops the speed gauges flickering between values. 
 - [Breaking/Minor] Removed the decimal values for altitude & gradient in the default layouts - they were distracting as they changed too much.
