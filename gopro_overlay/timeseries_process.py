@@ -28,7 +28,8 @@ def process_kalman(new, key):
 
     def process(item):
         v = key(item)
-        return {new: k.update(v)}
+        if v is not None:
+            return {new: k.update(v)}
 
     return process
 
@@ -50,6 +51,9 @@ def distance_azi_between(a: Point, b: Point):
 
 
 def calculate_speeds():
+
+    k = Kalman()
+
     def accept(a, b, c):
         dist, raw_azi = distance_azi_between(a.point, b.point)
 
@@ -61,8 +65,11 @@ def calculate_speeds():
 
         speed = dist / time if time.magnitude > 0 else units.Quantity(0, units.mps)
 
+        smoothed = k.update(speed)
         return {
-            "cspeed": speed,
+            "cspeed": smoothed,
+            "cspeed.k": smoothed,
+            "cspeed.raw": speed,
             "dist": dist / c,  # suspect this isn't right!
             "time": time,
             "azi": azi,

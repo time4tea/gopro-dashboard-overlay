@@ -1,4 +1,7 @@
+import pytest
+
 from gopro_overlay.smoothing import SimpleExponential, Kalman
+from gopro_overlay.units import units
 
 
 def test_ses():
@@ -19,3 +22,13 @@ def test_kalman():
     assert kal.update(2.0) == 1.0909090909090908
     assert kal.update(3.0) == 1.3969465648854962
     assert kal.update(-1.0) == 0.9018776499091459
+
+
+def test_kalman_units_and_nones():
+    k = Kalman()
+
+    assert k.update(None) == 0.0
+    assert k.update(units.Quantity(1, "mps")).m == pytest.approx(0.0909, abs=0.001)
+    assert k.update(units.Quantity(1, "mps")).m == pytest.approx(0.2366, abs=0.001)
+    assert k.update(None).m == pytest.approx(0.1878, abs=0.001)
+    assert k.update(units.Quantity(1, "mps")).m == pytest.approx(0.3783, abs=0.001)
