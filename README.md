@@ -47,36 +47,13 @@ Almost 30 different map styles are supported! - See [map styles](docs/maps/READM
 
 ## Installation
 
-See below for Windows instructions.
+For Windows, please see docs [docs/windows.md](docs/windows.md)
+
+For Docker, please see docs at [docs/docker.md](docs/docker.md)
 
 Install locally using `pip`, or use the provided Docker image
 
 Optional: Some widgets require the `cairo` library - which must be installed separately.
-
-### Installing and running with docker
-
-The docker image is a new thing and still a bit experimental... please file an issue if you find any problems.
-
-The docker image contains all you need to get started, and uses a volume `/work/`, which we suggest you map to the current directory which can contain your GoPro
-files. Note that the docker version doesn't support nvidia GPU extensions.
-
-The most recent version on docker is: <a href="https://hub.docker.com/r/overlaydash/gopro-dashboard-overlay"><img alt="Docker" src="https://img.shields.io/docker/v/overlaydash/gopro-dashboard-overlay?label=Docker&style=for-the-badge"></a>
-
-```shell
-docker run -it -v "$(pwd):/work" overlaydash/gopro-dashboard-overlay:<version> <program> [args...]
-```
-
-e.g.
-
-```shell
-docker run -it -v "$(pwd):/work" overlaydash/gopro-dashboard-overlay:0.92.0 gopro-dashboard.py GH010122.MP4 render/docker.MP4
-```
-
-Files created by the program will be created with the same uid that owns the mapped directory.
-
-You can use the `--cache-dir` and `--config-dir` command line arguments to configure where the cache and config dirs are,
-thereby making it easier to use persistent mapped volumes.
-
 
 
 ### Installing and running with pip
@@ -107,47 +84,6 @@ You might need to install some system libraries - This is what the pycairo docs 
 Ubuntu/Debian: `sudo apt install libcairo2-dev pkg-config python3-dev`
 
 macOS/Homebrew: `brew install cairo pkg-config`
-
-
-## Installation on Windows
-
-I don't know very much about windows, so corrections to these instructions are welcomed.
-
-### Installing Python
-
-Get the Windows installer from https://www.python.org/downloads/windows/ - Install it. Suggest "add to PATH". 
-
-## Installation
-
-```shell
-python3 -mvenv venv
-venv/Scripts/pip install gopro-overlay
-```
-
-You'll also need to install ffmpeg, if you don't have it already. You can download this from https://www.gyan.dev/ffmpeg/builds/ - The "essential version" is OK.
-Unzip this somewhere. The default might be something like: C:\Users\james\Downloads\ffmpeg-6.0-essentials_build
-
-Windows might not have Roboto Font, so start with a standard windows font - on my Windows 11 box, Trebuchet is installed. 
-
-In PowerShell...
-```shell
-Set-ExecutionPolicy Unrestricted -Scope Process
-.\venv\Scripts\activate.ps1
-python .\venv\Scripts\gopro-dashboard.py --font trebuc.ttf --ffmpeg C:\Users\james\Downloads\ffmpeg-6.0-essentials_build\ffmpeg-6.0-essentials_build\bin input.mp4 output.mp4
-```
-
-Configuration files will go into `%UserProfile%\.gopro-graphics`
-
-On my (pretty quick) Windows 11 Box, I get 35 fps (=3.5x realtime) on 2.7k with CPU only, and about the same with GPU. 
-
-I did get two errors running with GPU:
--   decoder->cvdl->cuvidCreateDecoder(&decoder->decoder, params) failed -> CUDA_ERROR_INVALID_VALUE: invalid argument
-    - This was fixed by following insttructions in docs/bin/README.md (adding -threads parameter) 
--   The minimum required Nvidia driver for nvenc is 522.25 or newer
-    - Needed to upgrade nvidia driver.
-
-`--double-buffer` DOES NOT WORK on Windows - shame - I don't really know how to implement this on Windows.
-
 
 ### Example
 

@@ -15,6 +15,8 @@ function show_available() {
     echo ".. these should either be below current directory, or use additional volume mounts"
 }
 
+set -x
+
 program=$1
 shift
 
@@ -35,9 +37,12 @@ else
 
       if [ $uid -ne 0 ]
       then
-        addgroup -g "$gid" dash
-        adduser -D -u "$uid" -G dash dash
-        chown dash:dash /home/dash
+        getent group $gid > /dev/null || groupadd -g "$gid" dash
+
+        if [ ! $(getent passwd $uid) ]; then
+          useradd --home-dir /home/dash --create-home --no-user-group --uid "$uid" --gid "$gid" dash
+          chown $uid:$gid /home/dash
+        fi
 
         umask 0002
         exec sudo -u "#$uid" -H -E env PATH="$PATH" /venv/bin/$program "$@"
