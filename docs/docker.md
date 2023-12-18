@@ -38,6 +38,9 @@ Pass in the `--gpus all` flag to docker...
 
 Set up a profile, say in `config` directory. (See profiles documentation) - that uses the GPU.
 
+Because of the way that we map volumes into docker, the `config` directory will need to be below the current working directory, 
+unless you use a more complex system of volume management.
+
 ```shell
 docker run --gpus all -it -v "$(pwd):/work" overlaydash/gopro-dashboard-overlay gopro-dashboard.py --config-dir=config --double-buffer --profile=nnvgpu input-file.mp4 output-file.mp4
 ```

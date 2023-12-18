@@ -1,4 +1,3 @@
-# python:3.11.3-alpine
 FROM ubuntu:23.10
 
 MAINTAINER gopro-overlay@time4tea.net
