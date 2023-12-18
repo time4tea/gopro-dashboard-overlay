@@ -19,6 +19,10 @@ RUN apt install -y libnvidia-decode-535-server libnvidia-encode-535-server
 ARG GOPRO_OVERLAY_VERSION
 RUN /venv/bin/pip install gopro-overlay==${GOPRO_OVERLAY_VERSION}
 
+RUN apt install -y libjpeg-dev
+RUN /venv/bin/pip uninstall -y pillow
+RUN /venv/bin/pip install pillow-simd==8.3.2.post0
+
 VOLUME /work
 WORKDIR /work
 
