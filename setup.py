@@ -25,7 +25,7 @@ test_requirements = [
 setup(
     name="gopro-overlay",
     version="0.117.0",
-    description="Overlay graphics dashboards onto GoPro footage",
+    description="Overlay graphics dashboards onto GoPro footage, or create videos from GPX or FIT files",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/time4tea/gopro-dashboard-overlay",
