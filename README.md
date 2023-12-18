@@ -191,7 +191,8 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
-- 0.115.0 [Docker Changes Only] Support GPU in docker image. See [docs/docker.md](docs/docker.md) Thanks to [@danielgv93](https://github.com/danielgv93) for suggestion.
+- 0.117.0 [Enhancements] Tentative support for Python 3.12. Thanks to [@JimmyS83](https://github.com/JimmyS83) for the suggestion. Also some small bugfixes for waiting for ffmpeg, and also hopefully removing error message about shared memory using `--double-buffer`
+- 0.116.0 [Docker Changes Only] Support GPU in docker image. See [docs/docker.md](docs/docker.md) Thanks to [@danielgv93](https://github.com/danielgv93) for suggestion.
 - 0.115.0 [Fix] Previous smoothing had some issues - hopefully sorted. Many thanks to [@neri14](https://github.com/neri14) for pointing this out. Fixed possible issue with ffmpeg exiting before writing MOOV - sometimes could result in unplayable MP4 files.
 - 0.114.0 [Enhancement] Huge Improvement to usability of speed gauges! - Speed was not being smoothed. Now a kalman filter is applied to speed, giving a much better result.
 See below for before and after. This stops the speed gauges flickering between values. 
