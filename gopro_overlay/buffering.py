@@ -191,5 +191,7 @@ class DoubleBuffer(DrawBuffer):
         self.worker1.join(timeout=1.0)
         self.worker2.join(timeout=1.0)
 
-        self.shm.close()
+        del self.frame0
+        del self.frame1
+
         self.shm.unlink()

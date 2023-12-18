@@ -114,7 +114,8 @@ class DrawTranslate:
         self.draw.point(xy=self._txy(xy), **kwargs)
 
     def rectangle(self, xy, *args, **kwargs):
-        self.draw.rectangle([self._txy(pair) for pair in xy], *args, **kwargs)
+        xy_ = [self._txy(pair) for pair in xy]
+        self.draw.rectangle(xy_, *args, **kwargs)
 
     def line(self, xy, *args, **kwargs):
         self.draw.line([self._txy(pair) for pair in xy], *args, **kwargs)

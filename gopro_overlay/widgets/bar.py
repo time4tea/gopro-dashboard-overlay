@@ -47,13 +47,37 @@ class Bar(Widget):
             ((self.x_coord(0), 0), (self.x_coord(0), self.size.y)),
             fill=self.zero
         )
-        draw.rectangle(
-            ((self.x_coord(current), self.line_width + 1), (self.x_coord(0), self.size.y - (self.line_width + 2))),
-            fill=self.bar
-        )
-        highlight_colour = self.highlight_colour_positive if current >= 0 else self.highlight_colour_negative
-        draw.rectangle(
-            ((self.x_coord(current * 0.95), self.line_width + 1),
-             (self.x_coord(current), self.size.y - (self.line_width + 2))),
-            fill=highlight_colour
-        )
+        if current >= 0:
+            start_x = self.x_coord(0)
+            end_x = self.x_coord(current)
+
+            start_hx = self.x_coord(current * 0.95)
+
+            draw.rectangle(
+                ((start_x, self.line_width + 1), (end_x, self.size.y - (self.line_width + 2))),
+                fill=self.bar
+            )
+
+            draw.rectangle(
+                ((start_hx, self.line_width + 1),
+                 (end_x, self.size.y - (self.line_width + 2))),
+                fill=self.highlight_colour_positive
+            )
+
+        else:
+            highlight_colour = self.highlight_colour_negative
+            start_x = self.x_coord(current)
+            end_x = self.x_coord(0)
+
+            start_hx = self.x_coord(current * 0.95)
+
+            draw.rectangle(
+                ((start_x, self.line_width + 1), (end_x, self.size.y - (self.line_width + 2))),
+                fill=self.bar
+            )
+
+            draw.rectangle(
+                ((start_x, self.line_width + 1),
+                 (start_hx, self.size.y - (self.line_width + 2))),
+                fill=highlight_colour
+            )

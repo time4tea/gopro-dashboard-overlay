@@ -41,7 +41,7 @@ at https://github.com/uploadcare/pillow-simd#pillow-simd
 Short version:
 ```bash
 venv/bin/pip uninstall pillow
-venv/bin/pip install pillow-simd==8.3.2.post0
+venv/bin/pip install pillow-simd==9.0.0.post1
 ```
 The frame drawing rate is quite a bit faster, but won't make a huge difference unless GPU settings are used with ffmpeg.
 

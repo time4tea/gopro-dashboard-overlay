@@ -7,9 +7,9 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 requires = [
-    "pillow==9.4.0",
+    "pillow==10.1.0",
     "pint==0.22",
-    "geotiler==0.14.7",
+    "geotiler==0.15",
     "gpxpy==1.6.1",
     "fitdecode==0.10.0",
     "geographiclib==1.52",
@@ -35,6 +35,7 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.10",
         "Environment :: Console",

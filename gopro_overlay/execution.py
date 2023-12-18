@@ -22,6 +22,12 @@ class InProcessExecution:
 
             try:
                 yield process.stdin
+            except Exception:
+                try:
+                    process.terminate()
+                except Exception:
+                    pass
+                raise
             finally:
                 if not process.stdin.closed:
                     process.stdin.flush()
