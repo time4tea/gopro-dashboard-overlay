@@ -200,11 +200,11 @@ def sqlite_caching_renderer(provider: MapProvider, db: SqliteDict):
     return render
 
 
-def no_caching_renderer(provider: MapProvider):
+def memory_caching_renderer(provider: MapProvider):
     def render(map, tiles=None, **kwargs):
         map.provider = provider
 
-        return geotiler.map.render_map(map, tiles, **kwargs)
+        return my_render_map(map, tiles, downloader=fetch_tiles)
 
     return render
 
@@ -313,4 +313,4 @@ class MapRenderer:
             ) as db:
                 yield sqlite_caching_renderer(map, db)
         else:
-            yield no_caching_renderer(map)
+            yield memory_caching_renderer(map)
