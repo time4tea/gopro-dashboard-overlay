@@ -1,2 +1,3 @@
+include README-PYPI.md
 include gopro_overlay/icons/*.png
 include gopro_overlay/layouts/*.xml
