@@ -4,7 +4,7 @@ from setuptools import setup
 
 HERE = pathlib.Path(__file__).parent
 
-README = (HERE / "README.md").read_text()
+README = (HERE / "README-PYPI.md").read_text()
 
 requires = [
     "pillow==10.1.0",
