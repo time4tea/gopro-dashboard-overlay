@@ -3,7 +3,9 @@ BIN=venv/bin
 
 default: test
 
-PYTHON=python3.11
+PYTHONVERSION ?=3.11
+
+PYTHON=python$(PYTHONVERSION)
 
 .PHONY: clean
 clean:
@@ -19,6 +21,7 @@ test:
 
 .PHONY: ci
 ci:
+	@echo python version is $(PYTHONVERSION)
 	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all tests
 
 .PHONY: check
