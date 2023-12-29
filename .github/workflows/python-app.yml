@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt install fonts-roboto ffmpeg
-        make venv req
+        PYTHONVERSION=${{matrix.version}} make venv req
     - name: Test with pytest
       run: |
         PYTHONVERSION=${{matrix.version}} make ci

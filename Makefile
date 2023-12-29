@@ -21,7 +21,6 @@ test:
 
 .PHONY: ci
 ci:
-	@echo python version is $(PYTHONVERSION)
 	CI=true PYTHONPATH=. $(BIN)/pytest --capture sys --show-capture all tests
 
 .PHONY: check
@@ -46,6 +45,7 @@ flake:
 venv: venv/.installed
 
 venv/.installed:
+	@echo python version is $(PYTHONVERSION)
 	$(PYTHON) -m venv venv
 	touch $@
 
