@@ -146,7 +146,7 @@ class GPS9Components:
     points: List[GPS9]
 
 
-gps9_date_base = datetime.datetime.fromisoformat("2000-01-01T00:00:00Z")
+gps9_date_base = datetime.datetime.fromisoformat("2000-01-01T00:00:00+00:00")
 
 
 class GPS9EntryConverter:
