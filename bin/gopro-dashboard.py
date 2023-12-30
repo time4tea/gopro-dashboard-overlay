@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import datetime
 import sys
+import os
 from importlib import metadata
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
@@ -383,6 +384,9 @@ if __name__ == "__main__":
                 log("...Stopping...")
                 pass
             finally:
+                if redirect:
+                    os.remove(redirect)
+
                 for t in [draw_timer]:
                     log(t)
 
