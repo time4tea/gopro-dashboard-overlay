@@ -1,33 +1,59 @@
+from typing import Mapping
+
 from gopro_overlay.config import Config
 from gopro_overlay.ffmpeg_overlay import FFMPEGOptions
 
+builtin_profiles = {}
 
-def load_ffmpeg_profile(config: Config, profile: str):
-    config_file = config.load("FFMPEG Profile", "ffmpeg-profiles.json")
 
-    profile_json = config_file.content
+class FFMPEGProfiles:
 
-    if profile not in profile_json:
-        raise ValueError(f"Can't find key {profile} in {config_file.location}")
+    def __init__(self, config: Config):
+        self.config = config
 
-    selected = profile_json[profile]
+    def load_profile(self, name: str) -> FFMPEGOptions:
+        config_file = self.config.maybe("ffmpeg-profiles.json")
 
-    if "input" in selected and type(selected["input"]) == list:
-        input_options = selected["input"]
-    else:
-        raise ValueError(f"Can't find input option list for key {profile} in {config_file.location}")
+        if config_file.exists():
+            if name in config_file.content:
+                try:
+                    return self.load_profile_content(config_file.content, name)
+                except ValueError as e:
+                    raise ValueError(f"{config_file.location}: {e}") from None
 
-    if "output" in selected and type(selected["output"]) == list:
-        output_options = selected["output"]
-    else:
-        raise ValueError(f"Can't find output option list for key {profile} in {config_file.location}")
+        if name in builtin_profiles:
+            profile = builtin_profiles[name]
+            return FFMPEGOptions(input=profile["input"], output=profile["output"], filter_spec=profile["filter"])
 
-    filter_spec = None
-
-    if "filter" in selected:
-        if type(selected["filter"]) == str:
-            filter_spec = selected["filter"]
+        if config_file.exists():
+            raise ValueError(f"Can't find key {name} in {config_file.location}, and it is also not a built-in profile")
         else:
-            raise ValueError("'filter' specified, but wasn't a string")
+            raise ValueError(f"{name} is not a built-in profile, and no config file found at {config_file.location}")
 
-    return FFMPEGOptions(input=input_options, output=output_options, filter_spec=filter_spec)
+    def load_profile_content(self, content: Mapping, name: str) -> FFMPEGOptions:
+
+        selected = content[name]
+
+        if "input" in selected and isinstance(selected["input"], list):
+            input_options = selected["input"]
+        else:
+            raise ValueError(f"Can't find input option list for key {name}")
+
+        if "output" in selected and isinstance(selected["output"], list):
+            output_options = selected["output"]
+        else:
+            raise ValueError(f"Can't find output option list for key {name}")
+
+        filter_spec = None
+
+        if "filter" in selected:
+            if isinstance(selected["filter"], str):
+                filter_spec = selected["filter"]
+            else:
+                raise ValueError("'filter' specified, but wasn't a string")
+
+        return FFMPEGOptions(input=input_options, output=output_options, filter_spec=filter_spec)
+
+
+def load_ffmpeg_profile(config: Config, name: str) -> FFMPEGOptions:
+    return FFMPEGProfiles(config).load_profile(name)
