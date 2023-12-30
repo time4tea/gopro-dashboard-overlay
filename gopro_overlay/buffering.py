@@ -149,9 +149,12 @@ class Frame:
 
 
 def p_writer(frame: Frame, writer: io.BytesIO):
-    while True:
-        if not frame.write(writer):
-            break
+    try:
+        while True:
+            if not frame.write(writer):
+                break
+    except KeyboardInterrupt:
+        pass
 
 
 class DoubleBuffer(DrawBuffer):

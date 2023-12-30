@@ -381,7 +381,6 @@ if __name__ == "__main__":
 
             except KeyboardInterrupt:
                 log("...Stopping...")
-                pass
             finally:
                 for t in [draw_timer]:
                     log(t)
