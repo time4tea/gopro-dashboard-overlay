@@ -5,7 +5,27 @@ from .ffmpeg_overlay import FFMPEGOptions
 from .log import log
 
 builtin_profiles = {
-
+    "nvgpu": {
+        "input": ["-hwaccel", "nvdec"],
+        "output": ["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "25M", "-bf:v", "3", "-profile:v", "high", "-spatial-aq", "true", "-movflags", "faststart"]
+    },
+    "nnvgpu": {
+        "input": ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"],
+        "filter": "[0:v]scale_cuda=format=yuv420p[mp4_stream];[1:v]format=yuva420p,hwupload[overlay_stream];[mp4_stream][overlay_stream]overlay_cuda",
+        "output": ["-vcodec", "h264_nvenc", "-rc:v", "cbr", "-b:v", "25M", "-bf:v", "3", "-profile:v", "main", "-spatial-aq", "true", "-movflags", "faststart"]
+    },
+    "mov": {
+        "input": [],
+        "output": ["-vcodec", "png"]
+    },
+    "vp9": {
+        "input": [],
+        "output": ["-vcodec", "vp9", "-pix_fmt", "yuva420p"]
+    },
+    "vp8": {
+        "input": [],
+        "output": ["-vcodec", "vp8", "-pix_fmt", "yuva420p", "-auto-alt-ref", "0"]
+    }
 }
 
 

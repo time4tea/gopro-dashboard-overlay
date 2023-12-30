@@ -126,6 +126,24 @@ container would be skipped.
 
 ## FFMPEG Profiles
 
+FFMPEG Profiles are a way to control the parameters to `ffmpeg`. The program supports very many options,
+so it's not very practical for us to support all of them.
+
+`gopro-dashboard.py` has a number of built-in profiles, selectable with `--profile <name>` on the command line, or you can
+create a configuration file as shown below, and create your own.
+
+Each `profile` can control the input, output, and optionally, the filter arguments to ffmpeg. 
+
+### Built-in profiles (not yet released)
+
+- `nvgpu` - Use NVIDIA GPU for decoding the GoPro MPEG file, and for encoding the output.
+- `nnvgpu` - Use NVIDIA GPU for as much of the process as possible - only supported on in newer versions of ffmpeg, and for certain drivers.
+- `mov` - Use PNG images inside a MOV container - allows an alpha channel in a movie, useful when using another video processing system. Note: Use an output filename extension of `.mov`
+- `vp9` - Create a vp9 webm movie. Note: use an output filename extension of `.webm`
+- `vp8` - Create a vp8 webm movie. Note: use an output filename extension of `.webm`
+
+## User-defined profiles
+
 Create a file `~/.gopro-graphics/ffmpeg-profiles.json`, and put FFMPEG parameters to control the `input` and `output`
 
 Both `input` and `output` sections are mandatory.
