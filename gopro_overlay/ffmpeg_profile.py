@@ -1,9 +1,12 @@
 from typing import Mapping
 
-from gopro_overlay.config import Config
-from gopro_overlay.ffmpeg_overlay import FFMPEGOptions
+from .config import Config
+from .ffmpeg_overlay import FFMPEGOptions
+from .log import log
 
-builtin_profiles = {}
+builtin_profiles = {
+
+}
 
 
 class FFMPEGProfiles:
@@ -16,12 +19,14 @@ class FFMPEGProfiles:
 
         if config_file.exists():
             if name in config_file.content:
+                log(f"Using *user-defined* profile: {name}")
                 try:
                     return self.load_profile_content(config_file.content, name)
                 except ValueError as e:
                     raise ValueError(f"{config_file.location}: {e}") from None
 
         if name in builtin_profiles:
+            log(f"Using *built-in* profile: {name}")
             profile = builtin_profiles[name]
             return FFMPEGOptions(input=profile["input"], output=profile["output"], filter_spec=profile["filter"])
 

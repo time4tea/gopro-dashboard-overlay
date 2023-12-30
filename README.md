@@ -120,15 +120,13 @@ of [examples](docs/xml/examples/README.md)
 
 ## FFMPEG Control & GPUs
 
-*Experimental*
-
 FFMPEG has **a lot** of options! This program comes with some mostly sensible defaults, but to use GPUs and control the
 output much more carefully, including framerates and bitrates, you can use a JSON file containing a number of 'profiles'
 and select the profile you want when running the program.
 
-For more details on how to select these, and an example of Nvidia GPU, please see [docs/bin/PERFORMANCE_GUIDE.md](docs/bin/PERFORMANCE_GUIDE.md)
+For more details on how to select these, and an example of Nvidia GPU, please see the guide in [docs/bin#ffmpeg-profiles](docs/bin#ffmpeg-profiles)
 
-Please also see [PERFORMANCE.md](PERFORMANCE.md)
+Please also see other docs [PERFORMANCE.md](PERFORMANCE.md) and [docs/bin/PERFORMANCE_GUIDE.md](docs/bin/PERFORMANCE_GUIDE.md)
 
 ## Converting to GPX files
 
