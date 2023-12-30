@@ -14,9 +14,9 @@ def allow_attributes(allowed: Set[str]):
         def wrapper(*args, **kwargs):
             element: ET.Element
 
-            if type(args[0]) == ET.Element:
+            if isinstance(args[0], ET.Element):
                 element = args[0]
-            elif type(args[1]) == ET.Element:
+            elif isinstance(args[1], ET.Element):
                 element = args[1]
             else:
                 raise Defect("allow_attributes maybe on wrong method?")
