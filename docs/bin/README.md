@@ -165,6 +165,8 @@ Please consider contributing useful settings, particularly those that control GP
 
 You can also provide a custom setting for the "filter_complex" argument in `ffmpeg`. Mostly you'll not need to do this, but to get certain GPU accelerations, you might need this.
 
+The filter arguments are only used when overlaying onto a video, and in this case input 0 is the gopro movie, and input 1 is the overlay.
+
 ```json
 {
   "profile-name": {
