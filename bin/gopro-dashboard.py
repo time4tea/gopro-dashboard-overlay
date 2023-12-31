@@ -245,7 +245,7 @@ if __name__ == "__main__":
                                 "-from-gpx-and-video-not-created-with-gopro")
 
                         log(f"GPX/FIT Timeseries has {len(fit_or_gpx_timeseries)} data points.. merging...")
-                        merge_gpx_with_gopro(fit_or_gpx_timeseries, frame_meta)
+                        merge_gpx_with_gopro(fit_or_gpx_timeseries, frame_meta, mode=args.gpx_merge)
 
                 if args.overlay_size:
                     dimensions = dimension_from(args.overlay_size)
