@@ -134,7 +134,9 @@ create a configuration file as shown below, and create your own.
 
 Each `profile` can control the input, output, and optionally, the filter arguments to ffmpeg. 
 
-### Built-in profiles (not yet released)
+### Built-in profiles 
+
+Since v0.121.0
 
 - `nvgpu` - Use NVIDIA GPU for decoding the GoPro MPEG file, and for encoding the output.
 - `nnvgpu` - Use NVIDIA GPU for as much of the process as possible - only supported on in newer versions of ffmpeg, and for certain drivers.
