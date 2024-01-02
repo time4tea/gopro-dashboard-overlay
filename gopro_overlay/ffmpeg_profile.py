@@ -48,7 +48,7 @@ class FFMPEGProfiles:
         if name in builtin_profiles:
             log(f"Using *built-in* profile: {name}")
             profile = builtin_profiles[name]
-            return FFMPEGOptions(input=profile["input"], output=profile["output"], filter_spec=profile["filter"])
+            return FFMPEGOptions(input=profile["input"], output=profile["output"], filter_spec=profile.get("filter", None))
 
         if config_file.exists():
             raise ValueError(f"Can't find key {name} in {config_file.location}, and it is also not a built-in profile")
