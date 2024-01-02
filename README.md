@@ -193,6 +193,9 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.123.0 [Enhancement] Use better (but every so slightly slower, shouldn't make a huge difference) rotation method for maps - will give much better quality.
+  - Add new gauge - `cairo-gauge-donut` see [docs/xml](docs/xml/examples/06-cairo-gauge-donut)
+  - It looks like this: ![](docs/xml/examples/06-cairo-gauge-donut/06-cairo-gauge-donut-6.png)
 - 0.122.0 [Breaking] Previous change announced in v0.100.0 wasn't actually taking effect. Use --gpx-merge OVERWRITE to prefer values in gpx to gopro.
 - 0.121.0 [Enhancement] Build in some simple ffmpeg profiles - `nvgpu`, `nnvgpu`, `mov`, `vp8`, and `vp9` - see [docs/bin#ffmpeg-profiles](docs/bin#ffmpeg-profiles)
 - 0.120.0 [Fix] Resolve some Python3.10 compatibility issues. Thanks, [@KyleGW](https://github.com/KyleGW)

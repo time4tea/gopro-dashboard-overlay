@@ -43,11 +43,17 @@ There are 5 sectors by default. This can be changed with `sectors`
 {{ <component type="cairo-gauge-donut" metric="speed" units="mph"  length="90" sectors="20" /> }}
 {{ <component type="cairo-gauge-donut" metric="speed" units="mph"  length="180" sectors="6" /> }}
 
+# Range Markers
+
+You can set range markers, like the`cairo-gauge-arc-annotated` widget.
+
+{{ <component type="cairo-gauge-donut" metric="speed" units="mph"  length="180" sectors="6" max="60" arc-value-upper="60" arc-value-lower="50" arc-inner-rgb="255,0,255,50" arc-outer-rgb="255,0,0,250" /> }}
+
 # Colours
 
 Various colours can be set, either as RGB, or RGBA values.
 
-The following are available to change: `background-inner-rgb`, `background-outer-rgb`, `major-ann-rgb`, `minor-ann-rgb`, `needle-rgb`, `major-tick-rgb`, `minor-tick-rgb`
+The following are available to change: `background-inner-rgb`, `background-outer-rgb`, `major-ann-rgb`, `minor-ann-rgb`, `needle-rgb`, `major-tick-rgb`, `minor-tick-rgb`, `arc-inner-rgb`, `arc-outer-rgb`
 
 {{ <component type="cairo-gauge-donut" metric="speed" units="mph"  background-inner-rgb="255,0,0"/> }}
 {{ <component type="cairo-gauge-donut" metric="speed" units="mph"  background-outer-rgb="0,255,0"/> }}
