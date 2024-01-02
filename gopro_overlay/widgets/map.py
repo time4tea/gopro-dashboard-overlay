@@ -176,7 +176,7 @@ class MovingMap(Widget):
         if azimuth and self.rotate:
             azi = azimuth.to("degree").magnitude
             angle = 0 + azi if azi >= 0 else 360 + azi
-            image = image.rotate(angle)
+            image = image.rotate(angle, resample=Image.BILINEAR)
 
         crop = image.crop(self.bounds)
 
