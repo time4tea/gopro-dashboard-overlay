@@ -14,6 +14,10 @@ Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-over
 - Cut sections from GoPro movies (including metadata)
 - Linux, Mac, Windows!
 
+## Introduction Video
+
+[![Intro Video](https://img.youtube.com/vi/qTwPVjNXJ8o/0.jpg)](https://www.youtube.com/watch?v=qTwPVjNXJ8o)
+
 ## Examples
 
 ![Example Dashboard Image](examples/2022-05-15-example.png)
