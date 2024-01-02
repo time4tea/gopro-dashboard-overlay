@@ -48,7 +48,14 @@
     </translate>
 
     <translate x="1100" y="600">
-        <component type="cairo-gauge-donut" metric="speed" units="mph" start="90" sectors="8" size="250"/>
+        <component type="cairo-gauge-donut" metric="speed" units="mph" start="143" length="90" sectors="8" size="250"/>
+        <translate x="125" y="70">
+            <component type="metric" metric="speed" units="mph" size="100" dp="0" rgb="255,255,255,160" outline="0,0,0,160" align="centre"/>
+        </translate>
+    </translate>
+
+    <translate x="1100" y="300">
+        <component type="cairo-gauge-donut" metric="speed" units="mph" start="45" length="-90" sectors="8" size="250"/>
         <translate x="125" y="70">
             <component type="metric" metric="speed" units="mph" size="100" dp="0" rgb="255,255,255,160" outline="0,0,0,160" align="centre"/>
         </translate>
