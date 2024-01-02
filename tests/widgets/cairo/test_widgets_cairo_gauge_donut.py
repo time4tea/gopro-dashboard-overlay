@@ -40,3 +40,16 @@ def test_gauge_donut_reversed():
         ),
         repeat=10
     )
+
+@pytest.mark.cairo
+@approve_image
+def test_gauge_donut_sector():
+    return cairo_widget_test(
+        widget=CairoGaugeDonutAnnotated(
+            length=Angle(degrees=-143),
+            reading=lambda: Reading(3.0 / 5),
+            reading_arc_max= lambda: Reading(3.5 / 5),
+            reading_arc_min=lambda: Reading(2.5 / 5),
+        ),
+        repeat=10
+    )

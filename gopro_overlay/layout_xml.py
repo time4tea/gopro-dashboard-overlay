@@ -156,7 +156,6 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
                 widget=method(child, entry=entry)
             )
 
-
         @allow_attributes({"x", "y"})
         def create_composite(element, level):
             return decorate(
@@ -668,32 +667,24 @@ class Widgets:
             lock_3d=simple_icon(at, attrib(element, "lock_3d", d="gps_lock_3d.png"), size),
         )
 
-    def create_cairo_circuit_map(self, element, entry, **kwargs):
+    def with_cairo(self, f: Callable):
         try:
             import gopro_overlay.layout_xml_cairo
-            return gopro_overlay.layout_xml_cairo.create_cairo_circuit_map(element, entry, self.framemeta, **kwargs)
+            return f(gopro_overlay.layout_xml_cairo)
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
+
+    def create_cairo_circuit_map(self, element, entry, **kwargs):
+        return self.with_cairo(lambda m: m.create_cairo_circuit_map(element, entry, self.framemeta, **kwargs))
 
     def create_cairo_gauge_marker(self, element, entry, **kwargs):
-        try:
-            import gopro_overlay.layout_xml_cairo
-            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_marker(element, entry, self.converters, **kwargs)
-        except ModuleNotFoundError:
-            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+        return self.with_cairo(lambda m: m.create_cairo_gauge_marker(element, entry, self.converters, **kwargs))
 
     def create_cairo_gauge_round_annotated(self, element, entry, **kwargs):
-        try:
-            import gopro_overlay.layout_xml_cairo
-            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_round_annotated(element, entry, self.converters,
-                                                                                     **kwargs)
-        except ModuleNotFoundError:
-            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+        return self.with_cairo(lambda m: m.create_cairo_gauge_round_annotated(element, entry, self.converters, **kwargs))
 
     def create_cairo_gauge_arc_annotated(self, element, entry, **kwargs):
-        try:
-            import gopro_overlay.layout_xml_cairo
-            return gopro_overlay.layout_xml_cairo.create_cairo_gauge_arc_annotated(element, entry, self.converters,
-                                                                                     **kwargs)
-        except ModuleNotFoundError:
-            raise IOError("This widget needs pycairo to be installed - please see docs") from None
+        return self.with_cairo(lambda m: m.create_cairo_gauge_arc_annotated(element, entry, self.converters, **kwargs))
+
+    def create_cairo_gauge_donut(self, element, entry, **kwargs):
+        return self.with_cairo(lambda m: m.create_cairo_gauge_donut(element, entry, self.converters, **kwargs))

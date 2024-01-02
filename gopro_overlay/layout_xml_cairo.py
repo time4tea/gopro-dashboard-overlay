@@ -11,6 +11,7 @@ from .widgets.cairo.cairo import CairoAdapter
 from .widgets.cairo.circuit import CairoCircuit
 from .widgets.cairo.circuit import Line
 from .widgets.cairo.colour import Colour
+from .widgets.cairo.gauge_donut import CairoGaugeDonutAnnotated
 from .widgets.cairo.gauge_marker import CairoGaugeMarker
 from .widgets.cairo.gauge_round_254 import CairoGaugeRoundAnnotated
 from .widgets.cairo.gauge_sector_254 import CairoGaugeSectorAnnotated
@@ -90,14 +91,18 @@ def create_cairo_gauge_marker(element, entry, converters, **kwargs) -> Widget:
             start=Angle(degrees=iattrib(element, "start", d=0)),
             length=Angle(degrees=iattrib(element, "length", d=270)),
             sectors=iattrib(element, "sectors", d=6),
-            tick_colour=cairo_colour(rgbattr(element, "tick-rgb", d=(255, 255, 255))),
-            background_colour=cairo_colour(rgbattr(element, "background-rgb", d=None)),
-            gauge_colour=cairo_colour(rgbattr(element, "gauge-rgb", d=(0, 191, 255))),
-            marker_outer=cairo_colour(rgbattr(element, "dot-outer-rgb", d=None)),
-            marker_inner=cairo_colour(rgbattr(element, "dot-inner-rgb", d=None)),
+            tick_colour=colour_attr(element, "tick-rgb", (255, 255, 255)),
+            background_colour=colour_attr(element, "background-rgb", None),
+            gauge_colour=colour_attr(element, "gauge-rgb", (0, 191, 255)),
+            marker_outer=colour_attr(element, "dot-outer-rgb", None),
+            marker_inner=colour_attr(element, "dot-inner-rgb", None),
             cap=cap_from(attrib(element, "cap", d="square")),
         )
     )
+
+
+def colour_attr(element, attr, d):
+    return cairo_colour(rgbattr(element, attr, d=d))
 
 
 @allow_attributes({"size", "min", "max", "metric", "units", "start", "length",
@@ -128,14 +133,14 @@ def create_cairo_gauge_round_annotated(element, entry, converters, **kwargs) -> 
             start=Angle(degrees=iattrib(element, "start", d=143)),
             length=Angle(degrees=iattrib(element, "length", d=254)),
             sectors=iattrib(element, "sectors", d=5),
-            background_colour=cairo_colour(rgbattr(element, "background-rgb", d=(255, 255, 255, 150))),
-            major_annotation_colour=cairo_colour(rgbattr(element, "major-ann-rgb", d=(0, 0, 0))),
-            minor_annotation_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(0, 0, 0))),
-            major_tick_colour=cairo_colour(rgbattr(element, "major-tick-rgb", d=(0, 0, 0))),
-            minor_tick_colour=cairo_colour(rgbattr(element, "minor-tick-rgb", d=(0, 0, 0))),
+            background_colour=colour_attr(element, "background-rgb", d=(255, 255, 255, 150)),
+            major_annotation_colour=colour_attr(element, "major-ann-rgb", d=(0, 0, 0)),
+            minor_annotation_colour=colour_attr(element, "minor-ann-rgb", d=(0, 0, 0)),
+            major_tick_colour=colour_attr(element, "major-tick-rgb", d=(0, 0, 0)),
+            minor_tick_colour=colour_attr(element, "minor-tick-rgb", d=(0, 0, 0)),
             v_min=min_value,
             v_max=max_value,
-            needle_colour=cairo_colour(rgbattr(element, "needle-rgb", d=(255, 0, 0)))
+            needle_colour=colour_attr(element, "needle-rgb", d=(255, 0, 0))
         )
     )
 
@@ -183,24 +188,89 @@ def create_cairo_gauge_arc_annotated(element, entry, converters, **kwargs) -> Wi
     else:
         reading_arc_upper = None
 
-
     return CairoAdapter(
         size=Dimension(size, size),
         widget=CairoGaugeSectorAnnotated(
             start=Angle(degrees=iattrib(element, "start", d=143)),
             length=Angle(degrees=iattrib(element, "length", d=254)),
             sectors=iattrib(element, "sectors", d=5),
-            background_colour=cairo_colour(rgbattr(element, "background-rgb", d=(255, 255, 255, 150))),
-            major_annotation_colour=cairo_colour(rgbattr(element, "major-ann-rgb", d=(0, 0, 0))),
-            minor_annotation_colour=cairo_colour(rgbattr(element, "minor-ann-rgb", d=(0, 0, 0))),
-            major_tick_colour=cairo_colour(rgbattr(element, "major-tick-rgb", d=(0, 0, 0))),
-            minor_tick_colour=cairo_colour(rgbattr(element, "minor-tick-rgb", d=(0, 0, 0))),
+            background_colour=colour_attr(element, "background-rgb", d=(255, 255, 255, 150)),
+            major_annotation_colour=colour_attr(element, "major-ann-rgb", d=(0, 0, 0)),
+            minor_annotation_colour=colour_attr(element, "minor-ann-rgb", d=(0, 0, 0)),
+            major_tick_colour=colour_attr(element, "major-tick-rgb", d=(0, 0, 0)),
+            minor_tick_colour=colour_attr(element, "minor-tick-rgb", d=(0, 0, 0)),
             v_min=min_value,
             v_max=max_value,
             reading=as_reading(a_metric("metric"), min_value, max_value),
-            needle_colour=cairo_colour(rgbattr(element, "needle-rgb", d=(255, 0, 0))),
-            arc_inner_colour=cairo_colour(rgbattr(element, "arc-inner-rgb", d=(0, 0, 190, 50))),
-            arc_outer_colour=cairo_colour(rgbattr(element, "arc-outer-rgb", d=(0, 0, 190, 190))),
+            needle_colour=colour_attr(element, "needle-rgb", d=(255, 0, 0)),
+            arc_inner_colour=colour_attr(element, "arc-inner-rgb", d=(0, 0, 190, 50)),
+            arc_outer_colour=colour_attr(element, "arc-outer-rgb", d=(0, 0, 190, 190)),
+            reading_arc_max=reading_arc_upper,
+            reading_arc_min=reading_arc_lower
+        )
+    )
+
+@allow_attributes({"size", "min", "max", "metric", "units", "start", "length",
+                   "sectors",
+                   "background-inner-rgb", "background-outer-rgb",
+                   "major-ann-rgb", "minor-ann-rgb",
+                   "major-tick-rgb", "minor-tick-rgb",
+                   "needle-rgb",
+                   "arc-inner-rgb", "arc-outer-rgb",
+                   "arc-metric-upper", "arc-metric-lower",
+                   "arc-value-upper", "arc-value-lower"
+                   })
+def create_cairo_gauge_donut(element, entry, converters, **kwargs) -> Widget:
+    size = iattrib(element, "size", d=256)
+
+    min_value = iattrib(element, "min", d=0)
+    max_value = iattrib(element, "max", d=50)
+
+    converter = converters.converter(attrib(element, "units", d=None))
+
+    def a_metric(attr_name):
+        return metric_value(
+            entry,
+            accessor=metric_accessor_from(attrib(element, attr_name)),
+            converter=converter,
+            formatter=lambda q: q.m,
+            default=0
+        )
+
+    if "arc-metric-lower" in element.attrib:
+        reading_arc_lower = a_metric("arc-metric-lower")
+    elif "arc-value-lower" in element.attrib:
+        lower_value = fattrib(element, "arc-value-lower")
+        reading_arc_lower = as_reading(lambda: lower_value, min_value, max_value)
+    else:
+        reading_arc_lower = as_reading(lambda: 0, min_value, max_value)
+
+    if "arc-metric-upper" in element.attrib:
+        reading_arc_upper = a_metric("arc-metric-upper")
+    elif "arc-value-upper" in element.attrib:
+        upper_value = fattrib(element, "arc-value-upper")
+        reading_arc_upper = as_reading(lambda: upper_value, min_value, max_value)
+    else:
+        reading_arc_upper = None
+
+    return CairoAdapter(
+        size=Dimension(size, size),
+        widget=CairoGaugeDonutAnnotated(
+            start=Angle(degrees=iattrib(element, "start", d=143)),
+            length=Angle(degrees=iattrib(element, "length", d=254)),
+            sectors=iattrib(element, "sectors", d=5),
+            background_inner=colour_attr(element, "background-inner-rgb", d=(255, 255, 255, 150)),
+            background_outer=colour_attr(element, "background-inner-rgb", d=(255, 255, 255, 255)),
+            major_annotation_colour=colour_attr(element, "major-ann-rgb", d=(0, 0, 0)),
+            minor_annotation_colour=colour_attr(element, "minor-ann-rgb", d=(0, 0, 0)),
+            major_tick_colour=colour_attr(element, "major-tick-rgb", d=(0, 0, 0)),
+            minor_tick_colour=colour_attr(element, "minor-tick-rgb", d=(0, 0, 0)),
+            v_min=min_value,
+            v_max=max_value,
+            reading=as_reading(a_metric("metric"), min_value, max_value),
+            needle_colour=colour_attr(element, "needle-rgb", d=(255, 0, 0)),
+            arc_inner_colour=colour_attr(element, "arc-inner-rgb", d=(0, 0, 190, 50)),
+            arc_outer_colour=colour_attr(element, "arc-outer-rgb", d=(0, 0, 190, 190)),
             reading_arc_max=reading_arc_upper,
             reading_arc_min=reading_arc_lower
         )
