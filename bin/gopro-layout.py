@@ -100,6 +100,7 @@ if __name__ == "__main__":
         video_frame = load_frame(ffmpeg_gopro, inputpath, gopro.recording.video.dimension, timeseries.mid)
 
     else:
+        dimensions = dimension_from(args.overlay_size)
         timeseries = fake.fake_framemeta(timedelta(minutes=5), step=timedelta(seconds=1), rng=rng, point_step=0.0001)
 
     with MapRenderer(
@@ -128,7 +129,7 @@ if __name__ == "__main__":
                             create_widgets=layout
                         )
 
-                        supplier = SimpleFrameSupplier(dimension_from(args.overlay_size))
+                        supplier = SimpleFrameSupplier(dimensions)
                         frame = overlay.draw(timeseries.mid, supplier.drawing_frame())
 
                         if video_frame is not None:
