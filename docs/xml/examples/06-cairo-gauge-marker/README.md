@@ -56,6 +56,21 @@ The gauge is normally 270 degrees "long". This can be changed using `length`
 <kbd>![06-cairo-gauge-marker-4.png](06-cairo-gauge-marker-4.png)</kbd>
 
 
+You can use -ve length to get the gauge to run anti-clockwise
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="-90" />
+```
+<kbd>![06-cairo-gauge-marker-5.png](06-cairo-gauge-marker-5.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="-180" />
+```
+<kbd>![06-cairo-gauge-marker-6.png](06-cairo-gauge-marker-6.png)</kbd>
+
+
 # Number of Ticks / Sectors
 
 There are 6 sectors by default. This can be changed with `sectors`
@@ -64,13 +79,13 @@ There are 6 sectors by default. This can be changed with `sectors`
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="90" sectors="2" />
 ```
-<kbd>![06-cairo-gauge-marker-5.png](06-cairo-gauge-marker-5.png)</kbd>
+<kbd>![06-cairo-gauge-marker-7.png](06-cairo-gauge-marker-7.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="180" sectors="3" />
 ```
-<kbd>![06-cairo-gauge-marker-6.png](06-cairo-gauge-marker-6.png)</kbd>
+<kbd>![06-cairo-gauge-marker-8.png](06-cairo-gauge-marker-8.png)</kbd>
 
 
 # Colours
@@ -85,31 +100,31 @@ Changing the tick-colour will change the background colour so to get the desired
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" tick-rgb="255,0,0"/>
 ```
-<kbd>![06-cairo-gauge-marker-7.png](06-cairo-gauge-marker-7.png)</kbd>
+<kbd>![06-cairo-gauge-marker-9.png](06-cairo-gauge-marker-9.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" background-rgb="255,0,0,100"/>
 ```
-<kbd>![06-cairo-gauge-marker-8.png](06-cairo-gauge-marker-8.png)</kbd>
+<kbd>![06-cairo-gauge-marker-10.png](06-cairo-gauge-marker-10.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" gauge-rgb="255,0,0" />
 ```
-<kbd>![06-cairo-gauge-marker-9.png](06-cairo-gauge-marker-9.png)</kbd>
+<kbd>![06-cairo-gauge-marker-11.png](06-cairo-gauge-marker-11.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-outer-rgb="255,0,0" />
 ```
-<kbd>![06-cairo-gauge-marker-10.png](06-cairo-gauge-marker-10.png)</kbd>
+<kbd>![06-cairo-gauge-marker-12.png](06-cairo-gauge-marker-12.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-inner-rgb="255,0,0,128" />
 ```
-<kbd>![06-cairo-gauge-marker-11.png](06-cairo-gauge-marker-11.png)</kbd>
+<kbd>![06-cairo-gauge-marker-13.png](06-cairo-gauge-marker-13.png)</kbd>
 
 
 # Transparency
@@ -120,29 +135,29 @@ Any colour that is completely transparent will disappear... this can be used to 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" background-rgb="0,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-marker-12.png](06-cairo-gauge-marker-12.png)</kbd>
+<kbd>![06-cairo-gauge-marker-14.png](06-cairo-gauge-marker-14.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" tick-rgb="0,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-marker-13.png](06-cairo-gauge-marker-13.png)</kbd>
+<kbd>![06-cairo-gauge-marker-15.png](06-cairo-gauge-marker-15.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" gauge-rgb="0,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-marker-14.png](06-cairo-gauge-marker-14.png)</kbd>
+<kbd>![06-cairo-gauge-marker-16.png](06-cairo-gauge-marker-16.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-inner-rgb="0,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-marker-15.png](06-cairo-gauge-marker-15.png)</kbd>
+<kbd>![06-cairo-gauge-marker-17.png](06-cairo-gauge-marker-17.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" dot-outer-rgb="0,0,0,0"/>
 ```
-<kbd>![06-cairo-gauge-marker-16.png](06-cairo-gauge-marker-16.png)</kbd>
+<kbd>![06-cairo-gauge-marker-18.png](06-cairo-gauge-marker-18.png)</kbd>
 

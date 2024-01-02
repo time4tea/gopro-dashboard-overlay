@@ -23,6 +23,8 @@ Auto Generated File DO NOT EDIT
 
 [06-cairo-gauge-arc-annotated](06-cairo-gauge-arc-annotated/README.md)
 
+[06-cairo-gauge-donut](06-cairo-gauge-donut/README.md)
+
 [06-cairo-gauge-marker](06-cairo-gauge-marker/README.md)
 
 [06-cairo-gauge-round-annotated](06-cairo-gauge-round-annotated/README.md)

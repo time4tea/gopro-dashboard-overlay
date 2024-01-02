@@ -26,6 +26,11 @@ The gauge is normally 270 degrees "long". This can be changed using `length`
 {{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="90" /> }}
 {{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="180" /> }}
 
+You can use -ve length to get the gauge to run anti-clockwise
+
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="-90" /> }}
+{{ <component type="cairo-gauge-marker" metric="speed" units="mph" max="3" length="-180" /> }}
+
 # Number of Ticks / Sectors
 
 There are 6 sectors by default. This can be changed with `sectors`

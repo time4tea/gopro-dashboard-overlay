@@ -66,6 +66,19 @@ def test_cairo_gauge_marker_defaults_40():
 
 @pytest.mark.cairo
 @approve_image
+def test_cairo_gauge_marker_reverse():
+    return cairo_widget_test(
+        CairoGaugeMarker(
+            length=Angle(degrees=-270),
+            reading=lambda: Reading(0.40)
+        )
+    )
+
+
+
+
+@pytest.mark.cairo
+@approve_image
 def test_cairo_ellipse_marker_90_270_100():
     return cairo_widget_test(
         CairoEllipseMarker(

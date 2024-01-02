@@ -66,6 +66,21 @@ The gauge is normally 254 degrees "long". This can be changed using `length`
 <kbd>![06-cairo-gauge-arc-annotated-4.png](06-cairo-gauge-arc-annotated-4.png)</kbd>
 
 
+You can use a negative length to make the widget go anti-clockwise
+
+
+```xml
+<component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="-90" arc-value-upper="25" />
+```
+<kbd>![06-cairo-gauge-arc-annotated-5.png](06-cairo-gauge-arc-annotated-5.png)</kbd>
+
+
+```xml
+<component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="-180" arc-value-upper="25" />
+```
+<kbd>![06-cairo-gauge-arc-annotated-6.png](06-cairo-gauge-arc-annotated-6.png)</kbd>
+
+
 # Number of Ticks / Sectors
 
 There are 5 sectors by default. This can be changed with `sectors`
@@ -74,13 +89,13 @@ There are 5 sectors by default. This can be changed with `sectors`
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="90" sectors="20" arc-value-upper="25" />
 ```
-<kbd>![06-cairo-gauge-arc-annotated-5.png](06-cairo-gauge-arc-annotated-5.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-7.png](06-cairo-gauge-arc-annotated-7.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="180" sectors="6" arc-value-upper="25" />
 ```
-<kbd>![06-cairo-gauge-arc-annotated-6.png](06-cairo-gauge-arc-annotated-6.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-8.png](06-cairo-gauge-arc-annotated-8.png)</kbd>
 
 
 # Colours
@@ -93,44 +108,44 @@ The following are available to change: `background-rgb`, `major-ann-rgb`, `minor
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  background-rgb="255,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-7.png](06-cairo-gauge-arc-annotated-7.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-9.png](06-cairo-gauge-arc-annotated-9.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  major-ann-rgb="255,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-8.png](06-cairo-gauge-arc-annotated-8.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-10.png](06-cairo-gauge-arc-annotated-10.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  minor-ann-rgb="255,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-9.png](06-cairo-gauge-arc-annotated-9.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-11.png](06-cairo-gauge-arc-annotated-11.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  major-tick-rgb="255,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-10.png](06-cairo-gauge-arc-annotated-10.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-12.png](06-cairo-gauge-arc-annotated-12.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  minor-tick-rgb="255,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-11.png](06-cairo-gauge-arc-annotated-11.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-13.png](06-cairo-gauge-arc-annotated-13.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  needle-rgb="255,0,255" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-12.png](06-cairo-gauge-arc-annotated-12.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-14.png](06-cairo-gauge-arc-annotated-14.png)</kbd>
 
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  arc-inner-rgb="255,0,255,50" arc-outer-rgb="255,0,0,250" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-13.png](06-cairo-gauge-arc-annotated-13.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-15.png](06-cairo-gauge-arc-annotated-15.png)</kbd>
 
 
 # Transparency
@@ -141,37 +156,37 @@ Any colour that is completely transparent will disappear... this can be used to 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  background-rgb="255,0,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-14.png](06-cairo-gauge-arc-annotated-14.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-16.png](06-cairo-gauge-arc-annotated-16.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  major-ann-rgb="255,0,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-15.png](06-cairo-gauge-arc-annotated-15.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-17.png](06-cairo-gauge-arc-annotated-17.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  minor-ann-rgb="255,0,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-16.png](06-cairo-gauge-arc-annotated-16.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-18.png](06-cairo-gauge-arc-annotated-18.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  major-tick-rgb="255,0,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-17.png](06-cairo-gauge-arc-annotated-17.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-19.png](06-cairo-gauge-arc-annotated-19.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  minor-tick-rgb="255,0,0,0" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-18.png](06-cairo-gauge-arc-annotated-18.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-20.png](06-cairo-gauge-arc-annotated-20.png)</kbd>
 
 
 ```xml
 <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  needle-rgb="255,0,255,40" arc-value-upper="25"/>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-19.png](06-cairo-gauge-arc-annotated-19.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-21.png](06-cairo-gauge-arc-annotated-21.png)</kbd>
 
 
 # A Full Example
@@ -187,4 +202,4 @@ Here's an example of how to combine this with a metric to get a full speedometer
     </translate>
 </translate>
 ```
-<kbd>![06-cairo-gauge-arc-annotated-20.png](06-cairo-gauge-arc-annotated-20.png)</kbd>
+<kbd>![06-cairo-gauge-arc-annotated-22.png](06-cairo-gauge-arc-annotated-22.png)</kbd>

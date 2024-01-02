@@ -36,6 +36,7 @@ dimensions_by_file = {
     "06-cairo-gauge-marker.md": Dimension(256, 256),
     "06-cairo-gauge-round-annotated.md": Dimension(256, 256),
     "06-cairo-gauge-arc-annotated.md": Dimension(256, 256),
+    "06-cairo-gauge-donut.md": Dimension(256, 256),
     "06-moving-journey-map.md": Dimension(384, 384),
     "07-air-speed-indicator.md": Dimension(256, 256),
     "07-chart.md": Dimension(256, 128),
@@ -115,7 +116,7 @@ if __name__ == "__main__":
                 )
 
                 overlay = Overlay(framemeta=timeseries, create_widgets=layout)
-                supplier = SimpleFrameSupplier(dimensions_for(filepath))
+                supplier = SimpleFrameSupplier(dimensions_for(filepath), background=(0,0,0,255))
                 image = overlay.draw(timeseries.mid, supplier.drawing_frame())
 
                 os.makedirs(example_dest, exist_ok=True)

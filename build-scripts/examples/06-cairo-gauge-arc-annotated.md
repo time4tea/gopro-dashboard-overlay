@@ -37,6 +37,11 @@ The gauge is normally 254 degrees "long". This can be changed using `length`
 {{ <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="90" arc-value-upper="25" /> }}
 {{ <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="180" arc-value-upper="25" /> }}
 
+You can use a negative length to make the widget go anti-clockwise
+
+{{ <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="-90" arc-value-upper="25" /> }}
+{{ <component type="cairo-gauge-arc-annotated" metric="speed" units="mph"  length="-180" arc-value-upper="25" /> }}
+
 # Number of Ticks / Sectors
 
 There are 5 sectors by default. This can be changed with `sectors`

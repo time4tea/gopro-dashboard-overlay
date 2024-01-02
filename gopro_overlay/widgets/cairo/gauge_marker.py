@@ -109,7 +109,7 @@ class CairoGaugeMarker(CairoWidget):
             cap: cairo.LineCap = cairo.LINE_CAP_SQUARE,
             reading: Callable[[], Reading] = lambda: Reading.full(),
     ):
-        tick_every = length / sectors
+        tick_every = abs(length / sectors)
         reading = minimum_reading(Reading(0.0001), reading)
         marker_outer = ifnone(marker_outer, tick_colour.alpha(0.7))
         marker_inner = ifnone(marker_inner, gauge_colour.alpha(0.7))

@@ -45,7 +45,7 @@ class CairoGaugeSectorAnnotated(CairoWidget):
 
         stretch = 0.8
 
-        step = length / sectors
+        step = abs(length / sectors)
 
         centre = Coordinate(x=0.0, y=0.0)
         background = CairoEllipticBackground(
@@ -84,8 +84,8 @@ class CairoGaugeSectorAnnotated(CairoWidget):
             texts=major_texts,
             height=0.05,
             stretch=stretch,
-            start=start + step,
-            length=length - step
+            start=start + (length / sectors),
+            length=length - (length / sectors)
         )
 
         minor_annotation = EllipticAnnotation(
