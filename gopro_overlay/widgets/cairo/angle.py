@@ -17,6 +17,12 @@ class Angle:
         if radians is not None:
             self.angle = radians
 
+    def __abs__(self):
+        return Angle(radians=abs(self.radians()))
+
+    def __str__(self):
+        return f"Angle(degrees={self.degrees()})"
+
     def degrees(self) -> float:
         return math.degrees(self.angle)
 
@@ -58,12 +64,12 @@ class Angle:
         return Angle(radians=-self.angle)
 
     def __eq__(self, other):
-        if type(other) != Angle:
+        if not isinstance(other, Angle):
             return NotImplemented
         return self.angle == other.angle
 
     def __le__(self, other):
-        if type(other) != Angle:
+        if not isinstance(other, Angle):
             return NotImplemented
         return self.angle <= other.angle
 

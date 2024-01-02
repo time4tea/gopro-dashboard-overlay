@@ -26,13 +26,13 @@ class CairoScale(CairoWidget):
         self.outer = outer
         self.tick = tick
         self.lines = lines
-        self.start = start.radians()
-        self.length = length.radians() + tick.step.radians() * 0.05
+        self.start = start
+        self.length = length
         self.reading = reading
 
     def draw(self, context: cairo.Context):
 
-        current = self.length * self.reading().value()
+        current = abs(self.length) * self.reading().value()
 
         with saved(context):
             context.new_path()
@@ -40,17 +40,22 @@ class CairoScale(CairoWidget):
             thick = self.tick.first
 
             for i in range(0, 1000):
-                value = self.tick.step.radians() * i
-                if value >= current:
+                value = self.tick.step * i
+
+                if value > current:
                     break
+
+                if self.length < Angle.zero():
+                    value = -value
 
                 if thick == self.tick.skipped:
                     thick = 1
                 else:
                     thick += 1
 
-                    point_from = self.inner.get_point(self.inner * (self.start + value))
-                    point_to = self.outer.get_point(self.outer * (self.start + value))
+                    angle_r = (self.start + value).radians()
+                    point_from = self.inner.get_point(self.inner * angle_r)
+                    point_to = self.outer.get_point(self.outer * angle_r)
 
                     context.move_to(*point_from.tuple())
                     context.line_to(*point_to.tuple())

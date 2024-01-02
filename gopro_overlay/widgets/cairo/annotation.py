@@ -41,7 +41,7 @@ class EllipticAnnotation:
         self.ellipse = ellipse
         self.start = start
         self.original_length = length
-        self.length = length + tick.step * 0.05
+        self.length = abs(length)
         self.height = height
         self.stretch = stretch
 

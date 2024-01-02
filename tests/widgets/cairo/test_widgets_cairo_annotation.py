@@ -27,8 +27,31 @@ def test_annotation():
             texts=create_texts(0, 170, sectors),
             height=0.05,
             stretch=0.8,
-            start=Angle.zero() + step,
-            length=Angle.fullcircle() - step
+            start=Angle.zero(),
+            length=Angle.fullcircle()
+        ),
+        repeat=1
+    )
+
+
+@pytest.mark.cairo
+@approve_image
+def test_annotation_reverse():
+    sectors = 17
+    step = Angle(degrees=254) / sectors
+
+    return cairo_widget_test(
+        widget=EllipticAnnotation(
+            ellipse=EllipseParameters(Coordinate(x=0.0, y=0.0), major_curve=1.0 / 0.41, minor_radius=0.41, angle=0),
+            tick=TickParameters(step=step, first=1, skipped=2),
+            colour=BLACK,
+            face=ToyFontFace("arial"),
+            mode=AnnotationMode.MovedInside,
+            texts=create_texts(0, 170, sectors),
+            height=0.05,
+            stretch=0.8,
+            start=Angle.zero(),
+            length=-Angle.fullcircle()
         ),
         repeat=1
     )
