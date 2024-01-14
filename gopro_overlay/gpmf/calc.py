@@ -26,11 +26,15 @@ class CoriTimestampPacketTimeCalculator(PacketTimeCalculator):
     def next_packet(self, timestamp, samples_before_this, num_samples):
 
         if self._first_timestamp is not None and self._last_timestamp is not None and timestamp < self._last_timestamp:
-            # This is definitely wrong - need all the SHUT timings from the joined files...
-            self._adjust += self._last_timestamp
-            log(f"Joined file detected... adjusting by {self._adjust}")
-            self._first_timestamp = timestamp
-            self._last_timestamp = timestamp
+            delta = abs(self._last_timestamp - timestamp)
+            if delta < timeunits(seconds=1):
+                log(f"GPS Time correction.. Step back {delta} - possible GPS issue?")
+            else:
+                # This is definitely wrong - need all the SHUT timings from the joined files...
+                self._adjust += self._last_timestamp
+                log(f"Joined file detected... adjusting by {self._adjust}")
+                self._first_timestamp = timestamp
+                self._last_timestamp = timestamp
 
         if self._first_timestamp is None:
             self._first_timestamp = timestamp

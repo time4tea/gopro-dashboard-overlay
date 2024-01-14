@@ -3,8 +3,9 @@ import datetime
 import itertools
 import struct
 from enum import Enum
-from typing import List, TypeVar
+from typing import List, TypeVar, Optional
 
+from gopro_overlay.log import log
 from gopro_overlay.timeunits import timeunits
 
 T = TypeVar("T")
@@ -104,13 +105,15 @@ def _interpret_string(item, **kwargs):
     return str(item.rawdata, encoding='unicode_escape', errors="replace").strip('\0')
 
 
-def _interpret_gps_timestamp(item, **kwargs):
-    return datetime.datetime.strptime(
-        item.rawdata.decode(
-            'utf-8',
-            errors='replace'
-        ),
-        '%y%m%d%H%M%S.%f').replace(tzinfo=datetime.timezone.utc)
+def _interpret_gps_timestamp(item, **kwargs) -> Optional[datetime.datetime]:
+    date_string = item.rawdata.decode('utf-8', errors='replace')
+    try:
+        return datetime.datetime.strptime(
+            date_string,
+            '%y%m%d%H%M%S.%f').replace(tzinfo=datetime.timezone.utc)
+    except ValueError:
+        log(f"Couldn't parse GPS timestamp -: {date_string} - Known GoPro GPS firmware issue :- "
+            f"https://github.com/gopro/gpmf-parser/issues/162")
 
 
 def _struct_mapping_for(item, repeat=None):

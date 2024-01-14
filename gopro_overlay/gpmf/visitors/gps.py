@@ -6,6 +6,7 @@ from gopro_overlay.entry import Entry
 from gopro_overlay.gpmf.calc import PacketTimeCalculator
 from gopro_overlay.gpmd_filters import NullGPSLockFilter, GPSLockComponents
 from gopro_overlay.gpmf import GPSFix, GPS5, interpret_item, GPS9, GPS_FIXED
+from gopro_overlay.log import log
 from gopro_overlay.point import Point
 from gopro_overlay.timeunits import Timeunit
 
@@ -13,7 +14,7 @@ from gopro_overlay.timeunits import Timeunit
 @dataclasses.dataclass(frozen=True)
 class GPS5Components:
     samples: int
-    timestamp: int
+    timestamp: Timeunit
     basetime: datetime.datetime
     fix: GPSFix
     dop: float
@@ -29,17 +30,27 @@ class GPS5EntryConverter:
         self._total_samples = 0
         self._frame_calculator = calculator
         self._tracker = gps_lock_filter
+        self._short_packet_count = 0
 
     def convert(self, counter, components: GPS5Components):
 
         # Turns out GPS5 can contain no points. Possibly accompanied by EMPT packet?
-        if len(components.points) == 0:
+        point_count = len(components.points)
+
+        if point_count == 0:
             return
+
+        # There should be 18 points per packet generally..
+        if point_count <= 10:
+            self._short_packet_count += 1
+            if self._short_packet_count % 10 == 0:
+                log(f"Have seen {self._short_packet_count} suspicious GPS packets. Last was {point_count}/18. GPS is misbehaving? - See https://github.com/time4tea/gopro-dashboard-overlay/issues/141")
+
 
         sample_time_calculator = self._frame_calculator.next_packet(
             components.timestamp,
             self._total_samples,
-            len(components.points)
+            point_count
         )
 
         gpsfix = components.fix
@@ -62,6 +73,7 @@ class GPS5EntryConverter:
                     timestamp=self._units.Quantity(sample_frame_timestamp.millis(), self._units.number),
                     dop=self._units.Quantity(components.dop, self._units.number),
                     packet=self._units.Quantity(counter, self._units.number),
+                    packet_count=self._units.Quantity(point_count),
                     packet_index=self._units.Quantity(index, self._units.number),
                     point=position,
                     speed=speed,
@@ -70,7 +82,7 @@ class GPS5EntryConverter:
                     gpslock=self._units.Quantity(calculated_fix.value),
                 )
             )
-        self._total_samples += len(components.points)
+        self._total_samples += point_count
 
 
 class GPS5StreamVisitor:
@@ -82,7 +94,7 @@ class GPS5StreamVisitor:
         self._fix: Optional[GPSFix] = None
         self._scale: Optional[int] = None
         self._points: Optional[List[GPS5]] = None
-        self._timestamp: Optional[int] = None
+        self._timestamp: Optional[Timeunit] = None
         self._dop: Optional[float] = None
 
     def vi_STMP(self, item):
@@ -107,15 +119,18 @@ class GPS5StreamVisitor:
         self._points = interpret_item(item, scale=self._scale)
 
     def v_end(self):
-        self._on_end(GPS5Components(
-            samples=self._samples,
-            timestamp=self._timestamp,
-            basetime=self._basetime,
-            fix=self._fix,
-            dop=self._dop,
-            scale=self._scale,
-            points=self._points
-        ))
+        if self._basetime is not None:
+            self._on_end(GPS5Components(
+                samples=self._samples,
+                timestamp=self._timestamp,
+                basetime=self._basetime,
+                fix=self._fix,
+                dop=self._dop,
+                scale=self._scale,
+                points=self._points
+            ))
+        else:
+            log(f"No GPS Date :- Skipping Record with {len(self._points)} samples")
 
 
 class GPS5Visitor:
