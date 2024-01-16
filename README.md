@@ -163,6 +163,10 @@ You can cut a section of the gopro file, with metadata.
 - Validation / Improvement of smoothing - e.g. Kalman Filters
 - Suggestions for handling acceleration and orientation data, this is parsed, but display options are few.
 
+## Work In Progress
+
+- Adding min/max/moving averages to metrics
+
 ## Related Software
 
 - https://github.com/julesgraus/interactiveGoProDashboardTool - An interactive helper to build the command line for the dashboard program
