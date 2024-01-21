@@ -110,6 +110,8 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
     fonts = {}
 
     def font_at(size):
+        if size <= 0:
+            raise ValueError("font size must be positive")
         return fonts.setdefault(size, font.font_variant(size=size))
 
     factory = Widgets(
@@ -388,6 +390,9 @@ class Widgets:
         self.font = font
         self.converters = converters
 
+    def _font(self, element, name, d):
+        return self.font(iattrib(element, name, d=d, r=range(1, 2000)))
+
     @allow_attributes(
         {"x", "y", "metric", "size", "format", "dp", "units", "align", "cache", "rgb", "outline", "outline_width"})
     def create_metric(self, element, entry, **kwargs) -> Widget:
@@ -396,7 +401,7 @@ class Widgets:
             entry=entry,
             accessor=metric_accessor_from(attrib(element, "metric")),
             formatter=quantity_formatter_from(element),
-            font=self.font(iattrib(element, "size", d=16)),
+            font=self._font(element, "size", d=16),
             converter=self.converters.converter(attrib(element, "units", d=None)),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),
@@ -415,7 +420,7 @@ class Widgets:
             entry=entry,
             accessor=metric_accessor_from(attrib(element, "metric")),
             formatter=lambda q: format_string.format(q.u),
-            font=self.font(iattrib(element, "size", d=16)),
+            font=self._font(element, "size", d=16),
             converter=self.converters.converter(attrib(element, "units", d=None)),
             align=attrib(element, "align", d="left"),
             cache=True,
@@ -438,7 +443,7 @@ class Widgets:
         return text(
             at=at(element),
             value=date_formatter_from_element(element, entry),
-            font=self.font(iattrib(element, "size", d=16)),
+            font=self._font(element, "size", d=16),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),
             fill=rgbattr(element, "rgb", d=(255, 255, 255))
@@ -452,7 +457,7 @@ class Widgets:
         return text(
             at=at(element),
             value=lambda: element.text,
-            font=self.font(iattrib(element, "size", d=16)),
+            font=self._font(element, "size", d=16),
             align=attrib(element, "align", d="left"),
             direction=attrib(element, "direction", d="ltr"),
             fill=rgbattr(element, "rgb", d=(255, 255, 255)),
@@ -536,7 +541,7 @@ class Widgets:
             key=value
         )
 
-        title = self.font(iattrib(element, "textsize", d=16))
+        title = self._font(element, "textsize", d=16)
         values = battrib(element, "values", d=True)
         if not values:
             title = None
@@ -560,7 +565,7 @@ class Widgets:
         return Compass(
             size=iattrib(element, "size", d=256),
             reading=lambda: nonesafe(entry().cog),
-            font=self.font(iattrib(element, "textsize", d=16)),
+            font=self._font(element, "textsize", d=16),
             fg=rgbattr(element, "fg", d=(255, 255, 255)),
             bg=rgbattr(element, "bg", d=None),
             text=rgbattr(element, "text", d=(255, 255, 255)),
