@@ -8,6 +8,8 @@ Get the Windows installer from https://www.python.org/downloads/windows/ - Insta
 
 I would recommend Python 3.11 - as there are known problems with package dependencies on Python 3.12. If you have luck installing on 3.12 please let me know.
 
+Sometimes, on Windows only, errors are not printed to the console as they should be. Suggestions are welcomed for why this happens.
+
 ## Installation
 
 ```shell
