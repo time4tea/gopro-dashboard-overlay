@@ -204,6 +204,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.125.0 [Fix] Improved error messages with invalid font sizes. Thanks [@dyk74](https://github.com/dyk74) for raising.
 - 0.124.0 [Enhancement] Attempt to work around some GPS Issues, particularly https://github.com/time4tea/gopro-dashboard-overlay/issues/141 https://github.com/time4tea/gopro-dashboard-overlay/issues/22
 - 0.123.0 [Enhancement] Use better (but every so slightly slower, shouldn't make a huge difference) rotation method for maps - will give much better quality.
   - Add new gauge - `cairo-gauge-donut` see [docs/xml](docs/xml/examples/06-cairo-gauge-donut)
