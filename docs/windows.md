@@ -6,6 +6,8 @@ I don't know very much about windows, so corrections to these instructions are w
 
 Get the Windows installer from https://www.python.org/downloads/windows/ - Install it. Suggest "add to PATH". 
 
+I would recommend Python 3.11 - as there are known problems with package dependencies on Python 3.12. If you have luck installing on 3.12 please let me know.
+
 ## Installation
 
 ```shell
