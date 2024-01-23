@@ -147,7 +147,7 @@ def gopro_dashboard_arguments(args=None):
     units = parser.add_argument_group("Units", "Controlling Units")
 
     units.add_argument("--units-speed", default="mph",
-                       help="Default unit for speed. Many units supported: mph, mps, kph, kph, knot, ...")
+                       help="Default unit for speed. Many units supported: mph, mps, kph, knot, ...")
     units.add_argument("--units-altitude", default="metre",
                        help="Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec, angstrom, ...")
     units.add_argument("--units-distance", default="mile",
