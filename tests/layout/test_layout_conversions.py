@@ -70,7 +70,7 @@ def test_overriding_default_units():
 
 
 def test_various_speed_conversions_dont_blow_up():
-    for i in "mph, mps, kph, kph, knot".split(","):
+    for i in "mph, mps, kph, knot".split(","):
         Converters(speed_unit=i).converter("speed")(speed)
 
 

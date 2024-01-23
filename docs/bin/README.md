@@ -426,7 +426,7 @@ Units:
   Controlling Units
 
   --units-speed UNITS_SPEED
-                        Default unit for speed. Many units supported: mph, mps, kph, kph, knot, ... (default: mph)
+                        Default unit for speed. Many units supported: mph, mps, kph, knot, ... (default: mph)
   --units-altitude UNITS_ALTITUDE
                         Default unit for altitude. Many units supported: foot, mile, metre, meter, parsec,
                         angstrom, ... (default: metre)
