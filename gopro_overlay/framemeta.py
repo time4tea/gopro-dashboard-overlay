@@ -211,6 +211,18 @@ class FrameMeta:
                 if updates:
                     entry_a.update(**updates)
 
+    def process_accel(self, processor, skip=1, filter_fn: Callable[[Entry], bool] = lambda e: True):
+        self.check_modified()
+        diffs = list(zip(self.framelist, self.framelist[skip:]))
+
+        for a, b in diffs:
+            entry_a = self.frames[a]
+            entry_b = self.frames[b]
+            if filter_fn(entry_a) and filter_fn(entry_b):
+                updates = processor(entry_a, entry_b, skip)
+                if updates:
+                    entry_b.update(**updates)
+    
     def process(self, processor, filter_fn: Callable[[Entry], bool] = lambda e: True):
         self.check_modified()
         for pts in self.framelist:

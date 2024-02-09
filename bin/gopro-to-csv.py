@@ -79,6 +79,7 @@ if __name__ == "__main__":
     # ts.process(timeseries_process.process_ses("point", lambda i: i.point, alpha=0.45), filter_fn=locked_2d)
     ts.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3, filter_fn=locked_2d)
     ts.process(timeseries_process.calculate_odo(), filter_fn=locked_2d)
+    ts.process_accel(timeseries_process.calculate_accel(), skip=packets_per_second * 3, filter_fn=locked_2d)
     ts.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3, filter_fn=locked_3d)  # hack
     ts.process(timeseries_process.filter_locked())
 
@@ -88,7 +89,10 @@ if __name__ == "__main__":
     def printable_unit(v):
         if v is None:
             return ""
-        return v.magnitude
+        try:
+            return v.magnitude
+        except:
+            return None
 
 
     dest: Optional[Path] = args.output
@@ -96,12 +100,13 @@ if __name__ == "__main__":
     with smart_open(dest) as f:
         writer = csv.DictWriter(f=f,
                                 fieldnames=["packet", "packet_index", "gps_fix", "date", "lat", "lon", "dop", "alt",
-                                            "speed",
+                                            "speed", "accel",
                                             "dist", "time", "azi", "odo",
                                             "grad",
                                             "accl_x", "accl_y", "accl_z"])
         writer.writeheader()
         for entry in filter(filter_fn, ts.items(step=datetime.timedelta(seconds=args.every))):
+            
             writer.writerow({
                 "packet": printable_unit(entry.packet),
                 "packet_index": printable_unit(entry.packet_index),
@@ -113,6 +118,7 @@ if __name__ == "__main__":
                 "alt": printable_unit(entry.alt),
                 "grad": printable_unit(entry.grad if entry.grad is not None else entry.cgrad),
                 "speed": printable_unit(entry.speed if entry.speed is not None else entry.cspeed),
+                "accel": printable_unit(entry.accel),
                 "dist": printable_unit(entry.dist),
                 "time": printable_unit(entry.time),
                 "azi": printable_unit(entry.azi),

@@ -79,6 +79,19 @@ def calculate_speeds():
     return accept
 
 
+def calculate_accel():
+    def accept(a, b, c):
+        time = units.Quantity((b.dt - a.dt).total_seconds(), units.seconds)
+        
+        if a.speed and b.speed and time:
+            accel = (b.speed - a.speed) / time
+        else:
+            accel = units.Quantity(0, units.mps)
+        return { "accel": accel }
+
+    return accept
+
+
 def calculate_odo():
     total = [units.Quantity(0.0, units.m)]
 
@@ -91,7 +104,7 @@ def calculate_odo():
 
 
 def filter_locked():
-    fields = ["speed", "cspeed", "azi", "cog", "time", "dist", "grad", "cgrad", "alt"]
+    fields = ["speed", "cspeed", "accel", "azi", "cog", "time", "dist", "grad", "cgrad", "alt"]
 
     def accept(e):
         if e.gpsfix not in GPS_FIXED_VALUES:

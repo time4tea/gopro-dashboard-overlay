@@ -83,6 +83,15 @@ class Timeseries:
             if updates:
                 self.entries[a].update(**updates)
 
+    def process_accel(self, processor, skip=1):
+        self.check_modified()
+        diffs = list(zip(self.dates, self.dates[skip:]))
+
+        for a, b in diffs:
+            updates = processor(self.entries[a], self.entries[b], skip)
+            if updates:
+                self.entries[b].update(**updates)
+    
     def process(self, processor):
         self.check_modified()
         for e in self.dates:

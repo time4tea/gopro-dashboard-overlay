@@ -266,6 +266,7 @@ if __name__ == "__main__":
                 frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3,
                                           filter_fn=locked_2d)
                 frame_meta.process(timeseries_process.calculate_odo(), filter_fn=locked_2d)
+                frame_meta.process_accel(timeseries_process.calculate_accel(), skip=18 * 3)
                 frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3,
                                           filter_fn=locked_3d)  # hack
                 frame_meta.process(timeseries_process.process_kalman("speed", lambda e: e.speed))
