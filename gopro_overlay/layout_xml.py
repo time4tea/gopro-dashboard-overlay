@@ -20,6 +20,7 @@ from .exceptions import Defect
 from .layout_xml_attribute import allow_attributes
 from .log import log
 from .widgets.asi import AirspeedIndicator
+from .widgets.msi import MotorspeedIndicator, MotorspeedIndicator2
 from .widgets.bar import Bar
 from .widgets.chart import SimpleChart
 from .widgets.compass import Compass
@@ -660,6 +661,43 @@ class Widgets:
             rotate=iattrib(element, "rotate", d=0),
         )
 
+    @allow_attributes({"size", "metric", "units", "textsize", "needle", "green", "yellow", "end", "rotate"})
+    def create_msi(self, element, entry, **kwargs) -> Widget:
+        return MotorspeedIndicator(
+            size=iattrib(element, "size", d=256),
+            reading=metric_value(
+                entry,
+                accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
+                converter=self.converters.converter(attrib(element, "units", d="knots")),
+                formatter=lambda q: q.m,
+                default=0
+            ),
+            font=self.font(iattrib(element, "textsize", d=16)),
+            needle=iattrib(element, "needle", d=0),
+            green=iattrib(element, "green", d=0),
+            yellow=iattrib(element, "yellow", d=130),
+            end=iattrib(element, "end", d=180),
+            rotate=iattrib(element, "rotate", d=180),
+        )
+    
+    @allow_attributes({"size", "metric", "units", "textsize", "green", "yellow", "end", "rotate"})
+    def create_msi2(self, element, entry, **kwargs) -> Widget:
+        return MotorspeedIndicator2(
+            size=iattrib(element, "size", d=256),
+            reading=metric_value(
+                entry,
+                accessor=metric_accessor_from(attrib(element, "metric", d="speed")),
+                converter=self.converters.converter(attrib(element, "units", d="knots")),
+                formatter=lambda q: q.m,
+                default=0
+            ),
+            font=self.font(iattrib(element, "textsize", d=16)),
+            green=iattrib(element, "green", d=0),
+            yellow=iattrib(element, "yellow", d=130),
+            end=iattrib(element, "end", d=180),
+            rotate=iattrib(element, "rotate", d=180),
+        )
+    
     @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
     def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
         at = Coordinate(0, 0)
