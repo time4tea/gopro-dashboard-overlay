@@ -438,7 +438,7 @@ class Widgets:
             invert=battrib(element, "invert", d=True)
         )
 
-    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb"})
+    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb", "outline", "outline_width"})
     def create_datetime(self, element, entry, **kwargs):
         return text(
             at=at(element),
@@ -446,7 +446,9 @@ class Widgets:
             font=self._font(element, "size", d=16),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),
-            fill=rgbattr(element, "rgb", d=(255, 255, 255))
+            fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+            stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+            stroke_width=iattrib(element, "outline_width", d=2)
         )
 
     @allow_attributes({"x", "y", "size", "align", "direction", "rgb", "outline", "outline_width"})
