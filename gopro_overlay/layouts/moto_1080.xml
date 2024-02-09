@@ -26,10 +26,10 @@
 			
 			<translate x="0" y="260" >
 				<component type="bar" width="128" min="-3" max="0" height="40" metric="accel" outline-width="2" bar="255,157,157" h-neg="255,157,157" h-pos="255,157,157" zero="0,0,0,0"/>
-				<component x="63" y="11" type="text" size="16" align="centre">BRZDA</component>
+				<component x="63" y="11" type="text" size="16" align="centre">BRAKE</component>
 				<translate x="127" >
 					<component type="bar" width="128" min="0" max="3" height="40" metric="accel" outline-width="2" bar="157,157,255" h-neg="157,157,255" h-pos="157,157,255"  zero="0,0,0,0"/>
-					<component x="63" y="11" type="text" size="16" align="centre">PLYN</component>
+					<component x="63" y="11" type="text" size="16" align="centre">THROTTLE</component>
 				</translate>
 			</translate>			
 		</translate>
