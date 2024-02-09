@@ -95,6 +95,7 @@ if __name__ == "__main__":
 
         timeseries.process_deltas(timeseries_process.calculate_speeds(), skip=18 * 3)
         timeseries.process(timeseries_process.calculate_odo())
+        timeseries.process_accel(timeseries_process.calculate_accel(), skip=18 * 3)
         timeseries.process_deltas(timeseries_process.calculate_gradient(), skip=18 * 3)
 
         video_frame = load_frame(ffmpeg_gopro, inputpath, gopro.recording.video.dimension, timeseries.mid)

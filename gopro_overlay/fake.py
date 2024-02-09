@@ -57,6 +57,7 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
 
     points = Random2D(Point(51.4972, -0.1499), point_step, rng=rng)
     speed = Random1D(10, rng=rng)
+    accel = Random1D(5, -10, rng=rng)
     cad = Random1D(50, rng=rng)
     grad = Random1D(23, rng=rng)
     hr = Random1D(100, rng=rng)
@@ -87,6 +88,7 @@ def fake_framemeta(length: datetime.timedelta = datetime.timedelta(seconds=20),
                 packet_index=units.Quantity(counter % 18, units.number),
 
                 speed=units.Quantity(speed.step(), units.mps),
+                accel=units.Quantity(accel.step()),
                 cad=units.Quantity(cad.step(), units.rpm),
                 hr=units.Quantity(hr.step(), units.bpm),
                 alt=units.Quantity(alt.step(), units.m),
