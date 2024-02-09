@@ -67,13 +67,14 @@ def scale(min_value, max_value, rotate=180):
 
 class MotorspeedIndicator(Widget):
 
-    def __init__(self, size, font, needle, reading, green, yellow, end, rotate=180):
+    def __init__(self, size, font, needle, reading, green, yellow, end, rotate=180, outline=2):
         self.end = end
         self.yellow = yellow
         self.green = green
         self.font = font
         self.needle = needle
         self.reading = reading
+        self.outline = outline
         
         
         self.width = int(size/17) #15
@@ -122,7 +123,7 @@ class MotorspeedIndicator(Widget):
                 font=self.font,
                 anchor="mm",
                 fill=self.text,
-                stroke_width=2,
+                stroke_width=self.outline,
                 stroke_fill=(0, 0, 0)
             )
 
@@ -177,12 +178,13 @@ class MotorspeedIndicator(Widget):
         
 class MotorspeedIndicator2(Widget):
 
-    def __init__(self, size, font, reading, green, yellow, end, rotate=180):
+    def __init__(self, size, font, reading, green, yellow, end, rotate=180, outline=2):
         self.end = end
         self.yellow = yellow
         self.green = green
         self.font = font
         self.reading = reading
+        self.outline = outline
         
         
         self.width = int(size/17) #15
@@ -226,7 +228,7 @@ class MotorspeedIndicator2(Widget):
                 font=self.font,
                 anchor="mm",
                 fill=self.text,
-                stroke_width=2,
+                stroke_width=self.outline,
                 stroke_fill=(0, 0, 0)
             )
 

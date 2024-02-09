@@ -439,7 +439,7 @@ class Widgets:
             invert=battrib(element, "invert", d=True)
         )
 
-    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb"})
+    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb", "outline", "outline_width"})
     def create_datetime(self, element, entry, **kwargs):
         return text(
             at=at(element),
@@ -447,7 +447,9 @@ class Widgets:
             font=self._font(element, "size", d=16),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),
-            fill=rgbattr(element, "rgb", d=(255, 255, 255))
+            fill=rgbattr(element, "rgb", d=(255, 255, 255)),
+            stroke=rgbattr(element, "outline", d=(0, 0, 0)),
+            stroke_width=iattrib(element, "outline_width", d=2)
         )
 
     @allow_attributes({"x", "y", "size", "align", "direction", "rgb", "outline", "outline_width"})
@@ -661,7 +663,7 @@ class Widgets:
             rotate=iattrib(element, "rotate", d=0),
         )
 
-    @allow_attributes({"size", "metric", "units", "textsize", "needle", "green", "yellow", "end", "rotate"})
+    @allow_attributes({"size", "metric", "units", "textsize", "needle", "green", "yellow", "end", "rotate", "outline"})
     def create_msi(self, element, entry, **kwargs) -> Widget:
         return MotorspeedIndicator(
             size=iattrib(element, "size", d=256),
@@ -678,9 +680,10 @@ class Widgets:
             yellow=iattrib(element, "yellow", d=130),
             end=iattrib(element, "end", d=180),
             rotate=iattrib(element, "rotate", d=180),
+            outline=iattrib(element, "outline", d=2)
         )
     
-    @allow_attributes({"size", "metric", "units", "textsize", "green", "yellow", "end", "rotate"})
+    @allow_attributes({"size", "metric", "units", "textsize", "green", "yellow", "end", "rotate", "outline"})
     def create_msi2(self, element, entry, **kwargs) -> Widget:
         return MotorspeedIndicator2(
             size=iattrib(element, "size", d=256),
@@ -696,6 +699,7 @@ class Widgets:
             yellow=iattrib(element, "yellow", d=130),
             end=iattrib(element, "end", d=180),
             rotate=iattrib(element, "rotate", d=180),
+            outline=iattrib(element, "outline", d=2)
         )
     
     @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
