@@ -1,0 +1,49 @@
+<layout>
+	<translate x="16">
+		<composite name="metrics" x="0">
+			<component type="datetime" y="16" format="%d.%m.%Y" size="24" align="left"/>
+			<component type="datetime" y="45" format="%H:%M:%S" size="32" align="left"/>
+			<translate y="90">
+				<component type="icon" x="0"  file="mountain.png" size="48"/>			
+				<component type="text" x="65"  size="16">ALT (m)</component>
+				<component type="metric" x="55" y="20" align="left"  metric="alt" dp="1" size="26" />
+			</translate>
+			<translate y="150">
+				<component type="icon" x="0"  file="slope-triangle.png" size="48"/>			
+				<component type="text" x="65"  size="16">SLP (%)</component>
+				<component type="metric" x="70" y="20" align="left" metric="gradient" dp="1" size="26" />
+			</translate>	
+		</composite>
+				
+		<translate x="0" y="690">
+			<component type="msi" metric="speed" textsize="16" needle="1" units="kph" />
+			<translate x="128"  y="210">
+					<component type="metric" metric="speed" units="kph" dp="0" size="36" align="centre"/>
+			</translate>	
+			<translate x="128"  y="160">
+					<component type="text" size="18" align="centre">km/h</component>
+			</translate>	
+			
+			<translate x="0" y="260" >
+				<component type="bar" width="128" min="-3" max="0" height="40" metric="accel" outline-width="2" bar="255,157,157" h-neg="255,157,157" h-pos="255,157,157" zero="0,0,0,0"/>
+				<component x="63" y="11" type="text" size="16" align="centre">BRZDA</component>
+				<translate x="127" >
+					<component type="bar" width="128" min="0" max="3" height="40" metric="accel" outline-width="2" bar="157,157,255" h-neg="157,157,255" h-pos="157,157,255"  zero="0,0,0,0"/>
+					<component x="63" y="11" type="text" size="16" align="centre">PLYN</component>
+				</translate>
+			</translate>			
+		</translate>
+		
+		<translate x="1632" y="16">
+			<frame width="256" opacity="0.6" height="256" cr="20" fo="20">
+				<component type="moving_map"  name="moving_map" size="256" zoom="15"/>
+			</frame>
+			<frame y="256" width="256" opacity="0.6" height="256" cr="20" fo="20">
+					<component type="moving_journey_map" size="256" zoom="14" />
+			</frame>
+		</translate>
+			
+	</translate>
+	
+	<component x="7" y="1010" samples="256" type="chart" name="chart" metric="speed" units="kph" fill="0,191,255,128" bg="0,0,0,128" values="false"/>
+</layout>
