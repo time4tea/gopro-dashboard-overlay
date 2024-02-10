@@ -206,6 +206,7 @@ https://github.com/JuanIrache/gopro-telemetry
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
 - 0.126.0 [Enhancement] New Motorspeed widgets - "msi" & "msi2" - See examples [docs/xml/examples/07-motor-speed-indicator/README.md](docs/xml/examples/07-motor-speed-indicator/README.md) - Thanks to [@JimmyS83](https://github.com/JimmyS83) for contributing.
   - New metric `accel` which is computed from speed deltas, rather than gopro accelerometer. Thanks also to [@JimmyS83](https://github.com/JimmyS83)
+  - [Breaking] Ordering of fields in gopro-to-csv has changed, with addition of `accel` field
 - 0.125.0 [Fix] Improved error messages with invalid font sizes. Thanks [@dyk74](https://github.com/dyk74) for raising.
 - 0.124.0 [Enhancement] Attempt to work around some GPS Issues, particularly https://github.com/time4tea/gopro-dashboard-overlay/issues/141 https://github.com/time4tea/gopro-dashboard-overlay/issues/22
 - 0.123.0 [Enhancement] Use better (but every so slightly slower, shouldn't make a huge difference) rotation method for maps - will give much better quality.
