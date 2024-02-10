@@ -1,12 +1,9 @@
 import pytest
 
 from gopro_overlay.dimensions import Dimension
-from gopro_overlay.point import Coordinate
-from gopro_overlay.widgets.asi import AirspeedIndicator
 from gopro_overlay.widgets.msi import MotorspeedIndicator, MotorspeedIndicator2
-from gopro_overlay.widgets.widgets import Translate
-from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
+from tests.widgets import test_widgets_setup
 from tests.widgets.test_widgets import time_rendering
 
 font = test_widgets_setup.font
