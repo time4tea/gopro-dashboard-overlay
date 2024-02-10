@@ -18,7 +18,7 @@ class MotorspeedIndicator(Widget):
         self.reading = reading
         self.outline = outline
 
-        self.width = int(size / 17)  # 15
+        self.width = int(size / 17)
 
         self.step = 5
 
@@ -127,8 +127,8 @@ class MotorspeedIndicator2(Widget):
         self.reading = reading
         self.outline = outline
 
-        self.width = int(size / 17)  # 15
-        self.offset = int(size / 51)  # 5
+        self.width = int(size / 17)
+        self.offset = int(size / 51)
 
         self.step = 5
 
