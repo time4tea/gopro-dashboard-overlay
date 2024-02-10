@@ -1,3 +1,4 @@
+<!-- Dimension(256,256) -->
 
 # Cairo Gauge Arc Annotated
 

@@ -1,4 +1,4 @@
-
+<!-- Dimension(500,150) -->
 # Bar
 
 Draws a very simple horizontal bar with current metric value

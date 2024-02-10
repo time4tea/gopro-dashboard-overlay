@@ -20,7 +20,7 @@ def test_gauge():
         widgets=[
             MotorspeedIndicator(
                 size=size, font=font, green=40, yellow=46, end=200,
-                needle=1,
+                needle=True,
                 reading=lambda: 125
             )
         ]
@@ -53,7 +53,7 @@ def test_gauge_rotate_90():
         widgets=[
             MotorspeedIndicator(
                 size=size, font=font, green=40, yellow=46, end=200,
-                needle=1,
+                needle=True,
                 rotate=90,
                 reading=lambda: 125
             )
@@ -71,7 +71,7 @@ def test_no_needle():
         widgets=[
             MotorspeedIndicator(
                 size=size, font=font, green=40, yellow=46, end=200,
-                needle=0,
+                needle=False,
                 reading=lambda: 125
             )
         ]

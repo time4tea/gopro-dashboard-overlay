@@ -3,6 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+<!-- Dimension(256,256) -->
 
 # Cairo Gauge Marker
 

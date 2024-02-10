@@ -8,7 +8,7 @@ from .widgets import Widget
 
 class MotorspeedIndicator(Widget):
 
-    def __init__(self, size: int, font, needle: int, reading: Callable[[], float], green: int, yellow: int, end: int,
+    def __init__(self, size: int, font, needle: bool, reading: Callable[[], float], green: int, yellow: int, end: int,
                  rotate: int = 180, outline: int = 2):
         self.end = end
         self.yellow = yellow
@@ -49,7 +49,7 @@ class MotorspeedIndicator(Widget):
 
         arc.pieslice(draw, 0, outline=(0, 0, 0, 128), fill=(0, 0, 0, 128), width=int(self.size / 128))
 
-        if self.needle == 1:  # Needle
+        if self.needle:
             arc.arc(draw, 0, start=self.xa(self.green), end=self.xa(self.yellow), fill=(51, 193, 25), width=widths)
             arc.arc(draw, 0, start=self.xa(self.yellow), end=self.xa(self.end), fill=(237, 239, 42), width=widths)
 
@@ -90,7 +90,7 @@ class MotorspeedIndicator(Widget):
 
         arc = Arc(self.size)
 
-        if self.needle == 1:  # Needle
+        if self.needle:  # Needle
             draw.polygon(
                 [
                     arc.locate(self.xa(reading) - 0, 0),

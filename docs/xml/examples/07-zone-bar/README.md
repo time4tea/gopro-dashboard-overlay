@@ -3,6 +3,8 @@
 Auto Generated File DO NOT EDIT 
 
 -->
+<!-- Dimension(500,100) -->
+
 # Zone Bar
 
 Draws a simple horizontal bar with current metric value, with 4 zones - so suitable for

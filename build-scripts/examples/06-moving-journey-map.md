@@ -1,3 +1,4 @@
+<!-- Dimension(384,384) -->
 
 # Moving Journey Map
 

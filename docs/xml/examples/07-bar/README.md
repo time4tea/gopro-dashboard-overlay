@@ -3,7 +3,7 @@
 Auto Generated File DO NOT EDIT 
 
 -->
-
+<!-- Dimension(500,150) -->
 # Bar
 
 Draws a very simple horizontal bar with current metric value

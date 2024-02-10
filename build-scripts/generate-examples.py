@@ -28,27 +28,6 @@ def alphanum_key(s):
     return [tryint(c) for c in re.split(r'([0-9]+)', s)]
 
 
-dimensions_by_file = {
-    "07-bar.md": Dimension(500, 150),
-    "07-zone-bar.md": Dimension(500, 100),
-    "05-moving-map.md": Dimension(256, 256),
-    "06-journey-map.md": Dimension(256, 256),
-    "06-cairo-gauge-marker.md": Dimension(256, 256),
-    "06-cairo-gauge-round-annotated.md": Dimension(256, 256),
-    "06-cairo-gauge-arc-annotated.md": Dimension(256, 256),
-    "06-cairo-gauge-donut.md": Dimension(256, 256),
-    "06-moving-journey-map.md": Dimension(384, 384),
-    "07-air-speed-indicator.md": Dimension(256, 256),
-    "07-chart.md": Dimension(256, 128),
-    "08-translate.md": Dimension(256, 256),
-    "09-frame.md": Dimension(256, 256),
-}
-
-
-def dimensions_for(filepath: str) -> Dimension:
-    return dimensions_by_file.get(os.path.basename(filepath), Dimension(200, 100))
-
-
 AUTO_HEADER = "<!-- \n\nAuto Generated File DO NOT EDIT \n\n-->\n"
 
 if __name__ == "__main__":
@@ -88,6 +67,12 @@ if __name__ == "__main__":
 
             example_dest = os.path.join(dest, basename.stem)
 
+            dimensions_match = re.search(r"Dimension\((\d+),(\d+)\)", example_markdown)
+            if dimensions_match is None:
+                dimensions = Dimension(200, 100)
+            else:
+                dimensions = Dimension(int(dimensions_match.group(1)), int(dimensions_match.group(2)))
+
             while True:
                 match = re.search(r"{{(.+?)}}", example_markdown, re.MULTILINE | re.DOTALL)
                 if match is None:
@@ -116,7 +101,7 @@ if __name__ == "__main__":
                 )
 
                 overlay = Overlay(framemeta=timeseries, create_widgets=layout)
-                supplier = SimpleFrameSupplier(dimensions_for(filepath), background=(0,0,0,255))
+                supplier = SimpleFrameSupplier(dimensions, background=(0,0,0,255))
                 image = overlay.draw(timeseries.mid, supplier.drawing_frame())
 
                 os.makedirs(example_dest, exist_ok=True)

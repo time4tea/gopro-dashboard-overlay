@@ -1,12 +1,11 @@
+<!-- Dimension(256,256) -->
 
 # Air Speed Indicator
-
-** Experimental **
 
 The Air Speed Indicator component draws an air speed indicator.
 
 The best speed indicator that exists at the moment is `speed`, but this does represent
-the SOG or Groundspeed, not airspeed, but it might be OK for a video overlay.
+the SOG or Ground speed, not airspeed, but it might be OK for a video overlay.
 
 {{  <component type="asi" vs0="10" /> }}
 

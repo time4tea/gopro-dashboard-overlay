@@ -1,3 +1,4 @@
+<!-- Dimension(256,128) -->
 
 # Chart
 

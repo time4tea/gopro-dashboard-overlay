@@ -1,3 +1,4 @@
+<!-- Dimension(256,256) -->
 
 # Moving Map
 

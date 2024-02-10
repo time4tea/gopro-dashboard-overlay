@@ -3,7 +3,7 @@ import math
 import xml.etree.ElementTree as ET
 from importlib.resources import files, as_file
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, TypeVar, Tuple
 
 import pint
 from pint.formatting import format_unit
@@ -100,7 +100,7 @@ class Converters:
         try:
             units.Quantity(1, units=name)
             return lambda u: u.to(name)
-        except Exception as e:
+        except Exception:
             raise IOError(f"The conversion '{name}' is not supported.")
 
 
@@ -223,7 +223,10 @@ def component_type_of(element):
     return element.attrib["type"].replace("-", "_")
 
 
-def attrib(el, a, f=lambda v: v, **kwargs):
+T = TypeVar("T")
+
+
+def attrib(el, a, f: Callable[[str], T] = lambda v: v, **kwargs) -> T:
     """Use kwargs so can return a default value of None"""
     if a not in el.attrib:
         if "d" in kwargs:
@@ -232,7 +235,7 @@ def attrib(el, a, f=lambda v: v, **kwargs):
     return f(el.attrib[a])
 
 
-def iattrib(el, a, d=None, r=None):
+def iattrib(el, a, d=None, r=None) -> int:
     v = attrib(el, a, f=int, d=d)
     if r:
         if v not in r:
@@ -240,7 +243,7 @@ def iattrib(el, a, d=None, r=None):
     return v
 
 
-def fattrib(el, a, d=None, r=None):
+def fattrib(el, a, d=None, r=None) -> float:
     v = attrib(el, a, f=float, d=d)
     if r:
         if v not in r:
@@ -248,21 +251,22 @@ def fattrib(el, a, d=None, r=None):
     return v
 
 
-def battrib(el, a, d):
+def battrib(el, a, d) -> bool:
     return attrib(el, a, f=lambda s: s.lower() in ["true", "yes", "1"], d=d)
 
 
-def rgbattr(el, a, d):
+def rgbattr(el, a, d) -> Optional[Tuple]:
     v = attrib(el, a, f=lambda s: tuple(map(int, s.split(","))), d=d)
     if v is None:
         return v
     if len(v) != 3 and len(v) != 4:
         raise ValueError(
-            f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), or 4 (r,g,b,a) not {len(v)}")
+            f"RGB value for '{a}' in '{el.tag}' needs to be 3 numbers (r,g,b), or 4 (r,g,b,a) not {len(v)}"
+        )
     return v
 
 
-def at(el):
+def at(el) -> Coordinate:
     return Coordinate(iattrib(el, "x", d=0), iattrib(el, "y", d=0))
 
 
@@ -413,7 +417,7 @@ class Widgets:
         )
 
     @allow_attributes({"x", "y", "metric", "size", "units", "align", "rgb", "outline", "outline_width"})
-    def create_metric_unit(self, element, entry, **kwargs) -> Widget:
+    def create_metric_unit(self, element: ET.Element, entry, **kwargs) -> Widget:
 
         format_string = element.text or "{:~C}"
 
@@ -454,7 +458,7 @@ class Widgets:
         )
 
     @allow_attributes({"x", "y", "size", "align", "direction", "rgb", "outline", "outline_width"})
-    def create_text(self, element, entry, **kwargs) -> Widget:
+    def create_text(self, element: ET.Element, entry, **kwargs) -> Widget:
         if element.text is None:
             raise IOError("Text components should have the text in the element like <component...>Text</component>")
 
@@ -470,7 +474,7 @@ class Widgets:
         )
 
     @allow_attributes({"x", "y", "size", "zoom", "corner_radius", "opacity", "rotate"})
-    def create_moving_map(self, element, entry, **kwargs) -> Widget:
+    def create_moving_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return moving_map(
             at=at(element),
             entry=entry,
@@ -483,7 +487,7 @@ class Widgets:
         )
 
     @allow_attributes({"x", "y", "size", "corner_radius", "opacity"})
-    def create_journey_map(self, element, entry, **kwargs) -> Widget:
+    def create_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return journey_map(
             at(element),
             entry,
@@ -496,7 +500,7 @@ class Widgets:
         )
 
     @allow_attributes({"size", "zoom"})
-    def create_moving_journey_map(self, element, entry, **kwargs) -> Widget:
+    def create_moving_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MovingJourneyMap(
             location=lambda: entry().point,
             privacy_zone=self.privacy,
@@ -507,7 +511,7 @@ class Widgets:
         )
 
     @allow_attributes({"size", "fill", "outline", "fill_width", "outline_width"})
-    def create_circuit_map(self, element, entry, **kwargs) -> Widget:
+    def create_circuit_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         size = iattrib(element, "size", d=256)
         return Circuit(
             location=lambda: entry().point,
@@ -527,7 +531,7 @@ class Widgets:
     @allow_attributes({"x", "y", "metric", "units", "seconds",
                        "samples", "values", "textsize", "filled",
                        "height", "bg", "fill", "line", "text"})
-    def create_chart(self, element, entry, **kwargs) -> Widget:
+    def create_chart(self, element: ET.Element, entry, **kwargs) -> Widget:
         accessor = metric_accessor_from(attrib(element, "metric", d="alt"))
         converter = self.converters.converter(attrib(element, "units", d="metres"))
 
@@ -565,7 +569,7 @@ class Widgets:
         )
 
     @allow_attributes({"size", "textsize", "fg", "bg", "text"})
-    def create_compass(self, element, entry, **kwargs) -> Widget:
+    def create_compass(self, element: ET.Element, entry, **kwargs) -> Widget:
         return Compass(
             size=iattrib(element, "size", d=256),
             reading=lambda: nonesafe(entry().cog),
@@ -576,7 +580,7 @@ class Widgets:
         )
 
     @allow_attributes({"size", "textsize", "arrow", "bg", "text", "outline", "arrow-outline"})
-    def create_compass_arrow(self, element, entry, **kwargs) -> Widget:
+    def create_compass_arrow(self, element: ET.Element, entry, **kwargs) -> Widget:
         return CompassArrow(
             size=iattrib(element, "size", d=256),
             reading=lambda: nonesafe(entry().cog),
@@ -590,7 +594,7 @@ class Widgets:
 
     @allow_attributes({"width", "height", "metric", "units", "fill", "zero", "bar",
                        "outline", "outline-width", "h-neg", "h-pos", "max", "min", "cr"})
-    def create_bar(self, element, entry, **kwargs) -> Widget:
+    def create_bar(self, element: ET.Element, entry, **kwargs) -> Widget:
         return Bar(
             size=Dimension(x=iattrib(element, "width", d=400), y=iattrib(element, "height", d=30)),
             reading=metric_value(
@@ -615,7 +619,7 @@ class Widgets:
     @allow_attributes({"width", "height", "metric", "units", "fill", "zone-divider", "outline",
                        "outline-width", "cr", "max", "min", "z1", "z2", "z3", "z0-rgb", "z1-rgb",
                        "z2-rgb", "z3-rgb"})
-    def create_zone_bar(self, element, entry, **kwargs):
+    def create_zone_bar(self, element: ET.Element, entry, **kwargs):
         return GradientBar(
             size=Dimension(
                 x=iattrib(element, "width", d=400),
@@ -645,7 +649,7 @@ class Widgets:
         )
 
     @allow_attributes({"size", "metric", "units", "textsize", "vs0", "vs", "vfe", "vno", "vne", "rotate"})
-    def create_asi(self, element, entry, **kwargs) -> Widget:
+    def create_asi(self, element: ET.Element, entry, **kwargs) -> Widget:
         return AirspeedIndicator(
             size=iattrib(element, "size", d=256),
             reading=metric_value(
@@ -665,7 +669,7 @@ class Widgets:
         )
 
     @allow_attributes({"size", "metric", "units", "textsize", "needle", "green", "yellow", "end", "rotate", "outline"})
-    def create_msi(self, element, entry, **kwargs) -> Widget:
+    def create_msi(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MotorspeedIndicator(
             size=iattrib(element, "size", d=256),
             reading=metric_value(
@@ -676,16 +680,16 @@ class Widgets:
                 default=0
             ),
             font=self.font(iattrib(element, "textsize", d=16)),
-            needle=iattrib(element, "needle", d=0),
+            needle=battrib(element, "needle", d=True),
             green=iattrib(element, "green", d=0),
             yellow=iattrib(element, "yellow", d=130),
             end=iattrib(element, "end", d=180),
             rotate=iattrib(element, "rotate", d=180),
             outline=iattrib(element, "outline", d=2)
         )
-    
+
     @allow_attributes({"size", "metric", "units", "textsize", "green", "yellow", "end", "rotate", "outline"})
-    def create_msi2(self, element, entry, **kwargs) -> Widget:
+    def create_msi2(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MotorspeedIndicator2(
             size=iattrib(element, "size", d=256),
             reading=metric_value(
@@ -702,9 +706,9 @@ class Widgets:
             rotate=iattrib(element, "rotate", d=180),
             outline=iattrib(element, "outline", d=2)
         )
-    
+
     @allow_attributes({"size", "lock_none", "lock_unknown", "lock_2d", "lock_3d"})
-    def create_gps_lock_icon(self, element, entry, **kwargs) -> Widget:
+    def create_gps_lock_icon(self, element: ET.Element, entry, **kwargs) -> Widget:
         at = Coordinate(0, 0)
         size = iattrib(element, "size", d=64)
         return GPSLock(
@@ -722,17 +726,18 @@ class Widgets:
         except ModuleNotFoundError:
             raise IOError("This widget needs pycairo to be installed - please see docs") from None
 
-    def create_cairo_circuit_map(self, element, entry, **kwargs):
+    def create_cairo_circuit_map(self, element: ET.Element, entry, **kwargs):
         return self.with_cairo(lambda m: m.create_cairo_circuit_map(element, entry, self.framemeta, **kwargs))
 
-    def create_cairo_gauge_marker(self, element, entry, **kwargs):
+    def create_cairo_gauge_marker(self, element: ET.Element, entry, **kwargs):
         return self.with_cairo(lambda m: m.create_cairo_gauge_marker(element, entry, self.converters, **kwargs))
 
-    def create_cairo_gauge_round_annotated(self, element, entry, **kwargs):
-        return self.with_cairo(lambda m: m.create_cairo_gauge_round_annotated(element, entry, self.converters, **kwargs))
+    def create_cairo_gauge_round_annotated(self, element: ET.Element, entry, **kwargs):
+        return self.with_cairo(
+            lambda m: m.create_cairo_gauge_round_annotated(element, entry, self.converters, **kwargs))
 
-    def create_cairo_gauge_arc_annotated(self, element, entry, **kwargs):
+    def create_cairo_gauge_arc_annotated(self, element: ET.Element, entry, **kwargs):
         return self.with_cairo(lambda m: m.create_cairo_gauge_arc_annotated(element, entry, self.converters, **kwargs))
 
-    def create_cairo_gauge_donut(self, element, entry, **kwargs):
+    def create_cairo_gauge_donut(self, element, entry: ET.Element, **kwargs):
         return self.with_cairo(lambda m: m.create_cairo_gauge_donut(element, entry, self.converters, **kwargs))

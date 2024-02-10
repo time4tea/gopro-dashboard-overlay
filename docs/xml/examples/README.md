@@ -45,6 +45,8 @@ Auto Generated File DO NOT EDIT
 
 [07-compass](07-compass/README.md)
 
+[07-motor-speed-indicator](07-motor-speed-indicator/README.md)
+
 [07-zone-bar](07-zone-bar/README.md)
 
 [08-translate](08-translate/README.md)
