@@ -121,31 +121,32 @@ The following metrics are supported:
 
 Currently, there is no mechanism to calculate the overall acceleration, this will come in a future version.
 
-| Metric | Source|Description | Unit |
-|-----------|-------|------------------------------------------------------------|----------------------|
-| hr | gpx |Heart Rate | beats / minute |
-| cadence | gpx | Cadence | revolutions / minute |
-| power | gpx | Power | watts |
-| speed | gopro gpx |Speed (as reported by device if available, or fallback to cspeed) | metres / second |
-| cspeed | gopro gpx | Computed Speed  (derived from location delta)                     | metres / second |
-| temp | gpx | Ambient Temperature | degrees C |
-| gradient | gopro gpx |Gradient of Ascent | - |
-| alt | gopro gpx |Height above sea level | metres |
-| odo | gopro gpx |Distance since start | metres |
-| dist | gopro gpx |Distance since last point | metres |
-| azi | gopro gpx |Azimuth | degree |
-| cog | gopro gpx |Course over Ground | degree |
-| lat | gopro gpx |Latitude | - |
-| lon | gopro gpx |Longitude | - |
-| accl.x | gopro | Acceleration - X Axis | m/s² |
-| accl.y | gopro | Acceleration - Y Axis | m/s² |
-| accl.z | gopro | Acceleration - Z Axis | m/s² |
-| grav.x | gopro | Gravity Vector - X Axis | - |
-| grav.y | gopro | Gravity Vector - Y Axis | - |
-| grav.z | gopro | Gravity Vector - Z Axis | - |
-| ori.pitch | gopro | Orientation - Pitch | radians |
-| ori.roll | gopro | Orientation - Roll | radians |
-| ori.yaw | gopro | Orientation - Yaw | radians |
+| Metric    | Source    | Description                                                       | Unit |
+|-----------|-----------|-------------------------------------------------------------------|----------------------|
+| hr        | gpx       | Heart Rate                                                        | beats / minute |
+| cadence   | gpx       | Cadence                                                           | revolutions / minute |
+| power     | gpx       | Power                                                             | watts |
+| speed     | gopro gpx | Speed (as reported by device if available, or fallback to cspeed) | metres / second |
+| cspeed    | gopro gpx | Computed Speed  (derived from location delta)                     | metres / second |
+| temp      | gpx       | Ambient Temperature                                               | degrees C |
+| gradient  | gopro gpx | Gradient of Ascent                                                | - |
+| alt       | gopro gpx | Height above sea level                                            | metres |
+| odo       | gopro gpx | Distance since start                                              | metres |
+| dist      | gopro gpx | Distance since last point                                         | metres |
+| azi       | gopro gpx | Azimuth                                                           | degree |
+| cog       | gopro gpx | Course over Ground                                                | degree |
+| lat       | gopro gpx | Latitude                                                          | - |
+| lon       | gopro gpx | Longitude                                                         | - |
+| accel     | gopro gpx | Acceleration - Computed from speed                                | m/s² |
+| accl.x    | gopro     | Acceleration - X Axis                                             | m/s² |
+| accl.y    | gopro     | Acceleration - Y Axis                                             | m/s² |
+| accl.z    | gopro     | Acceleration - Z Axis                                             | m/s² |
+| grav.x    | gopro     | Gravity Vector - X Axis                                           | - |
+| grav.y    | gopro     | Gravity Vector - Y Axis                                           | - |
+| grav.z    | gopro     | Gravity Vector - Z Axis                                           | - |
+| ori.pitch | gopro     | Orientation - Pitch                                               | radians |
+| ori.roll  | gopro     | Orientation - Roll                                                | radians |
+| ori.yaw   | gopro     | Orientation - Yaw                                                 | radians |
 
 # Axes of Acceleration & Rotation
 
