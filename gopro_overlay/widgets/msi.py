@@ -1,3 +1,5 @@
+from typing import Callable
+
 from PIL import Image, ImageDraw
 
 from .asi import roundup, scale, Arc
@@ -6,7 +8,8 @@ from .widgets import Widget
 
 class MotorspeedIndicator(Widget):
 
-    def __init__(self, size, font, needle, reading, green, yellow, end, rotate=180, outline=2):
+    def __init__(self, size: int, font, needle: int, reading: Callable[[], float], green: int, yellow: int, end: int,
+                 rotate: int = 180, outline: int = 2):
         self.end = end
         self.yellow = yellow
         self.green = green
@@ -115,7 +118,8 @@ class MotorspeedIndicator(Widget):
 
 class MotorspeedIndicator2(Widget):
 
-    def __init__(self, size, font, reading, green, yellow, end, rotate=180, outline=2):
+    def __init__(self, size: int, font, reading: Callable[[], float], green: int, yellow: int, end: int,
+                 rotate: int = 180, outline: int = 2):
         self.end = end
         self.yellow = yellow
         self.green = green
