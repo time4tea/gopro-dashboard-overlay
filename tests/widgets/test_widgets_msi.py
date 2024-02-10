@@ -3,7 +3,7 @@ import pytest
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.point import Coordinate
 from gopro_overlay.widgets.asi import AirspeedIndicator
-from gopro_overlay.widgets.msi import MotorspeedIndicator
+from gopro_overlay.widgets.msi import MotorspeedIndicator, MotorspeedIndicator2
 from gopro_overlay.widgets.widgets import Translate
 from tests.widgets import test_widgets_setup
 from tests.approval import approve_image
@@ -24,6 +24,22 @@ def test_gauge():
             MotorspeedIndicator(
                 size=size, font=font, green=40, yellow=46, end=200,
                 needle=1,
+                reading=lambda: 125
+            )
+        ]
+    )
+
+
+@pytest.mark.gfx
+@approve_image
+def test_gauge_msi_2():
+    size = 256
+    return time_rendering(
+        name="test_gauge",
+        dimensions=Dimension(size, size),
+        widgets=[
+            MotorspeedIndicator2(
+                size=size, font=font, green=40, yellow=46, end=200,
                 reading=lambda: 125
             )
         ]
