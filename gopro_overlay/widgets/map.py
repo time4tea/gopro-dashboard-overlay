@@ -210,9 +210,10 @@ def view_window(size, d):
 
 class MovingJourneyMap(Widget):
 
-    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer):
+    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer, fulltimeseries=None):
         self.privacy_zone = privacy_zone
         self.timeseries = timeseries
+        self.fulltimeseries = fulltimeseries
         self.size = size
         self.renderer = renderer
         self.zoom = zoom
@@ -223,7 +224,10 @@ class MovingJourneyMap(Widget):
 
     def _redraw(self):
         journey = Journey()
-        self.timeseries.process(journey.accept)
+        if self.fulltimeseries is None:
+            self.timeseries.process(journey.accept)
+        else:
+            self.fulltimeseries.process(journey.accept)
 
         bbox = journey.bounding_box
 

@@ -509,6 +509,7 @@ class Widgets:
             location=lambda: entry().point,
             privacy_zone=self.privacy,
             renderer=self.renderer,
+            fulltimeseries=self.fulltimeseries,
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
