@@ -83,8 +83,9 @@ class MaybeRoundedBorder:
 
 class JourneyMap(Widget):
     def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
-                 privacy_zone=NoPrivacyZone()):
+                 privacy_zone=NoPrivacyZone(), fulltimeseries=None):
         self.timeseries = timeseries
+        self.fulltimeseries = fulltimeseries
         self.privacy_zone = privacy_zone
         self.at = at
         self.location = location
@@ -98,7 +99,10 @@ class JourneyMap(Widget):
         if self.map is None:
             journey = Journey()
 
-            self.timeseries.process(journey.accept)
+            if self.fulltimeseries is None:
+                self.timeseries.process(journey.accept)
+            else:
+                self.fulltimeseries.process(journey.accept)
 
             bbox = journey.bounding_box
             self.map = geotiler.Map(extent=(bbox.min.lon, bbox.min.lat, bbox.max.lon, bbox.max.lat),
