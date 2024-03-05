@@ -227,7 +227,8 @@ class MovingJourneyMap(Widget):
         if self.fulltimeseries is None:
             self.timeseries.process(journey.accept)
         else:
-            self.fulltimeseries.process(journey.accept)
+            self.fulltimeseries.process(journey.accept_location)
+            self.timeseries.process(journey.accept_minmax)
 
         bbox = journey.bounding_box
 
