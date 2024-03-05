@@ -63,14 +63,21 @@ class Journey:
         self.badlat = MinMax("badlat")
         self.badlon = MinMax("badlon")
 
-    def accept(self, item):
+    def accept_location(self, item):
         if item.gpsfix in GPS_FIXED_VALUES:
             self.locations.append(item.point)
+
+    def accept_minmax(self, item):
+        if item.gpsfix in GPS_FIXED_VALUES:
             self.lat.update(item.point.lat)
             self.lon.update(item.point.lon)
         else:
             self.badlat.update(item.point.lat)
             self.badlon.update(item.point.lon)
+
+    def accept(self, item):
+        self.accept_location(item)
+        self.accept_minmax(item)
 
     @property
     def bounding_box(self) -> BoundingBox:
