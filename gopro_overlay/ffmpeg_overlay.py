@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import datetime
 from pathlib import Path
 
 from gopro_overlay.dimensions import Dimension
@@ -42,11 +43,13 @@ class FFMPEGOverlay:
             output: Path,
             overlay_size: Dimension,
             options: FFMPEGOptions = None,
-            execution=None
+            execution=None,
+            creation_time: datetime.datetime = None
     ):
         self.exe = ffmpeg
         self.output = output
         self.overlay_size = overlay_size
+        self.creation_time = creation_time if creation_time else datetime.datetime.now()
         self.execution = execution if execution else InProcessExecution()
         self.options = options if options else FFMPEGOptions()
 
@@ -63,6 +66,7 @@ class FFMPEGOverlay:
             "-i", "-",
             "-r", "30",
             self.options.output,
+            "-metadata", f"creation_time={self.creation_time.isoformat()}",
             str(self.output)
         ])
 
@@ -78,13 +82,15 @@ class FFMPEGOverlayVideo:
             output: Path,
             overlay_size: Dimension,
             options: FFMPEGOptions = None,
-            execution=None
+            execution=None,
+            creation_time: datetime.datetime = None
     ):
         self.exe = ffmpeg
         self.output = output
         self.input = input
         self.options = options if options else FFMPEGOptions()
         self.overlay_size = overlay_size
+        self.creation_time = creation_time if creation_time else datetime.datetime.now()
         self.execution = execution if execution else InProcessExecution()
 
     @contextlib.contextmanager
@@ -101,6 +107,7 @@ class FFMPEGOverlayVideo:
             "-i", "-",
             "-filter_complex", self.options.filter_complex,
             self.options.output,
+            "-metadata", f"creation_time={self.creation_time.isoformat()}",
             str(self.output)
         ])
 
