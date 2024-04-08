@@ -143,8 +143,7 @@ def calculate_gradient():
 def custom_passthrough():
     def accept(e):
         return {
-            "custom_fields": e.custom_fields,
-            "custom_metadata": e.custom_metadata
+            "custom": e.custom
         }
 
     return accept

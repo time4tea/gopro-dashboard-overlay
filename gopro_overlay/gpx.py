@@ -9,7 +9,7 @@ from .gpmf import GPSFix
 from .point import Point
 from .timeseries import Timeseries, Entry
 
-GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed custom_fields custom_metadata")
+GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed custom")
 
 
 def fudge(gpx):
@@ -27,8 +27,7 @@ def fudge(gpx):
                     "cad": None,
                     "power": None,
                     "speed": None,
-                    "custom_fields": {},
-                    "custom_metadata": metadata
+                    "custom": {"field": {}, "metadata": metadata},
                 }
                 for extension in point.extensions:
                     for element in extension.iter():
@@ -36,7 +35,7 @@ def fudge(gpx):
                         if tag in ("atemp", "hr", "cad", "power", "speed"):
                             data[tag] = float(element.text)
                         else:
-                            data["custom_fields"][tag] = element.text
+                            data["custom"]["field"][tag] = element.text
                 yield GPX(**data)
 
 
@@ -51,8 +50,7 @@ def with_unit(gpx, units):
         units.Quantity(gpx.atemp, units.celsius) if gpx.atemp is not None else None,
         units.Quantity(gpx.power, units.watt) if gpx.power is not None else None,
         units.Quantity(gpx.speed, units.mps) if gpx.speed is not None else None,
-        gpx.custom_fields,
-        gpx.custom_metadata
+        gpx.custom
     )
 
 
@@ -90,8 +88,7 @@ def gpx_to_timeseries(gpx: List[GPX], units):
             gpsfix=GPSFix.LOCK_3D.value,
             gpslock=units.Quantity(GPSFix.LOCK_3D.value),
 
-            custom_fields=point.custom_fields,
-            custom_metadata=point.custom_metadata
+            custom=point.custom,
         )
         for index, point in enumerate(gpx)
     ]

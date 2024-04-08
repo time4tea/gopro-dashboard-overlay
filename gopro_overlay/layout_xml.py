@@ -305,12 +305,19 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
         "ori.yaw": lambda e: e.ori.yaw if e.ori else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
-        "custom_fields": lambda e: e.custom_fields,
-        "custom_metadata": lambda e: e.custom_metadata,
     }
     if name in accessors:
         return accessors[name]
-    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
+    elif name.startswith("custom."):
+        def f(e):
+            try:
+                return e.custom[name.split(".")[1]][name.split(".", 2)[2]]
+            except KeyError:
+                return "-"
+            except IndexError:
+                raise ValueError(f"Custom field {name.split('.', 1)[1]} not found")
+        return f
+    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys()) + ['custom']}")
 
 
 def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> Callable[[pint.Quantity], str]:
@@ -322,23 +329,22 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
 
     if format_string is not None:
         def f(q):
-            if type(q) != dict:
-                if format_string == "pace":
-                    # pace is in minutes, and we want minutes / seconds
-                    return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
-                try:
-                    return format(q.m, format_string)
-                except ValueError:
-                    raise ValueError(f"Unable to format value with format string {format_string}")
-            else:
-                return q.get(format_string, "-")
+            if type(q) == str:
+                raise ValueError("Custom fields and metadata cannot be formatted")
+            if format_string == "pace":
+                # pace is in minutes, and we want minutes / seconds
+                return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
+            try:
+                return format(q.m, format_string)
+            except ValueError:
+                raise ValueError(f"Unable to format value with format string {format_string}")
         return f
     elif dp is not None:
-        # hack to allow for custom fields or metadata to be passed through (what to replace 'none' with?)
+        # hack to allow for custom fields or metadata to be passed through
         def f(q):
-            if type(q) != dict:
-                return format(q.m, f".{dp}f")
-            raise ValueError("Custom fields or metadata require 'format' to be set")
+            if type(q) == str:
+                return q
+            return format(q.m, f".{dp}f")
         return f
     else:
         raise Defect("Problem deciding how to format")

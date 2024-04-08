@@ -43,11 +43,12 @@ class Entry:
         position = point / range
 
         items = {}
+        #CHANGE!!
         for key in self.items.keys():
             start = self.items[key]
             try:
                 end = other.items[key]
-                if key in ("custom_fields", "custom_metadata"):
+                if key in ("custom"):
                     items[key] = start
                     continue
                 diff = end - start
