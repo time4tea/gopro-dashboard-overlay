@@ -43,11 +43,11 @@ class Entry:
         position = point / range
 
         items = {}
-        #CHANGE!!
         for key in self.items.keys():
             start = self.items[key]
             try:
                 end = other.items[key]
+                # Custom field and metadata are not interpolated at this time
                 if key in ("custom"):
                     items[key] = start
                     continue

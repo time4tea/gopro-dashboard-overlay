@@ -13,6 +13,8 @@ units.define("pace_kt = minutes / nautical_mile = paceKt")
 units.define("number = []")
 # this is a hack to support "lat" and "lon" as a metric.
 units.define("location = []")
+# continue with the hack to support custom fields and metadata
+units.define("custom = []")
 
 
 def metres(n):

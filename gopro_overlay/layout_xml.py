@@ -87,6 +87,8 @@ class Converters:
             "miles": lambda u: u.to("mile"),
             "metres": lambda u: u.to("m"),
             "nautical_miles": lambda u: u.to("nautical_mile"),
+
+            "custom": lambda u: units.Quantity(float(u), units.custom)
         }
 
     def converter(self, name: str) -> Callable[[pint.Quantity], Optional[pint.Quantity]]:
@@ -311,9 +313,9 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
     elif name.startswith("custom."):
         def f(e):
             try:
-                return e.custom[name.split(".")[1]][name.split(".", 2)[2]]
+                return units.Quantity(e.custom[name.split(".")[1]][name.split(".", 2)[2]], units.custom)
             except KeyError:
-                return "-"
+                return None
             except IndexError:
                 raise ValueError(f"Custom field {name.split('.', 1)[1]} not found")
         return f
@@ -342,8 +344,8 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
     elif dp is not None:
         # hack to allow for custom fields or metadata to be passed through
         def f(q):
-            if type(q) == str:
-                return q
+            if type(q.m) == str:
+                return q.m
             return format(q.m, f".{dp}f")
         return f
     else:
