@@ -321,19 +321,18 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
         dp = 2
 
     if format_string is not None:
-        if format_string == "pace":
-            # pace is in minutes, and we want minutes / seconds
-            return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
-        else:
-            def f(q):
-                if type(q) != dict:
-                    try:
-                        return format(q.m, format_string)
-                    except ValueError:
-                        raise ValueError(f"Unable to custom field ot metadata value {format_string}")
-                else:
-                    return q.get(format_string, "-")
-            return f
+        def f(q):
+            if type(q) != dict:
+                if format_string == "pace":
+                    # pace is in minutes, and we want minutes / seconds
+                    return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
+                try:
+                    return format(q.m, format_string)
+                except ValueError:
+                    raise ValueError(f"Unable to format value with format string {format_string}")
+            else:
+                return q.get(format_string, "-")
+        return f
     elif dp is not None:
         # hack to allow for custom fields or metadata to be passed through (what to replace 'none' with?)
         def f(q):
