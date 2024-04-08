@@ -88,7 +88,8 @@ class Converters:
             "metres": lambda u: u.to("m"),
             "nautical_miles": lambda u: u.to("nautical_mile"),
 
-            "custom": lambda u: units.Quantity(float(u), units.custom)
+            # convert custom fields and metadata to float for charts
+            "custom.float": lambda u: units.Quantity(float(u.m), units.custom)
         }
 
     def converter(self, name: str) -> Callable[[pint.Quantity], Optional[pint.Quantity]]:
@@ -331,7 +332,7 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
 
     if format_string is not None:
         def f(q):
-            if type(q) == str:
+            if type(q.m) == str:
                 raise ValueError("Custom fields and metadata cannot be formatted")
             if format_string == "pace":
                 # pace is in minutes, and we want minutes / seconds
