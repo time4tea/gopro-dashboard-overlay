@@ -305,6 +305,9 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
         "ori.yaw": lambda e: e.ori.yaw if e.ori else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
+        "previous-stop": lambda e: e.transit_previous_stop,
+        "current-stop": lambda e: e.transit_current_stop,
+        "next-stop": lambda e: e.transit_next_stop,
     }
     if name in accessors:
         return accessors[name]
@@ -328,7 +331,8 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
             except ValueError:
                 raise ValueError(f"Unable to format value with format string {format_string}")
     elif dp is not None:
-        return lambda q: format(q.m, f".{dp}f")
+        # hack to allow for string values to be passed through
+        return lambda q: format(q.m, f".{dp}f") if type(q) != str else q
     else:
         raise Defect("Problem deciding how to format")
 

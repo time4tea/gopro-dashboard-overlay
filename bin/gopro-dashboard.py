@@ -272,6 +272,8 @@ if __name__ == "__main__":
                 frame_meta.process(timeseries_process.process_kalman("speed", lambda e: e.speed))
                 frame_meta.process(timeseries_process.filter_locked())
 
+                frame_meta.process(timeseries_process.transit_passthrough())
+
             # privacy zone applies everywhere, not just at start, so might not always be suitable...
             if args.privacy:
                 lat, lon, km = args.privacy.split(",")

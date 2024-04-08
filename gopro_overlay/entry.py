@@ -47,6 +47,9 @@ class Entry:
             start = self.items[key]
             try:
                 end = other.items[key]
+                if key in ("transit_previous_stop", "transit_current_stop", "transit_next_stop"):
+                    items[key] = start
+                    continue
                 diff = end - start
                 interp = start + (diff * position)
             except KeyError:

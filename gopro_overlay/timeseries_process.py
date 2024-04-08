@@ -138,3 +138,14 @@ def calculate_gradient():
                 }
 
     return accept
+
+
+def transit_passthrough():
+    def accept(e):
+        return {
+            "transit_previous_stop": e.transit_previous_stop,
+            "transit_current_stop": e.transit_current_stop,
+            "transit_next_stop": e.transit_next_stop,
+        }
+
+    return accept
