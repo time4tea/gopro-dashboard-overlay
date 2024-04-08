@@ -305,9 +305,8 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
         "ori.yaw": lambda e: e.ori.yaw if e.ori else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
-        "previous-stop": lambda e: e.transit_previous_stop,
-        "current-stop": lambda e: e.transit_current_stop,
-        "next-stop": lambda e: e.transit_next_stop,
+        "custom_fields": lambda e: e.custom_fields,
+        "custom_metadata": lambda e: e.custom_metadata,
     }
     if name in accessors:
         return accessors[name]
@@ -326,13 +325,22 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
             # pace is in minutes, and we want minutes / seconds
             return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
         else:
-            try:
-                return lambda q: format(q.m, format_string)
-            except ValueError:
-                raise ValueError(f"Unable to format value with format string {format_string}")
+            def f(q):
+                if type(q) != dict:
+                    try:
+                        return format(q.m, format_string)
+                    except ValueError:
+                        raise ValueError(f"Unable to custom field ot metadata value {format_string}")
+                else:
+                    return q.get(format_string, "-")
+            return f
     elif dp is not None:
-        # hack to allow for string values to be passed through
-        return lambda q: format(q.m, f".{dp}f") if type(q) != str else q
+        # hack to allow for custom fields or metadata to be passed through (what to replace 'none' with?)
+        def f(q):
+            if type(q) != dict:
+                return format(q.m, f".{dp}f")
+            raise ValueError("Custom fields or metadata require 'format' to be set")
+        return f
     else:
         raise Defect("Problem deciding how to format")
 

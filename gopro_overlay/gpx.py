@@ -9,10 +9,11 @@ from .gpmf import GPSFix
 from .point import Point
 from .timeseries import Timeseries, Entry
 
-GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed transit_previous_stop transit_current_stop transit_next_stop")
+GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed custom_fields custom_metadata")
 
 
 def fudge(gpx):
+    metadata = dict((m.tag, m.text) for m in gpx.metadata_extensions)
     for track in gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
@@ -26,17 +27,16 @@ def fudge(gpx):
                     "cad": None,
                     "power": None,
                     "speed": None,
-                    "transit_previous_stop": None,
-                    "transit_current_stop": None,
-                    "transit_next_stop": None
+                    "custom_fields": {},
+                    "custom_metadata": metadata
                 }
                 for extension in point.extensions:
                     for element in extension.iter():
                         tag = element.tag[element.tag.find("}") + 1:]
                         if tag in ("atemp", "hr", "cad", "power", "speed"):
                             data[tag] = float(element.text)
-                        elif tag in ("transit_previous_stop", "transit_current_stop", "transit_next_stop"):
-                            data[tag] = element.text
+                        else:
+                            data["custom_fields"][tag] = element.text
                 yield GPX(**data)
 
 
@@ -51,9 +51,8 @@ def with_unit(gpx, units):
         units.Quantity(gpx.atemp, units.celsius) if gpx.atemp is not None else None,
         units.Quantity(gpx.power, units.watt) if gpx.power is not None else None,
         units.Quantity(gpx.speed, units.mps) if gpx.speed is not None else None,
-        gpx.transit_previous_stop,
-        gpx.transit_current_stop,
-        gpx.transit_next_stop
+        gpx.custom_fields,
+        gpx.custom_metadata
     )
 
 
@@ -91,9 +90,8 @@ def gpx_to_timeseries(gpx: List[GPX], units):
             gpsfix=GPSFix.LOCK_3D.value,
             gpslock=units.Quantity(GPSFix.LOCK_3D.value),
 
-            transit_previous_stop=point.transit_previous_stop,
-            transit_current_stop=point.transit_current_stop,
-            transit_next_stop=point.transit_next_stop
+            custom_fields=point.custom_fields,
+            custom_metadata=point.custom_metadata
         )
         for index, point in enumerate(gpx)
     ]
