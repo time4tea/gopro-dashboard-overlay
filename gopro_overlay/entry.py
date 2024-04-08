@@ -48,7 +48,7 @@ class Entry:
             try:
                 end = other.items[key]
                 # Custom field and metadata are not interpolated at this time
-                if key in ("custom"):
+                if key == "custom":
                     items[key] = start
                     continue
                 diff = end - start

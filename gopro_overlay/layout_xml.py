@@ -336,7 +336,7 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
                 raise ValueError("Custom fields and metadata cannot be formatted")
             if format_string == "pace":
                 # pace is in minutes, and we want minutes / seconds
-                return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
+                return '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
             try:
                 return format(q.m, format_string)
             except ValueError:
