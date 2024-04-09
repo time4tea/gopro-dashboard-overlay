@@ -333,7 +333,7 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
     if format_string is not None:
         def f(q):
             if type(q.m) == str:
-                raise ValueError("Custom fields and metadata cannot be formatted")
+                raise ValueError("String values cannot be formatted")
             if format_string == "pace":
                 # pace is in minutes, and we want minutes / seconds
                 return '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
