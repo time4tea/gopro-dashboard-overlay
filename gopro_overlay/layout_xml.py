@@ -88,7 +88,7 @@ class Converters:
             "metres": lambda u: u.to("m"),
             "nautical_miles": lambda u: u.to("nautical_mile"),
 
-            # convert custom fields and metadata to float for charts
+            # format custom fields and metadata for components which expect a float
             "custom.float": lambda u: units.Quantity(float(u.m), units.custom)
         }
 
@@ -320,7 +320,7 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
             except IndexError:
                 raise ValueError(f"Custom field {name.split('.', 1)[1]} not found")
         return f
-    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys()) + ['custom']}")
+    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys()) + ['custom.*']}")
 
 
 def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> Callable[[pint.Quantity], str]:
