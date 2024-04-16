@@ -89,7 +89,7 @@ class Converters:
             "nautical_miles": lambda u: u.to("nautical_mile"),
 
             # format custom fields and metadata for components which expect a float
-            "custom.float": lambda u: units.Quantity(float(u.m), units.custom)
+            "custom.float": lambda u: units.Quantity(float(u.m), units.custom) if u else None
         }
 
     def converter(self, name: str) -> Callable[[pint.Quantity], Optional[pint.Quantity]]:
@@ -314,7 +314,8 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
     elif name.startswith("custom."):
         def f(e):
             try:
-                return units.Quantity(e.custom[name.split(".")[1]][name.split(".", 2)[2]], units.custom)
+                metric = e.custom[name.split(".")[1]][name.split(".", 2)[2]]
+                return units.Quantity(metric, units.custom) if metric else None
             except KeyError:
                 return None
             except IndexError:
