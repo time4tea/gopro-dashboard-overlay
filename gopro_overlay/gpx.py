@@ -12,6 +12,16 @@ from .timeseries import Timeseries, Entry
 GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed custom")
 
 
+class Reference:
+    def __init__(self, data: dict):
+        self.data = data
+    
+    def __getitem__(self, key):
+        try:
+            return self.data["metadata"][self.data["field"][key]]
+        except KeyError:
+            return None
+
 def fudge(gpx):
     metadata = dict((m.tag, m.text) for m in gpx.metadata_extensions)
     for track in gpx.tracks:
@@ -36,6 +46,7 @@ def fudge(gpx):
                             data[tag] = float(element.text)
                         else:
                             data["custom"]["field"][tag] = element.text
+                data["custom"].update({"ref": Reference(data["custom"])})
                 yield GPX(**data)
 
 

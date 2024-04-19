@@ -311,17 +311,15 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
     }
     if name in accessors:
         return accessors[name]
-    elif name.startswith("custom."):
+    elif name.startswith("custom.field.") or name.startswith("custom.metadata.") or name.startswith("custom.ref."):
         def f(e):
             try:
                 metric = e.custom[name.split(".")[1]][name.split(".", 2)[2]]
                 return units.Quantity(metric, units.custom) if metric else None
             except KeyError:
-                return None
-            except IndexError:
-                raise ValueError(f"Custom field {name.split('.', 1)[1]} not found")
+                return None # Custom field not found
         return f
-    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys()) + ['custom.*']}")
+    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys()) + ['custom.field', 'custom.metadata', 'custom.ref']}")
 
 
 def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> Callable[[pint.Quantity], str]:
