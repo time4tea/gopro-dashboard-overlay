@@ -17,10 +17,7 @@ class Reference:
         self.data = data
     
     def __getitem__(self, key):
-        try:
-            return self.data["metadata"][self.data["field"][key]]
-        except KeyError:
-            return None
+        return self.data["metadata"][self.data["field"][key]]
 
 def fudge(gpx):
     metadata = dict((m.tag, m.text) for m in gpx.metadata_extensions)
