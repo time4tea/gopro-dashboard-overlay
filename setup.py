@@ -10,7 +10,7 @@ requires = [
     "pillow==10.1.0",
     "pint==0.22",
     "geotiler==0.15",
-    "gpxpy==1.6.1",
+    "gpxpy>=1.6.1,<=1.6.2",
     "fitdecode==0.10.0",
     "geographiclib==1.52",
     "progressbar2==4.2.0",
