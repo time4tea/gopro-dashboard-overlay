@@ -53,7 +53,7 @@ def icon(file, at, transform=lambda x: x) -> Widget:
 
 def simple_icon(at, file, size=64, invert=False):
     return icon(file, at, transform=compose(
-        functools.partial(transform_resize, (size, size)),
+        functools.partial(transform_resize, (size, size)) if size else transform_identity,
         transform_rgba,
         transform_negative if invert else transform_identity
     ))
@@ -68,7 +68,7 @@ def transform_resize(target, img):
 
 
 def transform_rgba(img):
-    return img.convert("RGBA") if img.mode == "P" else img
+    return img.convert("RGBA") if img.mode in ("P", "RGB") else img
 
 
 def transform_negative(img):
