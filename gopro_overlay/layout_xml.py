@@ -505,7 +505,7 @@ class Widgets:
             rotate=battrib(element, "rotate", d=True)
         )
 
-    @allow_attributes({"x", "y", "size", "corner_radius", "opacity"})
+    @allow_attributes({"x", "y", "size", "corner_radius", "opacity", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
     def create_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return journey_map(
             at(element),
@@ -515,18 +515,35 @@ class Widgets:
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             corner_radius=iattrib(element, "corner_radius", 0),
-            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0))
+            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
+            style={
+                "pos_rgb": rgbattr(element, "pos_rgb", d=(0, 0, 255)),
+                "pos_size": iattrib(element, "pos_size", d=6),
+                "path_rgb": rgbattr(element, "path_rgb", d=(255, 0, 0)),
+                "path_width": iattrib(element, "path_width", d=4),
+                "wpt_rgb": rgbattr(element, "wpt_rgb", d=(0, 255, 0)),
+                "wpt_size": iattrib(element, "wpt_size", d=6)
+            }
         )
 
-    @allow_attributes({"size", "zoom"})
+    @allow_attributes({"size", "zoom", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
     def create_moving_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MovingJourneyMap(
             location=lambda: entry().point,
+            waypoints=lambda: entry().custom["waypoints"],
             privacy_zone=self.privacy,
             renderer=self.renderer,
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
-            zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
+            zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
+            style={
+                "pos_rgb": rgbattr(element, "pos_rgb", d=(0, 0, 255)),
+                "pos_size": iattrib(element, "pos_size", d=6),
+                "path_rgb": rgbattr(element, "path_rgb", d=(255, 0, 0)),
+                "path_width": iattrib(element, "path_width", d=4),
+                "wpt_rgb": rgbattr(element, "wpt_rgb", d=(0, 255, 0)),
+                "wpt_size": iattrib(element, "wpt_size", d=6)
+            }
         )
 
     @allow_attributes({"size", "fill", "outline", "fill_width", "outline_width"})

@@ -20,7 +20,8 @@ class Reference:
         return self.data["metadata"][self.data["field"][key]]
 
 def fudge(gpx):
-    metadata = dict((m.tag, m.text) for m in gpx.metadata_extensions)
+    metadata = {m.tag: m.text for m in gpx.metadata_extensions}
+    waypoints = gpx.waypoints
     for track in gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
@@ -34,7 +35,7 @@ def fudge(gpx):
                     "cad": None,
                     "power": None,
                     "speed": None,
-                    "custom": {"field": {}, "metadata": metadata},
+                    "custom": {"field": {}, "metadata": metadata, "waypoints": waypoints},
                 }
                 for extension in point.extensions:
                     for element in extension.iter():

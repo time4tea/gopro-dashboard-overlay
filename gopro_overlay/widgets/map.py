@@ -82,17 +82,21 @@ class MaybeRoundedBorder:
 
 
 class JourneyMap(Widget):
-    def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
-                 privacy_zone=NoPrivacyZone()):
+    def __init__(self, timeseries, at, location, waypoints, renderer, style, size=256, corner_radius=None,
+                 opacity=0.7, privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
         self.at = at
         self.location = location
+        self.waypoints = waypoints
         self.renderer = renderer
         self.size = size
         self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
+        self.style = style
+
         self.map = None
         self.image = None
+        self.cached_waypoints = None
 
     def _init_maybe(self):
         if self.map is None:
@@ -118,9 +122,16 @@ class JourneyMap(Widget):
             image = self.renderer(self.map)
 
             draw = ImageDraw.Draw(image)
-            draw.line(plots, fill=(255, 0, 0), width=4)
+            draw.line(plots, fill=self.style["path_rgb"], width=self.style["path_width"])
 
             self.image = self.border.rounded(image)
+
+        if self.cached_waypoints is None:
+            wp_draw = ImageDraw.Draw(self.image)
+            for wp in self.waypoints():
+                draw_marker(wp_draw, self.map.rev_geocode((wp.longitude, wp.latitude)),
+                            size=self.style["wpt_size"], fill=self.style["wpt_rgb"])
+            self.cached_waypoints = True
 
     def draw(self, image: Image, draw: ImageDraw):
         self._init_maybe()
@@ -131,7 +142,7 @@ class JourneyMap(Widget):
 
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
-        draw_marker(draw, current, 6)
+        draw_marker(draw, current, size=self.style["pos_size"], fill=self.style["pos_rgb"])
 
         image.alpha_composite(frame, self.at.tuple())
 
@@ -206,16 +217,19 @@ def view_window(size, d):
 
 class MovingJourneyMap(Widget):
 
-    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer):
+    def __init__(self, timeseries, privacy_zone, location, waypoints, size, zoom, renderer, style):
         self.privacy_zone = privacy_zone
         self.timeseries = timeseries
         self.size = size
         self.renderer = renderer
         self.zoom = zoom
         self.location = location
+        self.waypoints = waypoints
+        self.style = style
 
         self.cached_map_image = None
         self.cached_map = None
+        self.cached_waypoints = None
 
     def _redraw(self):
         journey = Journey()
@@ -246,13 +260,20 @@ class MovingJourneyMap(Widget):
         ]
 
         draw = ImageDraw.Draw(map_image)
-        draw.line(plots, fill=(255, 0, 0), width=4)
+        draw.line(plots, fill=self.style["path_rgb"], width=self.style["path_width"])
 
         return map, map_image
 
     def draw(self, image: Image, draw: ImageDraw):
         if self.cached_map is None:
             self.cached_map, self.cached_map_image = self._redraw()
+
+        if self.cached_waypoints is None:
+            wp_draw = ImageDraw.Draw(self.cached_map_image)
+            for wp in self.waypoints():
+                draw_marker(wp_draw, self.cached_map.rev_geocode((wp.longitude, wp.latitude)),
+                            size=self.style["wpt_size"], fill=self.style["wpt_rgb"])
+            self.cached_waypoints = True
 
         location = self.location()
         if location.lon is not None and location.lat is not None:
@@ -264,7 +285,8 @@ class MovingJourneyMap(Widget):
             tb = view_window(self.size, map_size[1])(int(current_position_in_big_map[1]))
 
             image.alpha_composite(self.cached_map_image, (0, 0), source=(lr[0], tb[0], lr[1], tb[1]))
-            draw_marker(draw, (int(self.size / 2), int(self.size / 2)), 6)
+            draw_marker(draw, (int(self.size / 2), int(self.size / 2)),
+                        size=self.style["pos_size"], fill=self.style["pos_rgb"])
 
 
 class OutLine:
