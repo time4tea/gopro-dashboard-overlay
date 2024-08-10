@@ -40,7 +40,7 @@ Use `x` and `y` to set the position on screen
 <kbd>![06-journey-map-2.png](06-journey-map-2.png)</kbd>
 
 
-# Colours
+## Colours
 
 Refer to the [Moving Journey Map docs](../06-moving-journey-map/README.md#colours) for details on setting colours and sizes for the current position, path, and waypoints.
 
