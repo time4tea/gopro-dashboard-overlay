@@ -40,6 +40,11 @@ Use `x` and `y` to set the position on screen
 <kbd>![06-journey-map-2.png](06-journey-map-2.png)</kbd>
 
 
+# Colours
+
+Refer to the [Moving Journey Map docs](../06-moving-journey-map/README.md#colours) for details on setting colours and sizes for the current position, path, and waypoints.
+
+
 ## Opacity
 
 Set the opacity using `opacity`. It defaults to 1.0 which is completely opaque. 0.0 would be completely transparent.

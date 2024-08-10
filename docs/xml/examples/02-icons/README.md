@@ -46,6 +46,8 @@ To rescale the icon use `size`
 
 *If `size` is 0, the icon will be rendered at its original size. This also allows for non-square icons to be rendered at their original aspect ratio.*
 
+***Make sure `invert="false"` is used if you want to display the original icon.***
+
 ## Positioning
 
 This component supports positioning with `x` and `y`.
