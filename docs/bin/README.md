@@ -144,6 +144,7 @@ Since v0.127.0
 - `vp9` - Create a vp9 webm movie. Note: use an output filename extension of `.webm`
 - `vp8` - Create a vp8 webm movie. Note: use an output filename extension of `.webm`
 - `overlay` Use the `qtrle` codec to create a movie with an alpha channel which is much smaller than PNG images. Note: use an output filename extension of `.mov`
+
 ## User-defined profiles
 
 Create a file `~/.gopro-graphics/ffmpeg-profiles.json`, and put FFMPEG parameters to control the `input` and `output`
