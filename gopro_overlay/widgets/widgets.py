@@ -68,7 +68,7 @@ def transform_resize(target, img):
 
 
 def transform_rgba(img):
-    return img.convert("RGBA") if img.mode in ("P", "RGB") else img
+    return img.convert("RGBA")
 
 
 def transform_negative(img):
