@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import datetime
-import sys
+import sys, os
 from importlib import metadata
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
@@ -72,7 +72,7 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
     elif layout == "xml":
         return layout_from_xml(
             load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter,
-            decorator=profiler, converters=converters
+            decorator=profiler, converters=converters, xml_path=os.path.abspath(layout_xml)
         )
     else:
         raise ValueError(f"Unsupported layout {args.layout_creator}")

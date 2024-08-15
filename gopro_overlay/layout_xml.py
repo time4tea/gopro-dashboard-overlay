@@ -108,7 +108,7 @@ class Converters:
 
 
 def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
-                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters()):
+                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters(), xml_path=None):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -124,6 +124,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         renderer=renderer,
         framemeta=framemeta,
         converters=converters,
+        xml_path=xml_path
     )
 
     def name_of(element):
@@ -408,12 +409,13 @@ class FloatRange:
 
 class Widgets:
 
-    def __init__(self, font, privacy, renderer, framemeta, converters):
+    def __init__(self, font, privacy, renderer, framemeta, converters, xml_path=None):
         self.framemeta = framemeta
         self.renderer = renderer
         self.privacy = privacy
         self.font = font
         self.converters = converters
+        self.xml_path = xml_path
 
     def _font(self, element, name, d):
         return self.font(iattrib(element, name, d=d, r=range(1, 2000)))
@@ -460,7 +462,8 @@ class Widgets:
             at=at(element),
             file=attrib(element, "file"),
             size=iattrib(element, "size", d=64),
-            invert=battrib(element, "invert", d=True)
+            invert=battrib(element, "invert", d=True),
+            xml_path=self.xml_path
         )
 
     @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb", "outline", "outline_width"})
