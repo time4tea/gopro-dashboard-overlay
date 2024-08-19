@@ -631,7 +631,7 @@ class Widgets:
             arrow_outline=rgbattr(element, "arrow-outline", d=(0, 0, 0)),
         )
 
-    @allow_attributes({"width", "height", "metric", "units", "fill", "zero", "bar",
+    @allow_attributes({"width", "height", "metric", "units", "fill", "zero", "bar", "align_center",
                        "outline", "outline-width", "h-neg", "h-pos", "max", "min", "cr"})
     def create_bar(self, element: ET.Element, entry, **kwargs) -> Widget:
         return Bar(
@@ -646,6 +646,7 @@ class Widgets:
             fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
             zero=rgbattr(element, "zero", d=(255, 255, 255)),
             bar=rgbattr(element, "bar", d=(255, 255, 255)),
+            align_center=battrib(element, "align_center", d=False),
             outline=rgbattr(element, "outline", d=(255, 255, 255)),
             outline_width=iattrib(element, "outline-width", d=3),
             highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),
