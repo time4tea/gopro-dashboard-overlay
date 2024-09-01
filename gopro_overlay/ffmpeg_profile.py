@@ -25,6 +25,10 @@ builtin_profiles = {
     "vp8": {
         "input": [],
         "output": ["-vcodec", "vp8", "-pix_fmt", "yuva420p", "-auto-alt-ref", "0"]
+    },
+    "mac": {
+        "input": ["-hwaccel", "videotoolbox"],
+        "output": ["-vcodec", "hevc_videotoolbox", "-q:v", "60"]
     }
 }
 
