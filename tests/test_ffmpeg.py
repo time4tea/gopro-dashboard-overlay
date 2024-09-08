@@ -235,8 +235,8 @@ def test_ffmpeg_overlay_execute_options():
 
     ffmpeg = FFMPEGOverlayVideo(
         ffmpeg=FFMPEG(),
-        input="input",
-        output="output",
+        input=Path("input"),
+        output=Path("output"),
         options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
         overlay_size=Dimension(3, 4),
         execution=fake,
