@@ -204,7 +204,8 @@ def test_ffmpeg_overlay_execute_default():
         input=Path("input"),
         output=Path("output"),
         overlay_size=Dimension(3, 4),
-        execution=fake
+        execution=fake,
+        creation_time=datetime_of(1231233223.12344)
     )
 
     with ffmpeg.generate():
@@ -224,6 +225,7 @@ def test_ffmpeg_overlay_execute_default():
         "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
         "-vcodec", "libx264",
         "-preset", "veryfast",
+        '-metadata', 'creation_time=2009-01-06T09:13:43.123440+00:00',
         "output"
     ]
 
@@ -237,7 +239,8 @@ def test_ffmpeg_overlay_execute_options():
         output="output",
         options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
         overlay_size=Dimension(3, 4),
-        execution=fake
+        execution=fake,
+        creation_time=datetime_of(1231233223.12344)
     )
 
     with ffmpeg.generate():
@@ -257,6 +260,7 @@ def test_ffmpeg_overlay_execute_options():
         "-i", "-",  # input 1
         "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
         "-output-option",  # output option goes before output
+        '-metadata', 'creation_time=2009-01-06T09:13:43.123440+00:00',
         "output"
     ]
 
