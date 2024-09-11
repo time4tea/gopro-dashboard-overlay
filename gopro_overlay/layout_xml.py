@@ -305,6 +305,7 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
         "ori.yaw": lambda e: e.ori.yaw if e.ori else None,
         "lat": lambda e: units.Quantity(e.point.lat, units.location),
         "lon": lambda e: units.Quantity(e.point.lon, units.location),
+        "sdps": lambda e: e.sdps, # Vaaka cadence sensor distance-per-stroke field
     }
     if name in accessors:
         return accessors[name]
