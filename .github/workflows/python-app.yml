@@ -32,7 +32,7 @@ jobs:
         PYTHONVERSION=${{matrix.version}} make ci
     - name: Upload build artefacts
       if: failure()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: approval-artifacts
         path: ${{ github.workspace }}/tests/approvals/*.png
