@@ -26,6 +26,7 @@ interpret = {
     "gps_accuracy": lambda f, u: {"dop": u.Quantity(f.value)},
     "power": lambda f, u: {"power": u.Quantity(f.value, u.watt)},
     "grade": lambda f, u: {"grad": u.Quantity(f.value)},
+    "Sdps": lambda f, u: {"sdps": u.Quantity(f.value, u.cm)},
 }
 
 

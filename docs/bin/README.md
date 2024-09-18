@@ -222,6 +222,17 @@ You'll need to create a profile - see [FFMPEG Profiles](#ffmpeg-profiles)
 }
 ```
 
+You can use "QTRLE" encoding (thanks to [@victorlysak](https://github.com/victorlysak))
+
+```json
+{
+    "quicktime": {
+      "input": ["-hwaccel", "auto"],
+      "output": ["-r", "50", "-vcodec", "qtrle", "-pix_fmt", "argb"]
+    }
+}
+```
+
 then execute (NOTE: extension is `mov`)
 
 ```shell

@@ -320,7 +320,8 @@ if __name__ == "__main__":
                         output=output,
                         options=ffmpeg_options,
                         overlay_size=dimensions,
-                        execution=execution
+                        execution=execution,
+                        creation_time=frame_meta.date_at(frame_meta.min)
                     )
                 else:
                     output.unlink(missing_ok=True)
@@ -330,7 +331,8 @@ if __name__ == "__main__":
                         output=output,
                         options=ffmpeg_options,
                         overlay_size=dimensions,
-                        execution=execution
+                        execution=execution,
+                        creation_time=frame_meta.date_at(frame_meta.min)
                     )
 
                 draw_timer = PoorTimer("drawing frames")

@@ -134,7 +134,7 @@ def test_metric_component():
         metric(
             at=Coordinate(100, 100),
             entry=lambda: ts.get(ts.min),
-            accessor=lambda e: e.speed,
+            accessor=lambda e: e.speed.m,
             formatter=lambda v: format(v, ".1f"),
             font=font.font_variant(size=160),
         )
