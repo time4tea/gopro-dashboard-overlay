@@ -105,7 +105,8 @@ class Converters:
 
 
 def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
-                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters()):
+                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters(),
+                    fulltimeseries = None):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -121,6 +122,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         renderer=renderer,
         framemeta=framemeta,
         converters=converters,
+        fulltimeseries=fulltimeseries
     )
 
     def name_of(element):
@@ -390,12 +392,13 @@ class FloatRange:
 
 class Widgets:
 
-    def __init__(self, font, privacy, renderer, framemeta, converters):
+    def __init__(self, font, privacy, renderer, framemeta, converters, fulltimeseries = None):
         self.framemeta = framemeta
         self.renderer = renderer
         self.privacy = privacy
         self.font = font
         self.converters = converters
+        self.fulltimeseries = fulltimeseries
 
     def _font(self, element, name, d):
         return self.font(iattrib(element, name, d=d, r=range(1, 2000)))
@@ -495,6 +498,7 @@ class Widgets:
             privacy_zone=self.privacy,
             renderer=self.renderer,
             timeseries=self.framemeta,
+            fulltimeseries=self.fulltimeseries,
             size=iattrib(element, "size", d=256),
             corner_radius=iattrib(element, "corner_radius", 0),
             opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0))
@@ -506,6 +510,7 @@ class Widgets:
             location=lambda: entry().point,
             privacy_zone=self.privacy,
             renderer=self.renderer,
+            fulltimeseries=self.fulltimeseries,
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
