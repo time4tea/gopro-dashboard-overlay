@@ -72,6 +72,7 @@ class FFMPEGGoPro:
                 "-hide_banner",
                 "-print_format", "json",
                 "-show_streams",
+                "-show_entries", "stream_tags:format_tags",
                 filepath
             ]
         ).stdout)
@@ -127,13 +128,20 @@ class FFMPEGGoPro:
         else:
             data_stream = None
 
+        creationDateTime = None
+        try:
+            creationDateTime = datetime.datetime.fromisoformat(ffprobe_json["format"]["tags"]["creation_time"])
+        except Exception:
+            pass
+
         return GoproRecording(
             ffmpeg=self.exe,
             location=filepath,
             file=filestat(filepath, stat=stat),
             audio=audio_stream,
             video=video_stream,
-            data=data_stream
+            data=data_stream,
+            creationDateTime=creationDateTime
         )
 
     def load_frame(self, filepath: Path, at_time: Timeunit) -> Optional[bytes]:
@@ -201,6 +209,7 @@ class GoproRecording:
     audio: Optional[AudioStream]
     video: VideoStream
     data: Optional[DataStream]
+    creationDateTime: datetime.datetime
 
     def load_data(self) -> bytes:
         track = self.data.stream

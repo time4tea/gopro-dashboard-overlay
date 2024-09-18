@@ -152,17 +152,18 @@ if __name__ == "__main__":
                         duration = recording.video.duration
 
                         fns = {
-                            "file-created": lambda f: f.ctime,
-                            "file-modified": lambda f: f.mtime,
-                            "file-accessed": lambda f: f.atime
+                            "file-created": lambda f: f.file.ctime,
+                            "file-modified": lambda f: f.file.mtime,
+                            "file-accessed": lambda f: f.file.atime,
+                            "mp4-created": lambda f: f.creationDateTime
                         }
 
                         if args.video_time_start:
-                            start_date = fns[args.video_time_start](recording.file)
+                            start_date = fns[args.video_time_start](recording)
                             end_date = start_date + duration.timedelta()
 
                         if args.video_time_end:
-                            start_date = fns[args.video_time_end](recording.file) - duration.timedelta()
+                            start_date = fns[args.video_time_end](recording) - duration.timedelta()
                             end_date = start_date + duration.timedelta()
 
                     else:
