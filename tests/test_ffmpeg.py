@@ -14,6 +14,7 @@ from gopro_overlay.ffmpeg import FFMPEG
 from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.ffmpeg_overlay import FFMPEGOverlay, FFMPEGOptions, FFMPEGOverlayVideo
 from gopro_overlay.timeunits import timeunits
+from tests.test_timeseries import datetime_of
 
 ffprobe_output = (Path(__file__).parent / "test_ffmpeg_ffprobe_output.json").read_text()
 
@@ -169,7 +170,8 @@ def test_ffmpeg_generate_execute():
         ffmpeg=FFMPEG(),
         output=Path("output"),
         overlay_size=Dimension(100, 200),
-        execution=fake
+        execution=fake,
+        creation_time=datetime_of(1231233223.12344)
     )
 
     with ffmpeg.generate():
@@ -189,6 +191,7 @@ def test_ffmpeg_generate_execute():
         "-r", "30",  # output framerate
         "-vcodec", "libx264",  # output format
         "-preset", "veryfast",  # output quality/encoding preset
+        '-metadata','creation_time=2009-01-06T09:13:43.123440+00:00',
         "output"  # output file
     ]
 
@@ -201,7 +204,8 @@ def test_ffmpeg_overlay_execute_default():
         input=Path("input"),
         output=Path("output"),
         overlay_size=Dimension(3, 4),
-        execution=fake
+        execution=fake,
+        creation_time=datetime_of(1231233223.12344)
     )
 
     with ffmpeg.generate():
@@ -221,6 +225,7 @@ def test_ffmpeg_overlay_execute_default():
         "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
         "-vcodec", "libx264",
         "-preset", "veryfast",
+        '-metadata', 'creation_time=2009-01-06T09:13:43.123440+00:00',
         "output"
     ]
 
@@ -230,11 +235,12 @@ def test_ffmpeg_overlay_execute_options():
 
     ffmpeg = FFMPEGOverlayVideo(
         ffmpeg=FFMPEG(),
-        input="input",
-        output="output",
+        input=Path("input"),
+        output=Path("output"),
         options=FFMPEGOptions(input=["-input-option"], output=["-output-option"]),
         overlay_size=Dimension(3, 4),
-        execution=fake
+        execution=fake,
+        creation_time=datetime_of(1231233223.12344)
     )
 
     with ffmpeg.generate():
@@ -254,6 +260,7 @@ def test_ffmpeg_overlay_execute_options():
         "-i", "-",  # input 1
         "-filter_complex", "[0:v][1:v]overlay",  # overlay input 1 on input 0
         "-output-option",  # output option goes before output
+        '-metadata', 'creation_time=2009-01-06T09:13:43.123440+00:00',
         "output"
     ]
 
