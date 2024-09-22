@@ -25,7 +25,7 @@ The main element is `layout`: everything is contained within these tags.
 
 Please see the extensive collection of examples - [here](examples/README.md)
 
-# Custom Data (Experimental)
+# Custom GPX Data
 
 Custom data can be inserted into components using `extension` tags in a GPX file. Global data is inserted inside the `metadata` tag, and data for a specific GPX trackpoint is inserted inside the trackpoint. They can be accessed in the XML configuration using the metric `custom.metadata.<key>` and `custom.field.<key>` respectively. For example, in the GPX file below, global data `("transit_headsign", "route_length")` and `("transit_next_stop", "transit_distance", "ref_test")` for the first trackpoint are defined.
 Note: The GPX parser does not seem to parse `extension` tags without another tag beside it, so `name` is used as a dummy tag.
