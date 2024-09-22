@@ -290,109 +290,109 @@ if __name__ == "__main__":
                         api_key_finder=api_key_finder(config_loader, args)
             ))
             renderer.default_style = args.map_style
-            if True: # Keep indent for git diff (for now)
-                if args.profiler:
-                    profiler = WidgetProfiler()
-                else:
-                    profiler = None
 
-                if args.profile:
-                    ffmpeg_options = load_ffmpeg_profile(config_loader, args.profile)
-                else:
-                    ffmpeg_options = None
+            if args.profiler:
+                profiler = WidgetProfiler()
+            else:
+                profiler = None
 
-                if args.show_ffmpeg:
-                    redirect = None
-                else:
-                    redirect = temp_file_name(suffix=".txt")
-                    log(f"FFMPEG Output is in {redirect}")
+            if args.profile:
+                ffmpeg_options = load_ffmpeg_profile(config_loader, args.profile)
+            else:
+                ffmpeg_options = None
 
-                execution = InProcessExecution(redirect=redirect)
+            if args.show_ffmpeg:
+                redirect = None
+            else:
+                redirect = temp_file_name(suffix=".txt")
+                log(f"FFMPEG Output is in {redirect}")
 
-                output: Path = args.output
+            execution = InProcessExecution(redirect=redirect)
 
-                if generate == "none":
-                    ffmpeg = FFMPEGNull()
-                elif generate == "overlay":
-                    output.unlink(missing_ok=True)
-                    ffmpeg = FFMPEGOverlay(
-                        ffmpeg=ffmpeg_exe,
-                        output=output,
-                        options=ffmpeg_options,
-                        overlay_size=dimensions,
-                        execution=execution,
-                        creation_time=frame_meta.date_at(frame_meta.min)
-                    )
-                else:
-                    output.unlink(missing_ok=True)
-                    ffmpeg = FFMPEGOverlayVideo(
-                        ffmpeg=ffmpeg_exe,
-                        input=inputpath,
-                        output=output,
-                        options=ffmpeg_options,
-                        overlay_size=dimensions,
-                        execution=execution,
-                        creation_time=frame_meta.date_at(frame_meta.min)
-                    )
+            output: Path = args.output
 
-                draw_timer = PoorTimer("drawing frames")
-
-                # Draw an overlay frame every 0.1 seconds of video
-                timelapse_correction = frame_meta.duration() / video_duration
-                log(f"Timelapse Factor = {timelapse_correction:.3f}")
-                stepper = frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
-                progress = ProgressBarProgress("Render")
-
-                unit_converters = Converters(
-                    speed_unit=args.units_speed,
-                    distance_unit=args.units_distance,
-                    altitude_unit=args.units_altitude,
-                    temperature_unit=args.units_temperature,
+            if generate == "none":
+                ffmpeg = FFMPEGNull()
+            elif generate == "overlay":
+                output.unlink(missing_ok=True)
+                ffmpeg = FFMPEGOverlay(
+                    ffmpeg=ffmpeg_exe,
+                    output=output,
+                    options=ffmpeg_options,
+                    overlay_size=dimensions,
+                    execution=execution,
+                    creation_time=frame_meta.date_at(frame_meta.min)
+                )
+            else:
+                output.unlink(missing_ok=True)
+                ffmpeg = FFMPEGOverlayVideo(
+                    ffmpeg=ffmpeg_exe,
+                    input=inputpath,
+                    output=output,
+                    options=ffmpeg_options,
+                    overlay_size=dimensions,
+                    execution=execution,
+                    creation_time=frame_meta.date_at(frame_meta.min)
                 )
 
-                layout_creator = create_desired_layout(
-                    layout=args.layout,
-                    layout_xml=args.layout_xml,
-                    dimensions=dimensions,
-                    include=args.include,
-                    exclude=args.exclude,
-                    renderer=renderer,
-                    timeseries=frame_meta,
-                    font=font,
-                    privacy_zone=privacy_zone,
-                    profiler=profiler,
-                    converters=unit_converters
-                )
+            draw_timer = PoorTimer("drawing frames")
 
-                overlay = Overlay(framemeta=frame_meta, create_widgets=layout_creator)
+            # Draw an overlay frame every 0.1 seconds of video
+            timelapse_correction = frame_meta.duration() / video_duration
+            log(f"Timelapse Factor = {timelapse_correction:.3f}")
+            stepper = frame_meta.stepper(timeunits(seconds=0.1 * timelapse_correction))
+            progress = ProgressBarProgress("Render")
 
-                try:
-                    progress.start(len(stepper))
-                    with ffmpeg.generate() as writer:
+            unit_converters = Converters(
+                speed_unit=args.units_speed,
+                distance_unit=args.units_distance,
+                altitude_unit=args.units_altitude,
+                temperature_unit=args.units_temperature,
+            )
 
-                        if args.double_buffer:
-                            log("*** NOTE: Double Buffer mode is experimental. It is believed to work fine on Linux. "
-                                "Please raise issues if you see it working or not-working. Thanks ***")
-                            buffer = DoubleBuffer(dimensions, args.bg, writer)
-                        else:
-                            buffer = SingleBuffer(dimensions, args.bg, writer)
+            layout_creator = create_desired_layout(
+                layout=args.layout,
+                layout_xml=args.layout_xml,
+                dimensions=dimensions,
+                include=args.include,
+                exclude=args.exclude,
+                renderer=renderer,
+                timeseries=frame_meta,
+                font=font,
+                privacy_zone=privacy_zone,
+                profiler=profiler,
+                converters=unit_converters
+            )
 
-                        with buffer:
-                            for index, dt in enumerate(stepper.steps()):
-                                progress.update(index)
-                                draw_timer.time(lambda: buffer.draw(lambda frame: overlay.draw(dt, frame)))
+            overlay = Overlay(framemeta=frame_meta, create_widgets=layout_creator)
 
-                    log("Finished drawing frames. waiting for ffmpeg to catch up")
-                    progress.complete()
+            try:
+                progress.start(len(stepper))
+                with ffmpeg.generate() as writer:
 
-                finally:
-                    for t in [draw_timer]:
-                        log(t)
+                    if args.double_buffer:
+                        log("*** NOTE: Double Buffer mode is experimental. It is believed to work fine on Linux. "
+                            "Please raise issues if you see it working or not-working. Thanks ***")
+                        buffer = DoubleBuffer(dimensions, args.bg, writer)
+                    else:
+                        buffer = SingleBuffer(dimensions, args.bg, writer)
 
-                    if profiler:
-                        log("\n\n*** Widget Timings ***")
-                        profiler.print()
-                        log("***\n\n")
+                    with buffer:
+                        for index, dt in enumerate(stepper.steps()):
+                            progress.update(index)
+                            draw_timer.time(lambda: buffer.draw(lambda frame: overlay.draw(dt, frame)))
+
+                log("Finished drawing frames. waiting for ffmpeg to catch up")
+                progress.complete()
+
+            finally:
+                for t in [draw_timer]:
+                    log(t)
+
+                if profiler:
+                    log("\n\n*** Widget Timings ***")
+                    profiler.print()
+                    log("***\n\n")
 
     except KeyboardInterrupt:
         log("User interrupted...")
