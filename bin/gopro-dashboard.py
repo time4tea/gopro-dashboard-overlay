@@ -284,13 +284,13 @@ if __name__ == "__main__":
             else:
                 privacy_zone = NoPrivacyZone()
 
-            with MapRenderer(
+            renderer = MapRenderer(
                     cache_dir=cache_dir,
                     styler=MapStyler(
                         api_key_finder=api_key_finder(config_loader, args)
-                    )
-            ).open(args.map_style) as renderer:
-
+            ))
+            renderer.default_style = args.map_style
+            if True: # Keep indent for git diff (for now)
                 if args.profiler:
                     profiler = WidgetProfiler()
                 else:

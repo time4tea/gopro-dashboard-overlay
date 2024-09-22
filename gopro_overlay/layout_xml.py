@@ -496,7 +496,7 @@ class Widgets:
             stroke_width=iattrib(element, "outline_width", d=2),
         )
 
-    @allow_attributes({"x", "y", "size", "zoom", "corner_radius", "opacity", "rotate"})
+    @allow_attributes({"x", "y", "size", "zoom", "corner_radius", "opacity", "rotate", "map_style"})
     def create_moving_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return moving_map(
             at=at(element),
@@ -506,10 +506,11 @@ class Widgets:
             renderer=self.renderer,
             corner_radius=iattrib(element, "corner_radius", 0),
             opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
-            rotate=battrib(element, "rotate", d=True)
+            rotate=battrib(element, "rotate", d=True),
+            map_style=attrib(element, "map_style", d="")
         )
 
-    @allow_attributes({"x", "y", "size", "corner_radius", "opacity", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
+    @allow_attributes({"x", "y", "size", "corner_radius", "opacity", "map_style", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
     def create_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return journey_map(
             at(element),
@@ -520,6 +521,7 @@ class Widgets:
             size=iattrib(element, "size", d=256),
             corner_radius=iattrib(element, "corner_radius", 0),
             opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
+            map_style=attrib(element, "map_style", d=""),
             style={
                 "pos_rgb": rgbattr(element, "pos_rgb", d=(0, 0, 255)),
                 "pos_size": iattrib(element, "pos_size", d=6),
@@ -530,7 +532,7 @@ class Widgets:
             }
         )
 
-    @allow_attributes({"size", "zoom", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
+    @allow_attributes({"size", "zoom", "map_style", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
     def create_moving_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MovingJourneyMap(
             location=lambda: entry().point,
@@ -540,6 +542,7 @@ class Widgets:
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
+            map_style=attrib(element, "map_style", d=""),
             style={
                 "pos_rgb": rgbattr(element, "pos_rgb", d=(0, 0, 255)),
                 "pos_size": iattrib(element, "pos_size", d=6),
