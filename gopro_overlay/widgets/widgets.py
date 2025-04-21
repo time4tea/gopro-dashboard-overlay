@@ -41,9 +41,12 @@ class Drawable(Widget):
         image.alpha_composite(self.drawable, self.at.tuple())
 
 
-def icon(file, at, transform=lambda x: x) -> Widget:
+def icon(file, at, transform=lambda x: x, xml_path=None) -> Widget:
+    xml_relative = os.path.join(os.path.dirname(xml_path), file) if xml_path else file
     if os.path.exists(file):
         image = Image.open(file)
+    elif os.path.exists(xml_relative):
+        image = Image.open(xml_relative)
     else:
         with as_file(files(icons) / file) as f:
             image = Image.open(f)
@@ -51,12 +54,12 @@ def icon(file, at, transform=lambda x: x) -> Widget:
     return Drawable(at, transform(image))
 
 
-def simple_icon(at, file, size=64, invert=False):
+def simple_icon(at, file, size=64, invert=False, xml_path=None):
     return icon(file, at, transform=compose(
-        functools.partial(transform_resize, (size, size)),
+        functools.partial(transform_resize, (size, size)) if size else transform_identity,
         transform_rgba,
         transform_negative if invert else transform_identity
-    ))
+    ), xml_path=xml_path)
 
 
 def transform_identity(img):
@@ -68,7 +71,7 @@ def transform_resize(target, img):
 
 
 def transform_rgba(img):
-    return img.convert("RGBA") if img.mode == "P" else img
+    return img.convert("RGBA")
 
 
 def transform_negative(img):

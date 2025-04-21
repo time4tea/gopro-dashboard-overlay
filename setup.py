@@ -8,9 +8,9 @@ README = (HERE / "README-PYPI.md").read_text()
 
 requires = [
     "pillow==10.1.0",
-    "pint==0.22",
+    "pint==0.24.1",
     "geotiler==0.15",
-    "gpxpy==1.6.1",
+    "gpxpy>=1.6.1,<=1.6.2",
     "fitdecode==0.10.0",
     "geographiclib==1.52",
     "progressbar2==4.2.0",
@@ -24,7 +24,7 @@ test_requirements = [
 
 setup(
     name="gopro-overlay",
-    version="0.126.0",
+    version="0.127.0",
     description="Overlay graphics dashboards onto GoPro footage, or create videos from GPX or FIT files",
     long_description=README,
     long_description_content_type="text/markdown",

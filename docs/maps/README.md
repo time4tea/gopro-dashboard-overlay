@@ -12,6 +12,7 @@ The providers are:
 - OSM/OpenStreetmap
 - ThunderForest 
 - Geoapify
+- TianDiTu/天地图
 
 # Selecting the Map Style
 
@@ -20,6 +21,12 @@ Use the command line option `--map-style` to choose the map style
 Example:
 
 `--map-style tf-cycle `
+
+# (NEW) Per-Component Map Style
+
+Since v0.127.0
+
+It is now possible to set the map provider and style on a per-component basis. This can be done on the `moving_map`, `journey_map`, and `moving_journey_map` components by using the `map_style` attribute. If blank or omitted, the global map style (set with `--map-style`) will be used. Transparent map styles can be overlaid by using multiple components with different `map_style` attributes.
 
 # API Keys
 

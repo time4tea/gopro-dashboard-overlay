@@ -87,6 +87,9 @@ class Converters:
             "miles": lambda u: u.to("mile"),
             "metres": lambda u: u.to("m"),
             "nautical_miles": lambda u: u.to("nautical_mile"),
+
+            # format custom fields and metadata for components which expect a float
+            "custom.float": lambda u: units.Quantity(float(u.m), units.custom) if u else None
         }
 
     def converter(self, name: str) -> Callable[[pint.Quantity], Optional[pint.Quantity]]:
@@ -105,7 +108,7 @@ class Converters:
 
 
 def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name: True,
-                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters()):
+                    decorator: Optional[WidgetProfiler] = None, converters: Converters = Converters(), xml_path=None):
     root = ET.fromstring(xml)
 
     fonts = {}
@@ -121,6 +124,7 @@ def layout_from_xml(xml, renderer, framemeta, font, privacy, include=lambda name
         renderer=renderer,
         framemeta=framemeta,
         converters=converters,
+        xml_path=xml_path
     )
 
     def name_of(element):
@@ -309,7 +313,15 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
     }
     if name in accessors:
         return accessors[name]
-    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
+    elif name.startswith("custom.field.") or name.startswith("custom.metadata.") or name.startswith("custom.ref."):
+        def f(e):
+            try:
+                metric = e.custom[name.split(".")[1]][name.split(".", 2)[2]]
+                return units.Quantity(metric, units.custom) if metric else None
+            except KeyError:
+                return None # Custom field not found
+        return f
+    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys()) + ['custom.field', 'custom.metadata', 'custom.ref']}")
 
 
 def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> Callable[[pint.Quantity], str]:
@@ -320,16 +332,24 @@ def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> C
         dp = 2
 
     if format_string is not None:
-        if format_string == "pace":
-            # pace is in minutes, and we want minutes / seconds
-            return lambda q: '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
-        else:
+        def f(q):
+            if type(q.m) == str:
+                raise ValueError("String values cannot be formatted")
+            if format_string == "pace":
+                # pace is in minutes, and we want minutes / seconds
+                return '{:d}:{:02d}'.format(*divmod(math.ceil(60.0 * q.m), 60))
             try:
-                return lambda q: format(q.m, format_string)
+                return format(q.m, format_string)
             except ValueError:
                 raise ValueError(f"Unable to format value with format string {format_string}")
+        return f
     elif dp is not None:
-        return lambda q: format(q.m, f".{dp}f")
+        # hack to allow for custom fields or metadata to be passed through
+        def f(q):
+            if type(q.m) == str:
+                return q.m
+            return format(q.m, f".{dp}f")
+        return f
     else:
         raise Defect("Problem deciding how to format")
 
@@ -390,12 +410,13 @@ class FloatRange:
 
 class Widgets:
 
-    def __init__(self, font, privacy, renderer, framemeta, converters):
+    def __init__(self, font, privacy, renderer, framemeta, converters, xml_path=None):
         self.framemeta = framemeta
         self.renderer = renderer
         self.privacy = privacy
         self.font = font
         self.converters = converters
+        self.xml_path = xml_path
 
     def _font(self, element, name, d):
         return self.font(iattrib(element, name, d=d, r=range(1, 2000)))
@@ -442,7 +463,8 @@ class Widgets:
             at=at(element),
             file=attrib(element, "file"),
             size=iattrib(element, "size", d=64),
-            invert=battrib(element, "invert", d=True)
+            invert=battrib(element, "invert", d=True),
+            xml_path=self.xml_path
         )
 
     @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb", "outline", "outline_width"})
@@ -474,7 +496,7 @@ class Widgets:
             stroke_width=iattrib(element, "outline_width", d=2),
         )
 
-    @allow_attributes({"x", "y", "size", "zoom", "corner_radius", "opacity", "rotate"})
+    @allow_attributes({"x", "y", "size", "zoom", "corner_radius", "opacity", "rotate", "map_style"})
     def create_moving_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return moving_map(
             at=at(element),
@@ -484,10 +506,11 @@ class Widgets:
             renderer=self.renderer,
             corner_radius=iattrib(element, "corner_radius", 0),
             opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
-            rotate=battrib(element, "rotate", d=True)
+            rotate=battrib(element, "rotate", d=True),
+            map_style=attrib(element, "map_style", d="")
         )
 
-    @allow_attributes({"x", "y", "size", "corner_radius", "opacity"})
+    @allow_attributes({"x", "y", "size", "corner_radius", "opacity", "map_style", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
     def create_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return journey_map(
             at(element),
@@ -497,18 +520,37 @@ class Widgets:
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             corner_radius=iattrib(element, "corner_radius", 0),
-            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0))
+            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
+            map_style=attrib(element, "map_style", d=""),
+            style={
+                "pos_rgb": rgbattr(element, "pos_rgb", d=(0, 0, 255)),
+                "pos_size": iattrib(element, "pos_size", d=6),
+                "path_rgb": rgbattr(element, "path_rgb", d=(255, 0, 0)),
+                "path_width": iattrib(element, "path_width", d=4),
+                "wpt_rgb": rgbattr(element, "wpt_rgb", d=(0, 255, 0)),
+                "wpt_size": iattrib(element, "wpt_size", d=6)
+            }
         )
 
-    @allow_attributes({"size", "zoom"})
+    @allow_attributes({"size", "zoom", "map_style", "pos_rgb", "pos_size", "path_rgb", "path_width", "wpt_rgb", "wpt_size"})
     def create_moving_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MovingJourneyMap(
             location=lambda: entry().point,
+            waypoints=lambda: entry().custom["waypoints"],
             privacy_zone=self.privacy,
             renderer=self.renderer,
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
-            zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
+            zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
+            map_style=attrib(element, "map_style", d=""),
+            style={
+                "pos_rgb": rgbattr(element, "pos_rgb", d=(0, 0, 255)),
+                "pos_size": iattrib(element, "pos_size", d=6),
+                "path_rgb": rgbattr(element, "path_rgb", d=(255, 0, 0)),
+                "path_width": iattrib(element, "path_width", d=4),
+                "wpt_rgb": rgbattr(element, "wpt_rgb", d=(0, 255, 0)),
+                "wpt_size": iattrib(element, "wpt_size", d=6)
+            }
         )
 
     @allow_attributes({"size", "fill", "outline", "fill_width", "outline_width"})
@@ -593,7 +635,7 @@ class Widgets:
             arrow_outline=rgbattr(element, "arrow-outline", d=(0, 0, 0)),
         )
 
-    @allow_attributes({"width", "height", "metric", "units", "fill", "zero", "bar",
+    @allow_attributes({"width", "height", "metric", "units", "fill", "zero", "bar", "align_center",
                        "outline", "outline-width", "h-neg", "h-pos", "max", "min", "cr"})
     def create_bar(self, element: ET.Element, entry, **kwargs) -> Widget:
         return Bar(
@@ -608,6 +650,7 @@ class Widgets:
             fill=rgbattr(element, "fill", d=(255, 255, 255, 0)),
             zero=rgbattr(element, "zero", d=(255, 255, 255)),
             bar=rgbattr(element, "bar", d=(255, 255, 255)),
+            align_center=battrib(element, "align_center", d=False),
             outline=rgbattr(element, "outline", d=(255, 255, 255)),
             outline_width=iattrib(element, "outline-width", d=3),
             highlight_colour_negative=rgbattr(element, "h-neg", d=(255, 0, 0)),

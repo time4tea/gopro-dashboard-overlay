@@ -25,3 +25,57 @@ The main element is `layout`: everything is contained within these tags.
 
 Please see the extensive collection of examples - [here](examples/README.md)
 
+# Custom GPX Data
+
+Custom data can be inserted into components using `extension` tags in a GPX file. Global data is inserted inside the `metadata` tag, and data for a specific GPX trackpoint is inserted inside the trackpoint. They can be accessed in the XML configuration using the metric `custom.metadata.<key>` and `custom.field.<key>` respectively. For example, in the GPX file below, global data `("transit_headsign", "route_length")` and `("transit_next_stop", "transit_distance", "ref_test")` for the first trackpoint are defined.
+Note: The GPX parser does not seem to parse `extension` tags without another tag beside it, so `name` is used as a dummy tag.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx>
+	<metadata>
+		<extensions>
+			<transit_headsign>Route 1 to Place</transit_headsign>
+			<route_length>5.2</route_length>
+		</extensions>
+		<name>Route 1</name>
+	</metadata>
+	<trk>
+		<trkseg>
+			<trkpt lat="50.000" lon="-100.000">
+				<extensions>
+					<transit_next_stop>Stop C</transit_next_stop>
+					<transit_distance>0.5</transit_distance>
+					<ref_test>transit_headsign</ref_test>
+				</extensions>
+				<ele>232.0</ele>
+				<time>2024-04-02T13:03:37Z</time>
+			</trkpt>
+		</trkseg>
+	</trk>
+</gpx>
+```
+
+### Custom Data Formatting
+
+By default custom data is inserted as a string, which means formatting attributes like `format` and `dp` cannot be used, and the data cannot be used in components that expect a number, like `chart`. To insert custom data as a float, specify `units="custom.float"` in the configuration file. 
+
+Display the `transit_distance` field in a `chart`
+
+```xml
+<component type="chart" metric="custom.field.transit_distance" units="custom.float" />
+```
+
+Format the `route_length` metadata to 3 decimal places
+
+```xml
+<component type="metric" metric="custom.metadata.route_length" units="custom.float" dp="3" />
+```
+
+### Metadata References
+
+`custom.metadata` values can be accessed by its key using `custom.ref.<key reference>`. For example, in the GPX file above, the `ref_test` field is set to the metadata key `transit_headsign`, which can be accessed using the following configuration:
+
+```xml
+<component type="metric" metric="custom.ref.ref_test" />
+```

@@ -6,7 +6,7 @@ Auto Generated File DO NOT EDIT
 
 # Icons
 
-Icons are *square* images that can be placed anywhere.
+Icons are *square* images that can be placed anywhere. Custom icons must be in `RGB` or `RGBA` format.
 
 ## Built-In
 
@@ -44,6 +44,9 @@ To rescale the icon use `size`
 ```
 <kbd>![02-icons-2.png](02-icons-2.png)</kbd>
 
+*If `size` is 0, the icon will be rendered at its original size. This also allows for non-square icons to be rendered at their original aspect ratio.*
+
+***Make sure `invert="false"` is used if you want to display the original icon.***
 
 ## Positioning
 

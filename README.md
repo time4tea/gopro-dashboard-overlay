@@ -204,6 +204,7 @@ https://github.com/JuanIrache/gopro-telemetry
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.127.0 [Enhancement] Inserting custom data through a GPX file, custom colors for the journey map, non-square icon support
 - 0.126.0 [Enhancement] New Motorspeed widgets - "msi" & "msi2" - See examples [docs/xml/examples/07-motor-speed-indicator/README.md](docs/xml/examples/07-motor-speed-indicator/README.md) - Thanks to [@JimmyS83](https://github.com/JimmyS83) for contributing.
   - New metric `accel` which is computed from speed deltas, rather than gopro accelerometer. Thanks also to [@JimmyS83](https://github.com/JimmyS83)
   - [Breaking] Ordering of fields in gopro-to-csv has changed, with addition of `accel` field

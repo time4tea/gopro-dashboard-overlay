@@ -138,3 +138,12 @@ def calculate_gradient():
                 }
 
     return accept
+
+
+def custom_passthrough():
+    def accept(e):
+        return {
+            "custom": e.custom
+        }
+
+    return accept

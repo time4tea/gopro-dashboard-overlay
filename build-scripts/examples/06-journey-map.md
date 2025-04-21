@@ -20,6 +20,10 @@ Use `x` and `y` to set the position on screen
 
 {{ <component type="journey_map" x="64" y="64" size="64" /> }}
 
+## Colours
+
+Refer to the [Moving Journey Map docs](06-moving-journey-map.md#colours) for details on setting colours and sizes for the current position, path, and waypoints.
+
 ## Opacity
 
 Set the opacity using `opacity`. It defaults to 1.0 which is completely opaque. 0.0 would be completely transparent.
