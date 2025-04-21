@@ -1,7 +1,7 @@
 # for drawing text/images
 pillow==10.1.0
 # pint for unit conversion
-pint==0.24.1
+pint==0.24.4
 # for drawing little map
 geotiler==0.15
 # for loading GPX files
