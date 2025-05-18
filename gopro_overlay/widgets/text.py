@@ -40,16 +40,11 @@ class CachingText(Widget):
                 direction=None if self.direction == "ltr" else self.direction
             )
 
-            if x0 < 0:
-                x1 = x1 + abs(x0)
-            if y0 < 0:
-                y1 = y1 + abs(x0)
-
-            backing_image = Image.new(mode="RGBA", size=(x1, y1))
+            backing_image = Image.new(mode="RGBA", size=(x1 - x0, y1 - y0))
             backing_draw = ImageDraw.Draw(backing_image)
 
             backing_draw.text(
-                (abs(x0), 0),
+                (-x0, -y0),
                 text,
                 anchor=self.anchor,
                 direction=None if self.direction == "ltr" else self.direction,
@@ -59,7 +54,7 @@ class CachingText(Widget):
                 stroke_fill=self.stroke
             )
             cached = {
-                "at": Coordinate(x0 if x0 < 0 else 0, y0 if y0 < 0 else 0),
+                "at": Coordinate(x0, y0),
                 "image": backing_image
             }
             self.cache[text] = cached
