@@ -7,6 +7,7 @@ from PIL import ImageDraw, Image
 from gopro_overlay.dimensions import Dimension
 from gopro_overlay.framemeta import FrameMeta
 from gopro_overlay.journey import Journey
+from gopro_overlay.geo import MapRenderer, available_map_styles
 from gopro_overlay.log import log
 from gopro_overlay.point import Point
 from gopro_overlay.privacy import NoPrivacyZone
@@ -52,13 +53,19 @@ class MaybeRoundedBorder:
 
     def rounded(self, image):
 
+        if image.mode != 'RGBA':
+            image = image.convert('RGBA')
         draw = ImageDraw.Draw(image)
 
-        if self.corner_radius:
-            if self.mask is None:
-                self.mask = self.generate_mask()
+        r, g, b, a = image.split()
+        image = Image.merge('RGBA', (r, g, b, a.point(lambda p: int(p * self.opacity))))
 
-            image.putalpha(self.mask)
+        if self.corner_radius:
+            mask = Image.new('L', (self.size, self.size), 255)
+            ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (self.size - 1, self.size - 1), radius=self.corner_radius,
+                                                   fill=0)
+            
+            image.paste((0, 0, 0, 0), mask=mask)
 
             draw.rounded_rectangle(
                 (0, 0) + (self.size - 1, self.size - 1),
@@ -70,29 +77,30 @@ class MaybeRoundedBorder:
                 (0, 0, 0, self.size - 1, self.size - 1, self.size - 1, self.size - 1, 0, 0, 0),
                 fill=(0, 0, 0)
             )
-            image.putalpha(int(255 * self.opacity))
 
         return image
 
-    def generate_mask(self):
-        mask = Image.new('L', (self.size, self.size), 0)
-        ImageDraw.Draw(mask).rounded_rectangle((0, 0) + (self.size - 1, self.size - 1), radius=self.corner_radius,
-                                               fill=int(self.opacity * 255))
-        return mask
-
 
 class JourneyMap(Widget):
-    def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
-                 privacy_zone=NoPrivacyZone()):
+    def __init__(self, timeseries, at, location, waypoints, renderer, style, map_style, size=256, corner_radius=None,
+                 opacity=0.7, privacy_zone=NoPrivacyZone()):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
         self.at = at
         self.location = location
+        self.waypoints = waypoints
         self.renderer = renderer
         self.size = size
         self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
+        self.map_style = map_style
+        self.style = style
+
         self.map = None
         self.image = None
+        self.cached_waypoints = None
+
+        if self.map_style and self.map_style not in available_map_styles():
+            raise IOError(f"Invalid map style '{self.map_style}'. Choose from {available_map_styles()}")
 
     def _init_maybe(self):
         if self.map is None:
@@ -115,12 +123,22 @@ class JourneyMap(Widget):
                 epsilon=1
             )
 
-            image = self.renderer(self.map)
+            if not self.map_style:
+                self.map_style = self.renderer.default_style
+            with self.renderer.open(self.map_style) as renderer:
+                image = renderer(self.map)
 
             draw = ImageDraw.Draw(image)
-            draw.line(plots, fill=(255, 0, 0), width=4)
+            draw.line(plots, fill=self.style["path_rgb"], width=self.style["path_width"])
 
             self.image = self.border.rounded(image)
+
+        if self.cached_waypoints is None:
+            wp_draw = ImageDraw.Draw(self.image)
+            for wp in self.waypoints():
+                draw_marker(wp_draw, self.map.rev_geocode((wp.longitude, wp.latitude)),
+                            size=self.style["wpt_size"], fill=self.style["wpt_rgb"])
+            self.cached_waypoints = True
 
     def draw(self, image: Image, draw: ImageDraw):
         self._init_maybe()
@@ -131,7 +149,7 @@ class JourneyMap(Widget):
 
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
-        draw_marker(draw, current, 6)
+        draw_marker(draw, current, size=self.style["pos_size"], fill=self.style["pos_rgb"])
 
         image.alpha_composite(frame, self.at.tuple())
 
@@ -144,7 +162,7 @@ def draw_marker(draw, position, size, fill=None):
 
 
 class MovingMap(Widget):
-    def __init__(self, at, location, azimuth, renderer,
+    def __init__(self, at, location, azimuth, renderer, map_style,
                  rotate=True, size=256, zoom=17, corner_radius=None, opacity=0.7, always_redraw=False):
         self.at = at
         self.rotate = rotate
@@ -153,6 +171,7 @@ class MovingMap(Widget):
         self.location = location
         self.size = size
         self.zoom = zoom
+        self.map_style = map_style
         self.hypotenuse = int(math.sqrt((self.size ** 2) * 2))
 
         self.half_width_height = (self.hypotenuse / 2)
@@ -167,8 +186,14 @@ class MovingMap(Widget):
         self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
         self.cached = None
 
+        if self.map_style and self.map_style not in available_map_styles():
+            raise IOError(f"Invalid map style '{self.map_style}'. Choose from {available_map_styles()}")
+
     def _redraw(self, map):
-        image = self.renderer(map)
+        if not self.map_style:
+            self.map_style = self.renderer.default_style
+        with self.renderer.open(self.map_style) as renderer:
+            image = renderer(map)
 
         draw = ImageDraw.Draw(image)
         draw_marker(draw, (self.half_width_height, self.half_width_height), 6)
@@ -206,16 +231,23 @@ def view_window(size, d):
 
 class MovingJourneyMap(Widget):
 
-    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer):
+    def __init__(self, timeseries, privacy_zone, location, waypoints, size, zoom, renderer, map_style, style):
         self.privacy_zone = privacy_zone
         self.timeseries = timeseries
         self.size = size
         self.renderer = renderer
         self.zoom = zoom
         self.location = location
+        self.waypoints = waypoints
+        self.map_style = map_style
+        self.style = style
 
         self.cached_map_image = None
         self.cached_map = None
+        self.cached_waypoints = None
+
+        if self.map_style and self.map_style not in available_map_styles():
+            raise IOError(f"Invalid map style '{self.map_style}'. Choose from {available_map_styles()}")
 
     def _redraw(self):
         journey = Journey()
@@ -236,7 +268,10 @@ class MovingJourneyMap(Widget):
 
         log(f"{self.__class__.__name__} Rendering backing map ({map.size}) (can be slow)")
 
-        map_image = self.renderer(map)
+        if not self.map_style:
+            self.map_style = self.renderer.default_style
+        with self.renderer.open(self.map_style) as renderer:
+            map_image = renderer(map)
 
         log(f"... done")
 
@@ -246,13 +281,20 @@ class MovingJourneyMap(Widget):
         ]
 
         draw = ImageDraw.Draw(map_image)
-        draw.line(plots, fill=(255, 0, 0), width=4)
+        draw.line(plots, fill=self.style["path_rgb"], width=self.style["path_width"])
 
         return map, map_image
 
     def draw(self, image: Image, draw: ImageDraw):
         if self.cached_map is None:
             self.cached_map, self.cached_map_image = self._redraw()
+
+        if self.cached_waypoints is None:
+            wp_draw = ImageDraw.Draw(self.cached_map_image)
+            for wp in self.waypoints():
+                draw_marker(wp_draw, self.cached_map.rev_geocode((wp.longitude, wp.latitude)),
+                            size=self.style["wpt_size"], fill=self.style["wpt_rgb"])
+            self.cached_waypoints = True
 
         location = self.location()
         if location.lon is not None and location.lat is not None:
@@ -264,7 +306,8 @@ class MovingJourneyMap(Widget):
             tb = view_window(self.size, map_size[1])(int(current_position_in_big_map[1]))
 
             image.alpha_composite(self.cached_map_image, (0, 0), source=(lr[0], tb[0], lr[1], tb[1]))
-            draw_marker(draw, (int(self.size / 2), int(self.size / 2)), 6)
+            draw_marker(draw, (int(self.size / 2), int(self.size / 2)),
+                        size=self.style["pos_size"], fill=self.style["pos_rgb"])
 
 
 class OutLine:

@@ -136,13 +136,14 @@ Each `profile` can control the input, output, and optionally, the filter argumen
 
 ### Built-in profiles 
 
-Since v0.121.0
+Since v0.127.0
 
 - `nvgpu` - Use NVIDIA GPU for decoding the GoPro MPEG file, and for encoding the output.
 - `nnvgpu` - Use NVIDIA GPU for as much of the process as possible - only supported on in newer versions of ffmpeg, and for certain drivers.
 - `mov` - Use PNG images inside a MOV container - allows an alpha channel in a movie, useful when using another video processing system. Note: Use an output filename extension of `.mov`
 - `vp9` - Create a vp9 webm movie. Note: use an output filename extension of `.webm`
 - `vp8` - Create a vp8 webm movie. Note: use an output filename extension of `.webm`
+- `overlay` Use the `qtrle` codec to create a movie with an alpha channel which is much smaller than PNG images. Note: use an output filename extension of `.mov`
 
 ## User-defined profiles
 

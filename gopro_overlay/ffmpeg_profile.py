@@ -26,6 +26,10 @@ builtin_profiles = {
         "input": [],
         "output": ["-vcodec", "vp8", "-pix_fmt", "yuva420p", "-auto-alt-ref", "0"]
     },
+    "overlay": {
+        "input": [],
+        "output": ["-vcodec", "qtrle", "-pix_fmt", "yuva420p"]
+    },
     "mac_hevc": {
         "input": ["-hwaccel", "videotoolbox"],
         "output": ["-vcodec", "hevc_videotoolbox", "-q:v", "60"]
