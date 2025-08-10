@@ -12,6 +12,7 @@ def journey_map(at, entry, **kwargs) -> Widget:
     return JourneyMap(
         at=at,
         location=lambda: entry().point,
+        waypoints=lambda: entry().custom["waypoints"],
         **kwargs
     )
 

@@ -59,6 +59,10 @@ Use `max` and `min` to control the max and min values that the bar will display
 
 {{ <component type="bar" metric="accl.y" units="m/s^2" max="10" min="0" /> }}
 
+## Centered bar
+
+Use `align_center="true"` to center the bar around zero (the middle). This can be useful for progress bars or similar. The `h-neg` and `h-pos` properties are not used or displayed in this mode. **Tip:** set color properties to `0,0,0,0` to hide them. You will probably want to hide `fill`, `outline`, and `zero` for a progress bar.
+
 
 ## Example Composite Bar Component
 

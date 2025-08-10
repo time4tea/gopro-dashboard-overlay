@@ -130,6 +130,30 @@ class ThunderforestStyleConfig(PrefixMapStyleConfig):
         }
 
 
+class TianDiTuStyleConfig(PrefixMapStyleConfig):
+
+    def __init__(self):
+        super().__init__("tdt")
+
+    def _styles(self) -> List[str]:
+        return [
+            "vec", "cva", "img", "cia",
+            "ter", "cta", "ibo"
+        ]
+
+    def _attributes(self, style: str) -> Dict:
+        assert style in self._styles()
+        return {
+            "name": "TianDiTu",
+            "attribution": "转自天地图\nhttp://www.tianditu.gov.cn/",
+            "url": "http://t{subdomain}.tianditu.gov.cn/$MAPSTYLE$_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=$MAPSTYLE$&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk={api_key}".replace(
+                "$MAPSTYLE$", style),
+            "subdomains": ["0", "1", "2", "3", "4", "5", "6", "7"],
+            "api-key-ref": "tianditu",
+            "limit": 2,
+        }
+
+
 class LocalStyleConfig(PrefixMapStyleConfig):
 
     def __init__(self):
@@ -163,7 +187,7 @@ def configured_style(loader: Config, name: str) -> Optional[dict]:
     return None
 
 
-configurations = [OSMStyleConfig(), CyclOSMStyleConfig(), ThunderforestStyleConfig(), GeoapifyStyleConfig(),
+configurations = [OSMStyleConfig(), CyclOSMStyleConfig(), ThunderforestStyleConfig(), GeoapifyStyleConfig(), TianDiTuStyleConfig(),
                   LocalStyleConfig()]
 
 

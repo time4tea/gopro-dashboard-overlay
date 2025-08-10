@@ -62,9 +62,8 @@ Map rotation can be turned off with `rotate`.
 ## Map Provider & Styles
 
 The map provider, and the map style, can be selected using the command line arguments when running the dashboard program. 
-Currently, it's not possible to have multiple different map styles and providers in the same dashboard.
 
-It is possible to have multiple moving maps, though
+It is possible to have multiple maps in the same video:
 
 {{ 
 <component type="moving_map" size="128" zoom="4" /> 

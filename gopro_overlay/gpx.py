@@ -9,10 +9,19 @@ from .gpmf import GPSFix
 from .point import Point
 from .timeseries import Timeseries, Entry
 
-GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed")
+GPX = collections.namedtuple("GPX", "time lat lon alt hr cad atemp power speed custom")
 
+
+class Reference:
+    def __init__(self, data: dict):
+        self.data = data
+    
+    def __getitem__(self, key):
+        return self.data["metadata"][self.data["field"][key]]
 
 def fudge(gpx):
+    metadata = {m.tag: m.text for m in gpx.metadata_extensions}
+    waypoints = gpx.waypoints
     for track in gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
@@ -25,13 +34,17 @@ def fudge(gpx):
                     "hr": None,
                     "cad": None,
                     "power": None,
-                    "speed": None
+                    "speed": None,
+                    "custom": {"field": {}, "metadata": metadata, "waypoints": waypoints},
                 }
                 for extension in point.extensions:
                     for element in extension.iter():
                         tag = element.tag[element.tag.find("}") + 1:]
                         if tag in ("atemp", "hr", "cad", "power", "speed"):
                             data[tag] = float(element.text)
+                        else:
+                            data["custom"]["field"][tag] = element.text
+                data["custom"].update({"ref": Reference(data["custom"])})
                 yield GPX(**data)
 
 
@@ -46,6 +59,7 @@ def with_unit(gpx, units):
         units.Quantity(gpx.atemp, units.celsius) if gpx.atemp is not None else None,
         units.Quantity(gpx.power, units.watt) if gpx.power is not None else None,
         units.Quantity(gpx.speed, units.mps) if gpx.speed is not None else None,
+        gpx.custom
     )
 
 
@@ -81,7 +95,9 @@ def gpx_to_timeseries(gpx: List[GPX], units):
             packet_index=units.Quantity(0),
             # we should set the gps fix or Journey.accept() will skip the point:
             gpsfix=GPSFix.LOCK_3D.value,
-            gpslock=units.Quantity(GPSFix.LOCK_3D.value)
+            gpslock=units.Quantity(GPSFix.LOCK_3D.value),
+
+            custom=point.custom,
         )
         for index, point in enumerate(gpx)
     ]

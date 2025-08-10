@@ -47,6 +47,10 @@ class Entry:
             start = self.items[key]
             try:
                 end = other.items[key]
+                # Custom field and metadata are not interpolated at this time
+                if key == "custom":
+                    items[key] = start
+                    continue
                 diff = end - start
                 interp = start + (diff * position)
             except KeyError:
