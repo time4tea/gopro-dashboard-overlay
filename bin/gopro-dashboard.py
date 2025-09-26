@@ -265,7 +265,10 @@ if __name__ == "__main__":
                                    filter_fn=locked_2d)
                 frame_meta.process_deltas(timeseries_process.calculate_speeds(), skip=packets_per_second * 3,
                                           filter_fn=locked_2d)
-                frame_meta.process(timeseries_process.calculate_odo(), filter_fn=locked_2d)
+                
+                # Convert odometer start value from user's distance units to meters
+                odo_start = units.Quantity(args.odometer_start, args.units_distance).to("m")
+                frame_meta.process(timeseries_process.calculate_odo(start_value=odo_start), filter_fn=locked_2d)
                 frame_meta.process_accel(timeseries_process.calculate_accel(), skip=18 * 3)
                 frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3,
                                           filter_fn=locked_3d)  # hack

@@ -18,7 +18,7 @@
         </composite>
     </composite>
 
-    <composite x="16" y="1150" name="big_mph">
+    <composite x="16" y="1150" name="big_kph">
         <component type="metric_unit" metric="speed" units="kph" size="16">{:~c}</component>
         <component type="metric" x="0" y="0" metric="speed" units="kph" dp="0" size="160" />
     </composite>
@@ -35,6 +35,11 @@
         <component type="metric_unit" x="70" y="0" metric="alt" units="alt" size="16">ALT({:~C})</component>
         <component type="icon" x="0" y="0" file="mountain.png" size="64"/>
         <component type="metric" x="70" y="18" metric="alt" units="alt" dp="0" size="32" />
+    </composite>
+
+    <composite x="2200" y="1350" name="odometer">
+        <component type="metric_unit" x="70" y="0" metric="odo" units="km" size="36">{:~C}</component>
+        <component type="metric" x="0" y="0" metric="odo" units="km" dp="1" size="36" />
     </composite>
 
     <composite x="2500" y="1350" name="cadence">

@@ -108,3 +108,17 @@ def test_process_odo():
     )
     assert r["codo"].magnitude == 25
 
+
+def test_process_odo_with_start_value():
+    from gopro_overlay.units import units
+    start_value = units.Quantity(100.0, units.m)
+    processor = calculate_odo(start_value=start_value)
+    r = processor(
+        e=Entry(datetime_of(0), alt=metres(5), dist=metres(10)),
+    )
+    assert r["codo"].magnitude == 110
+    r = processor(
+        e=Entry(datetime_of(0), alt=metres(5), dist=metres(15)),
+    )
+    assert r["codo"].magnitude == 125
+

@@ -92,8 +92,10 @@ def calculate_accel():
     return accept
 
 
-def calculate_odo():
-    total = [units.Quantity(0.0, units.m)]
+def calculate_odo(start_value=None):
+    if start_value is None:
+        start_value = units.Quantity(0.0, units.m)
+    total = [start_value]
 
     def accept(e):
         if e.dist is not None:

@@ -221,6 +221,15 @@ def test_units_user():
     assert do_args("--units-temperature", "kelvin").units_temperature == "kelvin"
 
 
+def test_odometer_start_default():
+    assert do_args().odometer_start == 0.0
+
+
+def test_odometer_start_user():
+    assert do_args("--odometer-start", "100.5").odometer_start == 100.5
+    assert do_args("--odometer-start", "0").odometer_start == 0.0
+
+
 def do_args(*args, input: Optional[str] = "input", output: Optional[str] = "output"):
     all_args = [a for a in [input, output, *args] if a]
     print(all_args)
