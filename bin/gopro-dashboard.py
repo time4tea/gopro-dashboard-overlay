@@ -32,6 +32,7 @@ from gopro_overlay.point import Point
 from gopro_overlay.privacy import PrivacyZone, NoPrivacyZone
 from gopro_overlay.progresstrack import ProgressBarProgress
 from gopro_overlay.timeunits import timeunits, Timeunit
+from gopro_overlay.timeseries import Timeseries
 from gopro_overlay.timing import PoorTimer, Timers
 from gopro_overlay.units import units
 from gopro_overlay.widgets.profile import WidgetProfiler
@@ -50,7 +51,8 @@ def accepter_from_args(include, exclude):
 
 
 def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude, renderer, timeseries, font,
-                          privacy_zone, profiler, converters: Converters):
+                          privacy_zone, profiler, converters: Converters,
+                          fulltimeseries: Timeseries = None):
     accepter = accepter_from_args(include, exclude)
 
     if layout_xml:
@@ -61,7 +63,7 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
         try:
             return layout_from_xml(
                 load_xml_layout(resource_name), renderer, timeseries, font, privacy_zone, include=accepter,
-                decorator=profiler, converters=converters
+                decorator=profiler, converters=converters, fulltimeseries=fulltimeseries
             )
         except FileNotFoundError:
             raise IOError(f"Unable to locate bundled layout resource: {resource_name}. "
@@ -72,7 +74,7 @@ def create_desired_layout(dimensions, layout, layout_xml: Path, include, exclude
     elif layout == "xml":
         return layout_from_xml(
             load_xml_layout(layout_xml), renderer, timeseries, font, privacy_zone, include=accepter,
-            decorator=profiler, converters=converters
+            decorator=profiler, converters=converters, fulltimeseries=fulltimeseries
         )
     else:
         raise ValueError(f"Unsupported layout {args.layout_creator}")
@@ -359,7 +361,8 @@ if __name__ == "__main__":
                     font=font,
                     privacy_zone=privacy_zone,
                     profiler=profiler,
-                    converters=unit_converters
+                    converters=unit_converters,
+                    fulltimeseries=fit_or_gpx_timeseries if args.full_timeseries_journey else None
                 )
 
                 overlay = Overlay(framemeta=frame_meta, create_widgets=layout_creator)
