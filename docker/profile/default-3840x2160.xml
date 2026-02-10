@@ -46,4 +46,9 @@
         <component type="metric" x="-80" y="18" metric="hr" dp="0" size="64" align="right"/>
     </composite>
 
+    <composite x="3300" y="1980" name="odometer">
+        <component type="metric" x="0" y="0" metric="odo" units="km" dp="1" size="64" align="right"/>
+        <component type="metric_unit" x="10" y="0" metric="odo" units="km" size="64">{:~C}</component>
+    </composite>
+
 </layout>

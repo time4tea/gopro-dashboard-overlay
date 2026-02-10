@@ -38,8 +38,8 @@
     </composite>
 
     <composite x="2200" y="1350" name="odometer">
-        <component type="metric_unit" x="70" y="0" metric="odo" units="km" size="36">{:~C}</component>
-        <component type="metric" x="0" y="0" metric="odo" units="km" dp="1" size="36" />
+        <component type="metric" x="0" y="0" metric="odo" units="km" dp="1" size="36" align="right"/>
+        <component type="metric_unit" x="10" y="0" metric="odo" units="km" size="36">{:~C}</component>
     </composite>
 
     <composite x="2500" y="1350" name="cadence">

@@ -1,0 +1,6 @@
+<layout>
+    <composite x="7" y="7" name="date_and_time">
+        <component type="datetime" x="0" y="0" format="%H:%M:%S" size="43" align="left"/>
+        <component type="datetime" x="0" y="53" format="%Y/%m/%d" size="21" align="left"/>
+    </composite>
+</layout>
