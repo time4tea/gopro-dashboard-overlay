@@ -6,8 +6,10 @@ import gpxpy
 
 from gopro_overlay.entry import Entry
 from gopro_overlay.framemeta import FrameMeta
-from gopro_overlay.timeseries import Timeseries
+from gopro_overlay.timeseries import Timeseries, pairwise
+from gopro_overlay.timeseries_process import distance_azi_between
 from gopro_overlay.timeunits import Timeunit, timeunits
+from gopro_overlay.units import units as u
 
 
 def framemeta_to_gpx(fm: FrameMeta, step: timedelta = timedelta(seconds=0), filter_fn=lambda e: True):
@@ -76,6 +78,16 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta,
             pass
 
     gopro_framemeta.process(processor)
+
+
+def calculate_timeseries_distance(timeseries: Timeseries, end_dt: datetime.datetime):
+    entries = [e for e in timeseries.items() if e.dt <= end_dt]
+    total = u.Quantity(0.0, u.m)
+    for a, b in pairwise(entries):
+        if hasattr(a, 'point') and hasattr(b, 'point') and a.point is not None and b.point is not None:
+            dist, _ = distance_azi_between(a.point, b.point)
+            total += dist
+    return total
 
 
 def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datetime.datetime = None,

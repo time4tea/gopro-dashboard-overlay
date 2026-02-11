@@ -13,3 +13,5 @@ geographiclib==1.52
 progressbar2==4.2.0
 requests==2.31.0
 sqlitedict==2.1.0
+# for pkg_resources module (pin to <70 as pkg_resources was removed in 70+)
+setuptools<70.0.0

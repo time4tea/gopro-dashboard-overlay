@@ -21,7 +21,7 @@ from gopro_overlay.ffmpeg_gopro import FFMPEGGoPro
 from gopro_overlay.ffmpeg_overlay import FFMPEGNull, FFMPEGOverlay, FFMPEGOverlayVideo
 from gopro_overlay.ffmpeg_profile import load_ffmpeg_profile
 from gopro_overlay.font import load_font
-from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta
+from gopro_overlay.framemeta_gpx import merge_gpx_with_gopro, timeseries_to_framemeta, calculate_timeseries_distance
 from gopro_overlay.geo import MapRenderer, api_key_finder, MapStyler
 from gopro_overlay.gpmf import GPS_FIXED_VALUES, GPSFix
 from gopro_overlay.layout import Overlay, speed_awareness_layout
@@ -137,6 +137,8 @@ if __name__ == "__main__":
         with timers.timer("program"):
             with timers.timer("loading timeseries"):
 
+                gpx_odo_offset = None
+
                 if args.use_gpx_only:
 
                     start_date: Optional[datetime.datetime] = None
@@ -194,6 +196,10 @@ if __name__ == "__main__":
                         start_date=start_date,
                         duration=duration
                     )
+
+                    if start_date is not None and start_date > fit_or_gpx_timeseries.min:
+                        gpx_odo_offset = calculate_timeseries_distance(fit_or_gpx_timeseries, start_date)
+
                     video_duration = frame_meta.duration()
                     packets_per_second = 10
                 else:
@@ -268,6 +274,8 @@ if __name__ == "__main__":
                 
                 # Convert odometer start value from user's distance units to meters
                 odo_start = units.Quantity(args.odometer_start, args.units_distance).to("m")
+                if gpx_odo_offset is not None:
+                    odo_start = odo_start + gpx_odo_offset
                 frame_meta.process(timeseries_process.calculate_odo(start_value=odo_start), filter_fn=locked_2d)
                 frame_meta.process_accel(timeseries_process.calculate_accel(), skip=18 * 3)
                 frame_meta.process_deltas(timeseries_process.calculate_gradient(), skip=packets_per_second * 3,
