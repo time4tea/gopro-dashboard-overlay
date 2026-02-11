@@ -375,6 +375,11 @@ if __name__ == "__main__":
 
                 overlay = Overlay(framemeta=frame_meta, create_widgets=layout_creator)
 
+                # Initialize odometer CSV tracking
+                odo_csv_path = str(output) + "_odo.csv"
+                odo_csv_data = []  # List of (km, elapsed_sec) tuples
+                next_km_threshold = 0  # Next kilometer milestone to record
+
                 try:
                     progress.start(len(stepper))
                     with ffmpeg.generate() as writer:
@@ -391,8 +396,28 @@ if __name__ == "__main__":
                                 progress.update(index)
                                 draw_timer.time(lambda: buffer.draw(lambda frame: overlay.draw(dt, frame)))
 
+                                # Track odometer milestones for CSV export
+                                entry = frame_meta.get(dt)
+                                if entry.codo is not None:
+                                    odo_km = entry.codo.to("km").magnitude
+                                    elapsed_sec = dt.millis() / 1000.0
+                                    # Record all km milestones crossed since last check
+                                    while odo_km >= next_km_threshold:
+                                        odo_csv_data.append((next_km_threshold, elapsed_sec))
+                                        next_km_threshold += 1
+
                     log("Finished drawing frames. waiting for ffmpeg to catch up")
                     progress.complete()
+
+                    # Write odometer CSV
+                    if odo_csv_data:
+                        import csv
+                        with open(odo_csv_path, 'w', newline='') as csvfile:
+                            writer = csv.writer(csvfile)
+                            writer.writerow(['km', 'elapsed_sec'])
+                            for km, elapsed_sec in odo_csv_data:
+                                writer.writerow([km, f"{elapsed_sec:.2f}"])
+                        log(f"Odometer data exported to {odo_csv_path}")
 
                 finally:
                     for t in [draw_timer]:
