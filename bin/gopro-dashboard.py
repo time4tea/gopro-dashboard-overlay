@@ -378,7 +378,7 @@ if __name__ == "__main__":
                 # Initialize odometer CSV tracking
                 odo_csv_path = str(output) + "_odo.csv"
                 odo_csv_data = []  # List of (km, elapsed_sec) tuples
-                next_km_threshold = 0  # Next kilometer milestone to record
+                next_km_threshold = args.odometer_csv_step  # Next kilometer milestone to record
 
                 try:
                     progress.start(len(stepper))
@@ -404,7 +404,7 @@ if __name__ == "__main__":
                                     # Record all km milestones crossed since last check
                                     while odo_km >= next_km_threshold:
                                         odo_csv_data.append((next_km_threshold, elapsed_sec))
-                                        next_km_threshold += 1
+                                        next_km_threshold += args.odometer_csv_step
 
                     log("Finished drawing frames. waiting for ffmpeg to catch up")
                     progress.complete()

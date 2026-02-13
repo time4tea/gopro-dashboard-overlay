@@ -156,6 +156,8 @@ def gopro_dashboard_arguments(args=None):
                        help="Default unit for temperature")
     units.add_argument("--odometer-start", type=float, default=0.0,
                        help="Starting value for odometer in distance units (default: 0.0)")
+    units.add_argument("--odometer-csv-step", type=float, default=1.0,
+                       help="Step distance for odometer CSV export in km (default: 1.0)")
 
     gps = parser.add_argument_group("GPS", "Controlling GPS Parsing (from GoPro Only)")
 
