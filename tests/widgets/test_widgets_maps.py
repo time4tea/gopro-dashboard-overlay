@@ -108,6 +108,27 @@ def test_render_journey_map_rounded_when_no_data_was_locked_issue_103():
 
 @pytest.mark.gfx
 @approve_image
+def test_render_journey_map_custom_style():
+    with renderer.open() as map_renderer:
+        return time_rendering("journey_map_custom_style", widgets=[
+            journey_map(
+                at=Coordinate(100, 20),
+                entry=lambda: ts.get(ts.min),
+                size=256,
+                renderer=map_renderer,
+                timeseries=ts,
+                privacy_zone=NoPrivacyZone(),
+                line_fill=(255, 255, 0),
+                line_width=7,
+                marker_fill=(255, 0, 255),
+                marker_outline=(255, 255, 255),
+                marker_size=10,
+            )
+        ])
+
+
+@pytest.mark.gfx
+@approve_image
 def test_render_journey_very_transparent():
 
     with renderer.open() as map_renderer:
@@ -182,6 +203,29 @@ def test_moving_journey_map_at_start():
                     size=256,
                     zoom=15,
                     renderer=map_renderer,
+                ),
+            ])
+
+
+@pytest.mark.gfx
+@approve_image
+def test_moving_journey_map_custom_style():
+    with renderer.open() as map_renderer:
+        return time_rendering(
+            "test_moving_journey_map_custom_style",
+            widgets=[
+                MovingJourneyMap(
+                    timeseries=ts,
+                    privacy_zone=NoPrivacyZone(),
+                    location=lambda: ts.get(ts.min).point,
+                    size=256,
+                    zoom=15,
+                    renderer=map_renderer,
+                    line_fill=(0, 255, 0),
+                    line_width=7,
+                    marker_fill=(255, 0, 255),
+                    marker_outline=(255, 255, 255),
+                    marker_size=10,
                 ),
             ])
 
