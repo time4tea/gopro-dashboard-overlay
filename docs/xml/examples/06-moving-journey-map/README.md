@@ -51,6 +51,44 @@ The zoom can be set with `zoom` - Very high levels of zoom might not work reliab
 <kbd>![06-moving-journey-map-4.png](06-moving-journey-map-4.png)</kbd>
 
 
+## Journey Path and Location Styling
+
+Set `fill` and `line-width` to control the journey path style.
+
+
+```xml
+<component type="moving_journey_map" size="256" zoom="13" fill="255,255,0" line-width="3" />
+```
+<kbd>![06-moving-journey-map-5.png](06-moving-journey-map-5.png)</kbd>
+
+
+Set `line-width` to `0` to hide the journey line completely.
+
+
+```xml
+<component type="moving_journey_map" size="256" zoom="13" line-width="0" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />
+```
+<kbd>![06-moving-journey-map-6.png](06-moving-journey-map-6.png)</kbd>
+
+
+Set `loc-fill`, `loc-outline` and `loc-size` to control the current location marker style.
+
+
+```xml
+<component type="moving_journey_map" size="256" zoom="13" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />
+```
+<kbd>![06-moving-journey-map-7.png](06-moving-journey-map-7.png)</kbd>
+
+
+All journey/map marker style options can be used together.
+
+
+```xml
+<component type="moving_journey_map" size="256" zoom="13" fill="0,255,0" line-width="7" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />
+```
+<kbd>![06-moving-journey-map-8.png](06-moving-journey-map-8.png)</kbd>
+
+
 ## Positioning, Transparency and Corners
 
 The component should be placed in a `translate` to move it around the screen
@@ -64,7 +102,7 @@ To make the component rounded or transparent, it can be placed in a `frame`
     </frame>
 </translate>
 ```
-<kbd>![06-moving-journey-map-5.png](06-moving-journey-map-5.png)</kbd>
+<kbd>![06-moving-journey-map-9.png](06-moving-journey-map-9.png)</kbd>
 
 
 ## Fade out
@@ -79,5 +117,5 @@ Corners can be faded out using parent frame's `fo` where you can specify how man
     </frame>
 </frame>
 ```
-<kbd>![06-moving-journey-map-6.png](06-moving-journey-map-6.png)</kbd>
+<kbd>![06-moving-journey-map-10.png](06-moving-journey-map-10.png)</kbd>
 

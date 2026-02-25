@@ -72,6 +72,44 @@ if `corner_radius` == half the width (ie. the radius) then the corners will be s
 <kbd>![06-journey-map-5.png](06-journey-map-5.png)</kbd>
 
 
+## Journey Path and Location Styling
+
+Set `fill` and `line-width` to control the journey path style.
+
+
+```xml
+<component type="journey_map" size="256" fill="255,255,0" line-width="3" />
+```
+<kbd>![06-journey-map-6.png](06-journey-map-6.png)</kbd>
+
+
+Set `line-width` to `0` to hide the journey line completely.
+
+
+```xml
+<component type="journey_map" size="256" line-width="0" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />
+```
+<kbd>![06-journey-map-7.png](06-journey-map-7.png)</kbd>
+
+
+Set `loc-fill`, `loc-outline` and `loc-size` to control the current location marker style.
+
+
+```xml
+<component type="journey_map" size="256" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />
+```
+<kbd>![06-journey-map-8.png](06-journey-map-8.png)</kbd>
+
+
+All journey/map marker style options can be used together.
+
+
+```xml
+<component type="journey_map" size="256" fill="0,255,0" line-width="7" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />
+```
+<kbd>![06-journey-map-9.png](06-journey-map-9.png)</kbd>
+
+
 ## Fade out
 
 Corners can be faded out using parent frame's `fo` where you can specify how many pixels to use for the fade out.
@@ -84,7 +122,7 @@ Corners can be faded out using parent frame's `fo` where you can specify how man
     </frame>
 </frame>
 ```
-<kbd>![06-journey-map-6.png](06-journey-map-6.png)</kbd>
+<kbd>![06-journey-map-10.png](06-journey-map-10.png)</kbd>
 
 
 ## Copyright
