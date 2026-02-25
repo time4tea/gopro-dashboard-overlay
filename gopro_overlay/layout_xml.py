@@ -491,7 +491,7 @@ class Widgets:
             rotate=battrib(element, "rotate", d=True)
         )
 
-    @allow_attributes({"x", "y", "size", "corner_radius", "opacity"})
+    @allow_attributes({"x", "y", "size", "corner_radius", "opacity", "fill", "line-width", "loc-fill", "loc-outline", "loc-size"})
     def create_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return journey_map(
             at(element),
@@ -501,10 +501,15 @@ class Widgets:
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
             corner_radius=iattrib(element, "corner_radius", 0),
-            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0))
+            opacity=fattrib(element, "opacity", 0.7, r=FloatRange(0.0, 1.0)),
+            line_fill=rgbattr(element, "fill", d=(255, 0, 0)),
+            line_width=iattrib(element, "line-width", d=4),
+            marker_fill=rgbattr(element, "loc-fill", d=(0, 0, 255)),
+            marker_outline=rgbattr(element, "loc-outline", d=(0, 0, 0)),
+            marker_size=iattrib(element, "loc-size", d=6)
         )
 
-    @allow_attributes({"size", "zoom"})
+    @allow_attributes({"size", "zoom", "fill", "line-width", "loc-fill", "loc-outline", "loc-size"})
     def create_moving_journey_map(self, element: ET.Element, entry, **kwargs) -> Widget:
         return MovingJourneyMap(
             location=lambda: entry().point,
@@ -512,7 +517,12 @@ class Widgets:
             renderer=self.renderer,
             timeseries=self.framemeta,
             size=iattrib(element, "size", d=256),
-            zoom=iattrib(element, "zoom", d=16, r=range(1, 20))
+            zoom=iattrib(element, "zoom", d=16, r=range(1, 20)),
+            line_fill=rgbattr(element, "fill", d=(255, 0, 0)),
+            line_width=iattrib(element, "line-width", d=4),
+            marker_fill=rgbattr(element, "loc-fill", d=(0, 0, 255)),
+            marker_outline=rgbattr(element, "loc-outline", d=(0, 0, 0)),
+            marker_size=iattrib(element, "loc-size", d=6)
         )
 
     @allow_attributes({"size", "fill", "outline", "fill_width", "outline_width"})

@@ -83,7 +83,8 @@ class MaybeRoundedBorder:
 
 class JourneyMap(Widget):
     def __init__(self, timeseries, at, location, renderer, size=256, corner_radius=None, opacity=0.7,
-                 privacy_zone=NoPrivacyZone()):
+                 privacy_zone=NoPrivacyZone(), line_fill=(255, 0, 0), line_width=4,
+                 marker_fill=(0, 0, 255), marker_outline=(0, 0, 0), marker_size=6):
         self.timeseries = timeseries
         self.privacy_zone = privacy_zone
         self.at = at
@@ -91,6 +92,11 @@ class JourneyMap(Widget):
         self.renderer = renderer
         self.size = size
         self.border = MaybeRoundedBorder(size=size, corner_radius=corner_radius, opacity=opacity)
+        self.line_fill = line_fill
+        self.line_width = line_width
+        self.marker_fill = marker_fill
+        self.marker_outline = marker_outline
+        self.marker_size = marker_size
         self.map = None
         self.image = None
 
@@ -118,7 +124,7 @@ class JourneyMap(Widget):
             image = self.renderer(self.map)
 
             draw = ImageDraw.Draw(image)
-            draw.line(plots, fill=(255, 0, 0), width=4)
+            draw_journey_line(draw, plots, self.line_fill, self.line_width)
 
             self.image = self.border.rounded(image)
 
@@ -131,16 +137,22 @@ class JourneyMap(Widget):
 
         draw = ImageDraw.Draw(frame)
         current = self.map.rev_geocode((location.lon, location.lat))
-        draw_marker(draw, current, 6)
+        draw_marker(draw, current, self.marker_size, fill=self.marker_fill, outline=self.marker_outline)
 
         image.alpha_composite(frame, self.at.tuple())
 
 
-def draw_marker(draw, position, size, fill=None):
+def draw_marker(draw, position, size, fill=None, outline=(0, 0, 0)):
     fill = fill if fill is not None else (0, 0, 255)
     draw.ellipse([(position[0] - size, position[1] - size), (position[0] + size, position[1] + size)],
                  fill=fill,
-                 outline=(0, 0, 0))
+                 outline=outline)
+
+
+def draw_journey_line(draw, plots, fill, width):
+    if width <= 0:
+        return
+    draw.line(plots, fill=fill, width=width)
 
 
 class MovingMap(Widget):
@@ -206,13 +218,20 @@ def view_window(size, d):
 
 class MovingJourneyMap(Widget):
 
-    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer):
+    def __init__(self, timeseries, privacy_zone, location, size, zoom, renderer,
+                 line_fill=(255, 0, 0), line_width=4,
+                 marker_fill=(0, 0, 255), marker_outline=(0, 0, 0), marker_size=6):
         self.privacy_zone = privacy_zone
         self.timeseries = timeseries
         self.size = size
         self.renderer = renderer
         self.zoom = zoom
         self.location = location
+        self.line_fill = line_fill
+        self.line_width = line_width
+        self.marker_fill = marker_fill
+        self.marker_outline = marker_outline
+        self.marker_size = marker_size
 
         self.cached_map_image = None
         self.cached_map = None
@@ -246,7 +265,7 @@ class MovingJourneyMap(Widget):
         ]
 
         draw = ImageDraw.Draw(map_image)
-        draw.line(plots, fill=(255, 0, 0), width=4)
+        draw_journey_line(draw, plots, self.line_fill, self.line_width)
 
         return map, map_image
 
@@ -264,7 +283,8 @@ class MovingJourneyMap(Widget):
             tb = view_window(self.size, map_size[1])(int(current_position_in_big_map[1]))
 
             image.alpha_composite(self.cached_map_image, (0, 0), source=(lr[0], tb[0], lr[1], tb[1]))
-            draw_marker(draw, (int(self.size / 2), int(self.size / 2)), 6)
+            draw_marker(draw, (int(self.size / 2), int(self.size / 2)), self.marker_size,
+                        fill=self.marker_fill, outline=self.marker_outline)
 
 
 class OutLine:

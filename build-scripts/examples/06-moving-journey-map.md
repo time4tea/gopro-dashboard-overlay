@@ -21,6 +21,24 @@ The zoom can be set with `zoom` - Very high levels of zoom might not work reliab
 {{ <component type="moving_journey_map" size="256" zoom="11" />  }}
 {{ <component type="moving_journey_map" size="256" zoom="14" />  }}
 
+## Journey Path and Location Styling
+
+Set `fill` and `line-width` to control the journey path style.
+
+{{ <component type="moving_journey_map" size="256" zoom="13" fill="255,255,0" line-width="3" />  }}
+
+Set `line-width` to `0` to hide the journey line completely.
+
+{{ <component type="moving_journey_map" size="256" zoom="13" line-width="0" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />  }}
+
+Set `loc-fill`, `loc-outline` and `loc-size` to control the current location marker style.
+
+{{ <component type="moving_journey_map" size="256" zoom="13" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />  }}
+
+All journey/map marker style options can be used together.
+
+{{ <component type="moving_journey_map" size="256" zoom="13" fill="0,255,0" line-width="7" loc-fill="255,0,255" loc-outline="255,255,255" loc-size="10" />  }}
+
 ## Positioning, Transparency and Corners
 
 The component should be placed in a `translate` to move it around the screen
