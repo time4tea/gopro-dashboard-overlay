@@ -124,9 +124,9 @@ def gopro_dashboard_arguments(args=None):
 
     only.add_argument("--use-gpx-only", "--use-fit-only", action="store_true",
                       help="Use only the GPX/FIT file - no GoPro location data")
-    only.add_argument("--video-time-start", choices=["file-created", "file-modified", "file-accessed"],
+    only.add_argument("--video-time-start", choices=["file-created", "file-modified", "file-accessed", "mp4-created"],
                       help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed")
-    only.add_argument("--video-time-end", choices=["file-created", "file-modified", "file-accessed"],
+    only.add_argument("--video-time-end", choices=["file-created", "file-modified", "file-accessed", "mp4-created"],
                       help="Use file dates for aligning video and GPS information, only when --use-gpx-only - EXPERIMENTAL! - may be changed/removed")
 
     maps = parser.add_argument_group("Mapping", "Display of Maps")
