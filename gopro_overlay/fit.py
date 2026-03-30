@@ -71,6 +71,8 @@ def load_timeseries(filepath: Path, units):
                     else:
                         if field.name in interpret and field.value is not None:
                             items.update(**interpret[field.name](field.value, units))
+                        elif field.value is not None and isinstance(field.value, (int, float)):
+                            items[field.name] = units.Quantity(field.value)
 
                 if "lat" in items and "lon" in items:
                     items["point"] = Point(lat=items["lat"], lon=items["lon"])

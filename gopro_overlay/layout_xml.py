@@ -313,7 +313,9 @@ def metric_accessor_from(name: str) -> Callable[[Entry], Optional[pint.Quantity]
     }
     if name in accessors:
         return accessors[name]
-    raise IOError(f"The metric '{name}' is not supported. Use one of: {list(accessors.keys())}")
+    else:
+        log(f"The metric '{name}' is not a known metric: {list(accessors.keys())}. Attempting generic field lookup.")
+        return lambda e: e.items.get(name)
 
 
 def quantity_formatter_for(format_string: Optional[str], dp: Optional[int]) -> Callable[[pint.Quantity], str]:
