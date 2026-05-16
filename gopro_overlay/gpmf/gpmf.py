@@ -172,16 +172,23 @@ def _interpret_type(item, **kwargs) -> List[str]:
     return list(_interpret_string(item, **kwargs))
 
 
+def _correct_length(expected, what, thing):
+    if len(thing) != expected:
+        log(f"Skipping malformed {what} entry with {len(thing)} component(s) (expected {expected})")
+        return False
+    return True
+
+
 def _interpret_xyz(item, **kwargs) -> List[XYZ]:
-    return [XYZ(*it) for it in _interpret_element(item, **kwargs)]
+    return [XYZ(*it) for it in _interpret_element(item, **kwargs) if _correct_length(3, 'XYZ', it)]
 
 
 def _interpret_vector(item, **kwargs) -> List[VECTOR]:
-    return [VECTOR(*it) for it in _interpret_element(item, **kwargs)]
+    return [VECTOR(*it) for it in _interpret_element(item, **kwargs) if _correct_length(3, 'VECTOR', it)]
 
 
 def _interpret_quaternion(item, **kwargs) -> List[QUATERNION]:
-    return [QUATERNION(*it) for it in _interpret_element(item, **kwargs)]
+    return [QUATERNION(*it) for it in _interpret_element(item, **kwargs) if _correct_length(4, 'QUATERNION', it)]
 
 
 def _interpret_gps_lock(item, **kwargs) -> GPSFix:
