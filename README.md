@@ -207,6 +207,8 @@ https://coderunner.io/how-to-compress-gopro-movies-and-keep-metadata/
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.134.0 - [Fix] Don't crash when GRAV entries have wrong number of components (firmware bug workaround) - thanks [@joepetjr](https://github.com/joepetjr) for report & suggested fix
+  - [Fix] Fix typo in bbox calculation - thanks [@djm300](https://github.com/djm300)
 - 0.133.0 - [Enhancement] Chart - Add `width` and `marker-size`, better interpolation of datapoints at end of file, and use date from video file, with `--video-time-start video-start` - thanks to [@derFunk](https://github.com/derFunk) for contributing
 - 0.132.0 - [Enhancement] Use user-supplied unit pref for chart - thanks to [@DonkeyShine](https://github.com/DonkeyShine) for noticing
 - 0.131.0 [Enhancement] - Improved parsing of FIT files with gear changes thanks to  [@geomandolyn](https://github.com/geomandolyn) to raising issue & sample data.
