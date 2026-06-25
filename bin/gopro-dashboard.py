@@ -193,14 +193,20 @@ if __name__ == "__main__":
                                 "https://github.com/time4tea/gopro-dashboard-overlay/tree/main/docs/bin#create-a-movie"
                                 "-from-gpx-and-video-not-created-with-gopro"
                             )
+                    video_duration = duration
+
+                    if (args.timelapse_factor):
+                        speedup = args.timelapse_factor
+                    else:
+                        speedup = 1.0
 
                     frame_meta = timeseries_to_framemeta(
                         fit_or_gpx_timeseries,
                         units,
                         start_date=start_date,
-                        duration=duration
+                        duration=duration * speedup,
+                        speedup=speedup
                     )
-                    video_duration = frame_meta.duration()
                     packets_per_second = 10
                 else:
                     inputpath = assert_file_exists(args.input)

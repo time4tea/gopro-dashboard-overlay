@@ -79,7 +79,7 @@ def merge_gpx_with_gopro(gpx_timeseries: Timeseries, gopro_framemeta: FrameMeta,
 
 
 def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datetime.datetime = None,
-                            duration: Timeunit = None) -> FrameMeta:
+                            duration: Timeunit = None, speedup: float = 1.0) -> FrameMeta:
     fake_frame_meta = FrameMeta()
 
     if start_date is None:
@@ -90,7 +90,7 @@ def timeseries_to_framemeta(gpx_timeseries: Timeseries, units, start_date: datet
     else:
         end_date = start_date + duration.timedelta()
 
-    stepper = gpx_timeseries.stepper(step=timeunits(seconds=0.1))
+    stepper = gpx_timeseries.stepper(step=timeunits(seconds=0.1 * speedup))
 
     for pts in stepper.steps():
 
