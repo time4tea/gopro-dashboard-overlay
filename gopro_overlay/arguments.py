@@ -86,6 +86,8 @@ def gopro_dashboard_arguments(args=None):
     parser.add_argument("output", type=pathlib.Path,
                         help="Output Video File - MP4/MOV/WEBM all supported, see Profiles documentation")
 
+    parser.add_argument("--timelapse-factor", type=float, default=1.0,
+                     help="Speedup factor (for time-lapse/warp/shift/hyperlapse).  5.0 = 5x realtime, etc.")
     parser.add_argument("--font", help="Selects a font", default="Roboto-Medium.ttf")
     parser.add_argument("--privacy", help="Set privacy zone (lat,lon,km)")
 
