@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Multimedia :: Video",
 ]
 dependencies = [
-    "pillow==11.3.0",
+    "pillow==12.3.0",
     "pint==0.25.1",      # min python version 3.11
     "gpxpy==1.6.1",
     "fitdecode==0.10.0",
