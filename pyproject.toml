@@ -31,7 +31,7 @@ dependencies = [
     "progressbar2==4.2.0",
     "requests==2.32.5",
     "sqlitedict==2.1.0",
-    "aiohttp==3.13.3",   # for geotiler
+    "aiohttp==3.14.3",   # for geotiler
     "cytoolz==1.1.0",    # for geotiler
 ]
 
