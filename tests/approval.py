@@ -1,4 +1,5 @@
 import inspect
+import os
 import sys
 from functools import wraps
 from pathlib import Path
@@ -7,6 +8,8 @@ import pytest
 from PIL import ImageChops, Image, ImageStat
 
 from testenvironment import is_ci
+
+AUTO_APPROVE=os.getenv("AUTO_APPROVE", "no").lower() == 'yes'
 
 
 def approve_image(f):
@@ -33,6 +36,13 @@ def approve_image(f):
             raise AssertionError(f"{function_name} needs to return the image it created")
 
         actual_image.save(actual_location, "PNG")
+
+        if AUTO_APPROVE:
+            print(f"Writing Approval {approved_location}: APPROVED", file=sys.stderr)
+            actual_image.save(approved_location, "PNG")
+            return
+
+
         if not approved_location.exists():
             print(f"cp {actual_location} {approved_location}", file=sys.stderr)
             pytest.xfail(f"{function_name}: approved File does not exist, no assertion")

@@ -20,17 +20,18 @@ Discuss on [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-over
 
 ## Examples
 
-![Example Dashboard Image](examples/2022-05-15-example.png)
-![Example Dashboard Image](examples/2022-06-11-contrib-example.png)
-![Example Dashboard Image](examples/2022-07-19-contrib-example-plane.jpg)
-![Example Dashboard Image](examples/2023-07-23-contrib-example-ski-pov.png)
-![Example Dashboard Image](examples/2023-07-23-contrib-example-ski-drone.png)
+![Example - Chedder Gorge](examples/2022-05-15-example.png)
+![Example - Rallye Des Cimes](examples/2026-05-16-rallye-des-cimes-contrib-example.png)
+![Example - GoKarting](examples/2022-06-11-contrib-example.png)
+![Example - Light Plane Cockpit](examples/2022-07-19-contrib-example-plane.jpg)
+![Example - Skiing First Person](examples/2023-07-23-contrib-example-ski-pov.png)
+![Example - Skiing Drone](examples/2023-07-23-contrib-example-ski-drone.png)
 
 An Example of 'overlay only' mode, which generates movies from GPX files
 ![Example Dashboard Image](examples/2022-11-24-gpx-only-overlay.png)
 
 Example from [examples/layout](examples/layout)
-![Example Dashboard Image](examples/layout/layout-cairo-2704x1520.png)
+![Example - Richmond Park with Cairo Widgets](examples/layout/layout-cairo-2704x1520.png)
 
 ## Map Styles
 
@@ -207,6 +208,8 @@ https://coderunner.io/how-to-compress-gopro-movies-and-keep-metadata/
 ## Latest Changes
 
 If you find any issues with new releases, please discuss in [GitHub Discussions](https://github.com/time4tea/gopro-dashboard-overlay/discussions)
+- 0.134.0 - [Fix] Don't crash when GRAV entries have wrong number of components (firmware bug workaround) - thanks [@joepetjr](https://github.com/joepetjr) for report & suggested fix
+  - [Fix] Fix typo in bbox calculation - thanks [@djm300](https://github.com/djm300)
 - 0.133.0 - [Enhancement] Chart - Add `width` and `marker-size`, better interpolation of datapoints at end of file, and use date from video file, with `--video-time-start video-start` - thanks to [@derFunk](https://github.com/derFunk) for contributing
 - 0.132.0 - [Enhancement] Use user-supplied unit pref for chart - thanks to [@DonkeyShine](https://github.com/DonkeyShine) for noticing
 - 0.131.0 [Enhancement] - Improved parsing of FIT files with gear changes thanks to  [@geomandolyn](https://github.com/geomandolyn) to raising issue & sample data.

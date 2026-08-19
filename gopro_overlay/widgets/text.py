@@ -43,7 +43,7 @@ class CachingText(Widget):
             if x0 < 0:
                 x1 = x1 + abs(x0)
             if y0 < 0:
-                y1 = y1 + abs(x0)
+                y1 = y1 + abs(y0)
 
             backing_image = Image.new(mode="RGBA", size=(x1, y1))
             backing_draw = ImageDraw.Draw(backing_image)
