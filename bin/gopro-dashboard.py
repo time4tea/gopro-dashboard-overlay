@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import datetime
 import sys
+import zoneinfo
 from importlib import metadata
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
@@ -159,13 +160,15 @@ if __name__ == "__main__":
                         }
 
                         if args.video_time_start:
-                            start_date = fns[args.video_time_start]()
+                            video_tz_offset = fns[args.video_time_start]().replace(tzinfo=zoneinfo.ZoneInfo(args.video_time_zone)).utcoffset()
+                            start_date = fns[args.video_time_start]() - video_tz_offset
                             if start_date is None:
                                 fatal("No creation_time found in video metadata. Try --video-time-start file-modified instead.")
                             end_date = start_date + duration.timedelta()
 
                         if args.video_time_end:
-                            start_date = fns[args.video_time_end]()
+                            video_tz_offset = fns[args.video_time_end]().replace(tzinfo=zoneinfo.ZoneInfo(args.video_time_zone)).utcoffset()
+                            start_date = fns[args.video_time_end]() - video_tz_offset
                             if start_date is None:
                                 fatal("No creation_time found in video metadata. Try --video-time-end file-modified instead.")
                             start_date = start_date - duration.timedelta()
@@ -315,6 +318,7 @@ if __name__ == "__main__":
 
                 output: Path = args.output
 
+                video_tz_offset = frame_meta.date_at(frame_meta.min).replace(tzinfo=zoneinfo.ZoneInfo(args.video_time_zone)).utcoffset()
                 if generate == "none":
                     ffmpeg = FFMPEGNull()
                 elif generate == "overlay":
@@ -325,7 +329,7 @@ if __name__ == "__main__":
                         options=ffmpeg_options,
                         overlay_size=dimensions,
                         execution=execution,
-                        creation_time=frame_meta.date_at(frame_meta.min)
+                        creation_time=frame_meta.date_at(frame_meta.min) + video_tz_offset
                     )
                 else:
                     output.unlink(missing_ok=True)
@@ -336,7 +340,7 @@ if __name__ == "__main__":
                         options=ffmpeg_options,
                         overlay_size=dimensions,
                         execution=execution,
-                        creation_time=frame_meta.date_at(frame_meta.min)
+                        creation_time=frame_meta.date_at(frame_meta.min) + video_tz_offset
                     )
 
                 draw_timer = PoorTimer("drawing frames")
