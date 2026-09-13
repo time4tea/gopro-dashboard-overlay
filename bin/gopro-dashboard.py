@@ -161,14 +161,16 @@ if __name__ == "__main__":
 
                         if args.video_time_start:
                             video_tz_offset = fns[args.video_time_start]().replace(tzinfo=zoneinfo.ZoneInfo(args.video_time_zone)).utcoffset()
-                            start_date = fns[args.video_time_start]() - video_tz_offset
+                            video_user_offset = datetime.timedelta(seconds=args.video_seconds_offset)
+                            start_date = fns[args.video_time_start]() - video_tz_offset + video_user_offset
                             if start_date is None:
                                 fatal("No creation_time found in video metadata. Try --video-time-start file-modified instead.")
                             end_date = start_date + duration.timedelta()
 
                         if args.video_time_end:
                             video_tz_offset = fns[args.video_time_end]().replace(tzinfo=zoneinfo.ZoneInfo(args.video_time_zone)).utcoffset()
-                            start_date = fns[args.video_time_end]() - video_tz_offset
+                            video_user_offset = datetime.timedelta(seconds=args.video_seconds_offset)
+                            start_date = fns[args.video_time_end]() - video_tz_offset + video_user_offset
                             if start_date is None:
                                 fatal("No creation_time found in video metadata. Try --video-time-end file-modified instead.")
                             start_date = start_date - duration.timedelta()

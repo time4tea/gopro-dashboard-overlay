@@ -124,6 +124,7 @@ def gopro_dashboard_arguments(args=None):
 
     only.add_argument("--use-gpx-only", "--use-fit-only", action="store_true",
                       help="Use only the GPX/FIT file - no GoPro location data")
+    only.add_argument("--video-seconds-offset", help="Set the video file offset in seconds", default=0, type=int)
     only.add_argument("--video-time-zone", help="Set the video file time zone", default="UTC")
     only.add_argument("--video-time-start", choices=["file-created", "file-modified", "file-accessed", "video-created"],
                       help="Use file/video dates for aligning video and GPS information, only when --use-gpx-only. "
@@ -182,8 +183,8 @@ def gopro_dashboard_arguments(args=None):
         parser.print_help(file=sys.stderr)
         fatal(f"Invalid arguments: {reason}")
 
-    if (args.video_time_zone or args.video_time_start or args.video_time_end) and not args.use_gpx_only:
-        quit("--video-time-zone/--video-time-start/--video-time-end only applies when --use-gpx-only")
+    if (args.video_seconds_offset or args.video_time_zone or args.video_time_start or args.video_time_end) and not args.use_gpx_only:
+        quit("--video-seconds-offset/--video-time-zone/--video-time-start/--video-time-end only applies when --use-gpx-only")
 
     if args.use_gpx_only and not args.gpx:
         quit("--gpx is required with --use-gpx-only")
