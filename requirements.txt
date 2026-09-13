@@ -14,3 +14,4 @@ progressbar2==4.2.0
 requests==2.32.4
 pycairo==1.28.0
 sqlitedict==2.1.0
+tzlocal

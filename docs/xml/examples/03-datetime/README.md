@@ -121,3 +121,21 @@ values for the text.
 <component type="datetime" format="%Y-%m-%d" rgb="255,255,0,128" />
 ```
 <kbd>![03-datetime-10.png](03-datetime-10.png)</kbd>
+
+
+## Timezone
+
+Timezone can be controlled with `timezone`. By default, it will use the system's local time zone.
+
+
+```xml
+<component type="datetime" format="%Y-%m-%d %H:%M:%S" timezone="Europe/London" size="20"/>
+```
+<kbd>![03-datetime-11.png](03-datetime-11.png)</kbd>
+
+
+
+```xml
+<component type="datetime" format="%Y-%m-%d %H:%M:%S" timezone="Europe/Athens" size="20"/>
+```
+<kbd>![03-datetime-12.png](03-datetime-12.png)</kbd>

@@ -33,6 +33,7 @@ dependencies = [
     "sqlitedict==2.1.0",
     "aiohttp==3.13.3",   # for geotiler
     "cytoolz==1.1.0",    # for geotiler
+    "tzlocal",
 ]
 
 [project.urls]
