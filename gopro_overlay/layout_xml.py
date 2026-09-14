@@ -1,6 +1,8 @@
 import dataclasses
 import math
+import tzlocal
 import xml.etree.ElementTree as ET
+import zoneinfo
 from importlib.resources import files, as_file
 from pathlib import Path
 from typing import Callable, Optional, TypeVar, Tuple
@@ -352,11 +354,11 @@ def date_formatter_from(entry: Callable[[], Entry], format_string, truncate=0, t
         return lambda: entry().dt.astimezone(tz=tz).strftime(format_string)
 
 
-def date_formatter_from_element(element, entry: Callable[[], Entry]):
+def date_formatter_from_element(element, entry: Callable[[], Entry], tz):
     format_string = attrib(element, "format")
     truncate = iattrib(element, "truncate", d=0)
 
-    return date_formatter_from(entry, format_string, truncate)
+    return date_formatter_from(entry, format_string, truncate, tz)
 
 
 def nonesafe(v):
@@ -449,11 +451,11 @@ class Widgets:
             invert=battrib(element, "invert", d=True)
         )
 
-    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb", "outline", "outline_width"})
+    @allow_attributes({"x", "y", "size", "format", "truncate", "align", "cache", "rgb", "outline", "outline_width", "timezone"})
     def create_datetime(self, element, entry, **kwargs):
         return text(
             at=at(element),
-            value=date_formatter_from_element(element, entry),
+            value=date_formatter_from_element(element, entry, zoneinfo.ZoneInfo(attrib(element, "timezone", d=tzlocal.get_localzone_name()))),
             font=self._font(element, "size", d=16),
             align=attrib(element, "align", d="left"),
             cache=battrib(element, "cache", d=True),

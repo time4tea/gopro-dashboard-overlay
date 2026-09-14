@@ -64,3 +64,11 @@ Text colour and transparency is set with the `rgb` attribute. `rgb` is either 3 
 values for the text.
 
 {{ <component type="datetime" format="%Y-%m-%d" rgb="255,255,0,128" /> }}
+
+## Timezone
+
+Timezone can be controlled with `timezone`. By default, it will use the system's local time zone.
+
+{{ <component type="datetime" format="%Y-%m-%d %H:%M:%S" timezone="Europe/London" size="20"/> }}
+
+{{ <component type="datetime" format="%Y-%m-%d %H:%M:%S" timezone="Europe/Athens" size="20"/> }}
